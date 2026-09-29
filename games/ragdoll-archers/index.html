@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+  <meta name="robots" content="noindex,nofollow">
+  <title>Ragdoll Archers</title>
+  <link rel="icon" type="image/jpeg" href="logo.jpeg">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div id="toast" class="toast" hidden></div>
+
+  <div class="page">
+    <div id="unity-container" class="unity-shell unity-desktop">
+      <canvas id="unity-canvas" tabindex="-1" aria-label="Ragdoll Archers game canvas"></canvas>
+      <div id="loading-cover" class="loading-cover">
+        <div class="loading-panel">
+          <div id="unity-logo" class="logo-wrap">
+            <img src="logo.jpeg" alt="Ragdoll Archers logo">
+          </div>
+          <div class="progress-spinner-container">
+            <div class="spinner-left"><img src="spinner.png" alt=""></div>
+            <div id="unity-progress-bar-empty">
+              <div id="unity-progress-bar-full"></div>
+            </div>
+            <div class="spinner-right"><img src="spinner.png" alt=""></div>
+          </div>
+          <p id="status-text">Loading game files...</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script src="local-sdk.js"></script>
+  <script>
+    const buildUrl = "Build";
+    const loaderUrl = `${buildUrl}/loader.js`;
+    const search = new URLSearchParams(window.location.search);
+
+    if (!search.has("useLocalSdk")) {
+      search.set("useLocalSdk", "true");
+      const newUrl = `${window.location.pathname}?${search.toString()}${window.location.hash}`;
+      window.history.replaceState({}, "", newUrl);
+    }
+
+    // Keep the game fully self-contained: intercept any attempt by the Unity
+    // build to reach the public CrazyGames SDK and redirect it to the local
+    // shim (local-sdk.js), so nothing is fetched from a third-party CDN.
+    function installCrazyGamesSdkBlocker() {
+      const blockedPatterns = [
+        /crazygames-sdk/i,
+        /crazygames\.com/i,
+        /cza\.crazygames\.com/i,
+      ];
+      const localSdkUrl = new URL("local-sdk.js", window.location.href).href;
+
+      const localCrazyGames = window.CrazyGames;
+      const localCrazySDK = window.CrazySDK;
+
+      const isBlockedUrl = (value) => {
+        if (!value || typeof value !== "string") {
+          return false;
+        }
+        return blockedPatterns.some((pattern) => pattern.test(value));
+      };
+
+      const blockScriptElement = (node) => {
+        if (!node || node.nodeType !== 1) {
+          return false;
+        }
+
+        const tagName = String(node.tagName || "").toLowerCase();
+        const src = node.getAttribute && node.getAttribute("src");
+        if (tagName === "script" && isBlockedUrl(src)) {
+          console.info("Redirected public CrazyGames SDK script to local shim", src);
+          node.setAttribute("src", localSdkUrl);
+          return false;
+        }
+
+        return false;
+      };
+
+      const originalAppendChild = Node.prototype.appendChild;
+      Node.prototype.appendChild = function patchedAppendChild(node) {
+        if (blockScriptElement(node)) {
+          return node;
+        }
+        return originalAppendChild.call(this, node);
+      };
+
+      const originalInsertBefore = Node.prototype.insertBefore;
+      Node.prototype.insertBefore = function patchedInsertBefore(node, referenceNode) {
+        if (blockScriptElement(node)) {
+          return node;
+        }
+        return originalInsertBefore.call(this, node, referenceNode);
+      };
+
+      const originalReplaceChild = Node.prototype.replaceChild;
+      Node.prototype.replaceChild = function patchedReplaceChild(node, oldChild) {
+        if (blockScriptElement(node)) {
+          return oldChild;
+        }
+        return originalReplaceChild.call(this, node, oldChild);
+      };
+
+      const originalFetch = window.fetch ? window.fetch.bind(window) : null;
+      if (originalFetch) {
+        window.fetch = function patchedFetch(resource, init) {
+          const url = typeof resource === "string" ? resource : resource?.url;
+          if (isBlockedUrl(url)) {
+            console.info("Redirected CrazyGames fetch to local shim", url);
+            return originalFetch(localSdkUrl, init);
+          }
+          return originalFetch(resource, init);
+        };
+      }
+
+      const originalOpen = XMLHttpRequest.prototype.open;
+      XMLHttpRequest.prototype.open = function patchedOpen(method, url, ...rest) {
+        this.__crazyGamesBlocked = isBlockedUrl(String(url || ""));
+        this.__crazyGamesBlockedUrl = url;
+        if (this.__crazyGamesBlocked) {
+          console.info("Redirected CrazyGames XHR to local shim", url);
+          return originalOpen.call(this, method, localSdkUrl, ...rest);
+        }
+        return originalOpen.call(this, method, url, ...rest);
+      };
+
+      try {
+        Object.defineProperty(window, "CrazyGames", {
+          configurable: false,
+          enumerable: true,
+          get() {
+            return localCrazyGames;
+          },
+          set(value) {
+            console.info("Ignored public CrazyGames overwrite attempt", value);
+          },
+        });
+      } catch (error) {
+        console.warn("Failed to lock window.CrazyGames", error);
+      }
+
+      try {
+        Object.defineProperty(window, "CrazySDK", {
+          configurable: false,
+          enumerable: true,
+          get() {
+            return localCrazySDK;
+          },
+          set(value) {
+            console.info("Ignored public CrazySDK overwrite attempt", value);
+          },
+        });
+      } catch (error) {
+        console.warn("Failed to lock window.CrazySDK", error);
+      }
+
+      const observer = new MutationObserver((mutations) => {
+        for (const mutation of mutations) {
+          for (const node of mutation.addedNodes) {
+            if (blockScriptElement(node) && node.parentNode) {
+              node.parentNode.removeChild(node);
+            }
+          }
+        }
+      });
+
+      observer.observe(document.documentElement, {
+        childList: true,
+        subtree: true,
+      });
+
+      console.info("Local CrazyGames SDK guard enabled");
+    }
+
+    installCrazyGamesSdkBlocker();
+
+    const config = {
+      dataUrl: `${buildUrl}/build.data`,
+      frameworkUrl: `${buildUrl}/build.framework.js`,
+      codeUrl: `${buildUrl}/build.wasm`,
+      streamingAssetsUrl: "StreamingAssets",
+      companyName: "Ericetto",
+      productName: "Ragdoll Archers",
+      productVersion: "0.1",
+      cacheControl(url) {
+        if (url.endsWith(".data") || url.endsWith(".wasm")) {
+          return "must-revalidate";
+        }
+        return "no-store";
+      },
+    };
+
+    const container = document.querySelector("#unity-container");
+    const canvas = document.querySelector("#unity-canvas");
+    const loadingCover = document.querySelector("#loading-cover");
+    const progressBarEmpty = document.querySelector("#unity-progress-bar-empty");
+    const progressBarFull = document.querySelector("#unity-progress-bar-full");
+    const statusText = document.querySelector("#status-text");
+
+    if (/iPhone|iPad|iPod|Android/i.test(navigator.userAgent)) {
+      container.classList.remove("unity-desktop");
+      container.classList.add("unity-mobile");
+    }
+
+    if (location.protocol === "file:") {
+      statusText.textContent = "Opening from a file. If loading fails, run a simple local web server in this folder.";
+    }
+
+    function tryInitLocalSdk() {
+      try {
+        if (window.CrazyGames && window.CrazyGames.SDK && typeof window.CrazyGames.SDK.init === "function") {
+          window.CrazyGames.SDK.init({ debug: false }).catch((error) => {
+            console.error("Local CrazySDK init failed", error);
+          });
+        }
+      } catch (error) {
+        console.error("Failed to initialize local CrazySDK", error);
+      }
+    }
+
+    tryInitLocalSdk();
+    loadingCover.style.display = "flex";
+
+    const unityLoader = document.createElement("script");
+    unityLoader.src = loaderUrl;
+    unityLoader.onload = () => {
+      createUnityInstance(canvas, config, (progress) => {
+        progressBarEmpty.style.display = "block";
+        progressBarFull.style.width = `${Math.round(progress * 100)}%`;
+      }).then((unityInstance) => {
+        window.unityInstance = unityInstance;
+        loadingCover.style.display = "none";
+        statusText.textContent = "";
+      }).catch((message) => {
+        statusText.textContent = "Game failed to start. Try reloading the page.";
+        alert(message);
+      });
+    };
+    unityLoader.onerror = () => {
+      statusText.textContent = "Missing loader.js file.";
+    };
+
+    document.body.appendChild(unityLoader);
+
+    document.addEventListener("pointerdown", () => {
+      container.focus();
+      window.focus();
+      canvas.focus();
+    });
+
+    window.addEventListener("error", (event) => {
+      console.error("Window error", event.error || event.message);
+    });
+
+    window.addEventListener("unhandledrejection", (event) => {
+      console.error("Unhandled promise rejection", event.reason);
+    });
+  </script>
+</body>
+</html>
