@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+<meta name="robots" content="noindex,nofollow">
+<title>Star Fighter</title>
+<style>
+  *{box-sizing:border-box}html,body{margin:0;height:100%}
+  body{background:#03030c;color:#cfe;font-family:system-ui,Segoe UI,Roboto,Arial,sans-serif;
+    display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;gap:8px;padding:10px;user-select:none;-webkit-user-select:none}
+  h1{margin:0;font-size:clamp(18px,5vw,26px)}
+  #hud{display:flex;gap:22px;font-weight:800;color:#7cf}
+  canvas{background:#05051a;border-radius:10px;touch-action:none;max-width:96vw;height:auto}
+  #status{min-height:18px;color:#9ad;font-weight:700;text-align:center}
+  button{background:#39c;color:#02121a;border:0;border-radius:10px;padding:8px 18px;font-weight:800;cursor:pointer}
+  .hint{font-size:13px;opacity:.7}
+</style>
+</head>
+<body>
+<h1>Star Fighter</h1>
+<div id="hud"><span>Score: <b id="score">0</b></span><span>Lives: <b id="lives">3</b></span><span>Best: <b id="best">0</b></span></div>
+<canvas id="c" width="420" height="560"></canvas>
+<div id="status">Move to aim, auto-fire is on. Blast the invaders, dodge their shots!</div>
+<div class="hint">Arrow keys / A-D to move • Space to shoot • or drag on the canvas</div>
+<button id="startBtn">Start</button>
+<script>
+const cv=document.getElementById('c'),ctx=cv.getContext('2d');const W=cv.width,H=cv.height;
+let ship,bullets,enemies,ebullets,stars,score,lives,best=+localStorage.getItem('sf_best')||0,keys,running,spawnT,waveSpeed,lastShot,touchX;
+document.getElementById('best').textContent=best;
+function init(){
+  ship={x:W/2,y:H-50,w:30,h:22,speed:5,cool:0};
+  bullets=[];enemies=[];ebullets=[];score=0;lives=3;keys={};spawnT=0;waveSpeed=1;lastShot=0;touchX=null;
+  stars=Array.from({length:60},()=>({x:Math.random()*W,y:Math.random()*H,s:Math.random()*2+0.5}));
+  running=true;updateHud();document.getElementById('startBtn').style.display='none';
+  document.getElementById('status').textContent='Blast the invaders, dodge their shots!';
+  loop();
+}
+function updateHud(){document.getElementById('score').textContent=score;document.getElementById('lives').textContent=lives;
+  document.getElementById('best').textContent=best;}
+document.addEventListener('keydown',e=>{keys[e.key.toLowerCase()]=true;if([' ','arrowleft','arrowright','arrowup','arrowdown'].includes(e.key.toLowerCase()))e.preventDefault();});
+document.addEventListener('keyup',e=>{keys[e.key.toLowerCase()]=false;});
+cv.addEventListener('touchstart',e=>{e.preventDefault();touchX=tx(e);},{passive:false});
+cv.addEventListener('touchmove',e=>{e.preventDefault();touchX=tx(e);},{passive:false});
+cv.addEventListener('touchend',()=>{touchX=null;});
+cv.addEventListener('mousemove',e=>{if(e.buttons)touchX=tx(e);});
+cv.addEventListener('mousedown',e=>{touchX=tx(e);});
+cv.addEventListener('mouseup',()=>{touchX=null;});
+function tx(e){const rect=cv.getBoundingClientRect();const sx=cv.width/rect.width;const t=e.touches?e.touches[0]:e;return (t.clientX-rect.left)*sx;}
+function shoot(){bullets.push({x:ship.x,y:ship.y-14,vy:-9});}
+function spawnEnemy(){const x=30+Math.random()*(W-60);enemies.push({x,y:-20,w:26,h:20,vy:0.6+waveSpeed*0.25,vx:(Math.random()-0.5)*1.2,fire:Math.random()*120+60,hp:1});}
+function loop(){
+  if(!running)return;
+  // stars
+  stars.forEach(s=>{s.y+=s.s;if(s.y>H){s.y=0;s.x=Math.random()*W;}});
+  // input
+  if(keys['arrowleft']||keys['a'])ship.x-=ship.speed;
+  if(keys['arrowright']||keys['d'])ship.x+=ship.speed;
+  if(touchX!=null)ship.x+=(touchX-ship.x)*0.3;
+  ship.x=Math.max(ship.w/2,Math.min(W-ship.w/2,ship.x));
+  // auto fire + space
+  ship.cool--;if(ship.cool<=0){shoot();ship.cool=14;}
+  // bullets
+  bullets.forEach(b=>b.y+=b.vy);bullets=bullets.filter(b=>b.y>-10);
+  ebullets.forEach(b=>b.y+=b.vy);ebullets=ebullets.filter(b=>b.y<H+10);
+  // spawn
+  spawnT--;if(spawnT<=0){spawnEnemy();spawnT=Math.max(30,90-score/50);}
+  waveSpeed=1+score/400;
+  // enemies
+  enemies.forEach(en=>{en.y+=en.vy;en.x+=en.vx;if(en.x<15||en.x>W-15)en.vx*=-1;
+    en.fire--;if(en.fire<=0){ebullets.push({x:en.x,y:en.y+12,vy:3.4+waveSpeed*0.3});en.fire=90+Math.random()*90;}});
+  // collisions: bullets vs enemies
+  for(let i=enemies.length-1;i>=0;i--){const en=enemies[i];
+    for(let j=bullets.length-1;j>=0;j--){const b=bullets[j];
+      if(Math.abs(b.x-en.x)<en.w/2&&Math.abs(b.y-en.y)<en.h/2){bullets.splice(j,1);en.hp--;if(en.hp<=0){enemies.splice(i,1);score+=10;updateHud();}break;}}
+  }
+  // enemy reaches bottom or hits ship
+  for(let i=enemies.length-1;i>=0;i--){const en=enemies[i];
+    if(en.y>H+20){enemies.splice(i,1);continue;}
+    if(Math.abs(en.x-ship.x)<(en.w+ship.w)/2-6&&Math.abs(en.y-ship.y)<(en.h+ship.h)/2-4){enemies.splice(i,1);hitShip();}}
+  // enemy bullets vs ship
+  for(let i=ebullets.length-1;i>=0;i--){const b=ebullets[i];
+    if(Math.abs(b.x-ship.x)<ship.w/2&&Math.abs(b.y-ship.y)<ship.h/2){ebullets.splice(i,1);hitShip();}}
+  draw();requestAnimationFrame(loop);
+}
+function hitShip(){lives--;updateHud();
+  if(lives<=0){running=false;if(score>best){best=score;localStorage.setItem('sf_best',best);}updateHud();
+    document.getElementById('status').textContent=`💥 Destroyed! Final score ${score}.`;
+    document.getElementById('startBtn').textContent='Play Again';document.getElementById('startBtn').style.display='';draw();}
+  else{document.getElementById('status').textContent='Hit! Keep fighting.';}
+}
+function draw(){
+  ctx.fillStyle='#05051a';ctx.fillRect(0,0,W,H);
+  ctx.fillStyle='#fff';stars.forEach(s=>{ctx.globalAlpha=s.s/2.5;ctx.fillRect(s.x,s.y,s.s,s.s);});ctx.globalAlpha=1;
+  // ship
+  ctx.fillStyle='#5cf';ctx.beginPath();ctx.moveTo(ship.x,ship.y-13);ctx.lineTo(ship.x-15,ship.y+11);ctx.lineTo(ship.x+15,ship.y+11);ctx.closePath();ctx.fill();
+  ctx.fillStyle='#fd6';ctx.fillRect(ship.x-3,ship.y+11,6,6);
+  // bullets
+  ctx.fillStyle='#9ff';bullets.forEach(b=>ctx.fillRect(b.x-2,b.y-8,4,10));
+  ctx.fillStyle='#f86';ebullets.forEach(b=>ctx.fillRect(b.x-2,b.y-4,4,10));
+  // enemies
+  enemies.forEach(en=>{ctx.fillStyle='#e66';ctx.beginPath();ctx.moveTo(en.x,en.y+11);ctx.lineTo(en.x-13,en.y-9);ctx.lineTo(en.x+13,en.y-9);ctx.closePath();ctx.fill();
+    ctx.fillStyle='#fdd';ctx.fillRect(en.x-3,en.y-4,6,4);});
+}
+document.getElementById('startBtn').onclick=init;
+init();
+</script>
+</body>
+</html>

@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+<meta name="robots" content="noindex,nofollow">
+<title>War (Card Game)</title>
+<style>
+  *{box-sizing:border-box}html,body{margin:0;height:100%}
+  body{background:radial-gradient(circle at 50% 0,#0d3320,#04120a 60%);color:#eafff0;
+    font-family:system-ui,Segoe UI,Roboto,Arial,sans-serif;display:flex;flex-direction:column;
+    align-items:center;justify-content:center;min-height:100vh;gap:16px;padding:16px;user-select:none;-webkit-user-select:none}
+  h1{margin:0;font-size:clamp(20px,5vw,28px)}
+  #status{min-height:24px;color:#8fe0a8;font-weight:800;text-align:center;font-size:18px}
+  .table{display:flex;gap:40px;align-items:center;justify-content:center}
+  .side{text-align:center}
+  .side .label{font-weight:700;margin-bottom:6px;color:#bfe}
+  .card{width:88px;height:126px;border-radius:12px;background:#fff;color:#111;display:flex;flex-direction:column;
+    align-items:center;justify-content:center;font-weight:800;box-shadow:0 4px 10px rgba(0,0,0,.5);position:relative}
+  .card.back{background:repeating-linear-gradient(45deg,#255,#255 8px,#1b4040 8px,#1b4040 16px);color:transparent}
+  .card .rank{font-size:30px}.card .suit{font-size:26px}
+  .card.red{color:#d22}
+  .count{margin-top:6px;color:#9fd}
+  .warpile{font-size:13px;color:#ffd76a;min-height:16px}
+  button{background:#7be0a0;color:#04240f;border:0;border-radius:12px;padding:12px 26px;font-size:17px;font-weight:800;cursor:pointer}
+  button:disabled{opacity:.4;cursor:default}
+</style>
+</head>
+<body>
+<h1>War</h1>
+<div id="status">Tap Flip to play a round. Highest card wins the pile.</div>
+<div class="table">
+  <div class="side"><div class="label">You</div><div class="card back" id="pCard"></div><div class="count" id="pCount">26</div></div>
+  <div class="side"><div class="label">CPU</div><div class="card back" id="cCard"></div><div class="count" id="cCount">26</div></div>
+</div>
+<div class="warpile" id="warInfo"></div>
+<button id="flip">Flip</button>
+<button id="newG" style="display:none">New Game</button>
+<script>
+const SUITS=[['♠',0],['♥',1],['♣',0],['♦',1]];const RANKS=['2','3','4','5','6','7','8','9','10','J','Q','K','A'];
+let pDeck,cDeck,over;
+function buildDeck(){const d=[];for(let r=0;r<13;r++)for(const[s,red] of SUITS)d.push({v:r+2,rank:RANKS[r],suit:s,red});return d;}
+function shuffle(a){for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
+function init(){
+  const d=shuffle(buildDeck());pDeck=d.slice(0,26);cDeck=d.slice(26);over=false;
+  document.getElementById('flip').style.display='';document.getElementById('newG').style.display='none';
+  document.getElementById('warInfo').textContent='';
+  setCard('pCard',null);setCard('cCard',null);updateCounts();
+  document.getElementById('status').textContent='Tap Flip to play a round.';
+}
+function setCard(id,card){
+  const el=document.getElementById(id);
+  if(!card){el.className='card back';el.innerHTML='';return;}
+  el.className='card'+(card.red?' red':'');
+  el.innerHTML=`<div class="rank">${card.rank}</div><div class="suit">${card.suit}</div>`;
+}
+function updateCounts(){document.getElementById('pCount').textContent=pDeck.length;document.getElementById('cCount').textContent=cDeck.length;}
+function flip(){
+  if(over)return;
+  const pile=[];let warInfo='';
+  const p=pDeck.shift(),c=cDeck.shift();pile.push(p,c);
+  setCard('pCard',p);setCard('cCard',c);
+  let msg=`You ${p.rank} vs CPU ${c.rank}. `;
+  if(p.v>c.v){shuffle(pile);pDeck.push(...pile);msg+='You win the round!';}
+  else if(c.v>p.v){shuffle(pile);cDeck.push(...pile);msg+='CPU wins the round.';}
+  else{
+    // WAR: each puts 3 face down + 1 up, repeat until broken
+    msg+='⚔️ WAR! ';let resolved=false;
+    while(!resolved){
+      if(pDeck.length<4||cDeck.length<4){ // whoever can't fund war loses
+        if(pDeck.length<cDeck.length){cDeck.push(...pile);msg+='You cannot fund the war — CPU takes the pile.';}
+        else{pDeck.push(...pile);msg+='CPU cannot fund the war — you take the pile.';}
+        resolved=true;break;
+      }
+      for(let i=0;i<3;i++){pile.push(pDeck.shift());pile.push(cDeck.shift());}
+      const pw=pDeck.shift(),cw=cDeck.shift();pile.push(pw,cw);
+      setCard('pCard',pw);setCard('cCard',cw);
+      warInfo=`War cards: You ${pw.rank} vs CPU ${cw.rank} (pile ${pile.length})`;
+      if(pw.v>cw.v){shuffle(pile);pDeck.push(...pile);msg+='You win the war!';resolved=true;}
+      else if(cw.v>pw.v){shuffle(pile);cDeck.push(...pile);msg+='CPU wins the war.';resolved=true;}
+      // else another war loops
+    }
+  }
+  document.getElementById('warInfo').textContent=warInfo;
+  document.getElementById('status').textContent=msg;
+  updateCounts();
+  if(pDeck.length===0||cDeck.length===0){
+    over=true;document.getElementById('flip').style.display='none';document.getElementById('newG').style.display='';
+    document.getElementById('status').textContent=pDeck.length? '🎉 You captured all 52 cards — you win the War!':'CPU captured all the cards. You lose the War.';
+  }
+}
+document.getElementById('flip').onclick=flip;
+document.getElementById('newG').onclick=init;
+init();
+</script>
+</body>
+</html>

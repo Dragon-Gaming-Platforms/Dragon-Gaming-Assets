@@ -1,0 +1,9 @@
+{
+  "name": "Mini Putt",
+  "desc": "A three-hole mini golf course with bouncing walls and obstacles. Drag to aim and set power, then putt the ball into the cup in as few strokes as possible. Beat par for birdies and eagles.",
+  "controls": "Drag from the ball and release to putt",
+  "shelf": "Sports & Racing",
+  "tags": ["games", "html5", "sports", "golf", "physics"],
+  "badge": "New",
+  "creator": "Dragon Gaming Platforms"
+}

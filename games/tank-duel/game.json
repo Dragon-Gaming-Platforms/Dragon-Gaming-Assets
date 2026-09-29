@@ -1,0 +1,9 @@
+{
+  "name": "Tank Duel",
+  "desc": "Turn-based artillery combat over destructible terrain. Set your angle and power, factor in the wind, and lob a shell at the enemy tank. First to knock out the other tank wins the duel.",
+  "controls": "Adjust Angle and Power with the buttons, then Fire",
+  "shelf": "Arcade & Action",
+  "tags": ["games", "html5", "artillery", "strategy", "tanks"],
+  "badge": "New",
+  "creator": "Dragon Gaming Platforms"
+}

@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+<meta name="robots" content="noindex,nofollow">
+<title>Nim</title>
+<style>
+  *{box-sizing:border-box}html,body{margin:0;height:100%}
+  body{background:radial-gradient(circle at 50% 0,#241a33,#0d0a15 60%);color:#eee;
+    font-family:system-ui,Segoe UI,Roboto,Arial,sans-serif;display:flex;flex-direction:column;
+    align-items:center;justify-content:center;min-height:100vh;gap:14px;padding:16px;user-select:none;-webkit-user-select:none}
+  h1{margin:0;font-size:clamp(20px,5vw,30px)}
+  #status{min-height:22px;color:#c9a3ff;font-weight:700;text-align:center}
+  #heaps{display:flex;flex-direction:column;gap:16px;width:min(94vw,460px)}
+  .heap{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;padding:10px;background:rgba(255,255,255,.05);border-radius:12px}
+  .obj{width:26px;height:38px;border-radius:6px;background:linear-gradient(#b48cff,#7a4fd1);cursor:pointer;box-shadow:0 3px 6px rgba(0,0,0,.4);transition:transform .1s,opacity .15s}
+  .obj:hover{transform:translateY(-4px)}
+  .obj.pick{outline:3px solid #ffd76a;transform:translateY(-4px)}
+  .obj.gone{opacity:0;pointer-events:none;width:0;margin:0;padding:0}
+  .row{display:flex;gap:10px;align-items:center}
+  button,select{background:#b48cff;color:#1a0f2b;border:0;border-radius:10px;padding:10px 18px;font-size:15px;font-weight:800;cursor:pointer}
+  select{background:rgba(255,255,255,.1);color:#eee}
+  #take{background:#ffd76a;color:#3a2610}
+  #take:disabled{opacity:.4;cursor:default}
+</style>
+</head>
+<body>
+<h1>Nim</h1>
+<div id="status">Take any number from one row. Take the last object to win.</div>
+<div id="heaps"></div>
+<div class="row">
+  <button id="take" disabled>Take selected</button>
+  <button id="newGame">New Game</button>
+  <select id="level"><option value="easy">Easy</option><option value="hard" selected>Hard (perfect)</option></select>
+</div>
+<script>
+const heapsEl=document.getElementById('heaps');
+let heaps,selHeap,selCount,turn,over;
+function init(){
+  heaps=[3,4,5].map(n=>n+Math.floor(Math.random()*2));
+  selHeap=-1;selCount=0;turn='you';over=false;
+  document.getElementById('status').textContent='Your turn — tap objects in ONE row, then Take.';
+  render();
+}
+function render(){
+  heapsEl.innerHTML='';
+  heaps.forEach((count,h)=>{
+    const row=document.createElement('div');row.className='heap';
+    if(count===0){row.textContent='(empty)';row.style.color='#666';}
+    for(let i=0;i<count;i++){
+      const o=document.createElement('div');o.className='obj';
+      // objects at the end are "picked" (removed from this heap)
+      if(h===selHeap&&i>=count-selCount)o.classList.add('pick');
+      o.onclick=()=>pick(h,i,count);
+      row.appendChild(o);
+    }
+    heapsEl.appendChild(row);
+  });
+  document.getElementById('take').disabled=!(turn==='you'&&selCount>0);
+}
+function pick(h,i,count){
+  if(over||turn!=='you')return;
+  if(selHeap!==h){selHeap=h;}
+  // clicking object i selects from that object to the end
+  selCount=count-i;
+  render();
+}
+function take(){
+  if(over||turn!=='you'||selCount<=0)return;
+  heaps[selHeap]-=selCount;selHeap=-1;selCount=0;render();
+  if(heaps.every(n=>n===0)){return end('🎉 You took the last one — you win!');}
+  turn='cpu';document.getElementById('status').textContent='CPU thinking…';
+  setTimeout(cpu,600);
+}
+function cpu(){
+  const level=document.getElementById('level').value;
+  let move=null;
+  const xor=heaps.reduce((a,b)=>a^b,0);
+  if(level==='hard'&&xor!==0){
+    for(let h=0;h<heaps.length;h++){const target=heaps[h]^xor;if(target<heaps[h]){move={h,take:heaps[h]-target};break;}}
+  }
+  if(!move){ // random legal (or losing position -> random)
+    const nonEmpty=heaps.map((n,h)=>({n,h})).filter(x=>x.n>0);
+    const pickH=nonEmpty[Math.floor(Math.random()*nonEmpty.length)];
+    move={h:pickH.h,take:1+Math.floor(Math.random()*pickH.n)};
+  }
+  heaps[move.h]-=move.take;render();
+  document.getElementById('status').textContent=`CPU took ${move.take} from a row.`;
+  if(heaps.every(n=>n===0)){return end('CPU took the last one — you lose. Try Hard mode!');}
+  turn='you';
+  setTimeout(()=>{if(!over)document.getElementById('status').textContent='Your turn — tap objects, then Take.';},700);
+}
+function end(msg){over=true;document.getElementById('status').textContent=msg;document.getElementById('take').disabled=true;}
+document.getElementById('take').onclick=take;
+document.getElementById('newGame').onclick=init;
+document.getElementById('level').onchange=init;
+init();
+</script>
+</body>
+</html>

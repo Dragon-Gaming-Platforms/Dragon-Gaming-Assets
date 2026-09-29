@@ -1,0 +1,9 @@
+{
+  "name": "Nim",
+  "desc": "The ancient mathematical strategy game. Take any number of objects from a single row on your turn — grab the very last object to win. Play a perfect-strategy CPU and learn the winning pattern.",
+  "controls": "Tap objects in one row to select, then Take selected",
+  "shelf": "Strategy & Idle",
+  "tags": ["games", "html5", "strategy", "math", "logic"],
+  "badge": "New",
+  "creator": "Dragon Gaming Platforms"
+}

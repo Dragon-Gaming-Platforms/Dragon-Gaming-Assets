@@ -1,0 +1,9 @@
+{
+  "name": "Ten-Pin Bowling",
+  "desc": "Roll for strikes and spares across a full ten-frame game. Time the swinging aim, bowl down the lane, and watch the pins scatter with proper bowling scoring including bonus balls in the tenth frame.",
+  "controls": "Tap Bowl to release the ball at the current aim",
+  "shelf": "Sports & Racing",
+  "tags": ["games", "html5", "sports", "bowling", "physics"],
+  "badge": "New",
+  "creator": "Dragon Gaming Platforms"
+}

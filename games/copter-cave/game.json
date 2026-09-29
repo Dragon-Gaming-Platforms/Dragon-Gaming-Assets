@@ -1,0 +1,9 @@
+{
+  "name": "Copter Cave",
+  "desc": "Pilot a helicopter through a twisting, narrowing cave. Hold to rise, release to fall, and thread between stalactites and stalagmites. The further you fly, the faster and tighter it gets.",
+  "controls": "Hold click / tap / Space to thrust upward, release to descend",
+  "shelf": "Arcade & Action",
+  "tags": ["games", "html5", "arcade", "reflex", "endless"],
+  "badge": "New",
+  "creator": "Dragon Gaming Platforms"
+}

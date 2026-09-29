@@ -1,0 +1,9 @@
+{
+  "name": "War",
+  "desc": "The classic luck-of-the-draw card game. You and the CPU each flip the top card — highest card wins the pile. Ties trigger a dramatic WAR. Capture all 52 cards to win.",
+  "controls": "Tap Flip to play each round",
+  "shelf": "Arcade & Action",
+  "tags": ["games", "html5", "cards", "classic", "luck"],
+  "badge": "New",
+  "creator": "Dragon Gaming Platforms"
+}

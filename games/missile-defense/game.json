@@ -1,0 +1,9 @@
+{
+  "name": "Missile Defense",
+  "desc": "Defend your cities from waves of incoming missiles. Click the sky to launch interceptors that explode into blast radiuses, taking out the descending warheads before they level your towns.",
+  "controls": "Tap / click the sky to launch an interceptor",
+  "shelf": "Arcade & Action",
+  "tags": ["games", "html5", "arcade", "shooter", "defense"],
+  "badge": "New",
+  "creator": "Dragon Gaming Platforms"
+}

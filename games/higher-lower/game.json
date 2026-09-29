@@ -1,0 +1,9 @@
+{
+  "name": "Higher or Lower",
+  "desc": "A quick-fire card guessing game. Will the next card be higher or lower than the current one? Build the longest streak you can and beat your best score.",
+  "controls": "Tap Higher or Lower to guess the next card",
+  "shelf": "Arcade & Action",
+  "tags": ["games", "html5", "cards", "casual", "luck"],
+  "badge": "New",
+  "creator": "Dragon Gaming Platforms"
+}

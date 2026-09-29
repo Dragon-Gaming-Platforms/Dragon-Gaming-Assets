@@ -1,0 +1,9 @@
+{
+  "name": "Star Fighter",
+  "desc": "A fast vertical space shooter. Weave between enemy fighters, dodge their fire, and blast waves of invaders that grow tougher as your score climbs. Auto-fire keeps the lasers flowing.",
+  "controls": "Arrow keys / A-D or drag to move, auto-fire (Space also shoots)",
+  "shelf": "Arcade & Action",
+  "tags": ["games", "html5", "arcade", "shooter", "space"],
+  "badge": "New",
+  "creator": "Dragon Gaming Platforms"
+}

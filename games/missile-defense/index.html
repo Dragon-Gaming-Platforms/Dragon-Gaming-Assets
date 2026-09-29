@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+<meta name="robots" content="noindex,nofollow">
+<title>Missile Defense</title>
+<style>
+  *{box-sizing:border-box}html,body{margin:0;height:100%}
+  body{background:#05060f;color:#cfe;font-family:system-ui,Segoe UI,Roboto,Arial,sans-serif;
+    display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;gap:8px;padding:10px;user-select:none;-webkit-user-select:none}
+  h1{margin:0;font-size:clamp(18px,5vw,26px)}
+  #hud{display:flex;gap:22px;font-weight:800;color:#6cf}
+  canvas{background:#0a0e1e;border-radius:10px;cursor:crosshair;touch-action:none;max-width:96vw;height:auto}
+  #status{min-height:18px;color:#9ad;font-weight:700;text-align:center}
+  button{background:#39c;color:#02121a;border:0;border-radius:10px;padding:8px 18px;font-weight:800;cursor:pointer}
+</style>
+</head>
+<body>
+<h1>Missile Defense</h1>
+<div id="hud"><span>Score: <b id="score">0</b></span><span>Wave: <b id="wave">1</b></span><span>Cities: <b id="cities">6</b></span><span>Ammo: <b id="ammo">30</b></span></div>
+<canvas id="c" width="520" height="380"></canvas>
+<div id="status">Tap/click the sky to launch interceptors. Protect your cities!</div>
+<button id="reset" style="display:none">Play Again</button>
+<script>
+const cv=document.getElementById('c'),ctx=cv.getContext('2d');const W=cv.width,H=cv.height,GROUND=H-24;
+let cities,enemies,interceptors,blasts,score,wave,ammo,spawnTimer,toSpawn,over,running;
+const BASE={x:W/2,y:GROUND};
+function init(){
+  cities=[];const spots=[60,120,180,340,400,460];
+  spots.forEach(x=>cities.push({x,alive:true}));
+  enemies=[];interceptors=[];blasts=[];score=0;wave=1;ammo=30;over=false;running=true;
+  startWave();updateHud();document.getElementById('reset').style.display='none';
+  loop();
+}
+function startWave(){toSpawn=6+wave*2;spawnTimer=0;ammo+=10;document.getElementById('status').textContent=`Wave ${wave} incoming!`;}
+function spawnEnemy(){
+  const sx=Math.random()*W;const targets=[...cities.filter(c=>c.alive).map(c=>c.x),BASE.x];
+  const tx=targets[Math.floor(Math.random()*targets.length)];
+  const speed=0.6+wave*0.12;const ang=Math.atan2(GROUND-0,tx-sx);
+  const d=Math.hypot(tx-sx,GROUND);const vx=(tx-sx)/d*speed,vy=GROUND/d*speed;
+  enemies.push({x:sx,y:0,vx,vy,tx});
+}
+function updateHud(){document.getElementById('score').textContent=score;document.getElementById('wave').textContent=wave;
+  document.getElementById('cities').textContent=cities.filter(c=>c.alive).length;document.getElementById('ammo').textContent=ammo;}
+function fire(mx,my){
+  if(over||ammo<=0)return;ammo--;updateHud();
+  const dx=mx-BASE.x,dy=my-BASE.y;const d=Math.hypot(dx,dy);const sp=6;
+  interceptors.push({x:BASE.x,y:BASE.y,vx:dx/d*sp,vy:dy/d*sp,tx:mx,ty:my});
+}
+cv.addEventListener('click',e=>{const p=pos(e);fire(p.x,p.y);});
+cv.addEventListener('touchstart',e=>{e.preventDefault();const p=pos(e);fire(p.x,p.y);},{passive:false});
+function pos(e){const rect=cv.getBoundingClientRect();const sx=cv.width/rect.width,sy=cv.height/rect.height;
+  const t=e.touches?e.touches[0]:e;return{x:(t.clientX-rect.left)*sx,y:(t.clientY-rect.top)*sy};}
+function loop(){
+  if(!running)return;
+  // spawn
+  if(toSpawn>0){spawnTimer--;if(spawnTimer<=0){spawnEnemy();toSpawn--;spawnTimer=60+Math.random()*60;}}
+  // enemies
+  enemies.forEach(m=>{m.x+=m.vx;m.y+=m.vy;});
+  for(let i=enemies.length-1;i>=0;i--){const m=enemies[i];
+    if(m.y>=GROUND){ // hit ground: destroy nearest city if close
+      const city=cities.find(c=>c.alive&&Math.abs(c.x-m.x)<20);
+      if(city)city.alive=false;blasts.push({x:m.x,y:GROUND,r:2,max:26,grow:1});enemies.splice(i,1);updateHud();}
+  }
+  // interceptors reach target -> blast
+  for(let i=interceptors.length-1;i>=0;i--){const it=interceptors[i];it.x+=it.vx;it.y+=it.vy;
+    if(Math.hypot(it.x-it.tx,it.y-it.ty)<8){blasts.push({x:it.x,y:it.y,r:2,max:34,grow:1.4});interceptors.splice(i,1);}}
+  // blasts expand and destroy enemies
+  for(let i=blasts.length-1;i>=0;i--){const b=blasts[i];b.r+=b.grow;
+    for(let j=enemies.length-1;j>=0;j--){if(Math.hypot(enemies[j].x-b.x,enemies[j].y-b.y)<b.r){enemies.splice(j,1);score+=25;updateHud();}}
+    if(b.r>=b.max)blasts.splice(i,1);}
+  // wave end
+  if(toSpawn===0&&enemies.length===0&&blasts.length===0){
+    if(cities.some(c=>c.alive)){wave++;updateHud();startWave();}
+  }
+  // game over
+  if(!cities.some(c=>c.alive)){over=true;running=false;
+    document.getElementById('status').textContent=`All cities destroyed! Final score ${score}, reached wave ${wave}.`;
+    document.getElementById('reset').style.display='';draw();return;}
+  draw();requestAnimationFrame(loop);
+}
+function draw(){
+  ctx.fillStyle='#0a0e1e';ctx.fillRect(0,0,W,H);
+  // ground
+  ctx.fillStyle='#243b1c';ctx.fillRect(0,GROUND,W,H-GROUND);
+  // base
+  ctx.fillStyle='#6cf';ctx.beginPath();ctx.moveTo(BASE.x-16,GROUND);ctx.lineTo(BASE.x,GROUND-16);ctx.lineTo(BASE.x+16,GROUND);ctx.fill();
+  // cities
+  cities.forEach(c=>{ctx.fillStyle=c.alive?'#4ae':'#333';ctx.fillRect(c.x-12,GROUND-12,24,12);
+    if(c.alive){ctx.fillRect(c.x-8,GROUND-18,4,6);ctx.fillRect(c.x+4,GROUND-18,4,6);}});
+  // enemies + trails
+  enemies.forEach(m=>{ctx.strokeStyle='#e55';ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(m.tx,0);ctx.lineTo(m.x,m.y);ctx.globalAlpha=.25;ctx.stroke();ctx.globalAlpha=1;
+    ctx.fillStyle='#f77';ctx.beginPath();ctx.arc(m.x,m.y,3,0,7);ctx.fill();});
+  // interceptors
+  interceptors.forEach(it=>{ctx.strokeStyle='#8f8';ctx.lineWidth=1;ctx.beginPath();ctx.moveTo(BASE.x,BASE.y);ctx.lineTo(it.x,it.y);ctx.globalAlpha=.3;ctx.stroke();ctx.globalAlpha=1;
+    ctx.fillStyle='#cfc';ctx.beginPath();ctx.arc(it.x,it.y,2,0,7);ctx.fill();});
+  // blasts
+  blasts.forEach(b=>{ctx.fillStyle='rgba(255,240,150,'+(1-b.r/b.max)+')';ctx.beginPath();ctx.arc(b.x,b.y,b.r,0,7);ctx.fill();});
+}
+document.getElementById('reset').onclick=init;
+init();
+</script>
+</body>
+</html>

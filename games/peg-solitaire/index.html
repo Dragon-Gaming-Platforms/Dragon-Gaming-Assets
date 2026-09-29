@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+<meta name="robots" content="noindex,nofollow">
+<title>Peg Solitaire</title>
+<style>
+  *{box-sizing:border-box}html,body{margin:0;height:100%}
+  body{background:radial-gradient(circle at 50% 0,#2a2016,#120d08 60%);color:#f0e6d8;
+    font-family:system-ui,Segoe UI,Roboto,Arial,sans-serif;display:flex;flex-direction:column;
+    align-items:center;justify-content:center;min-height:100vh;gap:12px;padding:16px;user-select:none;-webkit-user-select:none}
+  h1{margin:0;font-size:clamp(20px,5vw,30px)}
+  #status{min-height:22px;color:#e9c58a;font-weight:700}
+  #board{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;width:min(92vw,420px);aspect-ratio:1/1;
+    background:#3a2c1c;padding:10px;border-radius:14px}
+  .cell{display:flex;align-items:center;justify-content:center}
+  .cell.void{visibility:hidden}
+  .hole{width:78%;height:78%;border-radius:50%;background:#241a10;box-shadow:inset 0 3px 6px rgba(0,0,0,.6);cursor:pointer}
+  .peg{width:82%;height:82%;border-radius:50%;background:radial-gradient(circle at 35% 30%,#f5cd7a,#b8791f);
+    box-shadow:0 3px 6px rgba(0,0,0,.5);cursor:pointer;transition:transform .1s}
+  .peg:hover{transform:scale(1.06)}
+  .peg.sel{outline:3px solid #7cf;transform:scale(1.06)}
+  .cell.target .hole{background:#2f5c3f;box-shadow:inset 0 0 0 3px #6be08c}
+  button{background:#e9c58a;color:#3a2610;border:0;border-radius:10px;padding:10px 18px;font-size:15px;font-weight:800;cursor:pointer}
+</style>
+</head>
+<body>
+<h1>Peg Solitaire</h1>
+<div id="status">Jump a peg over a neighbour into an empty hole. Leave one peg to win.</div>
+<div id="board"></div>
+<div>Pegs left: <b id="count">32</b> &nbsp; <button id="reset">Reset</button></div>
+<script>
+const N=7;
+// -1 void, 0 empty, 1 peg
+let g,sel=null,over=false;
+function fresh(){
+  g=[];
+  for(let r=0;r<N;r++){g.push([]);for(let c=0;c<N;c++){
+    const corner=(r<2||r>4)&&(c<2||c>4);
+    g[r][c]=corner?-1:1;
+  }}
+  g[3][3]=0;sel=null;over=false;
+  render();
+}
+const boardEl=document.getElementById('board');
+function targets(r,c){ // valid destinations for peg at r,c
+  const t=[];
+  [[-2,0],[2,0],[0,-2],[0,2]].forEach(([dr,dc])=>{
+    const nr=r+dr,nc=c+dc,mr=r+dr/2,mc=c+dc/2;
+    if(nr>=0&&nr<N&&nc>=0&&nc<N&&g[nr][nc]===0&&g[mr][mc]===1)t.push([nr,nc]);
+  });
+  return t;
+}
+function render(){
+  boardEl.innerHTML='';
+  const tset=sel?targets(sel[0],sel[1]).map(t=>t.join(',')):[];
+  let pegs=0;
+  for(let r=0;r<N;r++)for(let c=0;c<N;c++){
+    const cell=document.createElement('div');cell.className='cell';
+    if(g[r][c]===-1){cell.classList.add('void');}
+    else if(g[r][c]===1){pegs++;const p=document.createElement('div');p.className='peg';
+      if(sel&&sel[0]===r&&sel[1]===c)p.classList.add('sel');
+      p.onclick=()=>selectPeg(r,c);cell.appendChild(p);
+    } else {
+      const h=document.createElement('div');h.className='hole';
+      if(tset.includes(r+','+c)){cell.classList.add('target');}
+      h.onclick=()=>moveTo(r,c);cell.appendChild(h);
+    }
+    boardEl.appendChild(cell);
+  }
+  document.getElementById('count').textContent=pegs;
+  if(!over){
+    if(pegs===1){over=true;document.getElementById('status').textContent='🏆 Solved! One peg left — perfect.';}
+    else if(!anyMove()){over=true;document.getElementById('status').textContent=`No moves left — ${pegs} pegs remain. Reset to retry.`;}
+  }
+}
+function anyMove(){for(let r=0;r<N;r++)for(let c=0;c<N;c++)if(g[r][c]===1&&targets(r,c).length)return true;return false;}
+function selectPeg(r,c){if(over)return;sel=(sel&&sel[0]===r&&sel[1]===c)?null:[r,c];render();}
+function moveTo(r,c){
+  if(over||!sel)return;
+  if(targets(sel[0],sel[1]).some(t=>t[0]===r&&t[1]===c)){
+    const mr=(sel[0]+r)/2,mc=(sel[1]+c)/2;
+    g[sel[0]][sel[1]]=0;g[mr][mc]=0;g[r][c]=1;sel=null;render();
+  }
+}
+document.getElementById('reset').onclick=fresh;
+fresh();
+</script>
+</body>
+</html>

@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+<meta name="robots" content="noindex,nofollow">
+<title>Ten-Pin Bowling</title>
+<style>
+  *{box-sizing:border-box}html,body{margin:0;height:100%}
+  body{background:#241a10;color:#f4e9d8;font-family:system-ui,Segoe UI,Roboto,Arial,sans-serif;
+    display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;gap:8px;padding:10px;user-select:none;-webkit-user-select:none}
+  h1{margin:0;font-size:clamp(18px,5vw,26px)}
+  #frames{display:flex;gap:2px;font-size:12px}
+  .fr{border:1px solid #6b543a;min-width:34px;text-align:center;background:#31261a}
+  .fr .top{display:flex;border-bottom:1px solid #6b543a}
+  .fr .top span{flex:1;border-left:1px solid #6b543a;min-height:16px}
+  .fr .top span:first-child{border-left:0}
+  .fr .tot{min-height:18px;font-weight:800}
+  .fr.active{outline:2px solid #ffcf6b}
+  canvas{background:linear-gradient(#c9a06a,#a67c48);border-radius:8px;touch-action:none;max-width:96vw;height:auto}
+  #status{min-height:18px;color:#ffcf6b;font-weight:700;text-align:center}
+  button{background:#ffcf6b;color:#2a1c08;border:0;border-radius:10px;padding:8px 18px;font-weight:800;cursor:pointer}
+</style>
+</head>
+<body>
+<h1>Ten-Pin Bowling</h1>
+<div id="frames"></div>
+<canvas id="c" width="300" height="480"></canvas>
+<div id="status">Move the aim, tap Bowl to roll. Knock down all 10 pins!</div>
+<button id="bowl">Bowl</button>
+<script>
+const cv=document.getElementById('c'),ctx=cv.getContext('2d');const W=cv.width,H=cv.height;
+// pin layout (standard triangle), coordinates near top
+const PINR=8;
+function pinLayout(){
+  const cx=W/2,topY=70,dx=20,dy=20;const pins=[];
+  const rows=[[0],[-1,1],[-2,0,2],[-3,-1,1,3]];
+  rows.forEach((row,r)=>row.forEach(off=>pins.push({x:cx+off*dx/2*2*0+cx*0+ (cx+off*11), y:topY+r*dy, down:false})));
+  // simpler explicit positions
+  const P=[];const spacing=22;
+  for(let r=0;r<4;r++){const count=r+1;const y=60+r*20;const startX=cx-(count-1)*spacing/2;
+    for(let i=0;i<count;i++)P.push({x:startX+i*spacing,y,down:false});}
+  return P;
+}
+let pins,ball,aim,aimDir,rolling,frames,frame,rollInBox,pinsAtRollStart;
+function newGame(){
+  frames=Array.from({length:10},()=>({rolls:[],score:null}));
+  frame=0;setupThrow(true);renderFrames();
+}
+function setupThrow(freshRack){
+  if(freshRack)pins=pinLayout();
+  ball={x:W/2,y:H-30,r:11,vx:0,vy:0,rolling:false};
+  aim=W/2;aimDir=1.4;rolling=false;
+  document.getElementById('bowl').disabled=false;
+  document.getElementById('status').textContent=`Frame ${frame+1}: aim and Bowl.`;
+  draw();aimLoop();
+}
+let aimRAF;
+function aimLoop(){
+  if(rolling)return;
+  aim+=aimDir;if(aim<W/2-90){aim=W/2-90;aimDir*=-1;}if(aim>W/2+90){aim=W/2+90;aimDir*=-1;}
+  draw();aimRAF=requestAnimationFrame(aimLoop);
+}
+function bowl(){
+  if(rolling)return;cancelAnimationFrame(aimRAF);rolling=true;ball.rolling=true;
+  document.getElementById('bowl').disabled=true;
+  const targetX=aim;ball.vx=(targetX-ball.x)/40;ball.vy=-7;
+  pinsAtRollStart=pins.filter(p=>!p.down).length;
+  step();
+}
+function step(){
+  ball.x+=ball.vx;ball.y+=ball.vy;
+  if(ball.x<ball.r||ball.x>W-ball.r)ball.vx*=-0.6;
+  // collide with pins
+  pins.forEach(p=>{if(p.down)return;const d=Math.hypot(ball.x-p.x,ball.y-p.y);
+    if(d<ball.r+PINR){p.down=true;knockNeighbors(p);const nx=(ball.x-p.x)/d;ball.vx+=nx*0.6;}});
+  draw();
+  if(ball.y<-20){finishRoll();return;}
+  requestAnimationFrame(step);
+}
+function knockNeighbors(pin){
+  // chain reaction: nearby standing pins have a chance to fall
+  pins.forEach(p=>{if(p.down)return;const d=Math.hypot(pin.x-p.x,pin.y-p.y);
+    if(d<30&&Math.random()<0.55)p.down=true;});
+}
+function finishRoll(){
+  const downNow=pins.filter(p=>p.down).length;
+  const knocked=downNow-(10-pinsAtRollStart);
+  const f=frames[frame];f.rolls.push(knocked);
+  recalc();renderFrames();
+  const standing=pins.filter(p=>!p.down).length;
+  // decide next
+  const isTenth=frame===9;
+  const rollsThis=f.rolls.length;
+  if(!isTenth){
+    if(rollsThis===1&&standing===0){advance();return;} // strike
+    if(rollsThis===2){advance();return;}
+    setupThrow(false); // second ball, same rack
+  } else {
+    // tenth frame logic
+    const sum=f.rolls.reduce((a,b)=>a+b,0);
+    if(rollsThis===1){ if(standing===0)setupThrow(true); else setupThrow(false); }
+    else if(rollsThis===2){
+      const bonus=(f.rolls[0]===10)||(f.rolls[0]+f.rolls[1]===10);
+      if(bonus){ if(standing===0)setupThrow(true); else setupThrow(false);} else endGame();
+    } else endGame();
+  }
+}
+function advance(){frame++;if(frame>9){endGame();return;}setupThrow(true);}
+function recalc(){
+  // build flat roll list per frame for standard scoring
+  let total=0;
+  for(let i=0;i<10;i++){const f=frames[i];if(f.rolls.length===0){f.score=null;continue;}
+    const r=f.rolls;
+    if(i<9){
+      if(r[0]===10){ // strike
+        const nb=nextRolls(i,2);if(nb.length<2){f.score=null;continue;}total+=10+nb[0]+nb[1];
+      } else if((r[0]||0)+(r[1]||0)===10&&r.length>=2){ // spare
+        const nb=nextRolls(i,1);if(nb.length<1){f.score=null;continue;}total+=10+nb[0];
+      } else { if(r.length<2){f.score=null;continue;}total+=r[0]+r[1]; }
+    } else { total+=r.reduce((a,b)=>a+b,0); }
+    f.score=total;
+  }
+}
+function nextRolls(frameIdx,n){
+  const out=[];for(let i=frameIdx+1;i<10&&out.length<n;i++){for(const r of frames[i].rolls){out.push(r);if(out.length>=n)break;}}return out;
+}
+function renderFrames(){
+  const el=document.getElementById('frames');el.innerHTML='';
+  frames.forEach((f,i)=>{const d=document.createElement('div');d.className='fr'+(i===frame?' active':'');
+    const top=document.createElement('div');top.className='top';
+    const marks=f.rolls.map((r,j)=>{
+      if(r===10&&(i<9||j===0))return 'X';
+      if(j>0&&f.rolls[j-1]!==10&&(f.rolls[j-1]+r===10))return '/';
+      if(i===9&&j>0&&f.rolls[j-1]===10&&r===10)return 'X';
+      return r===0?'-':r;
+    });
+    const cells=i===9?3:2;
+    for(let j=0;j<cells;j++){const s=document.createElement('span');s.textContent=marks[j]!==undefined?marks[j]:'';top.appendChild(s);}
+    const tot=document.createElement('div');tot.className='tot';tot.textContent=f.score!=null?f.score:'';
+    d.appendChild(top);d.appendChild(tot);el.appendChild(d);});
+}
+function endGame(){
+  rolling=true;document.getElementById('bowl').disabled=true;
+  const final=frames[9].score;
+  document.getElementById('status').textContent=`🎳 Game over! Final score: ${final}. Tap New Game.`;
+  document.getElementById('bowl').textContent='New Game';document.getElementById('bowl').disabled=false;
+  document.getElementById('bowl').onclick=()=>{document.getElementById('bowl').textContent='Bowl';document.getElementById('bowl').onclick=bowl;newGame();};
+}
+function draw(){
+  ctx.clearRect(0,0,W,H);
+  // gutters
+  ctx.fillStyle='#3a2a18';ctx.fillRect(0,0,14,H);ctx.fillRect(W-14,0,14,H);
+  // aim guide
+  if(!rolling){ctx.strokeStyle='rgba(255,255,255,.5)';ctx.setLineDash([5,6]);ctx.beginPath();ctx.moveTo(ball.x,ball.y);ctx.lineTo(aim,60);ctx.stroke();ctx.setLineDash([]);
+    ctx.fillStyle='#ff5';ctx.beginPath();ctx.arc(aim,55,5,0,7);ctx.fill();}
+  // pins
+  pins.forEach(p=>{if(p.down)return;ctx.fillStyle='#fff';ctx.beginPath();ctx.arc(p.x,p.y,PINR,0,7);ctx.fill();
+    ctx.strokeStyle='#c33';ctx.lineWidth=2;ctx.beginPath();ctx.arc(p.x,p.y,PINR,0,7);ctx.stroke();});
+  // ball
+  ctx.fillStyle='#222c55';ctx.beginPath();ctx.arc(ball.x,ball.y,ball.r,0,7);ctx.fill();
+  ctx.fillStyle='#556';ctx.beginPath();ctx.arc(ball.x-3,ball.y-3,2,0,7);ctx.fill();
+}
+document.getElementById('bowl').onclick=bowl;
+newGame();
+</script>
+</body>
+</html>

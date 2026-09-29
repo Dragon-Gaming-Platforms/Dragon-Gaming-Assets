@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+<meta name="robots" content="noindex,nofollow">
+<title>Hoop Shot</title>
+<style>
+  *{box-sizing:border-box}html,body{margin:0;height:100%}
+  body{background:#1a2233;color:#eef;font-family:system-ui,Segoe UI,Roboto,Arial,sans-serif;
+    display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;gap:8px;padding:10px;user-select:none;-webkit-user-select:none}
+  h1{margin:0;font-size:clamp(18px,5vw,26px)}
+  #hud{display:flex;gap:20px;font-weight:800;color:#ffb86b}
+  canvas{background:linear-gradient(#3a4a6b,#20293d);border-radius:12px;touch-action:none;max-width:96vw;height:auto}
+  #status{min-height:18px;color:#9ad;font-weight:700;text-align:center}
+  button{background:#ff9f43;color:#2a1600;border:0;border-radius:10px;padding:8px 16px;font-weight:800;cursor:pointer}
+</style>
+</head>
+<body>
+<h1>Hoop Shot</h1>
+<div id="hud"><span>Score: <b id="score">0</b></span><span>Best: <b id="best">0</b></span><span>Shots: <b id="shots">0</b></span></div>
+<canvas id="c" width="480" height="600"></canvas>
+<div id="status">Drag from the ball and release to shoot. Sink it through the hoop!</div>
+<button id="reset">Reset</button>
+<script>
+const cv=document.getElementById('c'),ctx=cv.getContext('2d');
+const W=cv.width,H=cv.height,G=0.4;
+let ball,hoop,aiming,aimStart,aimNow,score=0,best=+localStorage.getItem('hoop_best')||0,shots=0,scored;
+document.getElementById('best').textContent=best;
+function reset(){
+  ball={x:80,y:H-60,r:16,vx:0,vy:0,flying:false};
+  placeHoop();aiming=false;scored=false;
+  score=0;shots=0;updateHud();
+}
+function placeHoop(){hoop={x:W-90,y:120+Math.random()*180,w:70,r:9};}
+function updateHud(){document.getElementById('score').textContent=score;document.getElementById('shots').textContent=shots;
+  document.getElementById('best').textContent=best;}
+function pos(e){const rect=cv.getBoundingClientRect();const sx=cv.width/rect.width,sy=cv.height/rect.height;
+  const t=e.touches?e.touches[0]:e;return{x:(t.clientX-rect.left)*sx,y:(t.clientY-rect.top)*sy};}
+function down(e){if(ball.flying)return;const p=pos(e);
+  if(Math.hypot(p.x-ball.x,p.y-ball.y)<60){aiming=true;aimStart={x:ball.x,y:ball.y};aimNow=p;}e.preventDefault();}
+function move(e){if(aiming){aimNow=pos(e);e.preventDefault();}}
+function up(e){if(!aiming)return;aiming=false;
+  const dx=aimStart.x-aimNow.x,dy=aimStart.y-aimNow.y;
+  ball.vx=dx*0.18;ball.vy=dy*0.18;ball.flying=true;scored=false;shots++;updateHud();e.preventDefault();}
+cv.addEventListener('mousedown',down);cv.addEventListener('mousemove',move);window.addEventListener('mouseup',up);
+cv.addEventListener('touchstart',down,{passive:false});cv.addEventListener('touchmove',move,{passive:false});cv.addEventListener('touchend',up);
+function step(){
+  if(ball.flying){
+    const prevY=ball.y;
+    ball.x+=ball.vx;ball.y+=ball.vy;ball.vy+=G;
+    if(ball.x-ball.r<0){ball.x=ball.r;ball.vx*=-0.7;}
+    if(ball.x+ball.r>W){ball.x=W-ball.r;ball.vx*=-0.7;}
+    // backboard
+    if(ball.x+ball.r>hoop.x+hoop.w/2&&ball.y<hoop.y+40&&ball.y>hoop.y-60){ball.x=hoop.x+hoop.w/2-ball.r;ball.vx*=-0.6;}
+    // score: passing downward through rim line between the two rim ends
+    const lx=hoop.x-hoop.w/2,rx=hoop.x+hoop.w/2;
+    if(!scored&&prevY<hoop.y&&ball.y>=hoop.y&&ball.x>lx+4&&ball.x<rx-4&&ball.vy>0){
+      scored=true;score++;if(score>best){best=score;localStorage.setItem('hoop_best',best);}updateHud();
+      document.getElementById('status').textContent='🏀 Swish! +1';
+    }
+    // rim collision (bounce off ends)
+    [[lx,hoop.y],[rx,hoop.y]].forEach(([rxp,ryp])=>{const d=Math.hypot(ball.x-rxp,ball.y-ryp);
+      if(d<ball.r+4){const nx=(ball.x-rxp)/d,ny=(ball.y-ryp)/d;const dot=ball.vx*nx+ball.vy*ny;
+        ball.vx-=2*dot*nx;ball.vy-=2*dot*ny;ball.vx*=0.7;ball.vy*=0.7;ball.x=rxp+nx*(ball.r+4);ball.y=ryp+ny*(ball.r+4);}});
+    if(ball.y-ball.r>H){ // landed
+      ball.flying=false;ball.x=80;ball.y=H-60;ball.vx=ball.vy=0;
+      if(scored){placeHoop();}
+      else document.getElementById('status').textContent='Missed! Drag from the ball to try again.';
+    }
+  }
+  draw();requestAnimationFrame(step);
+}
+function draw(){
+  ctx.clearRect(0,0,W,H);
+  // floor
+  ctx.fillStyle='#2a3450';ctx.fillRect(0,H-30,W,30);
+  // pole + backboard
+  ctx.strokeStyle='#cfd8e6';ctx.lineWidth=6;ctx.beginPath();ctx.moveTo(hoop.x+hoop.w/2+6,hoop.y-50);ctx.lineTo(hoop.x+hoop.w/2+6,hoop.y+50);ctx.stroke();
+  ctx.fillStyle='rgba(255,255,255,.85)';ctx.fillRect(hoop.x+hoop.w/2,hoop.y-50,10,90);
+  // rim
+  ctx.strokeStyle='#ff5722';ctx.lineWidth=5;ctx.beginPath();ctx.moveTo(hoop.x-hoop.w/2,hoop.y);ctx.lineTo(hoop.x+hoop.w/2,hoop.y);ctx.stroke();
+  // net
+  ctx.strokeStyle='rgba(255,255,255,.5)';ctx.lineWidth=1;
+  for(let i=0;i<=6;i++){const t=i/6;const x=hoop.x-hoop.w/2+t*hoop.w;ctx.beginPath();ctx.moveTo(x,hoop.y);ctx.lineTo(hoop.x-hoop.w/4+t*hoop.w/2,hoop.y+34);ctx.stroke();}
+  // aim line
+  if(aiming){ctx.strokeStyle='rgba(255,255,255,.6)';ctx.lineWidth=3;ctx.setLineDash([6,6]);
+    ctx.beginPath();ctx.moveTo(ball.x,ball.y);ctx.lineTo(aimNow.x,aimNow.y);ctx.stroke();ctx.setLineDash([]);}
+  // ball
+  ctx.fillStyle='#ff9f43';ctx.beginPath();ctx.arc(ball.x,ball.y,ball.r,0,7);ctx.fill();
+  ctx.strokeStyle='#7a4a10';ctx.lineWidth=2;ctx.beginPath();ctx.arc(ball.x,ball.y,ball.r,0,7);ctx.stroke();
+  ctx.beginPath();ctx.moveTo(ball.x-ball.r,ball.y);ctx.lineTo(ball.x+ball.r,ball.y);ctx.moveTo(ball.x,ball.y-ball.r);ctx.lineTo(ball.x,ball.y+ball.r);ctx.stroke();
+}
+document.getElementById('reset').onclick=reset;
+reset();step();
+</script>
+</body>
+</html>

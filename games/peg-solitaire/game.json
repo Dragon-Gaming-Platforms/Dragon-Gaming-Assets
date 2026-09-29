@@ -1,0 +1,9 @@
+{
+  "name": "Peg Solitaire",
+  "desc": "The timeless single-player puzzle on the English cross board. Jump one peg over an adjacent peg into an empty hole to remove it. Clear the board down to a single peg to solve it.",
+  "controls": "Tap a peg then tap a highlighted hole to jump",
+  "shelf": "Puzzle & Logic",
+  "tags": ["games", "html5", "puzzle", "logic", "classic"],
+  "badge": "New",
+  "creator": "Dragon Gaming Platforms"
+}

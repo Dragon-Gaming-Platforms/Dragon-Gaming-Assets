@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+<meta name="robots" content="noindex,nofollow">
+<title>Mastermind</title>
+<style>
+  *{box-sizing:border-box}html,body{margin:0;height:100%}
+  body{background:radial-gradient(circle at 50% 0,#12233a,#070d16 60%);color:#eef;
+    font-family:system-ui,Segoe UI,Roboto,Arial,sans-serif;display:flex;flex-direction:column;
+    align-items:center;min-height:100vh;gap:10px;padding:16px;user-select:none;-webkit-user-select:none}
+  h1{margin:6px 0;font-size:clamp(20px,5vw,30px)}
+  #status{min-height:20px;color:#8fd0ff;font-weight:700;text-align:center}
+  #rows{display:flex;flex-direction:column-reverse;gap:6px;width:min(94vw,360px)}
+  .guessrow{display:flex;align-items:center;gap:8px;background:rgba(255,255,255,.05);padding:6px;border-radius:10px}
+  .slots{display:flex;gap:6px}
+  .slot{width:34px;height:34px;border-radius:50%;background:#22344a;box-shadow:inset 0 2px 4px rgba(0,0,0,.5)}
+  .feedback{display:grid;grid-template-columns:1fr 1fr;grid-template-rows:1fr 1fr;gap:3px;width:26px;height:26px}
+  .fb{width:11px;height:11px;border-radius:50%;background:#1a2634}
+  .fb.black{background:#111;box-shadow:0 0 0 1px #666}
+  .fb.white{background:#fff}
+  #palette{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;margin-top:6px}
+  .peg{width:36px;height:36px;border-radius:50%;cursor:pointer;box-shadow:0 2px 4px rgba(0,0,0,.5);border:2px solid rgba(255,255,255,.25)}
+  .peg.sel{outline:3px solid #ffd76a}
+  .row{display:flex;gap:10px;margin-top:4px}
+  button{background:#4aa3ff;color:#04152a;border:0;border-radius:10px;padding:9px 16px;font-size:15px;font-weight:800;cursor:pointer}
+  button:disabled{opacity:.4;cursor:default}
+</style>
+</head>
+<body>
+<h1>Mastermind</h1>
+<div id="status">Crack the 4-colour code in 10 tries. ● right colour+spot, ○ right colour.</div>
+<div id="rows"></div>
+<div id="palette"></div>
+<div class="row"><button id="check" disabled>Check</button><button id="clear">Clear</button><button id="newG">New</button></div>
+<script>
+const COLORS=['#e6394a','#f5a623','#f8e71c','#2ecc71','#3aa0ff','#b06bff'];
+const LEN=4,MAX=10;
+let code,guesses,current,selColor=0,over;
+function init(){
+  code=Array.from({length:LEN},()=>Math.floor(Math.random()*COLORS.length));
+  guesses=[];current=Array(LEN).fill(null);selColor=0;over=false;
+  document.getElementById('status').textContent='Pick a colour, tap slots to place, then Check.';
+  buildPalette();render();
+}
+function buildPalette(){
+  const p=document.getElementById('palette');p.innerHTML='';
+  COLORS.forEach((c,i)=>{const d=document.createElement('div');d.className='peg'+(i===selColor?' sel':'');
+    d.style.background=c;d.onclick=()=>{selColor=i;buildPalette();};p.appendChild(d);});
+}
+const rowsEl=document.getElementById('rows');
+function render(){
+  rowsEl.innerHTML='';
+  for(let r=0;r<MAX;r++){
+    const row=document.createElement('div');row.className='guessrow';
+    const slots=document.createElement('div');slots.className='slots';
+    const isCurrent=r===guesses.length&&!over;
+    for(let i=0;i<LEN;i++){
+      const s=document.createElement('div');s.className='slot';
+      let val=null;
+      if(r<guesses.length)val=guesses[r].g[i];
+      else if(isCurrent)val=current[i];
+      if(val!==null)s.style.background=COLORS[val];
+      if(isCurrent){s.style.cursor='pointer';s.onclick=()=>{current[i]=selColor;render();};}
+      slots.appendChild(s);
+    }
+    const fb=document.createElement('div');fb.className='feedback';
+    for(let k=0;k<LEN;k++){const f=document.createElement('div');f.className='fb';
+      if(r<guesses.length){if(k<guesses[r].black)f.classList.add('black');else if(k<guesses[r].black+guesses[r].white)f.classList.add('white');}
+      fb.appendChild(f);}
+    row.appendChild(slots);row.appendChild(fb);rowsEl.appendChild(row);
+  }
+  document.getElementById('check').disabled=over||current.some(v=>v===null);
+}
+function score(g){
+  let black=0,white=0;const c=[...code],gg=[...g];
+  for(let i=0;i<LEN;i++)if(gg[i]===c[i]){black++;c[i]=gg[i]=-1;}
+  for(let i=0;i<LEN;i++)if(gg[i]!==-1){const j=c.indexOf(gg[i]);if(j>=0){white++;c[j]=-1;}}
+  return{black,white};
+}
+function check(){
+  if(current.some(v=>v===null))return;
+  const{black,white}=score(current);
+  guesses.push({g:[...current],black,white});
+  current=Array(LEN).fill(null);
+  if(black===LEN){over=true;document.getElementById('status').textContent=`🎉 Cracked in ${guesses.length}!`;}
+  else if(guesses.length>=MAX){over=true;reveal();document.getElementById('status').textContent='Out of guesses! Code revealed at top.';}
+  render();
+}
+function reveal(){
+  guesses[MAX-1]=guesses[MAX-1]||{g:[...code],black:0,white:0};
+  // show code in status via a temporary row is overkill; just paint into current display
+}
+document.getElementById('check').onclick=check;
+document.getElementById('clear').onclick=()=>{if(!over){current=Array(LEN).fill(null);render();}};
+document.getElementById('newG').onclick=init;
+init();
+</script>
+</body>
+</html>

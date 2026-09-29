@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+<meta name="robots" content="noindex,nofollow">
+<title>Reaction Test</title>
+<style>
+  *{box-sizing:border-box}html,body{margin:0;height:100%}
+  body{margin:0;font-family:system-ui,Segoe UI,Roboto,Arial,sans-serif;user-select:none;-webkit-user-select:none}
+  #pad{position:fixed;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;
+    text-align:center;color:#fff;cursor:pointer;transition:background .1s;padding:20px}
+  #pad.wait{background:#c0392b}#pad.go{background:#27ae60}#pad.ready{background:#2c3e50}#pad.early{background:#8e44ad}#pad.result{background:#2980b9}
+  h1{font-size:clamp(24px,7vw,48px);margin:0 0 12px}
+  p{font-size:clamp(16px,4vw,22px);max-width:600px;margin:6px 0}
+  .big{font-size:clamp(40px,12vw,90px);font-weight:900}
+  .stats{margin-top:18px;font-size:16px;opacity:.9}
+</style>
+</head>
+<body>
+<div id="pad" class="ready">
+  <h1 id="title">Reaction Test</h1>
+  <p id="msg">Tap anywhere to start. When the screen turns green, tap as fast as you can.</p>
+  <div class="stats" id="stats"></div>
+</div>
+<script>
+const pad=document.getElementById('pad'),title=document.getElementById('title'),msg=document.getElementById('msg'),statsEl=document.getElementById('stats');
+let state='ready',timer=null,startTime=0,times=[];
+function setState(s){state=s;pad.className=s;}
+function start(){
+  setState('wait');title.textContent='Wait for green…';msg.textContent='Don\'t tap yet!';
+  const delay=1000+Math.random()*3000;
+  timer=setTimeout(()=>{setState('go');title.textContent='TAP NOW!';msg.textContent='';startTime=performance.now();},delay);
+}
+function tap(){
+  if(state==='ready'||state==='result'||state==='early'){start();return;}
+  if(state==='wait'){clearTimeout(timer);setState('early');title.textContent='Too soon! 🙈';msg.textContent='You tapped before green. Tap to try again.';return;}
+  if(state==='go'){
+    const rt=Math.round(performance.now()-startTime);times.push(rt);
+    setState('result');title.innerHTML=`<span class="big">${rt} ms</span>`;msg.textContent='Tap to go again.';
+    const best=Math.min(...times);const avg=Math.round(times.reduce((a,b)=>a+b,0)/times.length);
+    statsEl.textContent=`Attempts: ${times.length}  •  Best: ${best} ms  •  Average: ${avg} ms`;
+  }
+}
+pad.addEventListener('click',tap);
+pad.addEventListener('keydown',e=>{if(e.key===' '||e.key==='Enter')tap();});
+document.addEventListener('keydown',e=>{if(e.key===' '){e.preventDefault();tap();}});
+</script>
+</body>
+</html>
