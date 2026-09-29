@@ -6,4 +6,4 @@ Games live at `games/<slug>/`. Catalog entries in the main platform repository r
 
 `https://dragon-gaming-platforms.github.io/Dragon-Gaming-Assets/games/<slug>/`
 
-This repository has no blanket license. Per-game attribution and licensing information lives in the repository's [Third-Party.md file](./Third-Party.md)
+This repository has no blanket license. Per-game attribution and licensing information lives in the repository's [THIRD_PARTY.md file](./THIRD_PARTY.md)
