@@ -1,0 +1,9 @@
+{
+  "name": "Craps",
+  "desc": "A streamlined casino craps table built around the pass line. Place a pass or don't-pass bet, roll the come-out, and chase your point before a seven ends the round. Your bankroll is saved on your device so you can build a streak over time.",
+  "controls": "Pick a chip and line, then press Roll Dice",
+  "shelf": "Strategy & Idle",
+  "tags": ["games", "html5", "dice", "casino", "1player"],
+  "badge": "New",
+  "creator": "Dragon Gaming Platforms"
+}

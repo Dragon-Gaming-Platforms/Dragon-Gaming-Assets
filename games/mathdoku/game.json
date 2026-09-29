@@ -1,0 +1,9 @@
+{
+  "name": "MathDoku",
+  "desc": "An arithmetic logic puzzle in the KenKen style. Fill a four-by-four grid so every row and column contains one to four with no repeats, and each outlined cage combines to its target using the shown plus, minus, times, or divide operation. Cages and solutions are generated fresh each round.",
+  "controls": "Tap a cell then tap a number pad button to place it",
+  "shelf": "Puzzle & Logic",
+  "tags": ["games", "html5", "logic", "numbers", "math"],
+  "badge": "New",
+  "creator": "Dragon Gaming Platforms"
+}

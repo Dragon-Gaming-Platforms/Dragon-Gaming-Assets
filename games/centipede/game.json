@@ -1,0 +1,9 @@
+{
+  "name": "Centipede",
+  "desc": "A retro-style shooter. Blast the centipede as it winds down through a field of mushrooms; every hit splits it and sprouts new mushrooms. Clear a wave and a longer, faster centipede returns. Defend your zone across three lives.",
+  "controls": "Move with mouse or arrow keys, shoot with Space or tap",
+  "shelf": "Arcade & Action",
+  "tags": ["games", "html5", "arcade", "action", "shooter"],
+  "badge": "New",
+  "creator": "Dragon Gaming Platforms"
+}

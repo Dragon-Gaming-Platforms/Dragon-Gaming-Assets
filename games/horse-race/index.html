@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+<meta name="robots" content="noindex,nofollow">
+<title>Horse Race</title>
+<style>
+  *{box-sizing:border-box}html,body{margin:0}
+  body{min-height:100vh;background:#0c1a0e;color:#fff;font-family:system-ui,Segoe UI,Roboto,Arial,sans-serif;
+    display:flex;flex-direction:column;align-items:center;gap:10px;padding:12px;user-select:none;-webkit-user-select:none}
+  h1{margin:2px 0;font-size:clamp(18px,5vw,24px)}
+  #bank{font-weight:800;color:#ffe08a;font-size:18px}
+  #status{min-height:20px;font-weight:800;color:#9ad;text-align:center;max-width:460px}
+  canvas{background:linear-gradient(#3a7a3a,#2a5a2a);border-radius:12px;max-width:100%}
+  .horses{display:grid;grid-template-columns:1fr 1fr;gap:6px;max-width:460px;width:100%}
+  .horse{display:flex;justify-content:space-between;align-items:center;background:#183018;border:2px solid #2a5a2a;border-radius:8px;padding:8px 10px;cursor:pointer;font-weight:700}
+  .horse.sel{border-color:#ffcc33;background:#2a3a1a}
+  .odds{color:#ffcf5d;font-size:13px}
+  .row{display:flex;gap:8px;align-items:center;flex-wrap:wrap;justify-content:center}
+  .row button{border:0;border-radius:9px;padding:9px 15px;font-weight:800;cursor:pointer}
+  .chip{background:#26324e;color:#eef}.chip.sel{background:#ffcc33;color:#20150a}
+  #race{background:#ffcc33;color:#20150a}#race:disabled{opacity:.4}
+  .hint{font-size:12px;opacity:.75;text-align:center;max-width:470px}
+</style>
+</head>
+<body>
+<h1>Horse Race</h1>
+<div id="bank">Balance: $500</div>
+<div class="row"><span>Bet:</span>
+  <button class="chip" data-c="10">$10</button><button class="chip sel" data-c="25">$25</button><button class="chip" data-c="50">$50</button></div>
+<div class="horses" id="list"></div>
+<canvas id="cv" width="460" height="240"></canvas>
+<div id="status">Pick a horse and place your bet.</div>
+<button id="race">Race!</button>
+<div class="hint">Each horse has different odds — the longer the odds, the bigger the payout if it wins. Pick one, choose your stake, and race. Winnings = stake × odds.</div>
+<script>
+const cv=document.getElementById('cv'),ctx=cv.getContext('2d');
+const W=cv.width,H=cv.height,FINISH=W-30;
+const NAMES=['Thunder','Blaze','Comet','Shadow','Dasher'];
+const COLORS=['#ff5d5d','#4d96ff','#ffcf5d','#c56bff','#7cff8a'];
+let bal=+(localStorage.getItem('horse_bal')||500);
+let odds=[],picked=null,chip=25,racing=false,horses=[];
+function save(){localStorage.setItem('horse_bal',bal);}
+function genOdds(){odds=NAMES.map(()=>+(2+Math.random()*7).toFixed(1));}
+function buildList(){
+  const l=document.getElementById('list');l.innerHTML='';
+  NAMES.forEach((n,i)=>{const d=document.createElement('div');d.className='horse'+(picked===i?' sel':'');
+    d.innerHTML='<span><span style="color:'+COLORS[i]+'">■</span> '+n+'</span><span class="odds">'+odds[i].toFixed(1)+'×</span>';
+    d.onclick=()=>{if(racing)return;picked=i;buildList();setStatus('Backing '+n+' at '+odds[i].toFixed(1)+'×.');};
+    l.appendChild(d);});
+}
+function setStatus(t){document.getElementById('status').textContent=t;}
+function upd(){document.getElementById('bank').textContent='Balance: $'+bal;}
+document.querySelectorAll('.chip').forEach(b=>b.onclick=()=>{if(racing)return;chip=+b.dataset.c;
+  document.querySelectorAll('.chip').forEach(x=>x.classList.remove('sel'));b.classList.add('sel');});
+function drawTrack(){
+  ctx.clearRect(0,0,W,H);
+  const laneH=H/NAMES.length;
+  for(let i=0;i<NAMES.length;i++){ctx.strokeStyle='#ffffff44';ctx.beginPath();ctx.moveTo(0,i*laneH);ctx.lineTo(W,i*laneH);ctx.stroke();}
+  // finish line
+  ctx.fillStyle='#fff';for(let y=0;y<H;y+=12)ctx.fillRect(FINISH,y,6,6);
+  horses.forEach((h,i)=>{const y=i*laneH+laneH/2;
+    ctx.font='22px serif';ctx.textAlign='center';ctx.fillText('🐎',h.x,y+8);
+    ctx.fillStyle=COLORS[i];ctx.fillRect(h.x-16,y-16,4,4);
+  });
+}
+document.getElementById('race').onclick=()=>{
+  if(racing)return;
+  if(picked===null){setStatus('Pick a horse first.');return;}
+  if(chip>bal){setStatus('Not enough balance.');return;}
+  bal-=chip;save();upd();racing=true;document.getElementById('race').disabled=true;
+  horses=NAMES.map((n,i)=>({x:20,speed:0}));
+  // horse with better (lower) odds tends slightly faster
+  const step=()=>{
+    horses.forEach((h,i)=>{const base=2.2+ (9-odds[i])*0.12; h.x+=base*0.5 + Math.random()*2.4;});
+    drawTrack();
+    const winner=horses.findIndex(h=>h.x>=FINISH);
+    if(winner>=0){finish(winner);return;}
+    requestAnimationFrame(step);
+  };
+  setStatus('And they\'re off!');step();
+};
+function finish(winner){
+  racing=false;document.getElementById('race').disabled=false;
+  if(winner===picked){const won=Math.round(chip*odds[picked]);bal+=won;save();upd();
+    setStatus('🏆 '+NAMES[winner]+' wins! You won $'+won+' (net +$'+(won-chip)+').');}
+  else{setStatus('🏁 '+NAMES[winner]+' wins. You backed '+NAMES[picked]+' — lost $'+chip+'.');}
+  if(bal<=0){bal=500;save();upd();setStatus(document.getElementById('status').textContent+' Balance reset to $500.');}
+  genOdds();buildList();
+}
+genOdds();buildList();upd();
+horses=NAMES.map(()=>({x:20}));drawTrack();
+</script>
+</body>
+</html>

@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+<meta name="robots" content="noindex,nofollow">
+<title>Cornhole</title>
+<style>
+  *{box-sizing:border-box}html,body{margin:0;height:100%}
+  body{background:#122015;color:#fff;font-family:system-ui,Segoe UI,Roboto,Arial,sans-serif;
+    display:flex;flex-direction:column;align-items:center;gap:8px;padding:8px;user-select:none;-webkit-user-select:none;touch-action:none}
+  h1{margin:2px 0;font-size:clamp(16px,4vw,22px)}
+  #hud{font-weight:800;color:#ffe08a}
+  canvas{background:linear-gradient(#7ec850,#5aa838);border-radius:12px;touch-action:none;max-width:100%;cursor:crosshair}
+  #status{min-height:20px;font-weight:800;color:#eaffea;text-align:center;max-width:440px}
+  button{background:#ffcc33;color:#20150a;border:0;border-radius:9px;padding:9px 16px;font-weight:800;cursor:pointer}
+  .hint{font-size:12px;opacity:.8;text-align:center;max-width:460px}
+</style>
+</head>
+<body>
+<h1>Cornhole</h1>
+<div id="hud"><span id="score">You 0 — 0 CPU</span> &nbsp; Bag <span id="bag">1</span>/4</div>
+<canvas id="cv" width="360" height="540"></canvas>
+<div id="status">Drag left/right to aim, hold to set power, release to toss your bag.</div>
+<button id="next" style="display:none">Next Round</button>
+<div class="hint">In the hole = 3 points, on the board = 1 point. Move to aim, hold to charge power (aim for the sweet spot), release to throw. Each player tosses 4 bags per round; first to 21 wins.</div>
+<script>
+const cv=document.getElementById('cv'),ctx=cv.getContext('2d');
+const W=cv.width,H=cv.height;
+// board at top (perspective trapezoid), hole near its upper third
+const BOARD={x:W/2,y:120,w:150,h:160}; // center x, top y, width, length(screen)
+const HOLE={x:W/2,y:165,r:16};
+let phase,aim,power,charging,thrower,youScore,cpuScore,tossCount,bag,bags,roundYou,roundCpu;
+function reset(){youScore=0;cpuScore=0;startRound();}
+function startRound(){bags=[];tossCount=0;thrower='you';roundYou=0;roundCpu=0;phase='aim';aim=0;power=0;charging=false;bag=null;
+  document.getElementById('next').style.display='none';updHud();setStatus('Your toss — aim and hold to charge.');draw();}
+function updHud(){document.getElementById('score').textContent='You '+youScore+' — '+cpuScore+' CPU';
+  document.getElementById('bag').textContent=Math.min(8,tossCount+1);}
+function setStatus(t){document.getElementById('status').textContent=t;}
+function toss(angle,pwr,owner){
+  bag={x:W/2,y:H-40,z:0, vx:Math.sin(angle)*pwr*0.05, vy:-pwr*0.16, vz:pwr*0.11, owner, landed:false};
+  phase='fly';animate();
+}
+function animate(){
+  if(phase!=='fly'){return;}
+  const b=bag;
+  b.x+=b.vx;b.y+=b.vy;b.z+=b.vz;b.vz-=0.32; // z is height, gravity
+  // when z returns to 0 -> landed
+  if(b.z<=0&&b.vy<0===false){} // ignore
+  if(b.z<=0&&b.vz<0){
+    b.z=0;b.landed=true;phase='land';resolveToss();return;
+  }
+  // safety: if goes off top
+  if(b.y<-40){b.landed=true;phase='land';resolveToss();return;}
+  draw();requestAnimationFrame(animate);
+}
+function resolveToss(){
+  const b=bag;let pts=0,where='missed (off the board)';
+  const d=Math.hypot(b.x-HOLE.x,b.y-HOLE.y);
+  const onBoard=Math.abs(b.x-BOARD.x)<BOARD.w/2*0.8 && b.y>BOARD.y-10 && b.y<BOARD.y+BOARD.h;
+  if(d<HOLE.r){pts=3;where='IN THE HOLE! +3';}
+  else if(onBoard){pts=1;where='on the board +1';bags.push({x:b.x,y:b.y,owner:b.owner});}
+  else {bags.push({x:b.x,y:Math.min(H-30,b.y),owner:b.owner});}
+  if(b.owner==='you')roundYou+=pts;else roundCpu+=pts;
+  setStatus((b.owner==='you'?'You':'CPU')+': '+where);
+  tossCount++;updHud();bag=null;
+  if(tossCount>=8){endRound();return;}
+  thrower=thrower==='you'?'cpu':'you';phase='aim';
+  if(thrower==='cpu'){setStatus('CPU is tossing...');setTimeout(cpuToss,900);}
+  else{setStatus('Your toss — aim and hold.');draw();}
+}
+function cpuToss(){
+  // aim near hole with error
+  const err=(Math.random()-0.5)*0.16;
+  const angle=Math.atan2(HOLE.x-W/2,-(H-40-HOLE.y))+err;
+  const pwr=68+Math.random()*10 + (Math.random()<0.3?(Math.random()-0.5)*20:0);
+  toss(angle,pwr,'cpu');
+}
+function endRound(){
+  // cancellation scoring
+  const net=roundYou-roundCpu;
+  if(net>0)youScore+=net;else if(net<0)cpuScore+=-net;
+  updHud();
+  setStatus('Round: You '+roundYou+' vs CPU '+roundCpu+'. '+(net>0?'You +'+net:net<0?'CPU +'+(-net):'Push')+'.');
+  if(youScore>=21||cpuScore>=21){
+    setStatus((youScore>cpuScore?'🏆 You win '+youScore+'–'+cpuScore+'!':'💀 CPU wins '+cpuScore+'–'+youScore+'.'));
+    document.getElementById('next').textContent='Play Again';
+  } else document.getElementById('next').textContent='Next Round';
+  document.getElementById('next').style.display='inline-block';draw();
+}
+function draw(){
+  ctx.clearRect(0,0,W,H);
+  // board (trapezoid perspective)
+  ctx.fillStyle='#c98a3a';
+  ctx.beginPath();
+  ctx.moveTo(BOARD.x-BOARD.w/2*0.72,BOARD.y);
+  ctx.lineTo(BOARD.x+BOARD.w/2*0.72,BOARD.y);
+  ctx.lineTo(BOARD.x+BOARD.w/2,BOARD.y+BOARD.h);
+  ctx.lineTo(BOARD.x-BOARD.w/2,BOARD.y+BOARD.h);
+  ctx.closePath();ctx.fill();ctx.strokeStyle='#7a5320';ctx.lineWidth=3;ctx.stroke();
+  // hole
+  ctx.beginPath();ctx.ellipse(HOLE.x,HOLE.y,HOLE.r,HOLE.r*0.7,0,0,7);ctx.fillStyle='#111';ctx.fill();
+  // landed bags
+  for(const g of bags){ctx.fillStyle=g.owner==='you'?'#ffcc33':'#e34';
+    ctx.fillRect(g.x-9,g.y-6,18,12);ctx.strokeStyle='#0006';ctx.strokeRect(g.x-9,g.y-6,18,12);}
+  // flying bag (scale with z for height illusion)
+  if(bag){const s=1+bag.z*0.02;ctx.fillStyle=bag.owner==='you'?'#ffe08a':'#ff8a8a';
+    ctx.save();ctx.translate(bag.x,bag.y-bag.z);ctx.scale(s,s);ctx.fillRect(-9,-6,18,12);ctx.restore();
+    // shadow
+    ctx.fillStyle='#0004';ctx.beginPath();ctx.ellipse(bag.x,bag.y,9,4,0,0,7);ctx.fill();}
+  // thrower position + aim
+  const bx=W/2,by=H-40;
+  ctx.fillStyle='#4d96ff';ctx.beginPath();ctx.arc(bx,by,14,0,7);ctx.fill();
+  if(phase==='aim'&&thrower==='you'){
+    ctx.strokeStyle='#0a8';ctx.setLineDash([6,6]);ctx.lineWidth=2;
+    ctx.beginPath();ctx.moveTo(bx,by);ctx.lineTo(bx+Math.sin(aim)*130,by-Math.cos(aim)*130);ctx.stroke();ctx.setLineDash([]);
+    // power bar + sweet spot
+    ctx.fillStyle='#0006';ctx.fillRect(20,H-24,W-40,14);
+    ctx.fillStyle='#2f7a3a';ctx.fillRect(20+(W-40)*0.62,H-24,(W-40)*0.16,14);
+    ctx.fillStyle='#ff5d5d';ctx.fillRect(20,H-24,(W-40)*power/100,14);
+  }
+}
+function pos(e){const r=cv.getBoundingClientRect();const t=e.touches?e.touches[0]:e;return{x:(t.clientX-r.left)*W/r.width,y:(t.clientY-r.top)*H/r.height};}
+function setAim(x){aim=Math.max(-0.5,Math.min(0.5,(x-W/2)/(W/2)*0.5));draw();}
+cv.addEventListener('mousemove',e=>{if(thrower==='you'&&!charging&&phase==='aim')setAim(pos(e).x);});
+function startCharge(e){if(thrower!=='you'||phase!=='aim')return;charging=true;power=0;setAim(pos(e).x);chargeLoop();e.preventDefault();}
+function chargeLoop(){if(!charging)return;power+=1.8;if(power>100)power=100;draw();requestAnimationFrame(chargeLoop);}
+function release(e){if(!charging)return;charging=false;const pwr=45+power*0.55;toss(aim,pwr,'you');e&&e.preventDefault&&e.preventDefault();}
+cv.addEventListener('mousedown',startCharge);window.addEventListener('mouseup',release);
+cv.addEventListener('touchstart',startCharge,{passive:false});cv.addEventListener('touchmove',e=>{if(charging)setAim(pos(e).x);e.preventDefault();},{passive:false});
+window.addEventListener('touchend',release);
+document.getElementById('next').onclick=()=>{
+  if(youScore>=21||cpuScore>=21){reset();return;}
+  startRound();
+};
+reset();
+</script>
+</body>
+</html>

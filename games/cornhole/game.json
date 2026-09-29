@@ -1,0 +1,9 @@
+{
+  "name": "Cornhole",
+  "desc": "The backyard bag-toss game brought to your screen. Aim your throw, charge the power meter to its sweet spot, and land bags on the board for one point or in the hole for three. Play cancellation scoring against the computer and race to twenty-one.",
+  "controls": "Drag to aim, hold to charge power, release to toss",
+  "shelf": "Sports & Racing",
+  "tags": ["games", "html5", "sports", "arcade", "1player"],
+  "badge": "New",
+  "creator": "Dragon Gaming Platforms"
+}

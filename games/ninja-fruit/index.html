@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+<meta name="robots" content="noindex,nofollow">
+<title>Ninja Fruit</title>
+<style>
+  *{box-sizing:border-box}html,body{margin:0;height:100%}
+  body{background:#1a1206;color:#fff;font-family:system-ui,Segoe UI,Roboto,Arial,sans-serif;
+    display:flex;flex-direction:column;align-items:center;gap:8px;padding:8px;user-select:none;-webkit-user-select:none;touch-action:none}
+  h1{margin:2px 0;font-size:clamp(16px,4vw,22px)}
+  #hud{display:flex;gap:18px;font-weight:800}
+  #lives{color:#ff6b6b}#score{color:#ffe08a}
+  canvas{background:linear-gradient(#2b1e0a,#4a3410);border-radius:12px;touch-action:none;max-width:100%}
+  #msg{position:fixed;inset:0;display:none;align-items:center;justify-content:center;flex-direction:column;gap:12px;background:#000a}
+  button{background:#ffcc33;color:#20150a;border:0;border-radius:9px;padding:10px 18px;font-weight:800;cursor:pointer}
+  .hint{font-size:12px;opacity:.75;text-align:center}
+</style>
+</head>
+<body>
+<h1>Ninja Fruit</h1>
+<div id="hud"><span id="score">Score: 0</span><span id="lives">♥♥♥</span></div>
+<canvas id="cv" width="420" height="560"></canvas>
+<div class="hint">Swipe (drag) across fruit to slice them. Miss a fruit and lose a life. Slice a 💣 bomb and it's game over!</div>
+<div id="msg"><div id="mt" style="font-size:24px;font-weight:800"></div><button id="again">Play Again</button></div>
+<script>
+const cv=document.getElementById('cv'),ctx=cv.getContext('2d');
+const W=cv.width,H=cv.height;
+let objs,score,lives,over,spawnT,trail;
+const FRUIT=[['#ff5d5d','🍎'],['#ffcf5d','🍋'],['#7cff8a','🍉'],['#ff9f45','🍊'],['#c56bff','🍇']];
+function reset(){objs=[];score=0;lives=3;over=false;spawnT=0;trail=[];document.getElementById('msg').style.display='none';update();}
+function spawn(){
+  const bomb=Math.random()<0.16;
+  const x=40+Math.random()*(W-80);
+  objs.push({x,y:H+30,vx:(W/2-x)/60+(Math.random()*4-2),vy:-(11+Math.random()*4),r:26,bomb,
+    color:bomb?'#222':FRUIT[Math.floor(Math.random()*FRUIT.length)][0],
+    emoji:bomb?'💣':FRUIT[Math.floor(Math.random()*FRUIT.length)][1],sliced:false,rot:0,vr:(Math.random()-.5)*.2});
+}
+function update(){
+  if(over)return;
+  ctx.clearRect(0,0,W,H);
+  spawnT--;if(spawnT<=0){spawn();spawnT=45+Math.random()*40;}
+  const g=0.22;
+  for(const o of objs){o.vy+=g;o.x+=o.vx;o.y+=o.vy;o.rot+=o.vr;}
+  // remove fallen
+  for(const o of objs){
+    if(!o.sliced&&o.y>H+50){o.dead=true;if(!o.bomb){lives--;flash();if(lives<=0)end('💀 Out of lives!');}}
+    if(o.sliced&&o.y>H+80)o.dead=true;
+  }
+  objs=objs.filter(o=>!o.dead);
+  // draw trail
+  ctx.strokeStyle='rgba(255,255,255,.7)';ctx.lineWidth=4;ctx.lineCap='round';
+  ctx.beginPath();for(let i=0;i<trail.length;i++){const p=trail[i];if(i===0)ctx.moveTo(p.x,p.y);else ctx.lineTo(p.x,p.y);}ctx.stroke();
+  trail=trail.filter(p=>{p.life--;return p.life>0;});
+  for(const o of objs){
+    ctx.save();ctx.translate(o.x,o.y);ctx.rotate(o.rot);
+    ctx.beginPath();ctx.arc(0,0,o.r,0,7);ctx.fillStyle=o.sliced?'#8886':o.color;ctx.fill();
+    ctx.font='34px serif';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(o.emoji,0,2);
+    ctx.restore();
+  }
+  document.getElementById('score').textContent='Score: '+score;
+  document.getElementById('lives').textContent='♥'.repeat(Math.max(0,lives))||'—';
+  requestAnimationFrame(update);
+}
+let fl=0;function flash(){fl=6;}
+function end(t){over=true;document.getElementById('mt').textContent=t+' Score: '+score;document.getElementById('msg').style.display='flex';}
+function sliceAt(x,y,px,py){
+  for(const o of objs){if(o.sliced)continue;
+    // distance from segment to circle center (approx point check)
+    if(Math.hypot(o.x-x,o.y-y)<o.r+8){
+      if(o.bomb){o.sliced=true;end('💥 You sliced a bomb!');return;}
+      o.sliced=true;o.vx+=(Math.random()-.5)*3;o.vy-=2;score+=10;
+    }
+  }
+}
+let dragging=false,last=null;
+function pos(e){const r=cv.getBoundingClientRect();const t=e.touches?e.touches[0]:e;return{x:(t.clientX-r.left)*W/r.width,y:(t.clientY-r.top)*H/r.height};}
+function down(e){dragging=true;last=pos(e);e.preventDefault();}
+function move(e){if(!dragging)return;const p=pos(e);trail.push({x:p.x,y:p.y,life:10});if(last)sliceAt(p.x,p.y,last.x,last.y);last=p;e.preventDefault();}
+function up(){dragging=false;last=null;}
+cv.addEventListener('mousedown',down);cv.addEventListener('mousemove',move);window.addEventListener('mouseup',up);
+cv.addEventListener('touchstart',down,{passive:false});cv.addEventListener('touchmove',move,{passive:false});window.addEventListener('touchend',up);
+document.getElementById('again').onclick=reset;
+reset();
+</script>
+</body>
+</html>

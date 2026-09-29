@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+<meta name="robots" content="noindex,nofollow">
+<title>Craps</title>
+<style>
+  *{box-sizing:border-box}body{margin:0;min-height:100vh;background:#0d2818;color:#eef;
+    font-family:system-ui,Segoe UI,Roboto,Arial,sans-serif;display:flex;flex-direction:column;align-items:center;gap:14px;padding:18px;user-select:none;-webkit-user-select:none}
+  h1{margin:2px 0;font-size:clamp(18px,5vw,24px)}
+  #bank{font-weight:800;color:#ffe08a;font-size:19px}
+  #status{min-height:22px;font-weight:700;color:#fff;text-align:center;max-width:440px;font-size:16px}
+  #point{font-weight:800;color:#7cff8a}
+  #dice{display:flex;gap:16px;min-height:70px}
+  .die{width:64px;height:64px;border-radius:12px;background:#f4f4f4;color:#111;display:flex;align-items:center;justify-content:center;font-size:38px;box-shadow:0 4px 0 #0007}
+  .betrow{display:flex;gap:8px;align-items:center;flex-wrap:wrap;justify-content:center}
+  .betrow button{background:#1e5c3a;color:#fff;border:1px solid #3a8a5a;border-radius:8px;padding:7px 12px;font-weight:700;cursor:pointer}
+  .betrow button.sel{background:#ffcc33;color:#20150a}
+  #roll{background:#ffcc33;color:#20150a;border:0;border-radius:10px;padding:12px 26px;font-weight:800;font-size:17px;cursor:pointer}
+  #roll:disabled{opacity:.4}
+  .curbet{font-size:14px;color:#9ad}
+  .hint{font-size:12px;opacity:.72;text-align:center;max-width:460px}
+</style>
+</head>
+<body>
+<h1>Craps — Pass Line</h1>
+<div id="bank">Bankroll: $1000</div>
+<div class="curbet">Bet: $<span id="curbet">50</span> on <span id="curline">Pass</span> &nbsp; Point: <span id="point">—</span></div>
+<div class="betrow">
+  <span>Chip:</span>
+  <button data-b="10">$10</button><button data-b="25">$25</button><button class="sel" data-b="50">$50</button><button data-b="100">$100</button>
+</div>
+<div class="betrow">
+  <span>Line:</span>
+  <button class="line sel" data-l="Pass">Pass</button><button class="line" data-l="Don't Pass">Don't Pass</button>
+</div>
+<div id="dice"><div class="die">⚀</div><div class="die">⚀</div></div>
+<div id="status">Come-out roll. 7 or 11 wins Pass; 2, 3, 12 loses. Otherwise a point is set.</div>
+<button id="roll">Roll Dice</button>
+<div class="hint">Pass line pays even money. Come-out: 7/11 Pass wins, 2/3/12 Pass loses (Don't Pass wins on 2/3, pushes on 12). If a point (4,5,6,8,9,10) is set, keep rolling — hit the point to win Pass, roll a 7 to lose. Bankroll is saved on this device.</div>
+<script>
+const pips=['','⚀','⚁','⚂','⚃','⚄','⚅'];
+let bank=+(localStorage.getItem('craps_bank')||1000);
+let chip=50,line='Pass',point=null,bet=50,inRound=false;
+function save(){localStorage.setItem('craps_bank',bank);}
+function upd(){
+  document.getElementById('bank').textContent='Bankroll: $'+bank;
+  document.getElementById('curbet').textContent=bet;
+  document.getElementById('curline').textContent=line;
+  document.getElementById('point').textContent=point||'—';
+}
+document.querySelectorAll('[data-b]').forEach(b=>b.onclick=()=>{
+  if(inRound)return;chip=+b.dataset.b;bet=chip;
+  document.querySelectorAll('[data-b]').forEach(x=>x.classList.remove('sel'));b.classList.add('sel');upd();
+});
+document.querySelectorAll('.line').forEach(b=>b.onclick=()=>{
+  if(inRound)return;line=b.dataset.l;
+  document.querySelectorAll('.line').forEach(x=>x.classList.remove('sel'));b.classList.add('sel');upd();
+});
+function setStatus(t){document.getElementById('status').textContent=t;}
+function showDice(a,b){const d=document.getElementById('dice');d.innerHTML='';
+  [a,b].forEach(v=>{const e=document.createElement('div');e.className='die';e.textContent=pips[v];d.appendChild(e);});}
+document.getElementById('roll').onclick=()=>{
+  if(!inRound){
+    if(bet>bank){setStatus('Not enough bankroll for that bet.');return;}
+  }
+  const a=1+Math.floor(Math.random()*6),b=1+Math.floor(Math.random()*6),sum=a+b;
+  showDice(a,b);
+  if(!inRound){
+    // come-out
+    if(!point){bank-=bet;} // take the bet down once at round start
+  }
+  if(!inRound){
+    // come-out resolution
+    if(line==='Pass'){
+      if(sum===7||sum===11){win(bet*2,'Natural '+sum+' — Pass wins!');}
+      else if(sum===2||sum===3||sum===12){lose('Craps '+sum+' — Pass loses.');}
+      else{point=sum;inRound=true;setStatus('Point is '+sum+'. Roll it again before a 7.');}
+    } else { // Don't Pass
+      if(sum===2||sum===3){win(bet*2,"Craps "+sum+" — Don't Pass wins!");}
+      else if(sum===7||sum===11){lose('Natural '+sum+" — Don't Pass loses.");}
+      else if(sum===12){bank+=bet;setStatus('12 — push. Bet returned.');endRound();}
+      else{point=sum;inRound=true;setStatus('Point is '+sum+". Hope for a 7 before the "+sum+".");}
+    }
+  } else {
+    // point phase
+    if(line==='Pass'){
+      if(sum===point){win(bet*2,'Hit the point '+sum+' — Pass wins!');}
+      else if(sum===7){lose('Seven out — Pass loses.');}
+      else setStatus('Rolled '+sum+'. Point still '+point+'.');
+    } else {
+      if(sum===7){win(bet*2,"Seven out — Don't Pass wins!");}
+      else if(sum===point){lose('Point '+sum+" repeated — Don't Pass loses.");}
+      else setStatus('Rolled '+sum+'. Point still '+point+'.');
+    }
+  }
+  upd();save();
+};
+function win(amount,msg){bank+=amount;setStatus('✅ '+msg+' +$'+(amount-bet));endRound();}
+function lose(msg){setStatus('❌ '+msg);endRound();}
+function endRound(){inRound=false;point=null;upd();save();
+  if(bank<=0){setStatus('You are out of money! Resetting to $1000.');bank=1000;save();upd();}
+}
+upd();
+</script>
+</body>
+</html>

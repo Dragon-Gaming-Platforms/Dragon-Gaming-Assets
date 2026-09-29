@@ -1,0 +1,9 @@
+{
+  "name": "Curling",
+  "desc": "Slide stones down the ice against the computer. Aim your line, hold to build power, and release to send your stone gliding toward the button, using collisions to knock rivals out of the house. Closest stones score. Play out a full eight-stone end and beyond.",
+  "controls": "Drag to aim, hold to charge power, release to throw",
+  "shelf": "Sports & Racing",
+  "tags": ["games", "html5", "sports", "strategy", "1player"],
+  "badge": "New",
+  "creator": "Dragon Gaming Platforms"
+}

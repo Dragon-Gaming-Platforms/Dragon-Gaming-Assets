@@ -107,3 +107,23 @@ never invent a license.
 | Long Jump | `games/long-jump/` | Original build (Dragon Gaming Platforms) | Original — first-party, no third-party assets | 2026-09-29 |
 | Hurdles | `games/hurdles/` | Original build (Dragon Gaming Platforms) | Original — first-party, no third-party assets | 2026-09-29 |
 | Ski Jump | `games/ski-jump/` | Original build (Dragon Gaming Platforms) | Original — first-party, no third-party assets | 2026-09-29 |
+| Binairo | `games/binairo/` | Original build (Dragon Gaming Platforms) | Original — first-party, no third-party assets | 2026-09-29 |
+| MathDoku | `games/mathdoku/` | Original build (Dragon Gaming Platforms) | Original — first-party, no third-party assets | 2026-09-29 |
+| Magic Square | `games/magic-square/` | Original build (Dragon Gaming Platforms) | Original — first-party, no third-party assets | 2026-09-29 |
+| Mini Crossword | `games/mini-crossword/` | Original build (Dragon Gaming Platforms) | Original — first-party, no third-party assets | 2026-09-29 |
+| Block Blast | `games/block-blast/` | Original build (Dragon Gaming Platforms) | Original — first-party, no third-party assets | 2026-09-29 |
+| Ninja Fruit | `games/ninja-fruit/` | Original build (Dragon Gaming Platforms) | Original — first-party, no third-party assets | 2026-09-29 |
+| Helix Jump | `games/helix-jump/` | Original build (Dragon Gaming Platforms) | Original — first-party, no third-party assets | 2026-09-29 |
+| Geo Dash | `games/geo-dash/` | Original build (Dragon Gaming Platforms) | Original — first-party, no third-party assets | 2026-09-29 |
+| Centipede | `games/centipede/` | Original build (Dragon Gaming Platforms) | Original — first-party, no third-party assets | 2026-09-29 |
+| Jetpack Dash | `games/jetpack-dash/` | Original build (Dragon Gaming Platforms) | Original — first-party, no third-party assets | 2026-09-29 |
+| Puck Duel | `games/puck-duel/` | Original build (Dragon Gaming Platforms) | Original — first-party, no third-party assets | 2026-09-29 |
+| Farkle | `games/farkle/` | Original build (Dragon Gaming Platforms) | Original — first-party, no third-party assets | 2026-09-29 |
+| Craps | `games/craps/` | Original build (Dragon Gaming Platforms) | Original — first-party, no third-party assets | 2026-09-29 |
+| Baccarat | `games/baccarat/` | Original build (Dragon Gaming Platforms) | Original — first-party, no third-party assets | 2026-09-29 |
+| Keno | `games/keno/` | Original build (Dragon Gaming Platforms) | Original — first-party, no third-party assets | 2026-09-29 |
+| Curling | `games/curling/` | Original build (Dragon Gaming Platforms) | Original — first-party, no third-party assets | 2026-09-29 |
+| Boxing | `games/boxing/` | Original build (Dragon Gaming Platforms) | Original — first-party, no third-party assets | 2026-09-29 |
+| High Jump | `games/high-jump/` | Original build (Dragon Gaming Platforms) | Original — first-party, no third-party assets | 2026-09-29 |
+| Horse Race | `games/horse-race/` | Original build (Dragon Gaming Platforms) | Original — first-party, no third-party assets | 2026-09-29 |
+| Cornhole | `games/cornhole/` | Original build (Dragon Gaming Platforms) | Original — first-party, no third-party assets | 2026-09-29 |

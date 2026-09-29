@@ -1,0 +1,9 @@
+{
+  "name": "Ninja Fruit",
+  "desc": "Slice the flying fruit before it falls back down. Swipe through juicy targets to rack up points, but never touch the bombs and try not to let fruit slip past. A fast, reflex-driven arcade slasher with escalating chaos.",
+  "controls": "Swipe or drag across fruit to slice, avoid the bombs",
+  "shelf": "Arcade & Action",
+  "tags": ["games", "html5", "arcade", "action", "reflex"],
+  "badge": "New",
+  "creator": "Dragon Gaming Platforms"
+}

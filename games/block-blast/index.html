@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+<meta name="robots" content="noindex,nofollow">
+<title>Block Blast</title>
+<style>
+  *{box-sizing:border-box}body{margin:0;min-height:100vh;background:#0d1117;color:#eef;
+    font-family:system-ui,Segoe UI,Roboto,Arial,sans-serif;display:flex;flex-direction:column;align-items:center;gap:10px;padding:12px;user-select:none;-webkit-user-select:none}
+  h1{margin:2px 0;font-size:clamp(18px,5vw,24px)}
+  #score{font-weight:800;color:#ffe08a;font-size:18px}
+  #status{min-height:16px;color:#9ad;font-weight:700;text-align:center}
+  #board{display:grid;grid-template-columns:repeat(10,32px);gap:2px;background:#1b2330;padding:5px;border-radius:8px}
+  .b{width:32px;height:32px;border-radius:5px;background:#232d3d}
+  .b.f{box-shadow:0 2px 0 rgba(0,0,0,.3) inset}
+  .b.hi{outline:2px solid #fff8;outline-offset:-2px}
+  #trays{display:flex;gap:14px;align-items:flex-start}
+  .tray{padding:6px;border-radius:8px;background:#161d29;cursor:pointer}
+  .tray.sel{background:#2b3a52;outline:2px solid #ffcc33}
+  .tray.used{opacity:.25;pointer-events:none}
+  .pg{display:grid;gap:2px}
+  .pc{width:18px;height:18px;border-radius:4px}
+  button{background:#ffcc33;color:#20150a;border:0;border-radius:9px;padding:8px 14px;font-weight:800;cursor:pointer}
+  .hint{font-size:12px;opacity:.75;text-align:center;max-width:430px}
+</style>
+</head>
+<body>
+<h1>Block Blast</h1>
+<div id="score">Score: 0</div>
+<div id="status">Pick a piece, then tap the board to drop it.</div>
+<div id="board"></div>
+<div id="trays"></div>
+<button id="newg">New Game</button>
+<div class="hint">Select a piece below, then tap a board cell to place its top-left corner. Fill full rows or columns to clear them. Game ends when no piece fits.</div>
+<script>
+const SZ=10;
+const COLORS=['#ff6b6b','#ffd93d','#6bcB77','#4d96ff','#c56bff','#ff9f45','#37d0d6'];
+const SHAPES=[
+  [[0,0]],
+  [[0,0],[0,1]],[[0,0],[1,0]],
+  [[0,0],[0,1],[0,2]],[[0,0],[1,0],[2,0]],
+  [[0,0],[0,1],[1,0],[1,1]],
+  [[0,0],[0,1],[0,2],[0,3]],[[0,0],[1,0],[2,0],[3,0]],
+  [[0,0],[1,0],[1,1]],[[0,0],[0,1],[1,0]],[[0,1],[1,0],[1,1]],[[0,0],[0,1],[1,1]],
+  [[0,0],[0,1],[0,2],[1,0],[1,1],[1,2]],
+  [[0,0],[1,0],[2,0],[0,1],[0,2]],[[0,0],[0,1],[0,2],[1,2],[2,2]],
+  [[0,0],[0,1],[0,2]],
+];
+let board,pieces,sel,score;
+function newBoard(){board=Array.from({length:SZ},()=>Array(SZ).fill(null));}
+function randPiece(){const cells=SHAPES[Math.floor(Math.random()*SHAPES.length)];return{cells,color:COLORS[Math.floor(Math.random()*COLORS.length)],used:false};}
+function newPieces(){pieces=[randPiece(),randPiece(),randPiece()];sel=null;}
+function start(){newBoard();newPieces();score=0;setStatus('Pick a piece, then tap the board to drop it.');render();}
+function setStatus(t){document.getElementById('status').textContent=t;}
+function canPlace(piece,r,c){return piece.cells.every(([dr,dc])=>{const nr=r+dr,nc=c+dc;return nr>=0&&nr<SZ&&nc>=0&&nc<SZ&&!board[nr][nc];});}
+function anyFits(){return pieces.some(p=>!p.used&&fits(p));}
+function fits(p){for(let r=0;r<SZ;r++)for(let c=0;c<SZ;c++)if(canPlace(p,r,c))return true;return false;}
+function place(r,c){
+  if(sel===null)return;const p=pieces[sel];if(p.used||!canPlace(p,r,c)){setStatus('That piece will not fit there.');return;}
+  p.cells.forEach(([dr,dc])=>board[r+dr][c+dc]=p.color);
+  score+=p.cells.length;p.used=true;
+  // clear lines
+  const fullRows=[],fullCols=[];
+  for(let i=0;i<SZ;i++){if(board[i].every(x=>x))fullRows.push(i);
+    let colFull=true;for(let j=0;j<SZ;j++)if(!board[j][i]){colFull=false;break;}if(colFull)fullCols.push(i);}
+  fullRows.forEach(i=>{for(let j=0;j<SZ;j++)board[i][j]=null;});
+  fullCols.forEach(i=>{for(let j=0;j<SZ;j++)board[j][i]=null;});
+  const cleared=fullRows.length+fullCols.length;
+  if(cleared){score+=cleared*10;setStatus('Cleared '+cleared+' line'+(cleared>1?'s':'')+'! +'+(cleared*10));}
+  else setStatus('Placed. Keep going.');
+  sel=null;
+  if(pieces.every(p=>p.used))newPieces();
+  render();
+  if(!anyFits()){setStatus('💀 Game over — no piece fits. Score: '+score);}
+}
+function render(){
+  document.getElementById('score').textContent='Score: '+score;
+  const bd=document.getElementById('board');bd.innerHTML='';
+  for(let r=0;r<SZ;r++)for(let c=0;c<SZ;c++){
+    const b=document.createElement('div');b.className='b'+(board[r][c]?' f':'');
+    if(board[r][c])b.style.background=board[r][c];
+    if(sel!==null&&pieces[sel]&&!pieces[sel].used&&canPlace(pieces[sel],r,c))b.classList.add('hi');
+    b.onclick=()=>place(r,c);
+    bd.appendChild(b);
+  }
+  const tr=document.getElementById('trays');tr.innerHTML='';
+  pieces.forEach((p,i)=>{
+    const t=document.createElement('div');t.className='tray'+(sel===i?' sel':'')+(p.used?' used':'');
+    const maxR=Math.max(...p.cells.map(x=>x[0]))+1,maxC=Math.max(...p.cells.map(x=>x[1]))+1;
+    const pg=document.createElement('div');pg.className='pg';pg.style.gridTemplateColumns=`repeat(${maxC},18px)`;
+    const filled={};p.cells.forEach(([dr,dc])=>filled[dr+'_'+dc]=1);
+    for(let r=0;r<maxR;r++)for(let c=0;c<maxC;c++){const pc=document.createElement('div');pc.className='pc';
+      if(filled[r+'_'+c])pc.style.background=p.color;pg.appendChild(pc);}
+    t.appendChild(pg);
+    t.onclick=()=>{if(!p.used){sel=i;render();}};
+    tr.appendChild(t);
+  });
+}
+document.getElementById('newg').onclick=start;
+start();
+</script>
+</body>
+</html>

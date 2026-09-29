@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+<meta name="robots" content="noindex,nofollow">
+<title>Binairo</title>
+<style>
+  *{box-sizing:border-box}body{margin:0;min-height:100vh;background:#12141f;color:#eef;
+    font-family:system-ui,Segoe UI,Roboto,Arial,sans-serif;display:flex;flex-direction:column;align-items:center;gap:12px;padding:14px;user-select:none;-webkit-user-select:none}
+  h1{margin:2px 0;font-size:clamp(18px,5vw,24px)}
+  #status{min-height:18px;font-weight:700;color:#ffe08a;text-align:center;max-width:420px}
+  #grid{display:grid;gap:4px}
+  .cell{width:46px;height:46px;border-radius:8px;background:#1e2233;border:2px solid #2e3550;display:flex;align-items:center;justify-content:center;cursor:pointer}
+  .cell.given{cursor:default;border-color:#4a5580}
+  .cell.bad{border-color:#ff5d5d}
+  .dot{width:28px;height:28px;border-radius:50%}
+  .z{background:radial-gradient(circle at 35% 30%,#7fe3ff,#1c86b8)}
+  .o{background:radial-gradient(circle at 35% 30%,#ffd27f,#e08a1c)}
+  .given .dot{box-shadow:0 0 0 2px #fff6 inset}
+  button{background:#ffcc33;color:#20150a;border:0;border-radius:9px;padding:9px 15px;font-weight:800;cursor:pointer}
+  .hint{font-size:12px;opacity:.75;text-align:center;max-width:430px}
+</style>
+</head>
+<body>
+<h1>Binairo</h1>
+<div id="status">Fill the grid with two colours following the rules.</div>
+<div id="grid"></div>
+<button id="newg">New Puzzle</button>
+<div class="hint">Tap a cell to cycle blank → blue → orange. Each row and column needs three of each colour, no more than two of the same colour in a row, and every row and column must be unique.</div>
+<script>
+const N=6;
+let sol,grid,given;
+function shuffle(a){for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
+function tryGen(){
+  const g=Array.from({length:N},()=>Array(N).fill(-1));
+  function rowCount(r,v){let n=0;for(let c=0;c<N;c++)if(g[r][c]===v)n++;return n;}
+  function colCount(c,v){let n=0;for(let r=0;r<N;r++)if(g[r][c]===v)n++;return n;}
+  function ok(r,c,v){
+    if(rowCount(r,v)>=N/2||colCount(c,v)>=N/2)return false;
+    if(c>=2&&g[r][c-1]===v&&g[r][c-2]===v)return false;
+    if(r>=2&&g[r-1][c]===v&&g[r-2][c]===v)return false;
+    return true;
+  }
+  function bt(pos){
+    if(pos===N*N)return true;
+    const r=Math.floor(pos/N),c=pos%N;
+    for(const v of shuffle([0,1])){if(ok(r,c,v)){g[r][c]=v;if(bt(pos+1))return true;g[r][c]=-1;}}
+    return false;
+  }
+  if(!bt(0))return null;
+  // unique rows & cols?
+  const rows=new Set(),cols=new Set();
+  for(let r=0;r<N;r++)rows.add(g[r].join(''));
+  for(let c=0;c<N;c++){let s='';for(let r=0;r<N;r++)s+=g[r][c];cols.add(s);}
+  if(rows.size!==N||cols.size!==N)return null;
+  return g;
+}
+function gen(){
+  let s=null;for(let t=0;t<200&&!s;t++)s=tryGen();
+  sol=s;
+  given=Array.from({length:N},()=>Array(N).fill(false));
+  const all=[];for(let r=0;r<N;r++)for(let c=0;c<N;c++)all.push([r,c]);
+  shuffle(all).slice(0,Math.round(N*N*0.45)).forEach(([r,c])=>given[r][c]=true);
+  grid=Array.from({length:N},()=>Array(N).fill(-1));
+  for(let r=0;r<N;r++)for(let c=0;c<N;c++)if(given[r][c])grid[r][c]=sol[r][c];
+  setStatus('Fill every cell — three of each colour per line.');render();
+}
+function setStatus(t){document.getElementById('status').textContent=t;}
+function isBad(r,c){const v=grid[r][c];if(v<0)return false;
+  // three in a row
+  if(c>=2&&grid[r][c-1]===v&&grid[r][c-2]===v)return true;
+  if(c<=N-3&&grid[r][c+1]===v&&grid[r][c+2]===v)return true;
+  if(c>=1&&c<=N-2&&grid[r][c-1]===v&&grid[r][c+1]===v)return true;
+  if(r>=2&&grid[r-1][c]===v&&grid[r-2][c]===v)return true;
+  if(r<=N-3&&grid[r+1][c]===v&&grid[r+2][c]===v)return true;
+  if(r>=1&&r<=N-2&&grid[r-1][c]===v&&grid[r+1][c]===v)return true;
+  // too many of colour
+  let rc=0,cc=0;for(let k=0;k<N;k++){if(grid[r][k]===v)rc++;if(grid[k][c]===v)cc++;}
+  if(rc>N/2||cc>N/2)return true;
+  return false;
+}
+function render(){
+  const g=document.getElementById('grid');g.innerHTML='';
+  g.style.gridTemplateColumns=`repeat(${N},46px)`;
+  for(let r=0;r<N;r++)for(let c=0;c<N;c++){
+    const cell=document.createElement('div');cell.className='cell'+(given[r][c]?' given':'')+(isBad(r,c)?' bad':'');
+    if(grid[r][c]>=0){const d=document.createElement('div');d.className='dot '+(grid[r][c]===0?'z':'o');cell.appendChild(d);}
+    if(!given[r][c])cell.onclick=()=>{grid[r][c]=grid[r][c]===-1?0:grid[r][c]===0?1:-1;render();checkWin();};
+    g.appendChild(cell);
+  }
+}
+function valid(){
+  for(let r=0;r<N;r++)for(let c=0;c<N;c++){if(grid[r][c]<0)return false;if(isBad(r,c))return false;}
+  const rows=new Set(),cols=new Set();
+  for(let r=0;r<N;r++)rows.add(grid[r].join(''));
+  for(let c=0;c<N;c++){let s='';for(let r=0;r<N;r++)s+=grid[r][c];cols.add(s);}
+  return rows.size===N&&cols.size===N;
+}
+function checkWin(){if(valid())setStatus('🎉 Solved! Every rule satisfied.');}
+document.getElementById('newg').onclick=gen;
+gen();
+</script>
+</body>
+</html>

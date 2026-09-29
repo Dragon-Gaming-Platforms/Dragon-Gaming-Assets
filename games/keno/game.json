@@ -1,0 +1,9 @@
+{
+  "name": "Keno",
+  "desc": "A lottery-style numbers game. Pick up to ten spots from a field of eighty, set your bet, and watch twenty numbers get drawn. The more of your picks that hit, the bigger the payout, scaling all the way to a thousand-to-one jackpot. Credits are saved on your device.",
+  "controls": "Tap numbers to pick, set your bet, then press Draw",
+  "shelf": "Strategy & Idle",
+  "tags": ["games", "html5", "casino", "numbers", "1player"],
+  "badge": "New",
+  "creator": "Dragon Gaming Platforms"
+}

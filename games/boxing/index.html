@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+<meta name="robots" content="noindex,nofollow">
+<title>Boxing</title>
+<style>
+  *{box-sizing:border-box}html,body{margin:0;height:100%}
+  body{background:#1a0e0e;color:#fff;font-family:system-ui,Segoe UI,Roboto,Arial,sans-serif;
+    display:flex;flex-direction:column;align-items:center;gap:8px;padding:8px;user-select:none;-webkit-user-select:none;touch-action:manipulation}
+  h1{margin:2px 0;font-size:clamp(16px,4vw,22px)}
+  .bars{width:100%;max-width:460px}
+  .bar{height:20px;background:#3a1a1a;border-radius:10px;overflow:hidden;margin:4px 0}
+  .bar>div{height:100%;transition:width .15s}
+  .you>div{background:linear-gradient(90deg,#4d96ff,#7cff8a)}
+  .cpu>div{background:linear-gradient(90deg,#ff5d5d,#ffcf5d)}
+  .lbl{display:flex;justify-content:space-between;font-weight:800;font-size:13px}
+  canvas{background:#2a1414;border-radius:12px;max-width:100%}
+  #status{min-height:20px;font-weight:800;color:#ffe08a;text-align:center;max-width:440px;font-size:16px}
+  .controls{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;max-width:460px;width:100%}
+  .controls button{padding:14px 4px;font-weight:800;font-size:15px;border:0;border-radius:10px;cursor:pointer;color:#20150a}
+  #jab{background:#ffcc33}#bl{background:#7cc0ff}#br{background:#7cc0ff}#dodge{background:#9be89b}
+  .hint{font-size:12px;opacity:.75;text-align:center;max-width:460px}
+  button:disabled{opacity:.4}
+</style>
+</head>
+<body>
+<h1>Boxing</h1>
+<div class="bars">
+  <div class="lbl"><span>You</span><span id="youhp">100</span></div><div class="bar you"><div id="youbar" style="width:100%"></div></div>
+  <div class="lbl"><span id="cpuhp">100</span><span>CPU</span></div><div class="bar cpu"><div id="cpubar" style="width:100%"></div></div>
+</div>
+<canvas id="cv" width="440" height="240"></canvas>
+<div id="status">Round 1 — FIGHT! Watch the CPU's tell and react.</div>
+<div class="controls">
+  <button id="jab">JAB (J)</button>
+  <button id="bl">BLOCK ◀ (A)</button>
+  <button id="br">BLOCK ▶ (D)</button>
+  <button id="dodge">DODGE (S)</button>
+</div>
+<div class="hint">The CPU winds up before punching from the left or right — BLOCK that side or DODGE to avoid damage. When it's open (stunned/recovering), JAB to deal damage. First to drain the other's health wins.</div>
+<script>
+const cv=document.getElementById('cv'),ctx=cv.getContext('2d');
+const W=cv.width,H=cv.height;
+let youHP,cpuHP,over,cpuState,stateT,tell,shake,youAnim,cpuOpen;
+function reset(){youHP=100;cpuHP=100;over=false;cpuState='idle';stateT=60;tell=null;shake=0;youAnim=0;cpuOpen=0;
+  setStatus('Round 1 — FIGHT! Watch the CPU\'s tell.');loop();scheduleCpu();}
+function setStatus(t){document.getElementById('status').textContent=t;}
+function bars(){document.getElementById('youbar').style.width=Math.max(0,youHP)+'%';
+  document.getElementById('cpubar').style.width=Math.max(0,cpuHP)+'%';
+  document.getElementById('youhp').textContent=Math.max(0,youHP);document.getElementById('cpuhp').textContent=Math.max(0,cpuHP);}
+function scheduleCpu(){
+  if(over)return;
+  cpuState='idle';stateT=40+Math.random()*50;
+  setTimeout(()=>{if(over)return;
+    // windup
+    tell=Math.random()<0.5?'L':'R';cpuState='windup';
+    setTimeout(()=>{if(over)return;if(cpuState==='windup')throwPunch();},520+Math.random()*260);
+  },600+Math.random()*900);
+}
+function throwPunch(){
+  if(over)return;
+  cpuState='punch';shake=8;
+  // check player defense
+  const now=Date.now();
+  const blocked=(defense.type==='block'&&defense.side===tell&&now-defense.t<450);
+  const dodged=(defense.type==='dodge'&&now-defense.t<450);
+  if(blocked){setStatus('Blocked!');}
+  else if(dodged){setStatus('Dodged! CPU is open — JAB now!');cpuOpen=40;}
+  else{youHP-=8+Math.floor(Math.random()*5);setStatus('CPU landed a '+(tell==='L'?'left':'right')+' hook!');bars();if(youHP<=0){end(false);return;}}
+  // after punch cpu recovers (open briefly)
+  if(!blocked&&!dodged){cpuOpen=Math.max(cpuOpen,20);}else if(blocked){cpuOpen=28;setStatus('Blocked! CPU is open — JAB!');}
+  setTimeout(()=>{if(!over){cpuOpen=Math.max(cpuOpen,0);scheduleCpu();}},700);
+}
+let defense={type:null,side:null,t:0};
+function playerBlock(side){if(over)return;defense={type:'block',side,t:Date.now()};youAnim=8;}
+function playerDodge(){if(over)return;defense={type:'dodge',side:null,t:Date.now()};youAnim=8;}
+function playerJab(){if(over)return;youAnim=10;
+  if(cpuOpen>0){cpuHP-=10+Math.floor(Math.random()*6);cpuOpen=0;setStatus('Nice jab!');bars();shake=6;
+    if(cpuHP<=0){end(true);return;}}
+  else{setStatus('Jab blocked by the CPU\'s guard.');}
+}
+function loop(){
+  if(over)return;
+  if(cpuOpen>0)cpuOpen--;
+  ctx.clearRect(0,0,W,H);
+  const sx=(Math.random()-0.5)*shake;if(shake>0)shake-=0.6;
+  ctx.save();ctx.translate(sx,0);
+  // CPU (top area, facing down)
+  const cx=W/2,cy=70;
+  ctx.fillStyle=cpuOpen>0?'#ffcf5d':'#c0392b';
+  ctx.beginPath();ctx.arc(cx,cy,34,0,7);ctx.fill();
+  ctx.fillStyle='#fff';ctx.font='24px serif';ctx.textAlign='center';
+  ctx.fillText(cpuOpen>0?'😵':cpuState==='windup'?'😤':'🥊',cx,cy+8);
+  // CPU gloves / tell
+  ctx.fillStyle='#e34';
+  if(cpuState==='windup'||cpuState==='punch'){
+    const ext=cpuState==='punch'?70:30;
+    const gx=tell==='L'?cx-40:cx+40;
+    ctx.beginPath();ctx.arc(gx,cy+ext,16,0,7);ctx.fill();
+    if(cpuState==='windup'){ctx.fillStyle='#ffde59';ctx.fillText('!',gx,cy+ext-20);}
+  } else {
+    ctx.beginPath();ctx.arc(cx-40,cy+20,13,0,7);ctx.fill();
+    ctx.beginPath();ctx.arc(cx+40,cy+20,13,0,7);ctx.fill();
+  }
+  // YOU (bottom, gloves up top)
+  const yx=W/2,yy=H-30;
+  ctx.fillStyle='#2980b9';ctx.beginPath();ctx.arc(yx,yy,30,0,7);ctx.fill();
+  ctx.fillStyle='#4d96ff';
+  const dz=(Date.now()-defense.t<400);
+  if(dz&&defense.type==='block'){const gx=defense.side==='L'?yx-24:yx+24;ctx.beginPath();ctx.arc(gx,yy-34,14,0,7);ctx.fill();}
+  else if(youAnim>0){ctx.beginPath();ctx.arc(yx,yy-50,15,0,7);ctx.fill();}
+  else{ctx.beginPath();ctx.arc(yx-24,yy-24,12,0,7);ctx.fill();ctx.beginPath();ctx.arc(yx+24,yy-24,12,0,7);ctx.fill();}
+  if(youAnim>0)youAnim--;
+  ctx.restore();
+  requestAnimationFrame(loop);
+}
+function end(win){over=true;setStatus(win?'🏆 TKO! You win!':'💀 You got knocked out.');
+  document.querySelectorAll('.controls button').forEach(b=>b.disabled=true);
+  setTimeout(()=>{document.querySelectorAll('.controls button').forEach(b=>b.disabled=false);reset();},2600);}
+document.getElementById('jab').onclick=playerJab;
+document.getElementById('bl').onclick=()=>playerBlock('L');
+document.getElementById('br').onclick=()=>playerBlock('R');
+document.getElementById('dodge').onclick=playerDodge;
+window.addEventListener('keydown',e=>{const k=e.key.toLowerCase();
+  if(k==='j')playerJab();else if(k==='a')playerBlock('L');else if(k==='d')playerBlock('R');else if(k==='s')playerDodge();});
+reset();
+</script>
+</body>
+</html>

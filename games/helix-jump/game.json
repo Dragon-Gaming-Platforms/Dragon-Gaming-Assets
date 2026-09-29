@@ -1,0 +1,9 @@
+{
+  "name": "Helix Jump",
+  "desc": "Guide a bouncing ball down a spiralling tower. Rotate the platforms so the ball drops through the gaps and descends level after level, but never let it land on a red segment. How deep can you fall?",
+  "controls": "Drag left or right, or use arrow keys, to rotate the tower",
+  "shelf": "Arcade & Action",
+  "tags": ["games", "html5", "arcade", "action", "reflex"],
+  "badge": "New",
+  "creator": "Dragon Gaming Platforms"
+}

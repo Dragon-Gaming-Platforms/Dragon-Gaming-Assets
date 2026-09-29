@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+<meta name="robots" content="noindex,nofollow">
+<title>Jetpack Dash</title>
+<style>
+  *{box-sizing:border-box}html,body{margin:0;height:100%}
+  body{background:#1a1020;color:#fff;font-family:system-ui,Segoe UI,Roboto,Arial,sans-serif;
+    display:flex;flex-direction:column;align-items:center;gap:8px;padding:8px;user-select:none;-webkit-user-select:none;touch-action:none}
+  h1{margin:2px 0;font-size:clamp(16px,4vw,22px)}
+  #hud{display:flex;gap:18px;font-weight:800}
+  #coins{color:#ffd93d}#dist{color:#9ad}
+  canvas{background:linear-gradient(#2a1840,#3a2050);border-radius:12px;touch-action:none;max-width:100%;cursor:pointer}
+  #msg{position:fixed;inset:0;display:none;align-items:center;justify-content:center;flex-direction:column;gap:12px;background:#000a}
+  button{background:#ffcc33;color:#20150a;border:0;border-radius:9px;padding:10px 18px;font-weight:800;cursor:pointer}
+  .hint{font-size:12px;opacity:.75;text-align:center;max-width:420px}
+</style>
+</head>
+<body>
+<h1>Jetpack Dash</h1>
+<div id="hud"><span id="dist">0m</span><span id="coins">🪙 0</span></div>
+<canvas id="cv" width="480" height="300"></canvas>
+<div class="hint">Hold down (mouse / touch / Space) to fire the jetpack and rise; release to fall. Grab coins and dodge the red laser walls. One hit ends the run.</div>
+<div id="msg"><div id="mt" style="font-size:24px;font-weight:800"></div><button id="again">Play Again</button></div>
+<script>
+const cv=document.getElementById('cv'),ctx=cv.getContext('2d');
+const W=cv.width,H=cv.height,GROUND=H-20,TOP=20;
+let py,vy,thrust,dist,coins,obstacles,coinList,spawnX,coinX,over,best=0,t;
+const PX=70,PR=14;
+function reset(){
+  py=H/2;vy=0;thrust=false;dist=0;coins=0;obstacles=[];coinList=[];spawnX=W+100;coinX=W+300;over=false;t=0;
+  document.getElementById('msg').style.display='none';loop();
+}
+const speed=()=>3.2+dist/900;
+function spawnHaz(){
+  const s=speed();
+  const kind=Math.random();
+  if(kind<0.6){const h=50+Math.random()*90;const top=Math.random()<0.5;
+    obstacles.push({x:spawnX,y:top?TOP:GROUND-h,w:16,h});}
+  else{const gapY=TOP+40+Math.random()*(H-160);
+    obstacles.push({x:spawnX,y:TOP,w:16,h:gapY-TOP});
+    obstacles.push({x:spawnX,y:gapY+90,w:16,h:GROUND-(gapY+90)});}
+  spawnX+=200+Math.random()*120;
+}
+function spawnCoins(){
+  const cy=TOP+30+Math.random()*(H-100);
+  for(let i=0;i<5;i++)coinList.push({x:coinX+i*26,y:cy,got:false});
+  coinX+=220+Math.random()*160;
+}
+function loop(){
+  if(over)return;
+  ctx.clearRect(0,0,W,H);t++;
+  const s=speed();dist+=s/9;
+  vy+= thrust? -0.55 : 0.5; vy=Math.max(-7,Math.min(8,vy));py+=vy;
+  if(py<TOP+PR){py=TOP+PR;vy=0;}
+  if(py>GROUND-PR){py=GROUND-PR;vy=0;}
+  spawnX-=s;coinX-=s;
+  for(const o of obstacles)o.x-=s;
+  for(const c of coinList)c.x-=s;
+  obstacles=obstacles.filter(o=>o.x+o.w>-10);coinList=coinList.filter(c=>c.x>-10);
+  if(spawnX<W)spawnHaz();if(coinX<W)spawnCoins();
+  // collisions
+  for(const o of obstacles){
+    if(PX+PR>o.x&&PX-PR<o.x+o.w&&py+PR>o.y&&py-PR<o.y+o.h){end();return;}
+  }
+  for(const c of coinList){if(!c.got&&Math.hypot(c.x-PX,c.y-py)<PR+8){c.got=true;coins++;}}
+  // draw ground/ceiling
+  ctx.fillStyle='#20122e';ctx.fillRect(0,0,W,TOP);ctx.fillRect(0,GROUND,W,H-GROUND);
+  // obstacles (laser walls)
+  for(const o of obstacles){ctx.fillStyle='#ff4d5d';ctx.fillRect(o.x,o.y,o.w,o.h);
+    ctx.fillStyle='#ffb3ba';ctx.fillRect(o.x+5,o.y,3,o.h);}
+  // coins
+  for(const c of coinList){if(c.got)continue;ctx.fillStyle='#ffd93d';ctx.beginPath();ctx.arc(c.x,c.y,7,0,7);ctx.fill();
+    ctx.strokeStyle='#a8860a';ctx.stroke();}
+  // player
+  ctx.save();ctx.translate(PX,py);
+  ctx.fillStyle='#4d96ff';ctx.beginPath();ctx.arc(0,0,PR,0,7);ctx.fill();
+  ctx.fillStyle='#fff';ctx.fillRect(-14,-4,6,14); // jetpack
+  if(thrust){ctx.fillStyle=t%4<2?'#ffcf5d':'#ff7a3d';ctx.beginPath();ctx.moveTo(-11,10);ctx.lineTo(-14,10);ctx.lineTo(-12.5,22);ctx.closePath();ctx.fill();}
+  ctx.restore();
+  document.getElementById('dist').textContent=Math.floor(dist)+'m';
+  document.getElementById('coins').textContent='🪙 '+coins;
+  requestAnimationFrame(loop);
+}
+function end(){over=true;const sc=Math.floor(dist);if(sc>best)best=sc;
+  document.getElementById('mt').textContent='💥 Down! '+sc+'m · 🪙'+coins;document.getElementById('msg').style.display='flex';}
+function on(e){thrust=true;e.preventDefault();}
+function off(e){thrust=false;}
+cv.addEventListener('mousedown',on);window.addEventListener('mouseup',off);
+cv.addEventListener('touchstart',on,{passive:false});window.addEventListener('touchend',off);
+window.addEventListener('keydown',e=>{if(e.code==='Space'||e.key===' '||e.key==='ArrowUp'){thrust=true;e.preventDefault();}});
+window.addEventListener('keyup',e=>{if(e.code==='Space'||e.key===' '||e.key==='ArrowUp')thrust=false;});
+document.getElementById('again').onclick=reset;
+reset();
+</script>
+</body>
+</html>

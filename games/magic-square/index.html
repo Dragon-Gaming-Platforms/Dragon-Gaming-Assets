@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+<meta name="robots" content="noindex,nofollow">
+<title>Magic Square</title>
+<style>
+  *{box-sizing:border-box}body{margin:0;min-height:100vh;background:#141020;color:#eef;
+    font-family:system-ui,Segoe UI,Roboto,Arial,sans-serif;display:flex;flex-direction:column;align-items:center;gap:12px;padding:16px;user-select:none;-webkit-user-select:none}
+  h1{margin:2px 0;font-size:clamp(18px,5vw,24px)}
+  #status{min-height:18px;font-weight:700;color:#ffe08a;text-align:center;max-width:420px}
+  #wrap{display:grid;grid-template-columns:auto auto;gap:6px;align-items:center}
+  #grid{display:grid;grid-template-columns:repeat(3,64px);gap:5px}
+  .cell{width:64px;height:64px;border-radius:10px;background:#221a3a;border:2px solid #3a2e5e;
+    display:flex;align-items:center;justify-content:center;font-size:28px;font-weight:800;cursor:pointer;color:#fff}
+  .cell.given{background:#33285a;color:#ffd76a;cursor:default}
+  .cell.bad{border-color:#ff5d5d}
+  .sum{font-size:13px;color:#9ad;width:40px;text-align:center}
+  .sum.ok{color:#7cff8a}.sum.no{color:#ff8a8a}
+  button{background:#ffcc33;color:#20150a;border:0;border-radius:9px;padding:9px 15px;font-weight:800;cursor:pointer}
+  .hint{font-size:12px;opacity:.75;text-align:center;max-width:420px}
+  .used{font-size:13px;opacity:.85}
+</style>
+</head>
+<body>
+<h1>Magic Square</h1>
+<div id="status">Place 1–9 so every row, column and diagonal sums to 15.</div>
+<div id="wrap"></div>
+<div class="used">Remaining digits: <b id="rem"></b></div>
+<button id="newg">New Puzzle</button>
+<div class="hint">Each digit 1–9 is used exactly once. Tap a cell to cycle through the digits you have not placed yet.</div>
+<script>
+const BASE=[[2,7,6],[9,5,1],[4,3,8]];
+let sol,grid,given;
+function transform(m){
+  let g=m.map(r=>r.slice());
+  const rot=Math.floor(Math.random()*4);
+  for(let k=0;k<rot;k++){const n=g.map((row,i)=>row.map((_,j)=>g[2-j][i]));g=n;}
+  if(Math.random()<0.5)g=g.map(r=>r.slice().reverse());
+  return g;
+}
+function gen(){
+  sol=transform(BASE);
+  given=[[false,false,false],[false,false,false],[false,false,false]];
+  const cells=[];for(let r=0;r<3;r++)for(let c=0;c<3;c++)cells.push([r,c]);
+  for(let i=cells.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[cells[i],cells[j]]=[cells[j],cells[i]];}
+  cells.slice(0,3).forEach(([r,c])=>given[r][c]=true);
+  grid=[[0,0,0],[0,0,0],[0,0,0]];
+  for(let r=0;r<3;r++)for(let c=0;c<3;c++)if(given[r][c])grid[r][c]=sol[r][c];
+  setStatus('Make every line total 15.');render();
+}
+function setStatus(t){document.getElementById('status').textContent=t;}
+function used(){const s=new Set();for(let r=0;r<3;r++)for(let c=0;c<3;c++)if(grid[r][c])s.add(grid[r][c]);return s;}
+function nextDigit(cur){const u=used();for(let k=1;k<=9;k++){const v=((cur+k-1)%9)+1;if(!u.has(v)||v===cur)return v===cur?0:( !u.has(v)?v:0);}return 0;}
+function cycle(r,c){const u=used();u.delete(grid[r][c]);
+  let v=grid[r][c];
+  for(let step=0;step<10;step++){v=v>=9?0:v+1;if(v===0||!u.has(v)){grid[r][c]=v;return;}}
+  grid[r][c]=0;
+}
+function lineSum(cells){return cells.reduce((a,[r,c])=>a+grid[r][c],0);}
+function lineFull(cells){return cells.every(([r,c])=>grid[r][c]>0);}
+function render(){
+  const wrap=document.getElementById('wrap');wrap.innerHTML='';
+  const g=document.createElement('div');g.id='grid';
+  const rows=[[[0,0],[0,1],[0,2]],[[1,0],[1,1],[1,2]],[[2,0],[2,1],[2,2]]];
+  const cols=[[[0,0],[1,0],[2,0]],[[0,1],[1,1],[2,1]],[[0,2],[1,2],[2,2]]];
+  const dia=[[[0,0],[1,1],[2,2]],[[0,2],[1,1],[2,0]]];
+  // layout: grid + row sums on right, col sums below (use a simple wrapper)
+  const container=document.createElement('div');container.style.display='inline-grid';
+  container.style.gridTemplateColumns='repeat(3,64px) 40px';container.style.gridTemplateRows='repeat(3,64px) 20px';container.style.gap='5px';
+  for(let r=0;r<3;r++){
+    for(let c=0;c<3;c++){
+      const cell=document.createElement('div');cell.className='cell'+(given[r][c]?' given':'');
+      if(badCell(r,c))cell.classList.add('bad');
+      cell.textContent=grid[r][c]||'';
+      if(!given[r][c])cell.onclick=()=>{cycle(r,c);render();checkWin();};
+      container.appendChild(cell);
+    }
+    const rs=document.createElement('div');const full=lineFull(rows[r]);const s=lineSum(rows[r]);
+    rs.className='sum'+(full?(s===15?' ok':' no'):'');rs.textContent=full?s:'';container.appendChild(rs);
+  }
+  for(let c=0;c<3;c++){const cs=document.createElement('div');const full=lineFull(cols[c]);const s=lineSum(cols[c]);
+    cs.className='sum'+(full?(s===15?' ok':' no'):'');cs.textContent=full?s:'';container.appendChild(cs);}
+  const corner=document.createElement('div');
+  const dg=dia.map(d=>lineFull(d)?lineSum(d):'-').join('\\');corner.className='sum';corner.style.fontSize='11px';corner.textContent='◧'+dg;
+  container.appendChild(corner);
+  wrap.appendChild(container);
+  const u=used();const rem=[];for(let k=1;k<=9;k++)if(!u.has(k))rem.push(k);
+  document.getElementById('rem').textContent=rem.length?rem.join(' '):'none';
+}
+function badCell(r,c){if(!grid[r][c])return false;
+  let cnt=0;for(let rr=0;rr<3;rr++)for(let cc=0;cc<3;cc++)if(grid[rr][cc]===grid[r][c])cnt++;
+  return cnt>1;
+}
+function valid(){
+  const flat=[];for(let r=0;r<3;r++)for(let c=0;c<3;c++)flat.push(grid[r][c]);
+  if(flat.some(v=>!v))return false;if(new Set(flat).size!==9)return false;
+  for(let r=0;r<3;r++)if(grid[r][0]+grid[r][1]+grid[r][2]!==15)return false;
+  for(let c=0;c<3;c++)if(grid[0][c]+grid[1][c]+grid[2][c]!==15)return false;
+  if(grid[0][0]+grid[1][1]+grid[2][2]!==15)return false;
+  if(grid[0][2]+grid[1][1]+grid[2][0]!==15)return false;
+  return true;
+}
+function checkWin(){if(valid())setStatus('🎉 Magic! Every line adds to 15.');}
+document.getElementById('newg').onclick=gen;
+gen();
+</script>
+</body>
+</html>
