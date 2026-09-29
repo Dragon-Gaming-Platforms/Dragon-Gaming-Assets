@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+<meta name="robots" content="noindex,nofollow">
+<title>Ski Slalom</title>
+<style>
+  *{box-sizing:border-box}html,body{margin:0;height:100%}
+  body{background:#dfe9f5;color:#123;font-family:system-ui,Segoe UI,Roboto,Arial,sans-serif;
+    display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;gap:8px;padding:10px;user-select:none;-webkit-user-select:none}
+  h1{margin:0;font-size:clamp(18px,5vw,26px)}
+  #hud{display:flex;gap:20px;font-weight:800;color:#26557a}
+  canvas{background:#f4f8ff;border-radius:10px;border:2px solid #b8ccdf;touch-action:none;max-width:96vw;height:auto}
+  #status{min-height:18px;color:#26557a;font-weight:700;text-align:center}
+  .ctrls{display:flex;gap:10px}
+  button{background:#4a90c2;color:#fff;border:0;border-radius:10px;padding:12px 22px;font-weight:800;cursor:pointer}
+  .hint{font-size:12px;opacity:.7;text-align:center}
+</style>
+</head>
+<body>
+<h1>Ski Slalom</h1>
+<div id="hud"><span>Score: <b id="score">0</b></span><span>Gates: <b id="gates">0</b></span><span>Best: <b id="best">0</b></span></div>
+<canvas id="c" width="380" height="500"></canvas>
+<div id="status">Steer through the flag gates. Miss a gate or hit a tree and it's over!</div>
+<div class="ctrls"><button id="bL">◀ Left</button><button id="bR">Right ▶</button></div>
+<div class="hint">← → or A/D to carve · pass between each pair of flags · avoid the trees</div>
+<script>
+const cv=document.getElementById('c'),ctx=cv.getContext('2d');const W=cv.width,H=cv.height;
+let skier,items,scrollY,score,gates,best=+localStorage.getItem('ski_best')||0,keys={},over,speed,nextGateY,lastGateX;
+document.getElementById('best').textContent=best;
+function init(){skier={x:W/2,vx:0};items=[];scrollY=0;score=0;gates=0;over=false;speed=3.2;keys={};
+  nextGateY=-100;lastGateX=W/2;seed();updateHud();document.getElementById('status').textContent='Steer through the gates!';}
+function seed(){for(let i=0;i<6;i++){addGate();}for(let i=0;i<8;i++)addTree(-Math.random()*H);}
+function addGate(){lastGateX=Math.max(70,Math.min(W-70,lastGateX+(Math.random()-0.5)*160));
+  items.push({type:'gate',x:lastGateX,y:nextGateY,w:70,passed:false});nextGateY-=140;}
+function addTree(y){items.push({type:'tree',x:20+Math.random()*(W-40),y:y!==undefined?y:nextGateY-Math.random()*120,r:12});}
+function updateHud(){document.getElementById('score').textContent=score;document.getElementById('gates').textContent=gates;document.getElementById('best').textContent=best;}
+document.addEventListener('keydown',e=>{const k=e.key.toLowerCase();keys[k]=true;if(['arrowleft','arrowright'].includes(k))e.preventDefault();});
+document.addEventListener('keyup',e=>{keys[e.key.toLowerCase()]=false;});
+function hold(id,k){const el=document.getElementById(id);
+  el.addEventListener('mousedown',e=>{keys[k]=true;e.preventDefault();});el.addEventListener('mouseup',()=>keys[k]=false);el.addEventListener('mouseleave',()=>keys[k]=false);
+  el.addEventListener('touchstart',e=>{keys[k]=true;e.preventDefault();},{passive:false});el.addEventListener('touchend',()=>keys[k]=false);}
+hold('bL','arrowleft');hold('bR','arrowright');
+const SKI_Y=H-70;
+function loop(){
+  requestAnimationFrame(loop);
+  if(over){draw();return;}
+  if(keys['arrowleft']||keys['a'])skier.vx-=0.6;if(keys['arrowright']||keys['d'])skier.vx+=0.6;
+  skier.vx*=0.9;skier.x+=skier.vx;
+  if(skier.x<14){skier.x=14;skier.vx=0;}if(skier.x>W-14){skier.x=W-14;skier.vx=0;}
+  scrollY+=speed;speed+=0.0016;
+  items.forEach(it=>it.sy=it.y+scrollY);
+  // spawn more ahead
+  while(nextGateY+scrollY>-40){nextGateY-= 140; }
+  if(items.filter(i=>i.type==='gate'&&i.sy<SKI_Y+200).length<5){addGate();if(Math.random()<0.7)addTree();}
+  // collisions / gate checks
+  for(const it of items){
+    if(it.sy===undefined)continue;
+    if(it.type==='gate'&&!it.passed&&it.sy>SKI_Y){it.passed=true;
+      if(Math.abs(skier.x-it.x)<it.w/2){gates++;score+=10;} else {return end('Missed a gate!');}
+      updateHud();}
+    if(it.type==='tree'&&Math.abs(it.sy-SKI_Y)<14&&Math.abs(it.x-skier.x)<it.r+8){return end('Hit a tree! 🌲');}
+  }
+  items=items.filter(it=>it.sy===undefined||it.sy<H+60);
+  score+=0; draw();
+}
+function end(msg){over=true;if(score>best){best=score;localStorage.setItem('ski_best',best);updateHud();}
+  document.getElementById('status').textContent=`${msg} Final score ${score} (${gates} gates). Steer to restart.`;
+  const rst=()=>{init();};document.getElementById('bL').addEventListener('click',rst,{once:true});
+  document.addEventListener('keydown',function r(e){if(['arrowleft','arrowright','a','d'].includes(e.key.toLowerCase())){init();document.removeEventListener('keydown',r);}});
+}
+function draw(){
+  ctx.fillStyle='#f4f8ff';ctx.fillRect(0,0,W,H);
+  // moving snow texture
+  ctx.fillStyle='rgba(180,204,223,.5)';const off=scrollY%24;
+  for(let y=-24;y<H;y+=24)for(let x=(y/24%2)*12;x<W;x+=24)ctx.fillRect(x,y+off,2,2);
+  // items
+  items.forEach(it=>{if(it.sy===undefined||it.sy<-30||it.sy>H+30)return;
+    if(it.type==='gate'){
+      [it.x-it.w/2,it.x+it.w/2].forEach((fx,i)=>{ctx.fillStyle=i? '#e6394a':'#2a7ae6';
+        ctx.fillRect(fx-2,it.sy-18,4,20);ctx.beginPath();ctx.moveTo(fx+2,it.sy-18);ctx.lineTo(fx+14,it.sy-13);ctx.lineTo(fx+2,it.sy-8);ctx.fill();});
+    } else {ctx.fillStyle='#0d5c2a';ctx.beginPath();ctx.moveTo(it.x,it.sy-16);ctx.lineTo(it.x-11,it.sy+6);ctx.lineTo(it.x+11,it.sy+6);ctx.fill();
+      ctx.fillStyle='#7a4a1a';ctx.fillRect(it.x-2,it.sy+6,4,6);}
+  });
+  // skier
+  if(!over){ctx.fillStyle='#c0392b';ctx.beginPath();ctx.arc(skier.x,SKI_Y,8,0,7);ctx.fill();
+    ctx.strokeStyle='#333';ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(skier.x-7,SKI_Y+10);ctx.lineTo(skier.x-7,SKI_Y+18);ctx.moveTo(skier.x+7,SKI_Y+10);ctx.lineTo(skier.x+7,SKI_Y+18);ctx.stroke();}
+}
+init();loop();
+</script>
+</body>
+</html>

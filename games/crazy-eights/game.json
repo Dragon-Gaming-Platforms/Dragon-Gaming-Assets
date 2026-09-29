@@ -1,0 +1,9 @@
+{
+  "name": "Crazy Eights",
+  "desc": "Race to empty your hand in this classic shedding card game. Match the top card by suit or rank, and unleash a wild eight to change the suit whenever you like. Outplay the computer and go out first.",
+  "controls": "Tap a card to play it, tap the deck to draw",
+  "shelf": "Arcade & Action",
+  "tags": ["games", "html5", "cards", "family", "casual"],
+  "badge": "New",
+  "creator": "Dragon Gaming Platforms"
+}

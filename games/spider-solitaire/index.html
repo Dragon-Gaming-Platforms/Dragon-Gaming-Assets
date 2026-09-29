@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<title>Spider Solitaire</title>
+<style>
+  *{box-sizing:border-box}body{margin:0;min-height:100vh;background:#0b3d2e;color:#eef;
+    font-family:system-ui,Segoe UI,Roboto,Arial,sans-serif;display:flex;flex-direction:column;align-items:center;gap:8px;padding:8px}
+  h1{margin:2px 0;font-size:clamp(17px,5vw,23px)}
+  #status{min-height:18px;font-weight:700;color:#ffe08a;text-align:center;font-size:13px}
+  .bar{display:flex;gap:8px;align-items:center;flex-wrap:wrap;justify-content:center;font-size:13px}
+  button{background:#ffcc33;color:#20150a;border:0;border-radius:8px;padding:7px 12px;font-weight:800;cursor:pointer}
+  button.sm{padding:5px 9px;font-size:12px}
+  .board{display:flex;gap:4px;justify-content:center;align-items:flex-start}
+  .col{width:38px;min-height:60px;display:flex;flex-direction:column;align-items:center;cursor:pointer}
+  .col .ph{width:38px;height:52px;border-radius:5px;border:2px dashed rgba(255,255,255,.25)}
+  .card{width:38px;height:52px;background:#fff;border-radius:5px;color:#111;font-weight:800;font-size:13px;
+    display:flex;align-items:center;justify-content:center;border:1px solid #bbb;cursor:pointer}
+  .card.red{color:#c62828}
+  .card.down{background:linear-gradient(135deg,#274690,#12203f);color:transparent;border-color:#0a1530}
+  .card.sel{outline:3px solid #ffd000;outline-offset:1px;z-index:5}
+  .col .card{margin-top:-38px}.col .card:first-child{margin-top:0}
+  #stock{display:flex;gap:2px}
+  .stk{width:20px;height:52px;border-radius:4px;background:linear-gradient(135deg,#274690,#12203f);border:1px solid #0a1530}
+</style>
+</head>
+<body>
+<h1>Spider Solitaire</h1>
+<div id="status">Build King-to-Ace runs of one suit to clear them. 8 runs wins!</div>
+<div class="bar">
+  <span>Suits:</span>
+  <button class="sm" data-n="1">1 (easy)</button>
+  <button class="sm" data-n="2">2</button>
+  <button class="sm" data-n="4">4 (hard)</button>
+  <span>Sets: <b id="sets">0</b>/8</span>
+  <button id="dealBtn" class="sm">Deal Row</button>
+  <div id="stock"></div>
+</div>
+<div class="board" id="board"></div>
+<script>
+const SUITS=['♠','♥','♦','♣'];const RN={1:'A',11:'J',12:'Q',13:'K'};
+function rn(r){return RN[r]||String(r);}
+function isRed(s){return s==='♥'||s==='♦';}
+let tab,stock,sets,sel,nsuits=1;
+function deal(){
+  const suitList=SUITS.slice(0,nsuits);const d=[];
+  for(let k=0;k<8;k++){const s=suitList[k%nsuits];for(let r=1;r<=13;r++)d.push({s,r,up:false});}
+  for(let i=d.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[d[i],d[j]]=[d[j],d[i]];}
+  tab=[[],[],[],[],[],[],[],[],[],[]];
+  for(let i=0;i<54;i++){tab[i%10].push(d[i]);} // 54 dealt (cols 0-3:6, 4-9:5? -> i%10 gives 6,6,6,6,5,5,5,5,5,5? 54=10*5+4)
+  d.splice(0,54);stock=d;sets=0;sel=null;
+  tab.forEach(c=>{if(c.length)c[c.length-1].up=true;});
+  setStatus('Tap a run, then a destination. Deal a row when stuck.');render();
+}
+function setStatus(t){document.getElementById('status').textContent=t;}
+function movableFrom(col,idx){const seq=col.slice(idx);if(!seq[0].up)return false;
+  for(let i=0;i<seq.length;i++){if(!seq[i].up)return false;
+    if(i>0&&(seq[i-1].r!==seq[i].r+1||seq[i-1].s!==seq[i].s))return false;}return true;}
+function render(){
+  document.getElementById('sets').textContent=sets;
+  const stk=document.getElementById('stock');stk.innerHTML='';
+  for(let i=0;i<Math.floor(stock.length/10);i++){const e=document.createElement('div');e.className='stk';stk.appendChild(e);}
+  const bEl=document.getElementById('board');bEl.innerHTML='';
+  tab.forEach((col,ci)=>{const cEl=document.createElement('div');cEl.className='col';
+    cEl.onclick=(e)=>{if(e.target===cEl||e.target.classList.contains('ph'))drop(ci);};
+    if(col.length===0){const ph=document.createElement('div');ph.className='ph';cEl.appendChild(ph);}
+    col.forEach((c,idx)=>{const card=document.createElement('div');
+      card.className='card'+(c.up?(isRed(c.s)?' red':''):' down')+(sel&&sel.col===ci&&idx>=sel.idx?' sel':'');
+      card.textContent=c.up?rn(c.r)+c.s:'';
+      card.onclick=(e)=>{e.stopPropagation();clickCard(ci,idx);};cEl.appendChild(card);});
+    bEl.appendChild(cEl);});
+}
+function clickCard(ci,idx){
+  if(sel){drop(ci);return;}
+  if(!movableFrom(tab[ci],idx)){setStatus('That is not a movable same-suit run.');return;}
+  sel={col:ci,idx};setStatus('Selected — tap a destination column.');render();
+}
+function drop(ci){
+  if(!sel)return;const src=tab[sel.col];const seq=src.slice(sel.idx);const dest=tab[ci];
+  if(ci===sel.col){sel=null;render();return;}
+  const ok=dest.length===0||dest[dest.length-1].up&&dest[dest.length-1].r===seq[0].r+1;
+  if(!ok){setStatus('Place a run on a card one rank higher (any suit), or an empty column.');sel=null;render();return;}
+  src.length=sel.idx;seq.forEach(c=>dest.push(c));
+  if(src.length&&!src[src.length-1].up)src[src.length-1].up=true;
+  sel=null;checkComplete(dest);afterMove();
+}
+function checkComplete(col){
+  if(col.length<13)return;
+  const tail=col.slice(-13);
+  for(let i=0;i<13;i++){if(tail[i].r!==13-i||!tail[i].up||tail[i].s!==tail[0].s)return;}
+  col.length-=13;sets++;
+  if(col.length&&!col[col.length-1].up)col[col.length-1].up=true;
+}
+function afterMove(){render();
+  if(sets>=8){setStatus('🎉 You cleared all 8 runs — you win!');return;}
+  setStatus('Keep building down in suit.');}
+document.getElementById('dealBtn').onclick=function(){
+  if(stock.length<10){setStatus('No more cards in the stock.');return;}
+  if(tab.some(c=>c.length===0)){setStatus('Fill every empty column before dealing a new row.');return;}
+  for(let i=0;i<10;i++){const c=stock.shift();c.up=true;tab[i].push(c);}
+  tab.forEach(col=>checkComplete(col));sel=null;afterMove();
+};
+document.querySelectorAll('.bar [data-n]').forEach(b=>b.onclick=()=>{nsuits=+b.dataset.n;deal();});
+deal();
+</script>
+</body>
+</html>

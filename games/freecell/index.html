@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<title>FreeCell</title>
+<style>
+  *{box-sizing:border-box}body{margin:0;min-height:100vh;background:#0b6136;color:#eef;
+    font-family:system-ui,Segoe UI,Roboto,Arial,sans-serif;display:flex;flex-direction:column;align-items:center;gap:10px;padding:10px}
+  h1{margin:2px 0;font-size:clamp(18px,5vw,24px)}
+  #status{min-height:18px;font-weight:700;color:#ffe08a;text-align:center;font-size:14px}
+  .top{display:flex;gap:16px;flex-wrap:wrap;justify-content:center}
+  .set{display:flex;gap:5px}
+  .slot{width:44px;height:62px;border-radius:6px;border:2px dashed rgba(255,255,255,.4);
+    display:flex;align-items:center;justify-content:center;font-size:20px;color:rgba(255,255,255,.5);cursor:pointer}
+  .board{display:flex;gap:6px;justify-content:center;align-items:flex-start;flex-wrap:nowrap}
+  .col{width:44px;min-height:70px;display:flex;flex-direction:column;align-items:center;cursor:pointer}
+  .col .ph{width:44px;height:62px;border-radius:6px;border:2px dashed rgba(255,255,255,.25)}
+  .card{width:44px;height:62px;background:#fff;border-radius:6px;color:#111;font-weight:800;font-size:15px;
+    display:flex;align-items:center;justify-content:center;border:2px solid #fff;cursor:pointer}
+  .card.red{color:#c62828}
+  .card.sel{outline:3px solid #ffd000;outline-offset:1px}
+  .col .card{margin-top:-44px}.col .card:first-child{margin-top:0}
+  button{background:#ffcc33;color:#20150a;border:0;border-radius:9px;padding:8px 14px;font-weight:800;cursor:pointer}
+</style>
+</head>
+<body>
+<h1>FreeCell</h1>
+<div id="status">Build the four foundations from Ace to King. Tap a card, then its destination.</div>
+<div class="top">
+  <div class="set" id="free"></div>
+  <div class="set" id="found"></div>
+</div>
+<div class="board" id="board"></div>
+<button id="newg">New Deal</button>
+<script>
+const SUITS=['♠','♥','♦','♣'];
+const RN={1:'A',11:'J',12:'Q',13:'K'};
+function rn(r){return RN[r]||String(r);}
+function isRed(s){return s==='♥'||s==='♦';}
+let tab,free,found,sel;
+function deal(){
+  const d=[];for(const s of SUITS)for(let r=1;r<=13;r++)d.push({s,r});
+  for(let i=d.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[d[i],d[j]]=[d[j],d[i]];}
+  tab=[[],[],[],[],[],[],[],[]];d.forEach((c,i)=>tab[i%8].push(c));
+  free=[null,null,null,null];found={'♠':0,'♥':0,'♦':0,'♣':0};sel=null;
+  setStatus('Tap a card, then tap where to move it.');render();
+}
+function setStatus(t){document.getElementById('status').textContent=t;}
+function validRun(cards){for(let i=0;i<cards.length-1;i++){
+  if(cards[i].r!==cards[i+1].r+1)return false;
+  if(isRed(cards[i].s)===isRed(cards[i+1].s))return false;}return true;}
+function maxMove(destEmpty){const f=free.filter(x=>!x).length;
+  let e=tab.filter(c=>c.length===0).length;if(destEmpty)e=Math.max(0,e-1);
+  return (1+f)*Math.pow(2,e);}
+function render(){
+  const fEl=document.getElementById('free');fEl.innerHTML='';
+  free.forEach((c,i)=>{const s=document.createElement('div');
+    if(c){s.className='card'+(isRed(c.s)?' red':'')+(sel&&sel.type==='free'&&sel.i===i?' sel':'');s.textContent=rn(c.r)+c.s;}
+    else{s.className='slot';s.textContent='▢';}
+    s.onclick=()=>clickFree(i);fEl.appendChild(s);});
+  const foEl=document.getElementById('found');foEl.innerHTML='';
+  SUITS.forEach(s=>{const el=document.createElement('div');
+    if(found[s]>0){el.className='card'+(isRed(s)?' red':'');el.textContent=rn(found[s])+s;}
+    else{el.className='slot';el.textContent=s;}
+    el.onclick=()=>clickFound(s);foEl.appendChild(el);});
+  const bEl=document.getElementById('board');bEl.innerHTML='';
+  tab.forEach((col,ci)=>{const cEl=document.createElement('div');cEl.className='col';
+    cEl.onclick=(e)=>{if(e.target===cEl||e.target.classList.contains('ph'))clickCol(ci);};
+    if(col.length===0){const ph=document.createElement('div');ph.className='ph';cEl.appendChild(ph);}
+    col.forEach((c,idx)=>{const card=document.createElement('div');
+      card.className='card'+(isRed(c.s)?' red':'')+(sel&&sel.type==='tab'&&sel.col===ci&&idx>=sel.idx?' sel':'');
+      card.textContent=rn(c.r)+c.s;
+      card.onclick=(e)=>{e.stopPropagation();clickCard(ci,idx);};cEl.appendChild(card);});
+    bEl.appendChild(cEl);});
+}
+function clickCard(ci,idx){
+  if(sel){tryDropCol(ci);return;}
+  const col=tab[ci];const seq=col.slice(idx);
+  if(!validRun(seq)){setStatus('That is not a movable run.');return;}
+  sel={type:'tab',col:ci,idx};setStatus('Selected — tap a destination.');render();
+}
+function clickCol(ci){if(sel)tryDropCol(ci);}
+function clickFree(i){
+  if(!sel){if(free[i]){sel={type:'free',i};setStatus('Selected free cell — tap a destination.');render();}return;}
+  // drop into free cell (single card only)
+  const cards=selCards();
+  if(cards.length!==1){setStatus('Only one card fits in a free cell.');return;}
+  if(free[i]){ // if same is selected, deselect; else can't
+    if(sel.type==='free'&&sel.i===i){sel=null;render();return;} setStatus('That free cell is occupied.');return;}
+  removeSel();free[i]=cards[0];sel=null;afterMove();
+}
+function clickFound(s){
+  if(!sel)return;const cards=selCards();
+  if(cards.length!==1){setStatus('Move one card at a time to a foundation.');return;}
+  const c=cards[0];
+  if(c.s===s&&c.r===found[s]+1){removeSel();found[s]=c.r;sel=null;afterMove();}
+  else setStatus('That card cannot go there yet.');
+}
+function tryDropCol(ci){
+  const cards=selCards();const col=tab[ci];
+  const destEmpty=col.length===0;
+  if(!destEmpty){const top=col[col.length-1];
+    if(!(cards[0].r===top.r-1&&isRed(cards[0].s)!==isRed(top.s))){setStatus('That move is not allowed.');flashDeselect();return;}}
+  if(cards.length>maxMove(destEmpty)){setStatus('Not enough free cells/columns to move '+cards.length+' cards.');flashDeselect();return;}
+  removeSel();cards.forEach(c=>col.push(c));sel=null;afterMove();
+}
+function flashDeselect(){sel=null;render();}
+function selCards(){if(sel.type==='free')return[free[sel.i]];return tab[sel.col].slice(sel.idx);}
+function removeSel(){if(sel.type==='free')free[sel.i]=null;else tab[sel.col].length=sel.idx;}
+function afterMove(){autoFoundation();render();
+  if(SUITS.every(s=>found[s]===13)){setStatus('🎉 You solved it! Every foundation complete.');}
+  else setStatus('Nice — keep going.');}
+function autoFoundation(){let moved=true;while(moved){moved=false;
+  // auto-send obviously safe cards (both same-color foundations reached rank-1)
+  const minOpp=(s)=>{const opp=isRed(s)?['♠','♣']:['♥','♦'];return Math.min(found[opp[0]],found[opp[1]]);};
+  tab.forEach(col=>{if(col.length){const c=col[col.length-1];
+    if(c.r===found[c.s]+1&&(c.r<=2||c.r-1<=minOpp(c.s)+1)){found[c.s]=c.r;col.pop();moved=true;}}});
+  free.forEach((c,i)=>{if(c&&c.r===found[c.s]+1&&(c.r<=2||c.r-1<=minOpp(c.s)+1)){found[c.s]=c.r;free[i]=null;moved=true;}});
+}}
+document.getElementById('newg').onclick=deal;
+deal();
+</script>
+</body>
+</html>

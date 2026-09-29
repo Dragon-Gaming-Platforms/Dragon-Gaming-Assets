@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<title>Go Fish</title>
+<style>
+  *{box-sizing:border-box}body{margin:0;min-height:100vh;background:linear-gradient(#0a3d62,#062338);
+    color:#eef;font-family:system-ui,Segoe UI,Roboto,Arial,sans-serif;display:flex;flex-direction:column;align-items:center;gap:12px;padding:14px}
+  h1{margin:4px 0;font-size:clamp(18px,5vw,26px)}
+  #status{min-height:20px;font-weight:700;color:#ffe08a;text-align:center;max-width:520px}
+  .books{font-size:14px;opacity:.9}
+  .row{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;align-items:flex-end}
+  .card{width:48px;height:68px;background:#fff;border-radius:7px;color:#111;display:flex;align-items:center;justify-content:center;
+    font-weight:800;font-size:16px;border:2px solid #fff}
+  .card.red{color:#c62828}
+  .ask button{width:48px;height:52px;margin:3px;background:#ffcc33;color:#20150a;border:0;border-radius:8px;font-weight:800;font-size:16px;cursor:pointer}
+  .ask button:disabled{opacity:.35;cursor:default}
+  .lbl{font-size:13px;opacity:.85}
+  .col{display:flex;flex-direction:column;align-items:center;gap:4px}
+  #restart{display:none;background:#4caf50;color:#fff;border:0;border-radius:9px;padding:10px 16px;font-weight:800;cursor:pointer}
+</style>
+</head>
+<body>
+<h1>Go Fish</h1>
+<div id="status">Ask the computer for a rank you already hold. Collect all four to make a book!</div>
+<div class="books">You: <b id="pbooks">0</b> books &nbsp;•&nbsp; Computer: <b id="cbooks">0</b> books &nbsp;•&nbsp; Pool: <b id="pool">0</b></div>
+<div class="col"><div class="lbl">Computer's hand</div><div class="row" id="cpu"></div></div>
+<div class="col"><div class="lbl">Ask for:</div><div class="ask" id="ask"></div></div>
+<div class="col"><div class="lbl">Your hand</div><div class="row" id="hand"></div></div>
+<button id="restart">New Game</button>
+<script>
+const SUITS=['♠','♥','♦','♣'],RANKS=['A','2','3','4','5','6','7','8','9','10','J','Q','K'];
+let pool,player,cpu,pBooks,cBooks,cpuMem,turn,locked;
+function makeDeck(){const d=[];for(const s of SUITS)for(const r of RANKS)d.push({s,r});
+  for(let i=d.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[d[i],d[j]]=[d[j],d[i]];}return d;}
+function isRed(c){return c.s==='♥'||c.s==='♦';}
+function deal(){const d=makeDeck();player=d.splice(0,7);cpu=d.splice(0,7);pool=d;
+  pBooks=[];cBooks=[];cpuMem={};turn='player';locked=false;
+  document.getElementById('restart').style.display='none';
+  checkBooks(player,pBooks);checkBooks(cpu,cBooks);
+  setStatus('Your turn. Ask for a rank you hold.');render();}
+function setStatus(t){document.getElementById('status').textContent=t;}
+function counts(hand){const m={};hand.forEach(c=>m[c.r]=(m[c.r]||0)+1);return m;}
+function checkBooks(hand,books){const m=counts(hand);let made=[];
+  for(const r in m){if(m[r]===4){books.push(r);made.push(r);}}
+  made.forEach(r=>{for(let i=hand.length-1;i>=0;i--)if(hand[i].r===r)hand.splice(i,1);});
+  return made;}
+function render(){
+  document.getElementById('pbooks').textContent=pBooks.length;
+  document.getElementById('cbooks').textContent=cBooks.length;
+  document.getElementById('pool').textContent=pool.length;
+  const cpuEl=document.getElementById('cpu');cpuEl.innerHTML='';
+  cpu.forEach(()=>{const e=document.createElement('div');e.className='card';e.style.background='#274690';e.style.borderColor='#12203f';cpuEl.appendChild(e);});
+  const hEl=document.getElementById('hand');hEl.innerHTML='';
+  player.slice().sort((a,b)=>RANKS.indexOf(a.r)-RANKS.indexOf(b.r)).forEach(c=>{
+    const e=document.createElement('div');e.className='card'+(isRed(c)?' red':'');e.textContent=c.r+c.s;hEl.appendChild(e);});
+  const askEl=document.getElementById('ask');askEl.innerHTML='';
+  const have=[...new Set(player.map(c=>c.r))].sort((a,b)=>RANKS.indexOf(a)-RANKS.indexOf(b));
+  RANKS.forEach(r=>{const b=document.createElement('button');b.textContent=r;
+    b.disabled=!have.includes(r)||turn!=='player'||locked;
+    b.onclick=()=>askFor(r);askEl.appendChild(b);});
+}
+function drawFromPool(hand){if(pool.length===0)return null;const c=pool.shift();hand.push(c);return c;}
+function askFor(r){if(turn!=='player'||locked)return;locked=true;
+  const matches=cpu.filter(c=>c.r===r);
+  if(matches.length){cpu=cpu.filter(c=>c.r!==r);matches.forEach(c=>player.push(c));
+    cpuMem[r]=false;const made=checkBooks(player,pBooks);
+    setStatus(`Computer had ${matches.length} ${r}${matches.length>1?"'s":''}! `+(made.length?`You made a book of ${r}s! `:'')+'Go again.');
+    render();maybeEnd(()=>{locked=false;});
+  }else{const drawn=drawFromPool(player);cpuMem[r]=true; // cpu learns you want r
+    let msg='Go Fish! ';
+    if(drawn){msg+='You drew a card. ';if(drawn.r===r){msg+=`It was a ${r} — lucky, go again!`;}}
+    const made=checkBooks(player,pBooks);if(made.length)msg+=` Book of ${made.join(', ')}s!`;
+    setStatus(msg);render();
+    if(drawn&&drawn.r===r){maybeEnd(()=>{locked=false;});}
+    else{maybeEnd(()=>{turn='cpu';render();setTimeout(cpuTurn,900);});}
+  }
+}
+function cpuTurn(){locked=true;
+  if(cpu.length===0){drawFromPool(cpu);if(cpu.length===0){finish();return;}}
+  const cr=counts(cpu);
+  // prefer a rank player recently asked (they likely hold it), else a rank cpu holds most of
+  let ask=Object.keys(cpuMem).find(r=>cpuMem[r]&&cr[r]);
+  if(!ask){const ranks=Object.keys(cr);ask=ranks.sort((a,b)=>cr[b]-cr[a])[0];}
+  const matches=player.filter(c=>c.r===ask);
+  if(matches.length){player=player.filter(c=>c.r!==ask);matches.forEach(c=>cpu.push(c));
+    const made=checkBooks(cpu,cBooks);
+    setStatus(`Computer asked for ${ask} — you gave ${matches.length}. `+(made.length?`It made a book of ${ask}s! `:'')+'It goes again.');
+    render();maybeEnd(()=>setTimeout(cpuTurn,900));
+  }else{const drawn=drawFromPool(cpu);
+    let msg=`Computer asked for ${ask}. Go Fish! `;
+    const made=checkBooks(cpu,cBooks);if(made.length)msg+=`It made a book of ${made.join(', ')}s! `;
+    setStatus(msg+'Your turn.');render();
+    if(drawn&&drawn.r===ask&&!made.length){maybeEnd(()=>setTimeout(cpuTurn,900));}
+    else maybeEnd(()=>{turn='player';locked=false;render();});
+  }
+}
+function refill(){ // if a hand empties but pool has cards, draw one
+  if(player.length===0&&pool.length)drawFromPool(player);
+  if(cpu.length===0&&pool.length)drawFromPool(cpu);
+}
+function maybeEnd(next){refill();
+  if(pBooks.length+cBooks.length===13||(player.length===0&&cpu.length===0&&pool.length===0)){finish();return;}
+  next&&next();}
+function finish(){locked=true;turn=null;render();
+  const p=pBooks.length,c=cBooks.length;
+  setStatus(p>c?`🎉 You win ${p}–${c} books!`:p<c?`Computer wins ${c}–${p} books.`:`It's a ${p}–${c} tie!`);
+  document.getElementById('restart').style.display='inline-block';}
+document.getElementById('restart').onclick=deal;
+deal();
+</script>
+</body>
+</html>

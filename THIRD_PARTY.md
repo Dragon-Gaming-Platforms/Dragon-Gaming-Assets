@@ -72,3 +72,18 @@ never invent a license.
 | Spelling Bee | `games/spelling-bee/` | Original build (Dragon Gaming Platforms) | Original — first-party, no third-party assets | 2026-09-29 |
 | Fruit Slots | `games/fruit-slots/` | Original build (Dragon Gaming Platforms) | Original — first-party, no third-party assets | 2026-09-29 |
 | Roulette | `games/roulette/` | Original build (Dragon Gaming Platforms) | Original — first-party, no third-party assets | 2026-09-29 |
+| Gridiron Blitz | `games/gridiron-blitz/` | Original build (Dragon Gaming Platforms) | Original — first-party, no third-party assets | 2026-09-29 |
+| Penalty Kicks | `games/penalty-kicks/` | Original build (Dragon Gaming Platforms) | Original — first-party, no third-party assets | 2026-09-29 |
+| Home Run Derby | `games/home-run-derby/` | Original build (Dragon Gaming Platforms) | Original — first-party, no third-party assets | 2026-09-29 |
+| Archery Master | `games/archery-master/` | Original build (Dragon Gaming Platforms) | Original — first-party, no third-party assets | 2026-09-29 |
+| Drag Race | `games/drag-race/` | Original build (Dragon Gaming Platforms) | Original — first-party, no third-party assets | 2026-09-29 |
+| Ski Slalom | `games/ski-slalom/` | Original build (Dragon Gaming Platforms) | Original — first-party, no third-party assets | 2026-09-29 |
+| Maze Muncher | `games/maze-muncher/` | Original build (Dragon Gaming Platforms) | Original — first-party, no third-party assets | 2026-09-29 |
+| Crazy Eights | `games/crazy-eights/` | Original build (Dragon Gaming Platforms) | Original — first-party, no third-party assets | 2026-09-29 |
+| Go Fish | `games/go-fish/` | Original build (Dragon Gaming Platforms) | Original — first-party, no third-party assets | 2026-09-29 |
+| Snakes & Ladders | `games/snakes-ladders/` | Original build (Dragon Gaming Platforms) | Original — first-party, no third-party assets | 2026-09-29 |
+| FreeCell | `games/freecell/` | Original build (Dragon Gaming Platforms) | Original — first-party, no third-party assets | 2026-09-29 |
+| Spider Solitaire | `games/spider-solitaire/` | Original build (Dragon Gaming Platforms) | Original — first-party, no third-party assets | 2026-09-29 |
+| Tangram | `games/tangram/` | Original build (Dragon Gaming Platforms) | Original — first-party, no third-party assets | 2026-09-29 |
+| Mahjong Match | `games/mahjong-match/` | Original build (Dragon Gaming Platforms) | Original — first-party, no third-party assets | 2026-09-29 |
+| Dominoes | `games/dominoes/` | Original build (Dragon Gaming Platforms) | Original — first-party, no third-party assets | 2026-09-29 |

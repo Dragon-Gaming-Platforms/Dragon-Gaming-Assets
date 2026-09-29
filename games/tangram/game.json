@@ -1,0 +1,9 @@
+{
+  "name": "Tangram",
+  "desc": "The ancient Chinese dissection puzzle. Slide, rotate, and flip all seven geometric pieces to fill the square outline with no gaps or overlaps. Pieces snap into place when positioned correctly.",
+  "controls": "Drag a piece to move it, use Rotate and Flip to orient it",
+  "shelf": "Puzzle & Logic",
+  "tags": ["games", "html5", "puzzle", "geometry", "brain"],
+  "badge": "New",
+  "creator": "Dragon Gaming Platforms"
+}

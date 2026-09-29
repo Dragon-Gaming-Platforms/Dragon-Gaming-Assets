@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+<meta name="robots" content="noindex,nofollow">
+<title>Gridiron Blitz</title>
+<style>
+  *{box-sizing:border-box}html,body{margin:0;height:100%}
+  body{background:#0a1a0d;color:#eafff0;font-family:system-ui,Segoe UI,Roboto,Arial,sans-serif;
+    display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;gap:8px;padding:10px;user-select:none;-webkit-user-select:none}
+  h1{margin:0;font-size:clamp(18px,5vw,26px)}
+  #hud{display:flex;gap:18px;font-weight:800;color:#8fe0a8;flex-wrap:wrap;justify-content:center}
+  canvas{background:#1d6b34;border-radius:10px;border:2px solid #0d4a20;touch-action:none;max-width:96vw;height:auto}
+  #status{min-height:18px;color:#bfe;font-weight:700;text-align:center}
+  .ctrls{display:flex;gap:8px}
+  button{background:#7be0a0;color:#04240f;border:0;border-radius:10px;padding:12px 20px;font-weight:800;cursor:pointer}
+  .hint{font-size:12px;opacity:.7;text-align:center}
+</style>
+</head>
+<body>
+<h1>Gridiron Blitz</h1>
+<div id="hud"><span>Yards: <b id="yards">0</b></span><span>TD: <b id="td">0</b></span><span>Score: <b id="score">0</b></span><span>Tackles: <b id="tk">0</b>/3</span><span>Best: <b id="best">0</b></span></div>
+<canvas id="c" width="360" height="520"></canvas>
+<div id="status">Run for the end zone! Dodge the defenders.</div>
+<div class="ctrls"><button id="bL">◀</button><button id="bBurst">Burst</button><button id="bR">▶</button></div>
+<div class="hint">← → or A/D to juke · ↑ / Space for a speed burst · reach the top to score a touchdown</div>
+<script>
+const cv=document.getElementById('c'),ctx=cv.getContext('2d');const W=cv.width,H=cv.height;
+let rb,defs,scrollY,yards,td,score,tackles,best=+localStorage.getItem('gb_best')||0,keys={},over,burst,spawnT,speed;
+document.getElementById('best').textContent=best;
+function init(){
+  rb={x:W/2,y:H-70,r:13};defs=[];scrollY=0;yards=0;td=0;score=0;tackles=0;over=false;burst=0;spawnT=0;speed=2.4;keys={};
+  updateHud();document.getElementById('status').textContent='Run for the end zone! Dodge the defenders.';
+}
+function updateHud(){document.getElementById('yards').textContent=Math.floor(yards);document.getElementById('td').textContent=td;
+  document.getElementById('score').textContent=score;document.getElementById('tk').textContent=tackles;document.getElementById('best').textContent=best;}
+document.addEventListener('keydown',e=>{const k=e.key.toLowerCase();keys[k]=true;
+  if(['arrowleft','arrowright','arrowup',' '].includes(k)){e.preventDefault();}
+  if((k==='arrowup'||k===' ')&&burst<=0&&!over)burst=28;});
+document.addEventListener('keyup',e=>{keys[e.key.toLowerCase()]=false;});
+function hold(id,k){const el=document.getElementById(id);
+  el.addEventListener('mousedown',e=>{keys[k]=true;e.preventDefault();});el.addEventListener('mouseup',()=>keys[k]=false);el.addEventListener('mouseleave',()=>keys[k]=false);
+  el.addEventListener('touchstart',e=>{keys[k]=true;e.preventDefault();},{passive:false});el.addEventListener('touchend',()=>keys[k]=false);}
+hold('bL','arrowleft');hold('bR','arrowright');
+document.getElementById('bBurst').addEventListener('click',()=>{if(burst<=0&&!over)burst=28;});
+function spawnDef(){const x=20+Math.random()*(W-40);defs.push({x,y:-30,r:14,vx:(Math.random()-0.5)*1.6,speed:1.1+Math.random()*1.2});}
+function loop(){
+  requestAnimationFrame(loop);
+  if(over){draw();return;}
+  let sp=speed+(burst>0?3.2:0);if(burst>0)burst--;
+  scrollY+=sp;yards+=sp/12;
+  if(keys['arrowleft']||keys['a'])rb.x-=4.2;if(keys['arrowright']||keys['d'])rb.x+=4.2;
+  rb.x=Math.max(rb.r+6,Math.min(W-rb.r-6,rb.x));
+  spawnT--;if(spawnT<=0){spawnDef();spawnT=Math.max(16,42-yards/20);}
+  defs.forEach(d=>{d.y+=sp*0.55+d.speed;d.x+=d.vx;
+    // gentle homing
+    if(d.x<rb.x)d.x+=0.25;else d.x-=0.25;
+    if(d.x<15||d.x>W-15)d.vx*=-1;});
+  defs=defs.filter(d=>d.y<H+40);
+  // collision
+  for(const d of defs){if(Math.hypot(d.x-rb.x,d.y-rb.y)<d.r+rb.r-4){tackled();break;}}
+  // touchdown every 100 yards
+  if(yards>= (td+1)*100){td++;score+=6;defs=[];document.getElementById('status').textContent='🏈 TOUCHDOWN! +6';speed+=0.25;}
+  updateHud();draw();
+}
+function tackled(){tackles++;score=Math.max(score,score);updateHud();
+  defs=[];rb.x=W/2;burst=0;
+  if(tackles>=3){over=true;if(Math.floor(yards)+td*0>best){}
+    const total=Math.floor(yards)+td;// keep best by score
+    if(score>best){best=score;localStorage.setItem('gb_best',best);}
+    if(Math.floor(yards)>best){}
+    document.getElementById('status').textContent=`Tackled! Game over — ${Math.floor(yards)} yds, ${td} TD. Tap Burst to replay.`;
+    document.getElementById('bBurst').onclick=()=>{init();document.getElementById('bBurst').onclick=null;
+      document.getElementById('bBurst').addEventListener('click',()=>{if(burst<=0&&!over)burst=28;});};
+  } else document.getElementById('status').textContent=`Tackled! ${3-tackles} chances left.`;
+}
+function draw(){
+  ctx.fillStyle='#1d6b34';ctx.fillRect(0,0,W,H);
+  // yard lines scrolling
+  ctx.strokeStyle='rgba(255,255,255,.35)';ctx.lineWidth=2;ctx.fillStyle='rgba(255,255,255,.6)';ctx.font='10px system-ui';ctx.textAlign='left';
+  const off=scrollY%40;
+  for(let y=-40;y<H+40;y+=40){const yy=y+off;ctx.beginPath();ctx.moveTo(0,yy);ctx.lineTo(W,yy);ctx.stroke();}
+  // end zone hint at top
+  ctx.fillStyle='rgba(255,215,106,.18)';ctx.fillRect(0,0,W,24);
+  // defenders
+  defs.forEach(d=>{ctx.fillStyle='#e05a5a';ctx.beginPath();ctx.arc(d.x,d.y,d.r,0,7);ctx.fill();
+    ctx.fillStyle='#fff';ctx.font='bold 11px system-ui';ctx.textAlign='center';ctx.fillText('D',d.x,d.y+4);});
+  // ball carrier
+  if(!over){ctx.fillStyle=burst>0?'#ffd76a':'#5cf';ctx.beginPath();ctx.arc(rb.x,rb.y,rb.r,0,7);ctx.fill();
+    ctx.fillStyle='#04240f';ctx.font='bold 12px system-ui';ctx.textAlign='center';ctx.fillText('🏈',rb.x,rb.y+4);}
+}
+init();loop();
+</script>
+</body>
+</html>

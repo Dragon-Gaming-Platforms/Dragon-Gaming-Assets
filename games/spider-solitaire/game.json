@@ -1,0 +1,9 @@
+{
+  "name": "Spider Solitaire",
+  "desc": "Build descending runs of a single suit and clear eight complete King-to-Ace sequences to win. Choose one, two, or four suits for the difficulty you want, and deal a fresh row whenever you get stuck.",
+  "controls": "Tap a run then tap a column; tap the stock to deal",
+  "shelf": "Puzzle & Logic",
+  "tags": ["games", "html5", "cards", "solitaire", "puzzle"],
+  "badge": "New",
+  "creator": "Dragon Gaming Platforms"
+}

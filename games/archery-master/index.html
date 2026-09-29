@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+<meta name="robots" content="noindex,nofollow">
+<title>Archery Master</title>
+<style>
+  *{box-sizing:border-box}html,body{margin:0;height:100%}
+  body{background:#0d1a12;color:#eafff0;font-family:system-ui,Segoe UI,Roboto,Arial,sans-serif;
+    display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;gap:8px;padding:10px;user-select:none;-webkit-user-select:none}
+  h1{margin:0;font-size:clamp(18px,5vw,26px)}
+  #hud{display:flex;gap:20px;font-weight:800;color:#8fe0a8}
+  canvas{background:linear-gradient(#8fd0ff,#bfe6a0 70%);border-radius:10px;touch-action:none;max-width:96vw;height:auto;cursor:crosshair}
+  #status{min-height:20px;color:#f4d06a;font-weight:800;text-align:center}
+  .hint{font-size:12px;opacity:.7;text-align:center}
+  button{background:#7be0a0;color:#04240f;border:0;border-radius:10px;padding:8px 16px;font-weight:800;cursor:pointer}
+</style>
+</head>
+<body>
+<h1>Archery Master</h1>
+<div id="hud"><span>Score: <b id="score">0</b></span><span>Arrow: <b id="arrow">1</b>/6</span><span>Wind: <b id="wind">0</b></span><span>Best: <b id="best">0</b></span></div>
+<canvas id="c" width="460" height="320"></canvas>
+<div id="status">Tap to release. The aim sways and the wind pushes your arrow — compensate!</div>
+<button id="reset" style="display:none">Play Again</button>
+<div class="hint">Aim reticle sways; wind arrow shows drift. Bullseye = 10 points.</div>
+<script>
+const cv=document.getElementById('c'),ctx=cv.getContext('2d');const W=cv.width,H=cv.height;
+const TARGET={x:W-90,y:150,r:70};
+const RINGS=[{r:8,s:10,c:'#f5d020'},{r:20,s:9,c:'#f5d020'},{r:32,s:7,c:'#e6394a'},{r:46,s:5,c:'#e6394a'},{r:58,s:3,c:'#3aa0ff'},{r:70,s:1,c:'#3aa0ff'}];
+let score,arrowNum,wind,aim,t,over,flying,marks;
+document.getElementById('best').textContent=+localStorage.getItem('am_best')||0;
+let best=+localStorage.getItem('am_best')||0;
+function init(){score=0;arrowNum=1;over=false;marks=[];newArrow();updateHud();
+  document.getElementById('reset').style.display='none';document.getElementById('status').textContent='Tap to release your arrow.';}
+function newArrow(){wind=Math.round((Math.random()-0.5)*16);flying=null;t=0;
+  aim={x:TARGET.x+(Math.random()-0.5)*40,y:TARGET.y+(Math.random()-0.5)*40,swayX:1+Math.random(),swayY:0.8+Math.random()};updateHud();}
+function updateHud(){document.getElementById('score').textContent=score;document.getElementById('arrow').textContent=Math.min(arrowNum,6);
+  document.getElementById('wind').textContent=(wind>0?'→':wind<0?'←':'')+Math.abs(wind);document.getElementById('best').textContent=best;}
+function release(){
+  if(over||flying)return;
+  const reticle=reticlePos();
+  // arrow flies from bow (left) to reticle, drifting by wind
+  flying={x:60,y:H-60,tx:reticle.x+wind*1.4,ty:reticle.y,t:0};
+}
+function reticlePos(){return{x:aim.x+Math.sin(t*aim.swayX)*22,y:aim.y+Math.cos(t*aim.swayY)*18};}
+function score_hit(x,y){
+  const d=Math.hypot(x-TARGET.x,y-TARGET.y);
+  for(const ring of RINGS){if(d<=ring.r)return ring.s;}
+  return 0;
+}
+function loop(){
+  requestAnimationFrame(loop);
+  if(!over&&!flying)t+=0.05;
+  if(flying){flying.t+=0.06;const p=Math.min(1,flying.t);
+    flying.x=60+(flying.tx-60)*p;flying.y=(H-60)+(flying.ty-(H-60))*p;
+    if(p>=1){const pts=score_hit(flying.x,flying.y);score+=pts;marks.push({x:flying.x,y:flying.y,pts});
+      document.getElementById('status').textContent=pts>0?`Hit for ${pts}${pts===10?' — BULLSEYE! 🎯':' points'}`:'Missed the target!';
+      arrowNum++;updateHud();flying=null;
+      if(arrowNum>6){over=true;if(score>best){best=score;localStorage.setItem('am_best',best);updateHud();}
+        setTimeout(()=>{document.getElementById('status').textContent=`Finished! Total: ${score} points.`;document.getElementById('reset').style.display='';},400);}
+      else setTimeout(newArrow,600);
+    }}
+  draw();
+}
+function draw(){
+  ctx.fillStyle='#8fd0ff';ctx.fillRect(0,0,W,H*0.7);ctx.fillStyle='#bfe6a0';ctx.fillRect(0,H*0.7,W,H*0.3);
+  // target stand
+  ctx.strokeStyle='#7a5a2a';ctx.lineWidth=6;ctx.beginPath();ctx.moveTo(TARGET.x,TARGET.y+TARGET.r);ctx.lineTo(TARGET.x,H-20);ctx.stroke();
+  // rings
+  for(let i=RINGS.length-1;i>=0;i--){ctx.fillStyle=i%2?'#fff':RINGS[i].c;ctx.beginPath();ctx.arc(TARGET.x,TARGET.y,RINGS[i].r,0,7);ctx.fill();
+    ctx.strokeStyle='rgba(0,0,0,.25)';ctx.lineWidth=1;ctx.beginPath();ctx.arc(TARGET.x,TARGET.y,RINGS[i].r,0,7);ctx.stroke();}
+  // marks
+  marks.forEach(m=>{ctx.fillStyle='#111';ctx.beginPath();ctx.arc(m.x,m.y,3,0,7);ctx.fill();});
+  // bow / archer
+  ctx.strokeStyle='#5a3a18';ctx.lineWidth=4;ctx.beginPath();ctx.arc(60,H-60,20,-Math.PI/2.2,Math.PI/2.2);ctx.stroke();
+  // wind arrow
+  ctx.fillStyle='rgba(255,255,255,.85)';ctx.font='bold 13px system-ui';ctx.textAlign='center';
+  ctx.fillText('Wind '+(wind>0?'→':wind<0?'←':'·')+' '+Math.abs(wind),W/2,24);
+  // reticle
+  if(!over&&!flying){const r=reticlePos();ctx.strokeStyle='#c0392b';ctx.lineWidth=2;
+    ctx.beginPath();ctx.arc(r.x,r.y,9,0,7);ctx.stroke();
+    ctx.beginPath();ctx.moveTo(r.x-13,r.y);ctx.lineTo(r.x+13,r.y);ctx.moveTo(r.x,r.y-13);ctx.lineTo(r.x,r.y+13);ctx.stroke();}
+  // flying arrow
+  if(flying){ctx.strokeStyle='#333';ctx.lineWidth=3;ctx.beginPath();ctx.moveTo(flying.x-14,flying.y+4);ctx.lineTo(flying.x,flying.y);ctx.stroke();
+    ctx.fillStyle='#c0392b';ctx.beginPath();ctx.arc(flying.x,flying.y,3,0,7);ctx.fill();}
+}
+cv.addEventListener('click',release);cv.addEventListener('touchstart',e=>{e.preventDefault();release();},{passive:false});
+document.addEventListener('keydown',e=>{if(e.key===' '){e.preventDefault();release();}});
+document.getElementById('reset').onclick=init;
+init();loop();
+</script>
+</body>
+</html>

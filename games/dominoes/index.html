@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<title>Dominoes</title>
+<style>
+  *{box-sizing:border-box}body{margin:0;min-height:100vh;background:#2b2118;color:#eef;
+    font-family:system-ui,Segoe UI,Roboto,Arial,sans-serif;display:flex;flex-direction:column;align-items:center;gap:10px;padding:12px}
+  h1{margin:2px 0;font-size:clamp(18px,5vw,26px)}
+  #status{min-height:20px;font-weight:700;color:#ffe08a;text-align:center;max-width:520px}
+  .lbl{font-size:13px;opacity:.85}
+  .cpu{display:flex;gap:4px;flex-wrap:wrap;justify-content:center}
+  .cpuback{width:22px;height:40px;background:#3a2c20;border:1px solid #14100b;border-radius:4px}
+  .board{display:flex;gap:3px;flex-wrap:wrap;justify-content:center;align-items:center;min-height:56px;
+    max-width:96vw;overflow-x:auto;padding:8px;background:#1c150f;border-radius:8px}
+  .hand{display:flex;gap:6px;flex-wrap:wrap;justify-content:center}
+  .dom{display:flex;background:#fdfbf3;border:2px solid #cfc9ad;border-radius:6px;cursor:pointer}
+  .dom.v{flex-direction:column}
+  .dom.play{outline:2px solid #4caf50}
+  .dom.dis{opacity:.4;cursor:default}
+  .half{width:26px;height:26px;display:grid;grid-template-columns:repeat(3,1fr);grid-template-rows:repeat(3,1fr);padding:3px;gap:1px}
+  .dom .half:first-child{border-right:1px solid #cfc9ad}
+  .dom.v .half:first-child{border-right:0;border-bottom:1px solid #cfc9ad}
+  .pip{width:5px;height:5px;background:#20150a;border-radius:50%;align-self:center;justify-self:center}
+  .bar{display:flex;gap:10px;align-items:center;flex-wrap:wrap;justify-content:center;font-size:14px}
+  button{background:#ffcc33;color:#20150a;border:0;border-radius:9px;padding:9px 15px;font-weight:800;cursor:pointer}
+  button:disabled{opacity:.4;cursor:default}
+  .col{display:flex;flex-direction:column;align-items:center;gap:5px;width:100%}
+</style>
+</head>
+<body>
+<h1>Dominoes</h1>
+<div id="status">Match a tile to an open end. Empty your hand to win!</div>
+<div class="col"><div class="lbl">Computer</div><div class="cpu" id="cpu"></div></div>
+<div class="board" id="board"></div>
+<div class="bar">
+  <span>Boneyard: <b id="bone">0</b></span>
+  <button id="draw">Draw</button>
+  <button id="pass">Pass</button>
+  <button id="newg">New Game</button>
+</div>
+<div class="col"><div class="lbl">Your hand</div><div class="hand" id="hand"></div></div>
+<div id="pick" class="bar" style="display:none">Play on which end? <button id="pl">Left</button><button id="pr">Right</button></div>
+<script>
+const PIPS={0:[],1:[4],2:[0,8],3:[0,4,8],4:[0,2,6,8],5:[0,2,4,6,8],6:[0,2,3,5,6,8]};
+let board,leftEnd,rightEnd,hand,cpu,bone,turn,over,passes,pendTile;
+function newGame(){
+  const set=[];for(let a=0;a<=6;a++)for(let b=a;b<=6;b++)set.push([a,b]);
+  for(let i=set.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[set[i],set[j]]=[set[j],set[i]];}
+  hand=set.splice(0,7);cpu=set.splice(0,7);bone=set;board=[];over=false;passes=0;pendTile=null;
+  document.getElementById('pick').style.display='none';
+  // whoever holds highest double (or highest tile) opens; keep it player's move to place
+  turn='player';setStatus('Your turn — play any tile to open the line.');render();
+}
+function setStatus(t){document.getElementById('status').textContent=t;}
+function halfEl(n){const h=document.createElement('div');h.className='half';
+  for(let i=0;i<9;i++){const c=document.createElement('div');if(PIPS[n].includes(i)){const p=document.createElement('div');p.className='pip';c.appendChild(p);}h.appendChild(c);}
+  return h;}
+function domEl(a,b,vert){const d=document.createElement('div');d.className='dom'+(vert?' v':'');
+  d.appendChild(halfEl(a));d.appendChild(halfEl(b));return d;}
+function matches(tile){return board.length===0||tile[0]===leftEnd||tile[1]===leftEnd||tile[0]===rightEnd||tile[1]===rightEnd;}
+function render(){
+  const cpuEl=document.getElementById('cpu');cpuEl.innerHTML='';
+  cpu.forEach(()=>{const b=document.createElement('div');b.className='cpuback';cpuEl.appendChild(b);});
+  const bEl=document.getElementById('board');bEl.innerHTML='';
+  board.forEach(t=>bEl.appendChild(domEl(t.a,t.b,false)));
+  if(board.length===0){const s=document.createElement('div');s.className='lbl';s.textContent='(empty line)';bEl.appendChild(s);}
+  document.getElementById('bone').textContent=bone.length;
+  const hEl=document.getElementById('hand');hEl.innerHTML='';
+  hand.forEach((t,i)=>{const canPlay=turn==='player'&&!over&&matches(t);
+    const d=domEl(t[0],t[1],false);d.className+=canPlay?' play':' dis';
+    if(canPlay)d.onclick=()=>chooseTile(i);hEl.appendChild(d);});
+  const anyPlay=hand.some(t=>matches(t));
+  document.getElementById('draw').disabled=!(turn==='player'&&!over&&!anyPlay&&bone.length>0);
+  document.getElementById('pass').disabled=!(turn==='player'&&!over&&!anyPlay&&bone.length===0);
+}
+function chooseTile(i){const t=hand[i];
+  if(board.length===0){placeTile(i,'right');return;}
+  const fitL=t[0]===leftEnd||t[1]===leftEnd,fitR=t[0]===rightEnd||t[1]===rightEnd;
+  if(fitL&&fitR&&leftEnd!==rightEnd){pendTile=i;document.getElementById('pick').style.display='flex';setStatus('This tile fits both ends — choose one.');return;}
+  placeTile(i,fitR?'right':'left');
+}
+document.getElementById('pl').onclick=()=>{document.getElementById('pick').style.display='none';placeTile(pendTile,'left');};
+document.getElementById('pr').onclick=()=>{document.getElementById('pick').style.display='none';placeTile(pendTile,'right');};
+function placeTile(i,end){
+  const t=hand.splice(i,1)[0];addToBoard(t,end);passes=0;
+  if(hand.length===0){over=true;render();setStatus('🎉 Domino! You emptied your hand and win!');return;}
+  turn='cpu';render();setStatus('Computer is thinking...');setTimeout(cpuTurn,800);
+}
+function addToBoard(t,end){
+  if(board.length===0){board.push({a:t[0],b:t[1]});leftEnd=t[0];rightEnd=t[1];return;}
+  if(end==='right'){const other=t[0]===rightEnd?t[1]:t[0];board.push({a:rightEnd,b:other});rightEnd=other;}
+  else{const other=t[0]===leftEnd?t[1]:t[0];board.unshift({a:other,b:leftEnd});leftEnd=other;}
+}
+function cpuTurn(){
+  if(over)return;
+  let played=false,guard=0;
+  while(!played&&guard<40){guard++;
+    let idx=cpu.findIndex(t=>board.length===0||t[0]===leftEnd||t[1]===leftEnd||t[0]===rightEnd||t[1]===rightEnd);
+    if(idx>=0){const t=cpu.splice(idx,1)[0];
+      let end='right';
+      if(board.length>0){const fitR=t[0]===rightEnd||t[1]===rightEnd;end=fitR?'right':'left';}
+      addToBoard(t,end);played=true;passes=0;
+      setStatus('Computer played a tile. Your turn.');
+    } else if(bone.length>0){cpu.push(bone.shift());}
+    else break;
+  }
+  if(!played){passes++;setStatus('Computer passes. Your turn.');
+    if(passes>=2){endBlocked();return;}}
+  if(cpu.length===0){over=true;render();setStatus('Computer emptied its hand — it wins.');return;}
+  turn='player';render();
+  if(!hand.some(t=>matches(t))&&bone.length===0){
+    // player also can't play
+    setStatus(bone.length===0?'You have no move — pass.':'You must draw.');
+  }
+}
+document.getElementById('draw').onclick=()=>{
+  if(turn!=='player'||over)return;
+  if(bone.length===0)return;
+  const t=bone.shift();hand.push(t);
+  setStatus(matches(t)?'You drew a playable tile!':'You drew a tile.');render();
+};
+document.getElementById('pass').onclick=()=>{
+  if(turn!=='player'||over)return;passes++;
+  if(passes>=2){endBlocked();return;}
+  turn='cpu';render();setStatus('You passed. Computer is thinking...');setTimeout(cpuTurn,800);
+};
+function pipSum(h){return h.reduce((s,t)=>s+t[0]+t[1],0);}
+function endBlocked(){over=true;render();
+  const me=pipSum(hand),them=pipSum(cpu);
+  setStatus(me<them?`Blocked! You win on pips ${me} to ${them}.`:me>them?`Blocked! Computer wins on pips ${them} to ${me}.`:`Blocked! It's a tie at ${me} pips each.`);
+}
+document.getElementById('newg').onclick=newGame;
+newGame();
+</script>
+</body>
+</html>

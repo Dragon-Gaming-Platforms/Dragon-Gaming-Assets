@@ -1,0 +1,9 @@
+{
+  "name": "Dominoes",
+  "desc": "Play the classic tile game against the computer. Match your dominoes to the open ends of the line and be the first to empty your hand. Draw from the boneyard when stuck, and win on low pips if the game blocks.",
+  "controls": "Tap a tile to play it; use Draw and Pass when stuck",
+  "shelf": "Strategy & Idle",
+  "tags": ["games", "html5", "dominoes", "tiles", "strategy"],
+  "badge": "New",
+  "creator": "Dragon Gaming Platforms"
+}
