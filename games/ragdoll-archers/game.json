@@ -1,0 +1,9 @@
+{
+  "name": "Ragdoll Archers",
+  "desc": "Physics-based archery duels where wobbly stickman archers trade arrows. Aim your bow, manage stamina, dodge incoming shots, and spend skulls on upgrades across solo, PvP, and co-op modes.",
+  "controls": "Mouse to aim and shoot, keyboard to move and jump",
+  "shelf": "Arcade & Action",
+  "tags": ["games", "html5", "archery", "physics", "ragdoll"],
+  "badge": "New",
+  "creator": "Ericetto"
+}
