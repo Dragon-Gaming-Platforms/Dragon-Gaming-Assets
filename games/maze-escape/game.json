@@ -1,0 +1,9 @@
+{
+  "name": "Maze Escape",
+  "desc": "Race through procedurally generated mazes to reach the exit as fast as you can. Every maze is different, three sizes are available, and your best times are tracked.",
+  "controls": "Arrow keys / WASD, on-screen pad, or swipe to move",
+  "shelf": "Arcade & Action",
+  "tags": ["games", "html5", "maze", "arcade", "time-trial"],
+  "badge": "New",
+  "creator": "Dragon Gaming Platforms"
+}

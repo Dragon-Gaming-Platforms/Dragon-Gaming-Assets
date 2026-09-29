@@ -1,0 +1,9 @@
+{
+  "name": "Reversi",
+  "desc": "The classic Reversi (Othello) board game against a computer opponent with three difficulty levels. Flank your opponent's discs to flip them and control the board.",
+  "controls": "Mouse / touch to place a disc on a highlighted square",
+  "shelf": "Puzzle & Logic",
+  "tags": ["games", "html5", "board", "strategy", "reversi", "othello"],
+  "badge": "New",
+  "creator": "Dragon Gaming Platforms"
+}

@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+<meta name="robots" content="noindex,nofollow">
+<title>Maze Escape</title>
+<style>
+  *{box-sizing:border-box}
+  html,body{margin:0;height:100%}
+  body{background:radial-gradient(circle at 50% 0,#1d2340,#0a0d1a 60%);color:#eef;
+    font-family:system-ui,Segoe UI,Roboto,Arial,sans-serif;display:flex;flex-direction:column;
+    align-items:center;justify-content:center;min-height:100vh;gap:12px;padding:12px;user-select:none;-webkit-user-select:none;touch-action:none}
+  h1{margin:0;font-size:clamp(20px,5vw,30px)}
+  .hud{display:flex;gap:12px;font-size:16px;font-weight:700}
+  .hud div{background:rgba(255,255,255,.08);border-radius:10px;padding:7px 14px}
+  canvas{background:#0c1120;border-radius:10px;box-shadow:0 14px 40px rgba(0,0,0,.5);max-width:92vw;max-height:64vh;touch-action:none}
+  #msg{min-height:22px;font-size:16px;color:#ffd76a;font-weight:700}
+  .row{display:flex;gap:10px;align-items:center}
+  button,select{background:#5fd0c0;color:#04231f;border:0;border-radius:10px;padding:10px 18px;font-size:15px;font-weight:800;cursor:pointer}
+  select{background:rgba(255,255,255,.1);color:#eef}
+  .pad{display:grid;grid-template-columns:repeat(3,56px);grid-template-rows:repeat(3,56px);gap:6px}
+  .pad button{width:56px;height:56px;font-size:22px;padding:0;background:rgba(255,255,255,.12);color:#fff}
+  .pad .sp{visibility:hidden}
+  @media(hover:hover){.pad{display:none}}
+</style>
+</head>
+<body>
+<h1>Maze Escape</h1>
+<div class="hud"><div>Level <span id="lvl">1</span></div><div>Time <span id="time">0.0</span>s</div><div>Best <span id="best">—</span></div></div>
+<canvas id="cv"></canvas>
+<div id="msg">Reach the green exit. Arrow keys / WASD / swipe.</div>
+<div class="row">
+  <button id="newGame">New Maze</button>
+  <select id="size">
+    <option value="10">Small</option>
+    <option value="15" selected>Medium</option>
+    <option value="21">Large</option>
+  </select>
+</div>
+<div class="pad">
+  <span class="sp"></span><button data-d="U">▲</button><span class="sp"></span>
+  <button data-d="L">◀</button><span class="sp"></span><button data-d="R">▶</button>
+  <span class="sp"></span><button data-d="D">▼</button><span class="sp"></span>
+</div>
+<script>
+const cv=document.getElementById('cv'),ctx=cv.getContext('2d');
+let N,grid,player,exit,cell,level=1,startTime,timer,best={},done;
+function gen(n){
+  // recursive backtracker; grid cells store wall bits: 1=N,2=E,4=S,8=W
+  N=n;grid=Array.from({length:n},()=>Array(n).fill(15));
+  const vis=Array.from({length:n},()=>Array(n).fill(false));
+  const stack=[[0,0]];vis[0][0]=true;
+  const DX={1:0,2:1,4:0,8:-1},DY={1:-1,2:0,4:1,8:0},OPP={1:4,2:8,4:1,8:2};
+  while(stack.length){
+    const[x,y]=stack[stack.length-1];
+    const nbrs=[];
+    for(const bit of[1,2,4,8]){const nx=x+DX[bit],ny=y+DY[bit];
+      if(nx>=0&&ny>=0&&nx<n&&ny<n&&!vis[ny][nx])nbrs.push([bit,nx,ny]);}
+    if(!nbrs.length){stack.pop();continue;}
+    const[bit,nx,ny]=nbrs[Math.floor(Math.random()*nbrs.length)];
+    grid[y][x]&=~bit;grid[ny][nx]&=~OPP[bit];vis[ny][nx]=true;stack.push([nx,ny]);
+  }
+  player={x:0,y:0};exit={x:n-1,y:n-1};done=false;
+}
+function layout(){
+  const maxpx=Math.min(window.innerWidth*0.9,window.innerHeight*0.6,540);
+  cell=Math.floor(maxpx/N);cv.width=cv.height=cell*N;draw();
+}
+function draw(){
+  ctx.clearRect(0,0,cv.width,cv.height);
+  // exit glow
+  ctx.fillStyle='#1c5c34';ctx.fillRect(exit.x*cell+2,exit.y*cell+2,cell-4,cell-4);
+  ctx.strokeStyle='#8fe3b0';ctx.lineWidth=Math.max(2,cell*0.12);ctx.lineCap='round';
+  ctx.beginPath();
+  for(let y=0;y<N;y++)for(let x=0;x<N;x++){
+    const w=grid[y][x],px=x*cell,py=y*cell;
+    if(w&1){ctx.moveTo(px,py);ctx.lineTo(px+cell,py);}
+    if(w&2){ctx.moveTo(px+cell,py);ctx.lineTo(px+cell,py+cell);}
+    if(w&4){ctx.moveTo(px,py+cell);ctx.lineTo(px+cell,py+cell);}
+    if(w&8){ctx.moveTo(px,py);ctx.lineTo(px,py+cell);}
+  }
+  ctx.stroke();
+  // player
+  ctx.fillStyle='#ffd76a';ctx.beginPath();
+  ctx.arc(player.x*cell+cell/2,player.y*cell+cell/2,cell*0.3,0,7);ctx.fill();
+}
+function move(dir){
+  if(done)return;
+  if(!timer){startTime=performance.now();timer=requestAnimationFrame(tick);}
+  const{x,y}=player;const w=grid[y][x];
+  if(dir==='U'&&!(w&1))player.y--;
+  else if(dir==='R'&&!(w&2))player.x++;
+  else if(dir==='D'&&!(w&4))player.y++;
+  else if(dir==='L'&&!(w&8))player.x--;
+  draw();
+  if(player.x===exit.x&&player.y===exit.y)finish();
+}
+function tick(){
+  const t=(performance.now()-startTime)/1000;
+  document.getElementById('time').textContent=t.toFixed(1);
+  if(!done)timer=requestAnimationFrame(tick);
+}
+function finish(){
+  done=true;cancelAnimationFrame(timer);timer=null;
+  const t=(performance.now()-startTime)/1000;
+  const key=N;
+  if(best[key]===undefined||t<best[key]){best[key]=t;}
+  document.getElementById('best').textContent=best[key].toFixed(1)+'s';
+  document.getElementById('msg').textContent=`🎉 Escaped in ${t.toFixed(1)}s! Next maze…`;
+  level++;document.getElementById('lvl').textContent=level;
+  setTimeout(()=>{newMaze(false);document.getElementById('msg').textContent='Reach the green exit.';},1200);
+}
+function newMaze(resetLevel){
+  if(resetLevel){level=1;document.getElementById('lvl').textContent=1;}
+  cancelAnimationFrame(timer);timer=null;
+  document.getElementById('time').textContent='0.0';
+  gen(parseInt(document.getElementById('size').value));layout();
+}
+window.addEventListener('keydown',e=>{
+  const k=e.key.toLowerCase();
+  const map={arrowup:'U',w:'U',arrowright:'R',d:'R',arrowdown:'D',s:'D',arrowleft:'L',a:'L'};
+  if(map[k]){e.preventDefault();move(map[k]);}
+});
+document.querySelectorAll('.pad button').forEach(b=>b.onclick=()=>move(b.dataset.d));
+// swipe
+let sx,sy;
+cv.addEventListener('touchstart',e=>{sx=e.touches[0].clientX;sy=e.touches[0].clientY;},{passive:true});
+cv.addEventListener('touchend',e=>{
+  const dx=e.changedTouches[0].clientX-sx,dy=e.changedTouches[0].clientY-sy;
+  if(Math.abs(dx)<15&&Math.abs(dy)<15)return;
+  if(Math.abs(dx)>Math.abs(dy))move(dx>0?'R':'L');else move(dy>0?'D':'U');
+},{passive:true});
+window.addEventListener('resize',layout);
+document.getElementById('newGame').onclick=()=>newMaze(true);
+document.getElementById('size').onchange=()=>newMaze(true);
+newMaze(true);
+</script>
+</body>
+</html>

@@ -1,0 +1,9 @@
+{
+  "name": "Brick Breaker",
+  "desc": "A fast arcade brick-breaker: bounce the ball off your paddle to smash every brick, clear stages that grow harder, and chase a high score across three lives.",
+  "controls": "Mouse / touch / arrow keys to move the paddle, click or Space to launch",
+  "shelf": "Arcade & Action",
+  "tags": ["games", "html5", "arcade", "breakout", "action"],
+  "badge": "New",
+  "creator": "Dragon Gaming Platforms"
+}

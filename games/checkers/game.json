@@ -1,0 +1,9 @@
+{
+  "name": "Checkers",
+  "desc": "Classic English draughts against a minimax computer opponent, with forced captures, multi-jumps and king promotion. Capture all the CPU's pieces to win.",
+  "controls": "Mouse / touch: tap a piece, then tap a highlighted square",
+  "shelf": "Puzzle & Logic",
+  "tags": ["games", "html5", "board", "strategy", "checkers", "draughts"],
+  "badge": "New",
+  "creator": "Dragon Gaming Platforms"
+}
