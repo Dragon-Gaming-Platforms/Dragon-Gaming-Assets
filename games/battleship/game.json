@@ -1,0 +1,9 @@
+{
+  "name": "Battleship",
+  "desc": "Place your fleet, then hunt down the enemy's ships before they sink yours. Features ship placement with rotation, a hunting AI, and hit/miss/sunk tracking.",
+  "controls": "Mouse / touch to place ships and fire on the enemy grid",
+  "shelf": "Strategy & Idle",
+  "tags": ["games", "html5", "strategy", "board", "battleship"],
+  "badge": "New",
+  "creator": "Dragon Gaming Platforms"
+}

@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+<meta name="robots" content="noindex,nofollow">
+<title>Hangman</title>
+<style>
+  *{box-sizing:border-box}
+  html,body{margin:0;height:100%}
+  body{background:radial-gradient(circle at 50% 0,#243244,#0b1017 60%);color:#e8eefc;
+    font-family:system-ui,Segoe UI,Roboto,Arial,sans-serif;display:flex;flex-direction:column;
+    align-items:center;justify-content:center;min-height:100vh;gap:12px;padding:14px;user-select:none;-webkit-user-select:none}
+  h1{margin:0;font-size:clamp(20px,5vw,30px)}
+  #cat{color:#7dd3fc;font-weight:700}
+  svg{width:min(60vw,220px);height:auto}
+  .stroke{stroke:#cbd5e1;stroke-width:6;stroke-linecap:round;fill:none}
+  .body{stroke:#ff8a65}
+  #word{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;font-size:clamp(22px,7vw,38px);font-weight:800;letter-spacing:2px}
+  .slot{border-bottom:4px solid #4a6a86;min-width:26px;text-align:center}
+  .slot.rev{border-color:transparent}
+  #keys{display:grid;grid-template-columns:repeat(9,1fr);gap:6px;max-width:min(96vw,460px);width:100%}
+  .key{background:#22334a;border:0;border-radius:8px;padding:10px 0;font-weight:800;color:#e8eefc;cursor:pointer;font-size:15px}
+  .key:disabled{opacity:.32;cursor:default}
+  .key.good{background:#2e7d4f}.key.bad{background:#8a2a1e}
+  #status{min-height:24px;font-weight:800;color:#ffd76a;font-size:17px}
+  #lives{font-weight:700}
+  .row{display:flex;gap:10px;align-items:center}
+  button.ctrl,select{background:#38bdf8;color:#04121f;border:0;border-radius:10px;padding:10px 18px;font-size:15px;font-weight:800;cursor:pointer}
+  select{background:rgba(255,255,255,.1);color:#e8eefc}
+</style>
+</head>
+<body>
+<h1>Hangman</h1>
+<div id="cat"></div>
+<svg viewBox="0 0 200 200" aria-hidden="true">
+  <line class="stroke" x1="20" y1="185" x2="110" y2="185"/>
+  <line class="stroke g" x1="45" y1="185" x2="45" y2="20" id="p0" style="display:none"/>
+  <line class="stroke g" x1="43" y1="23" x2="130" y2="23" id="p1" style="display:none"/>
+  <line class="stroke g" x1="130" y1="23" x2="130" y2="45" id="p2" style="display:none"/>
+  <circle class="stroke body" cx="130" cy="62" r="17" id="p3" style="display:none"/>
+  <line class="stroke body" x1="130" y1="79" x2="130" y2="125" id="p4" style="display:none"/>
+  <line class="stroke body" x1="130" y1="90" x2="108" y2="112" id="p5" style="display:none"/>
+  <line class="stroke body" x1="130" y1="90" x2="152" y2="112" id="p6" style="display:none"/>
+  <line class="stroke body" x1="130" y1="125" x2="110" y2="152" id="p7" style="display:none"/>
+  <line class="stroke body" x1="130" y1="125" x2="150" y2="152" id="p8" style="display:none"/>
+</svg>
+<div id="word"></div>
+<div id="lives"></div>
+<div id="status"></div>
+<div id="keys"></div>
+<div class="row">
+  <button class="ctrl" id="newGame">New Word</button>
+  <select id="cats">
+    <option value="Animals">Animals</option>
+    <option value="Countries">Countries</option>
+    <option value="Fruits">Fruits</option>
+    <option value="Random" selected>Random mix</option>
+  </select>
+</div>
+<script>
+const WORDS={
+  Animals:['ELEPHANT','GIRAFFE','DOLPHIN','KANGAROO','PENGUIN','CHEETAH','OCTOPUS','HEDGEHOG','FLAMINGO','RACCOON'],
+  Countries:['CANADA','BRAZIL','JAPAN','MOROCCO','ICELAND','THAILAND','PORTUGAL','KENYA','NORWAY','MEXICO'],
+  Fruits:['STRAWBERRY','PINEAPPLE','WATERMELON','BLUEBERRY','APRICOT','POMEGRANATE','RASPBERRY','TANGERINE','COCONUT','PAPAYA']
+};
+const MAX=9; // number of body parts (p0..p8)
+let word,cat,guessed,wrong,over;
+function pick(){
+  const choice=document.getElementById('cats').value;
+  let c=choice;
+  if(choice==='Random'){const keys=Object.keys(WORDS);c=keys[Math.floor(Math.random()*keys.length)];}
+  const list=WORDS[c];word=list[Math.floor(Math.random()*list.length)];cat=c;
+}
+function newGame(){
+  pick();guessed=new Set();wrong=0;over=false;
+  for(let i=0;i<MAX;i++)document.getElementById('p'+i).style.display='none';
+  document.getElementById('cat').textContent='Category: '+cat;
+  document.getElementById('status').textContent='';
+  buildKeys();render();
+}
+function buildKeys(){
+  const k=document.getElementById('keys');k.innerHTML='';
+  'ABCDEFGHIJKLMNOPQRSTUVWXYZ'.split('').forEach(ch=>{
+    const b=document.createElement('button');b.className='key';b.textContent=ch;b.onclick=()=>guess(ch,b);k.appendChild(b);
+  });
+}
+function guess(ch,btn){
+  if(over||guessed.has(ch))return;
+  guessed.add(ch);btn.disabled=true;
+  if(word.includes(ch)){btn.classList.add('good');}
+  else{btn.classList.add('bad');document.getElementById('p'+wrong).style.display='';wrong++;}
+  render();
+  if(wrong>=MAX)lose();
+  else if(word.split('').every(c=>guessed.has(c)))win();
+}
+function render(){
+  const w=document.getElementById('word');w.innerHTML='';
+  word.split('').forEach(c=>{
+    const s=document.createElement('span');s.className='slot'+(guessed.has(c)||over?' rev':'');
+    s.textContent=(guessed.has(c)||over)?c:'';w.appendChild(s);
+  });
+  document.getElementById('lives').textContent=`Guesses left: ${MAX-wrong}`;
+}
+function win(){over=true;document.getElementById('status').textContent='🎉 You got it!';reveal();}
+function lose(){over=true;document.getElementById('status').textContent='💀 Out of guesses — it was '+word;reveal();}
+function reveal(){render();document.querySelectorAll('.key').forEach(b=>b.disabled=true);}
+window.addEventListener('keydown',e=>{
+  const ch=e.key.toUpperCase();
+  if(/^[A-Z]$/.test(ch)){const btn=[...document.querySelectorAll('.key')].find(b=>b.textContent===ch);if(btn&&!btn.disabled)guess(ch,btn);}
+});
+document.getElementById('newGame').onclick=newGame;
+document.getElementById('cats').onchange=newGame;
+newGame();
+</script>
+</body>
+</html>

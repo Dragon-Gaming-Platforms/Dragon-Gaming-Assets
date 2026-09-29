@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+<meta name="robots" content="noindex,nofollow">
+<title>Battleship</title>
+<style>
+  *{box-sizing:border-box}
+  html,body{margin:0;height:100%}
+  body{background:radial-gradient(circle at 50% 0,#0d2b45,#04121f 60%);color:#dbeafe;
+    font-family:system-ui,Segoe UI,Roboto,Arial,sans-serif;display:flex;flex-direction:column;
+    align-items:center;justify-content:center;min-height:100vh;gap:10px;padding:12px;user-select:none;-webkit-user-select:none}
+  h1{margin:0;font-size:clamp(20px,5vw,30px)}
+  #status{min-height:22px;color:#7dd3fc;font-weight:700;text-align:center}
+  .boards{display:flex;gap:24px;flex-wrap:wrap;justify-content:center}
+  .panel h2{margin:0 0 6px;font-size:14px;text-align:center;font-weight:700;color:#9fc3e8}
+  .grid{display:grid;gap:2px;background:#0a2336;padding:4px;border-radius:8px;box-shadow:0 10px 30px rgba(0,0,0,.5)}
+  .cell{width:var(--cs);height:var(--cs);background:#12466b;border-radius:3px;display:flex;align-items:center;justify-content:center;font-size:calc(var(--cs)*0.6)}
+  .enemy .cell{cursor:crosshair}
+  .enemy .cell:hover{background:#1b5c8a}
+  .ship{background:#5b6b7f}
+  .hit{background:#e0523f!important}
+  .miss{background:#0a2336!important;color:#4a6a86}
+  .sunk{background:#8a2a1e!important}
+  .row{display:flex;gap:10px;align-items:center;flex-wrap:wrap;justify-content:center}
+  button{background:#38bdf8;color:#04121f;border:0;border-radius:10px;padding:10px 18px;font-size:15px;font-weight:800;cursor:pointer}
+  button.ghost{background:transparent;color:#7dd3fc;box-shadow:inset 0 0 0 2px #38bdf8}
+  #setup{font-size:14px;color:#ffd76a;min-height:20px}
+</style>
+</head>
+<body>
+<h1>Battleship</h1>
+<div id="status">Place your ships</div>
+<div id="setup"></div>
+<div class="boards">
+  <div class="panel"><h2>Your fleet</h2><div class="grid" id="own"></div></div>
+  <div class="panel"><h2>Enemy waters</h2><div class="grid enemy" id="enemy"></div></div>
+</div>
+<div class="row">
+  <button id="rotate" class="ghost">Rotate: Horizontal</button>
+  <button id="random" class="ghost">Random</button>
+  <button id="start" disabled>Start Battle</button>
+  <button id="reset">Reset</button>
+</div>
+<script>
+const N=10;const SHIPS=[5,4,3,3,2];
+const ownEl=document.getElementById('own'),enemyEl=document.getElementById('enemy');
+let own,enemy,ownShips,enemyShips,phase,placeIdx,horiz,playerTurn,aiTargets;
+function setCS(){const cs=Math.floor(Math.min(window.innerWidth*0.44,340)/N);document.documentElement.style.setProperty('--cs',cs+'px');}
+function empty(){return Array.from({length:N},()=>Array(N).fill(0));}
+function init(){
+  own=empty();enemy=empty();ownShips=[];enemyShips=[];phase='place';placeIdx=0;horiz=true;playerTurn=true;
+  aiTargets=[];
+  document.getElementById('start').disabled=true;
+  document.getElementById('rotate').textContent='Rotate: Horizontal';
+  placeEnemy();buildGrids();updateSetup();
+  document.getElementById('status').textContent='Place your ships';
+}
+function canPlace(grid,r,c,len,h){
+  for(let i=0;i<len;i++){const rr=r+(h?0:i),cc=c+(h?i:0);
+    if(rr>=N||cc>=N)return false;
+    // no overlap or adjacency
+    for(let dr=-1;dr<=1;dr++)for(let dc=-1;dc<=1;dc++){const ar=rr+dr,ac=cc+dc;
+      if(ar>=0&&ac>=0&&ar<N&&ac<N&&grid[ar][ac])return false;}
+  }
+  return true;
+}
+function putShip(grid,ships,r,c,len,h){
+  const cells=[];for(let i=0;i<len;i++){const rr=r+(h?0:i),cc=c+(h?i:0);grid[rr][cc]=1;cells.push([rr,cc]);}
+  ships.push({cells,hits:0,len});
+}
+function placeEnemy(){
+  for(const len of SHIPS){let ok=false,t=0;
+    while(!ok&&t++<500){const h=Math.random()<0.5,r=Math.floor(Math.random()*N),c=Math.floor(Math.random()*N);
+      if(canPlace(enemy,r,c,len,h)){putShip(enemy,enemyShips,r,c,len,h);ok=true;}}
+  }
+}
+function randomOwn(){
+  own=empty();ownShips=[];
+  for(const len of SHIPS){let ok=false,t=0;
+    while(!ok&&t++<500){const h=Math.random()<0.5,r=Math.floor(Math.random()*N),c=Math.floor(Math.random()*N);
+      if(canPlace(own,r,c,len,h)){putShip(own,ownShips,r,c,len,h);ok=true;}}
+  }
+  placeIdx=SHIPS.length;phase='ready';document.getElementById('start').disabled=false;
+  buildGrids();updateSetup();
+}
+function buildGrids(){
+  ownEl.innerHTML='';enemyEl.innerHTML='';
+  ownEl.style.gridTemplateColumns=`repeat(${N},1fr)`;enemyEl.style.gridTemplateColumns=`repeat(${N},1fr)`;
+  for(let r=0;r<N;r++)for(let c=0;c<N;c++){
+    const o=document.createElement('div');o.className='cell'+(own[r][c]===1||own[r][c]==='S'?' ship':'');
+    if(own[r][c]==='X')o.classList.add('hit'),o.textContent='✷';
+    if(own[r][c]==='O')o.classList.add('miss'),o.textContent='•';
+    if(phase==='place')o.onclick=()=>placeAt(r,c),o.onmouseenter=()=>preview(r,c),o.onmouseleave=clearPreview;
+    ownEl.appendChild(o);
+    const e=document.createElement('div');e.className='cell';
+    if(enemy[r][c]==='X')e.classList.add('hit'),e.textContent='✷';
+    if(enemy[r][c]==='O')e.classList.add('miss'),e.textContent='•';
+    if(enemy[r][c]==='S')e.classList.add('sunk'),e.textContent='✷';
+    if(phase==='battle')e.onclick=()=>fire(r,c);
+    enemyEl.appendChild(e);
+  }
+}
+function preview(r,c){
+  if(phase!=='place'||placeIdx>=SHIPS.length)return;
+  clearPreview();const len=SHIPS[placeIdx];const ok=canPlace(own,r,c,len,horiz);
+  for(let i=0;i<len;i++){const rr=r+(horiz?0:i),cc=c+(horiz?i:0);if(rr<N&&cc<N){
+    const idx=rr*N+cc;const cell=ownEl.children[idx];if(cell&&!cell.classList.contains('ship'))cell.style.background=ok?'#2e6f45':'#7a2a20';}}
+}
+function clearPreview(){for(const cell of ownEl.children)if(!cell.classList.contains('ship')&&!cell.classList.contains('hit')&&!cell.classList.contains('miss'))cell.style.background='';}
+function placeAt(r,c){
+  if(phase!=='place'||placeIdx>=SHIPS.length)return;
+  const len=SHIPS[placeIdx];
+  if(!canPlace(own,r,c,len,horiz))return;
+  putShip(own,ownShips,r,c,len,horiz);placeIdx++;
+  if(placeIdx>=SHIPS.length){phase='ready';document.getElementById('start').disabled=false;}
+  buildGrids();updateSetup();
+}
+function updateSetup(){
+  const s=document.getElementById('setup');
+  if(phase==='place')s.textContent=`Placing ship of length ${SHIPS[placeIdx]} (${SHIPS.length-placeIdx} left)`;
+  else if(phase==='ready')s.textContent='Fleet ready — press Start Battle!';
+  else s.textContent='';
+}
+function start(){if(placeIdx<SHIPS.length)return;phase='battle';playerTurn=true;buildGrids();
+  document.getElementById('status').textContent='Fire at enemy waters!';}
+function fire(r,c){
+  if(phase!=='battle'||!playerTurn)return;
+  if(enemy[r][c]==='X'||enemy[r][c]==='O'||enemy[r][c]==='S')return;
+  if(enemy[r][c]===1){enemy[r][c]='X';registerHit(enemyShips,r,c,enemy);
+    if(allSunk(enemyShips))return win('🎉 You win! Enemy fleet destroyed.');
+    document.getElementById('status').textContent='Hit! Fire again.';buildGrids();return;
+  }else{enemy[r][c]='O';document.getElementById('status').textContent='Miss. Enemy returns fire…';playerTurn=false;buildGrids();setTimeout(aiFire,600);}
+}
+function registerHit(ships,r,c,grid){
+  const ship=ships.find(s=>s.cells.some(([sr,sc])=>sr===r&&sc===c));
+  if(ship){ship.hits++;if(ship.hits===ship.len)ship.cells.forEach(([sr,sc])=>grid[sr][sc]='S');}
+}
+function aiFire(){
+  if(phase!=='battle')return;
+  let target;
+  if(aiTargets.length){target=aiTargets.pop();}
+  else{do{target=[Math.floor(Math.random()*N),Math.floor(Math.random()*N)];}
+    while(own[target[0]][target[1]]==='X'||own[target[0]][target[1]]==='O');}
+  const [r,c]=target;
+  if(own[r][c]==='X'||own[r][c]==='O')return aiFire();
+  if(own[r][c]===1){own[r][c]='X';registerHit(ownShips,r,c,own);
+    // add neighbors to hunt queue
+    [[r-1,c],[r+1,c],[r,c-1],[r,c+1]].forEach(([nr,nc])=>{
+      if(nr>=0&&nc>=0&&nr<N&&nc<N&&own[nr][nc]!=='X'&&own[nr][nc]!=='O')aiTargets.push([nr,nc]);});
+    buildGrids();
+    if(allSunk(ownShips))return win('💀 You lose — your fleet is sunk.');
+    document.getElementById('status').textContent='Enemy hit your ship! Firing again…';setTimeout(aiFire,600);
+  }else{own[r][c]='O';buildGrids();playerTurn=true;document.getElementById('status').textContent='Enemy missed. Your turn — fire!';}
+}
+function allSunk(ships){return ships.every(s=>s.hits>=s.len);}
+function win(msg){phase='over';document.getElementById('status').textContent=msg;buildGrids();}
+document.getElementById('rotate').onclick=()=>{horiz=!horiz;document.getElementById('rotate').textContent='Rotate: '+(horiz?'Horizontal':'Vertical');};
+document.getElementById('random').onclick=randomOwn;
+document.getElementById('start').onclick=start;
+document.getElementById('reset').onclick=init;
+window.addEventListener('resize',()=>{setCS();buildGrids();});
+setCS();init();
+</script>
+</body>
+</html>

@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+<meta name="robots" content="noindex,nofollow">
+<title>Word Search</title>
+<style>
+  *{box-sizing:border-box}
+  html,body{margin:0;height:100%}
+  body{background:radial-gradient(circle at 50% 0,#20304f,#0a0f1e 60%);color:#eef;
+    font-family:system-ui,Segoe UI,Roboto,Arial,sans-serif;display:flex;flex-direction:column;
+    align-items:center;justify-content:center;min-height:100vh;gap:12px;padding:12px;user-select:none;-webkit-user-select:none;touch-action:none}
+  h1{margin:0;font-size:clamp(20px,5vw,30px)}
+  #status{min-height:20px;color:#ffd76a;font-weight:700}
+  #grid{display:grid;gap:2px;background:#0c1426;padding:6px;border-radius:10px;box-shadow:0 14px 40px rgba(0,0,0,.5)}
+  .c{display:flex;align-items:center;justify-content:center;background:#182541;border-radius:5px;
+    font-weight:800;cursor:pointer;font-size:var(--fs);width:var(--cs);height:var(--cs);color:#dbe6ff}
+  .c.sel{background:#4f7bd1;color:#fff}
+  .c.found{background:#2e7d4f;color:#fff}
+  #words{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;max-width:min(96vw,520px)}
+  .w{background:rgba(255,255,255,.08);border-radius:8px;padding:5px 12px;font-weight:700;font-size:14px}
+  .w.done{text-decoration:line-through;opacity:.5;color:#8ce99a}
+  .row{display:flex;gap:10px}
+  button,select{background:#5b8def;color:#fff;border:0;border-radius:10px;padding:10px 18px;font-size:15px;font-weight:800;cursor:pointer}
+  select{background:rgba(255,255,255,.1)}
+</style>
+</head>
+<body>
+<h1>Word Search</h1>
+<div id="status">Find all the words! Drag across letters.</div>
+<div id="grid"></div>
+<div id="words"></div>
+<div class="row">
+  <button id="newGame">New Puzzle</button>
+  <select id="theme">
+    <option value="animals" selected>Animals</option>
+    <option value="space">Space</option>
+    <option value="food">Food</option>
+    <option value="nature">Nature</option>
+  </select>
+</div>
+<script>
+const THEMES={
+  animals:['TIGER','PANDA','EAGLE','SHARK','HORSE','KOALA','OTTER','MOOSE','ZEBRA','LLAMA'],
+  space:['COMET','PLUTO','ORBIT','SOLAR','LUNAR','NOVA','MARS','VENUS','GALAXY','METEOR'],
+  food:['PIZZA','MANGO','BREAD','HONEY','LEMON','OLIVE','PASTA','WAFFLE','COOKIE','TOMATO'],
+  nature:['RIVER','CLOUD','STONE','FOREST','MEADOW','CANYON','BREEZE','PETAL','CORAL','FROST']
+};
+const N=12;
+const gridEl=document.getElementById('grid'),wordsEl=document.getElementById('words');
+let grid,placed,found,selecting,path;
+function sizeCells(){const cs=Math.floor(Math.min(window.innerWidth*0.92,window.innerHeight*0.5,480)/N);
+  document.documentElement.style.setProperty('--cs',cs+'px');
+  document.documentElement.style.setProperty('--fs',Math.floor(cs*0.5)+'px');}
+const DIRS=[[0,1],[1,0],[1,1],[-1,1],[0,-1],[-1,0],[-1,-1],[1,-1]];
+function newGame(){
+  sizeCells();
+  const theme=document.getElementById('theme').value;
+  const pool=THEMES[theme].slice().sort(()=>Math.random()-0.5).slice(0,7).filter(w=>w.length<=N);
+  grid=Array.from({length:N},()=>Array(N).fill(''));
+  placed=[];found=new Set();
+  for(const word of pool){
+    let ok=false,t=0;
+    while(!ok&&t++<200){
+      const dir=DIRS[Math.floor(Math.random()*DIRS.length)];
+      const r=Math.floor(Math.random()*N),c=Math.floor(Math.random()*N);
+      const er=r+dir[0]*(word.length-1),ec=c+dir[1]*(word.length-1);
+      if(er<0||ec<0||er>=N||ec>=N)continue;
+      let fits=true;
+      for(let i=0;i<word.length;i++){const rr=r+dir[0]*i,cc=c+dir[1]*i;
+        if(grid[rr][cc]&&grid[rr][cc]!==word[i]){fits=false;break;}}
+      if(!fits)continue;
+      for(let i=0;i<word.length;i++){const rr=r+dir[0]*i,cc=c+dir[1]*i;grid[rr][cc]=word[i];}
+      placed.push(word);ok=true;
+    }
+  }
+  const letters='ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+  for(let r=0;r<N;r++)for(let c=0;c<N;c++)if(!grid[r][c])grid[r][c]=letters[Math.floor(Math.random()*26)];
+  render();
+  document.getElementById('status').textContent='Find all the words! Drag across letters.';
+}
+function render(){
+  gridEl.style.gridTemplateColumns=`repeat(${N},var(--cs))`;
+  gridEl.innerHTML='';
+  for(let r=0;r<N;r++)for(let c=0;c<N;c++){
+    const d=document.createElement('div');d.className='c';d.textContent=grid[r][c];d.dataset.r=r;d.dataset.c=c;
+    gridEl.appendChild(d);
+  }
+  wordsEl.innerHTML='';
+  placed.forEach(w=>{const s=document.createElement('div');s.className='w'+(found.has(w)?' done':'');s.textContent=w;s.dataset.w=w;wordsEl.appendChild(s);});
+}
+function cellAt(x,y){const el=document.elementFromPoint(x,y);return el&&el.classList.contains('c')?el:null;}
+function start(e){e.preventDefault();selecting=true;path=[];const t=point(e);addCell(cellAt(t.x,t.y));}
+function move(e){if(!selecting)return;e.preventDefault();const t=point(e);const el=cellAt(t.x,t.y);if(el)addCell(el);}
+function endSel(e){if(!selecting)return;selecting=false;evaluate();clearSel();path=[];}
+function point(e){const t=e.touches?e.touches[0]:e;return{x:t.clientX,y:t.clientY};}
+function addCell(el){
+  if(!el)return;
+  const r=+el.dataset.r,c=+el.dataset.c;
+  if(path.length){const last=path[path.length-1];
+    if(last.r===r&&last.c===c)return;
+    // enforce straight line from origin
+    const o=path[0];const dr=Math.sign(r-o.r),dc=Math.sign(c-o.c);
+    const len=Math.max(Math.abs(r-o.r),Math.abs(c-o.c));
+    // rebuild path along the line
+    clearSel();path=[];
+    for(let i=0;i<=len;i++){const rr=o.r+dr*i,cc=o.c+dc*i;
+      if(rr<0||cc<0||rr>=N||cc>=N)break;
+      // must be straight (row, col or diagonal)
+      if(!((o.r===r)||(o.c===c)||(Math.abs(r-o.r)===Math.abs(c-o.c)))){}
+      path.push({r:rr,c:cc});}
+  }else path.push({r,c});
+  markSel();
+}
+function markSel(){document.querySelectorAll('.c.sel').forEach(el=>el.classList.remove('sel'));
+  path.forEach(p=>{const el=gridEl.children[p.r*N+p.c];if(el&&!el.classList.contains('found'))el.classList.add('sel');});}
+function clearSel(){document.querySelectorAll('.c.sel').forEach(el=>el.classList.remove('sel'));}
+function evaluate(){
+  if(path.length<2)return;
+  let word='';path.forEach(p=>word+=grid[p.r][p.c]);
+  const rev=word.split('').reverse().join('');
+  for(const w of placed){
+    if(found.has(w))continue;
+    if(w===word||w===rev){
+      found.add(w);
+      path.forEach(p=>{const el=gridEl.children[p.r*N+p.c];el.classList.add('found');});
+      const chip=[...wordsEl.children].find(c=>c.dataset.w===w);if(chip)chip.classList.add('done');
+      if(found.size===placed.length)document.getElementById('status').textContent='🎉 You found every word!';
+      return;
+    }
+  }
+}
+gridEl.addEventListener('mousedown',start);
+window.addEventListener('mousemove',move);
+window.addEventListener('mouseup',endSel);
+gridEl.addEventListener('touchstart',start,{passive:false});
+gridEl.addEventListener('touchmove',move,{passive:false});
+window.addEventListener('touchend',endSel);
+window.addEventListener('resize',()=>{sizeCells();render();});
+document.getElementById('newGame').onclick=newGame;
+document.getElementById('theme').onchange=newGame;
+newGame();
+</script>
+</body>
+</html>

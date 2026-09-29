@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+<meta name="robots" content="noindex,nofollow">
+<title>Tower of Hanoi</title>
+<style>
+  *{box-sizing:border-box}
+  html,body{margin:0;height:100%}
+  body{background:radial-gradient(circle at 50% 0,#2a1f3d,#100a1c 60%);color:#eee;
+    font-family:system-ui,Segoe UI,Roboto,Arial,sans-serif;display:flex;flex-direction:column;
+    align-items:center;justify-content:center;min-height:100vh;gap:14px;padding:14px;user-select:none;-webkit-user-select:none}
+  h1{margin:0;font-size:clamp(20px,5vw,30px)}
+  .hud{display:flex;gap:12px;font-weight:700}
+  .hud div{background:rgba(255,255,255,.08);border-radius:10px;padding:8px 14px}
+  #pegs{display:flex;gap:10px;width:min(96vw,720px);height:min(46vh,320px)}
+  .peg{flex:1;position:relative;display:flex;flex-direction:column-reverse;align-items:center;
+    cursor:pointer;border-radius:10px;transition:background .15s}
+  .peg::before{content:"";position:absolute;bottom:0;width:100%;height:12px;background:#5a4636;border-radius:6px}
+  .peg::after{content:"";position:absolute;bottom:12px;width:10px;height:calc(100% - 12px);background:#5a4636;border-radius:6px}
+  .peg.sel{background:rgba(255,255,255,.08)}
+  .peg.valid{background:rgba(90,220,120,.14)}
+  .disk{height:26px;border-radius:13px;margin-bottom:3px;z-index:2;position:relative;box-shadow:0 2px 6px rgba(0,0,0,.4)}
+  .disk.lift{outline:3px solid #ffd76a}
+  #win{min-height:22px;color:#ffd76a;font-weight:700}
+  .row{display:flex;gap:10px;align-items:center}
+  button,select{background:#b48cff;color:#160d2b;border:0;border-radius:10px;padding:10px 18px;font-size:15px;font-weight:800;cursor:pointer}
+  select{background:rgba(255,255,255,.1);color:#eee}
+</style>
+</head>
+<body>
+<h1>Tower of Hanoi</h1>
+<div class="hud"><div>Moves <span id="moves">0</span></div><div>Min <span id="min">7</span></div></div>
+<div id="pegs"></div>
+<div id="win">Move the whole stack to the rightmost peg. Tap a peg to pick up / drop.</div>
+<div class="row">
+  <button id="reset">Reset</button>
+  <select id="disks"><option value="3">3 disks</option><option value="4">4 disks</option><option value="5" selected>5 disks</option><option value="6">6 disks</option><option value="7">7 disks</option></select>
+</div>
+<script>
+const pegsEl=document.getElementById('pegs');
+const COLORS=['#ff6b6b','#ffa94d','#ffe066','#8ce99a','#63e6be','#74c0fc','#b197fc'];
+let pegs,sel,moves,count,solved;
+function init(){
+  count=parseInt(document.getElementById('disks').value);
+  pegs=[[],[],[]];for(let d=count;d>=1;d--)pegs[0].push(d);
+  sel=null;moves=0;solved=false;
+  document.getElementById('moves').textContent=0;
+  document.getElementById('min').textContent=Math.pow(2,count)-1;
+  document.getElementById('win').textContent='Move the whole stack to the rightmost peg.';
+  render();
+}
+function render(){
+  pegsEl.innerHTML='';
+  pegs.forEach((stack,i)=>{
+    const peg=document.createElement('div');peg.className='peg'+(sel===i?' sel':'');
+    if(sel!==null&&sel!==i&&canMove(sel,i))peg.classList.add('valid');
+    stack.forEach((d,idx)=>{
+      const disk=document.createElement('div');disk.className='disk'+(sel===i&&idx===stack.length-1?' lift':'');
+      disk.style.width=(28+d*(100/(count+1)))/(count+2)*100/100+'%';
+      disk.style.width=`${18+ d*(72/count)}%`;
+      disk.style.background=`linear-gradient(180deg,${COLORS[(d-1)%COLORS.length]},rgba(0,0,0,.25))`;
+      peg.appendChild(disk);
+    });
+    peg.onclick=()=>tap(i);
+    pegsEl.appendChild(peg);
+  });
+}
+function top(i){return pegs[i][pegs[i].length-1];}
+function canMove(from,to){if(!pegs[from].length)return false;if(!pegs[to].length)return true;return top(from)<top(to);}
+function tap(i){
+  if(solved)return;
+  if(sel===null){if(pegs[i].length)sel=i;render();return;}
+  if(sel===i){sel=null;render();return;}
+  if(canMove(sel,i)){pegs[i].push(pegs[sel].pop());moves++;
+    document.getElementById('moves').textContent=moves;sel=null;render();check();}
+  else{sel=pegs[i].length?i:null;render();}
+}
+function check(){
+  if(pegs[2].length===count){solved=true;
+    const min=Math.pow(2,count)-1;
+    document.getElementById('win').textContent=`🎉 Solved in ${moves} moves!`+(moves===min?' Perfect — that\u2019s the minimum!':'');
+  }
+}
+document.getElementById('reset').onclick=init;
+document.getElementById('disks').onchange=init;
+init();
+</script>
+</body>
+</html>

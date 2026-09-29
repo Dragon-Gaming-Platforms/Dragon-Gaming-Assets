@@ -1,0 +1,9 @@
+{
+  "name": "Tower of Hanoi",
+  "desc": "The famous math puzzle: move the whole stack of disks to the far peg, never placing a larger disk on a smaller one. Choose 3 to 7 disks and chase the minimum-move solution.",
+  "controls": "Mouse / touch a peg to pick up or drop a disk",
+  "shelf": "Puzzle & Logic",
+  "tags": ["games", "html5", "puzzle", "logic", "classic"],
+  "badge": "New",
+  "creator": "Dragon Gaming Platforms"
+}

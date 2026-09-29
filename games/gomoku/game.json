@@ -1,0 +1,9 @@
+{
+  "name": "Gomoku",
+  "desc": "Five-in-a-row on a 15x15 board against a computer opponent with three difficulty levels. Place stones and be the first to line up five in a row.",
+  "controls": "Mouse / touch to place a stone",
+  "shelf": "Puzzle & Logic",
+  "tags": ["games", "html5", "board", "strategy", "gomoku"],
+  "badge": "New",
+  "creator": "Dragon Gaming Platforms"
+}
