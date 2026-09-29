@@ -1,0 +1,9 @@
+{
+  "name": "Snakes & Ladders",
+  "desc": "Roll the die and race the computer up the board to square 100. Climb the ladders to leap ahead, but land on a snake and slide right back down. Pure luck and plenty of swings all the way to the finish.",
+  "controls": "Tap Roll to throw the die",
+  "shelf": "Arcade & Action",
+  "tags": ["games", "html5", "board", "family", "dice"],
+  "badge": "New",
+  "creator": "Dragon Gaming Platforms"
+}

@@ -1,0 +1,9 @@
+{
+  "name": "Maze Muncher",
+  "desc": "Gobble every dot in the maze while ghosts hunt you down. Grab a power pellet to turn the tables and chase them for big points. Clear the board to advance, but each level the ghosts get faster.",
+  "controls": "Arrow keys / WASD or the on-screen pad to move",
+  "shelf": "Arcade & Action",
+  "tags": ["games", "html5", "arcade", "maze", "retro"],
+  "badge": "New",
+  "creator": "Dragon Gaming Platforms"
+}

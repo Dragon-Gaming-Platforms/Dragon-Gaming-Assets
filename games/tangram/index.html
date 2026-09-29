@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+<meta name="robots" content="noindex,nofollow">
+<title>Tangram</title>
+<style>
+  *{box-sizing:border-box}body{margin:0;min-height:100vh;background:#141225;color:#eef;
+    font-family:system-ui,Segoe UI,Roboto,Arial,sans-serif;display:flex;flex-direction:column;align-items:center;gap:10px;padding:12px;user-select:none;-webkit-user-select:none}
+  h1{margin:2px 0;font-size:clamp(18px,5vw,26px)}
+  #status{min-height:18px;font-weight:700;color:#ffe08a;text-align:center}
+  canvas{background:#1e1b34;border-radius:10px;touch-action:none;max-width:94vw;height:auto}
+  .ctr{display:flex;gap:8px;flex-wrap:wrap;justify-content:center}
+  button{background:#ffcc33;color:#20150a;border:0;border-radius:9px;padding:10px 14px;font-weight:800;cursor:pointer}
+  .hint{font-size:12px;opacity:.7;text-align:center;max-width:360px}
+</style>
+</head>
+<body>
+<h1>Tangram</h1>
+<div id="status">Fit all 7 pieces into the square outline.</div>
+<canvas id="c" width="380" height="380"></canvas>
+<div class="ctr">
+  <button id="rot">Rotate ↻</button>
+  <button id="flip">Flip ⇋</button>
+  <button id="reset">Shuffle</button>
+</div>
+<div class="hint">Tap a piece to select &amp; drag it. Rotate turns it 45°. Pieces snap when placed correctly.</div>
+<script>
+const cv=document.getElementById('c'),ctx=cv.getContext('2d');
+const S=40,OX=30,OY=30,SIDE=8; // scale + offset; target square 0..8 -> 0..320 +30
+function P(x,y){return{x:x*S+OX,y:y*S+OY};}
+// target polygons (absolute) for the classic square dissection (verified perfect tiling)
+const DEF=[
+  {name:'LT1',color:'#ff6b6b',sym:360,pts:[[0,0],[0,8],[4,4]]},
+  {name:'LT2',color:'#4dabf7',sym:360,pts:[[0,8],[8,8],[4,4]]},
+  {name:'MT', color:'#38d9a9',sym:360,pts:[[4,0],[8,0],[8,4]]},
+  {name:'ST1',color:'#ffd43b',sym:360,pts:[[2,2],[6,2],[4,4]]},
+  {name:'SQ', color:'#da77f2',sym:90, pts:[[4,4],[6,2],[8,4],[6,6]]},
+  {name:'ST2',color:'#ff922b',sym:360,pts:[[8,4],[8,8],[6,6]]},
+  {name:'PAR',color:'#a9e34b',sym:180,pts:[[0,0],[4,0],[6,2],[2,2]],chiral:true},
+];
+let pieces,sel;
+function centroid(pts){let x=0,y=0;pts.forEach(p=>{x+=p.x;y+=p.y;});return{x:x/pts.length,y:y/pts.length};}
+function build(){
+  pieces=DEF.map((d,i)=>{
+    const abs=d.pts.map(([x,y])=>P(x,y));const c=centroid(abs);
+    const local=abs.map(p=>({x:p.x-c.x,y:p.y-c.y}));
+    return{...d,local,target:{x:c.x,y:c.y},targetRot:0,targetFlip:false,
+      pos:{x:0,y:0},rot:0,flip:false,locked:false,z:i};
+  });
+  shuffle();
+}
+function shuffle(){
+  pieces.forEach(p=>{p.locked=false;
+    p.pos={x:60+Math.random()*260,y:250+Math.random()*100};
+    p.rot=45*Math.floor(Math.random()*8);
+    p.flip=p.chiral?Math.random()<0.5:false;});
+  // keep them on-canvas
+  pieces.forEach(p=>{p.pos.x=Math.max(40,Math.min(cv.width-40,p.pos.x));p.pos.y=Math.max(40,Math.min(cv.height-40,p.pos.y));});
+  sel=null;setStatus('Fit all 7 pieces into the square outline.');draw();
+}
+function setStatus(t){document.getElementById('status').textContent=t;}
+function worldPts(p){const th=p.rot*Math.PI/180,cs=Math.cos(th),sn=Math.sin(th);
+  return p.local.map(pt=>{let x=pt.x;if(p.flip)x=-x;const y=pt.y;
+    return{x:p.pos.x+x*cs-y*sn,y:p.pos.y+x*sn+y*cs};});}
+function pointIn(poly,x,y){let inside=false;
+  for(let i=0,j=poly.length-1;i<poly.length;j=i++){
+    const xi=poly[i].x,yi=poly[i].y,xj=poly[j].x,yj=poly[j].y;
+    if(((yi>y)!==(yj>y))&&(x<(xj-xi)*(y-yi)/(yj-yi)+xi))inside=!inside;}
+  return inside;}
+function draw(){
+  ctx.clearRect(0,0,cv.width,cv.height);
+  // target outline
+  ctx.save();ctx.strokeStyle='rgba(255,255,255,.35)';ctx.lineWidth=2;ctx.setLineDash([6,5]);
+  ctx.strokeRect(OX,OY,SIDE*S,SIDE*S);ctx.restore();
+  const order=pieces.slice().sort((a,b)=>a.z-b.z);
+  order.forEach(p=>{const w=worldPts(p);
+    ctx.beginPath();ctx.moveTo(w[0].x,w[0].y);for(let i=1;i<w.length;i++)ctx.lineTo(w[i].x,w[i].y);ctx.closePath();
+    ctx.fillStyle=p.color;ctx.globalAlpha=p.locked?0.95:0.9;ctx.fill();ctx.globalAlpha=1;
+    ctx.lineWidth=(sel===p)?3:1.5;ctx.strokeStyle=(sel===p)?'#fff':'rgba(0,0,0,.4)';ctx.stroke();});
+}
+function bringFront(p){const maxz=Math.max(...pieces.map(x=>x.z));p.z=maxz+1;}
+function checkSnap(p){
+  if(p.locked)return;
+  const d=Math.hypot(p.pos.x-p.target.x,p.pos.y-p.target.y);
+  const rotOk=((p.rot%p.sym)+p.sym)%p.sym===0;
+  const flipOk=!p.chiral||p.flip===p.targetFlip;
+  if(d<24&&rotOk&&flipOk){p.pos={...p.target};p.locked=true;
+    // normalize rotation to a canonical equivalent (already valid); keep for square
+  }
+}
+// pointer handling
+let dragging=null,lastX,lastY,moved=false;
+function getXY(e){const r=cv.getBoundingClientRect();const sx=cv.width/r.width,sy=cv.height/r.height;
+  const t=e.touches?e.touches[0]:e;return{x:(t.clientX-r.left)*sx,y:(t.clientY-r.top)*sy};}
+function down(e){const {x,y}=getXY(e);
+  const order=pieces.slice().sort((a,b)=>b.z-a.z);
+  for(const p of order){if(pointIn(worldPts(p),x,y)){
+    if(!p.locked){dragging=p;bringFront(p);}sel=p;lastX=x;lastY=y;moved=false;draw();e.preventDefault();return;}}
+}
+function move(e){if(!dragging)return;const {x,y}=getXY(e);
+  dragging.pos.x+=x-lastX;dragging.pos.y+=y-lastY;lastX=x;lastY=y;moved=true;draw();e.preventDefault();}
+function up(e){if(dragging){checkSnap(dragging);dragging=null;draw();checkWin();}}
+cv.addEventListener('mousedown',down);window.addEventListener('mousemove',move);window.addEventListener('mouseup',up);
+cv.addEventListener('touchstart',down,{passive:false});cv.addEventListener('touchmove',move,{passive:false});cv.addEventListener('touchend',up);
+document.getElementById('rot').onclick=()=>{if(!sel||sel.locked)return;sel.rot=(sel.rot+45)%360;checkSnap(sel);draw();checkWin();};
+document.getElementById('flip').onclick=()=>{if(!sel||sel.locked)return;if(!sel.chiral){setStatus('Only the parallelogram can flip.');return;}sel.flip=!sel.flip;checkSnap(sel);draw();checkWin();};
+document.getElementById('reset').onclick=shuffle;
+document.addEventListener('keydown',e=>{const k=e.key.toLowerCase();
+  if(k==='r'){document.getElementById('rot').click();}if(k==='f'){document.getElementById('flip').click();}});
+function checkWin(){if(pieces.every(p=>p.locked))setStatus('🎉 Solved! The square is complete.');}
+build();
+</script>
+</body>
+</html>

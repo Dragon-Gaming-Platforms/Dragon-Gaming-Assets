@@ -1,0 +1,9 @@
+{
+  "name": "FreeCell",
+  "desc": "The beloved solitaire where nearly every deal is winnable. Use four free cells to shuffle cards around as you build the foundations from Ace to King. Plan your supermoves carefully to clear the tableau.",
+  "controls": "Tap a card then tap its destination to move it",
+  "shelf": "Puzzle & Logic",
+  "tags": ["games", "html5", "cards", "solitaire", "puzzle"],
+  "badge": "New",
+  "creator": "Dragon Gaming Platforms"
+}

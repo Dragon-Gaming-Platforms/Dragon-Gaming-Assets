@@ -1,0 +1,9 @@
+{
+  "name": "Mahjong Match",
+  "desc": "Clear the layered pyramid by matching pairs of identical tiles. Only free tiles with an open side and nothing on top can be removed, so plan ahead. Shuffle the remaining tiles if you run out of moves.",
+  "controls": "Tap two matching free tiles to remove them",
+  "shelf": "Puzzle & Logic",
+  "tags": ["games", "html5", "mahjong", "matching", "puzzle"],
+  "badge": "New",
+  "creator": "Dragon Gaming Platforms"
+}

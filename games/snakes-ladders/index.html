@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<title>Snakes &amp; Ladders</title>
+<style>
+  *{box-sizing:border-box}body{margin:0;min-height:100vh;background:#12102a;color:#eef;
+    font-family:system-ui,Segoe UI,Roboto,Arial,sans-serif;display:flex;flex-direction:column;align-items:center;gap:10px;padding:12px}
+  h1{margin:2px 0;font-size:clamp(18px,5vw,26px)}
+  #status{min-height:20px;font-weight:700;color:#ffe08a;text-align:center;max-width:420px}
+  canvas{background:#fff;border-radius:8px;max-width:94vw;height:auto}
+  .ctr{display:flex;gap:12px;align-items:center}
+  button{background:#ffcc33;color:#20150a;border:0;border-radius:9px;padding:12px 22px;font-weight:800;font-size:16px;cursor:pointer}
+  button:disabled{opacity:.5;cursor:default}
+  #die{width:48px;height:48px;background:#fff;color:#111;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:26px;font-weight:800}
+  .leg{display:flex;gap:16px;font-size:13px}
+  .p1{color:#ff5da2}.p2{color:#5de0ff}
+</style>
+</head>
+<body>
+<h1>Snakes &amp; Ladders</h1>
+<div id="status">Roll the die to race to square 100!</div>
+<canvas id="c" width="420" height="420"></canvas>
+<div class="ctr"><div id="die">–</div><button id="roll">Roll</button></div>
+<div class="leg"><span class="p1">● You: <b id="s1">1</b></span><span class="p2">● Computer: <b id="s2">1</b></span></div>
+<script>
+const cv=document.getElementById('c'),ctx=cv.getContext('2d'),N=10,CELL=cv.width/N;
+const ladders={1:38,4:14,9:31,21:42,28:84,36:44,51:67,71:91,80:100};
+const snakes={16:6,47:26,49:11,56:53,62:19,64:60,87:24,93:73,95:75,98:78};
+let pos,turn,over;
+function reset(){pos=[1,1];turn=0;over=false;setStatus('Your turn — roll the die!');
+  document.getElementById('roll').disabled=false;document.getElementById('die').textContent='–';draw();updHud();}
+function setStatus(t){document.getElementById('status').textContent=t;}
+function updHud(){document.getElementById('s1').textContent=pos[0];document.getElementById('s2').textContent=pos[1];}
+function cellXY(n){const r=Math.floor((n-1)/N),idx=(n-1)%N,col=(r%2===0)?idx:(N-1-idx);
+  return[col*CELL+CELL/2,cv.height-(r*CELL+CELL/2)];}
+function draw(){
+  for(let n=1;n<=100;n++){const[x,y]=cellXY(n);const r=Math.floor((n-1)/N);
+    ctx.fillStyle=((r+((n-1)%N))%2===0)?'#f4ecd8':'#e4d5b0';
+    ctx.fillRect(x-CELL/2,y-CELL/2,CELL,CELL);
+    ctx.fillStyle='#8a7a55';ctx.font='9px sans-serif';ctx.textAlign='left';ctx.fillText(n,x-CELL/2+2,y-CELL/2+10);}
+  // ladders
+  ctx.lineWidth=4;ctx.strokeStyle='#3a9d3a';
+  for(const a in ladders){const[x1,y1]=cellXY(+a),[x2,y2]=cellXY(ladders[a]);
+    ctx.beginPath();ctx.moveTo(x1-5,y1);ctx.lineTo(x2-5,y2);ctx.moveTo(x1+5,y1);ctx.lineTo(x2+5,y2);ctx.stroke();}
+  // snakes
+  ctx.strokeStyle='#c0392b';ctx.lineWidth=5;
+  for(const a in snakes){const[x1,y1]=cellXY(+a),[x2,y2]=cellXY(snakes[a]);
+    ctx.beginPath();ctx.moveTo(x1,y1);ctx.quadraticCurveTo((x1+x2)/2+18,(y1+y2)/2,x2,y2);ctx.stroke();
+    ctx.fillStyle='#c0392b';ctx.beginPath();ctx.arc(x1,y1,6,0,7);ctx.fill();}
+  // tokens
+  const[a1x,a1y]=cellXY(pos[0]);ctx.fillStyle='#ff5da2';ctx.beginPath();ctx.arc(a1x-8,a1y+6,8,0,7);ctx.fill();ctx.strokeStyle='#fff';ctx.lineWidth=2;ctx.stroke();
+  const[b1x,b1y]=cellXY(pos[1]);ctx.fillStyle='#5de0ff';ctx.beginPath();ctx.arc(b1x+8,b1y+6,8,0,7);ctx.fill();ctx.stroke();
+}
+function move(p,steps,done){
+  let target=pos[p]+steps;
+  if(target>100){setStatus((p===0?'You':'Computer')+' rolled '+steps+' — overshoots 100, stay put.');done();return;}
+  pos[p]=target;updHud();draw();
+  setTimeout(()=>{
+    if(ladders[pos[p]]){setStatus((p===0?'You':'Computer')+' climbed a ladder to '+ladders[pos[p]]+'! 🪜');pos[p]=ladders[pos[p]];}
+    else if(snakes[pos[p]]){setStatus((p===0?'You':'Computer')+' hit a snake down to '+snakes[pos[p]]+'! 🐍');pos[p]=snakes[pos[p]];}
+    updHud();draw();
+    if(pos[p]===100){over=true;setStatus(p===0?'🎉 You reached 100 — you win!':'Computer reached 100. It wins!');
+      document.getElementById('roll').disabled=false;document.getElementById('roll').textContent='Play Again';return;}
+    done();
+  },500);
+}
+document.getElementById('roll').onclick=function(){
+  if(over){document.getElementById('roll').textContent='Roll';reset();return;}
+  if(turn!==0)return;
+  const btn=this;btn.disabled=true;
+  const d=1+Math.floor(Math.random()*6);document.getElementById('die').textContent=['⚀','⚁','⚂','⚃','⚄','⚅'][d-1];
+  move(0,d,()=>{if(over)return;turn=1;setStatus('Computer is rolling...');setTimeout(cpuRoll,700);});
+};
+function cpuRoll(){const d=1+Math.floor(Math.random()*6);document.getElementById('die').textContent=['⚀','⚁','⚂','⚃','⚄','⚅'][d-1];
+  move(1,d,()=>{if(over)return;turn=0;setStatus('Your turn — roll!');document.getElementById('roll').disabled=false;});}
+reset();
+</script>
+</body>
+</html>

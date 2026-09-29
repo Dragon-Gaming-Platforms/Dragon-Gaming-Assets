@@ -1,0 +1,9 @@
+{
+  "name": "Go Fish",
+  "desc": "Ask the computer for the ranks you need and collect all four to complete a book. Guess wrong and it is Go Fish, so draw from the pool and hope for luck. The player with the most books wins.",
+  "controls": "Tap a rank button to ask the computer for cards",
+  "shelf": "Arcade & Action",
+  "tags": ["games", "html5", "cards", "family", "casual"],
+  "badge": "New",
+  "creator": "Dragon Gaming Platforms"
+}

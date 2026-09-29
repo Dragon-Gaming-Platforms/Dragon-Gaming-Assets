@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<title>Crazy Eights</title>
+<style>
+  *{box-sizing:border-box}body{margin:0;min-height:100vh;background:radial-gradient(circle at 50% 0,#1e5631,#0b2a17);
+    color:#eef;font-family:system-ui,Segoe UI,Roboto,Arial,sans-serif;display:flex;flex-direction:column;align-items:center;gap:12px;padding:14px}
+  h1{margin:4px 0;font-size:clamp(18px,5vw,26px)}
+  #status{min-height:20px;font-weight:700;color:#ffe08a;text-align:center}
+  .row{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;align-items:center}
+  .card{width:52px;height:74px;background:#fff;border-radius:7px;color:#111;display:flex;flex-direction:column;
+    justify-content:space-between;padding:5px;font-weight:800;font-size:15px;cursor:pointer;border:2px solid #fff;transition:transform .1s}
+  .card.red{color:#c62828}.card:hover{transform:translateY(-6px)}
+  .card.back{background:linear-gradient(135deg,#274690,#12203f);border-color:#0a1530;cursor:default}
+  .card.dis{cursor:default;opacity:.55}
+  .card .b{align-self:flex-end;transform:rotate(180deg)}
+  .pile{display:flex;gap:18px;align-items:center;margin:6px 0}
+  button{background:#ffcc33;color:#20150a;border:0;border-radius:9px;padding:10px 16px;font-weight:800;cursor:pointer}
+  button.suit{width:46px;height:46px;font-size:22px;padding:0}
+  #suitPick{display:none;gap:8px}
+  .lbl{font-size:13px;opacity:.85;margin-bottom:2px}
+  .col{display:flex;flex-direction:column;align-items:center}
+</style>
+</head>
+<body>
+<h1>Crazy Eights</h1>
+<div id="status">Match the top card by suit or rank. Eights are wild!</div>
+<div class="col"><div class="lbl">Computer</div><div class="row" id="cpu"></div></div>
+<div class="pile">
+  <div class="col"><div class="lbl">Draw</div><div id="stock"></div></div>
+  <div class="col"><div class="lbl">Discard</div><div id="discard"></div></div>
+</div>
+<div class="row" id="suitPick">
+  <button class="suit" data-s="♠">♠</button><button class="suit" data-s="♥" style="color:#c62828">♥</button>
+  <button class="suit" data-s="♦" style="color:#c62828">♦</button><button class="suit" data-s="♣">♣</button>
+</div>
+<div class="col"><div class="lbl">Your hand</div><div class="row" id="hand"></div></div>
+<button id="restart" style="display:none">New Game</button>
+<script>
+const SUITS=['♠','♥','♦','♣'],RANKS=['A','2','3','4','5','6','7','8','9','10','J','Q','K'];
+let deck,stock,discard,player,cpu,curSuit,turn,locked;
+function makeDeck(){const d=[];for(const s of SUITS)for(const r of RANKS)d.push({s,r});
+  for(let i=d.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[d[i],d[j]]=[d[j],d[i]];}return d;}
+function isRed(c){return c.s==='♥'||c.s==='♦';}
+function deal(){deck=makeDeck();player=deck.splice(0,7);cpu=deck.splice(0,7);
+  let top=deck.shift();while(top.r==='8'){deck.push(top);top=deck.shift();} // avoid starting on wild
+  discard=[top];stock=deck;curSuit=top.s;turn='player';locked=false;
+  document.getElementById('restart').style.display='none';
+  setStatus('Your turn — match ♠♥♦♣ suit or rank.');render();}
+function setStatus(t){document.getElementById('status').textContent=t;}
+function cardEl(c,clickable,disabled){const e=document.createElement('div');
+  e.className='card'+(isRed(c)?' red':'')+(disabled?' dis':'');
+  e.innerHTML=`<span>${c.r}${c.s}</span><span class="b">${c.r}${c.s}</span>`;
+  if(clickable&&!disabled)e.onclick=()=>playCard(c);return e;}
+function backEl(){const e=document.createElement('div');e.className='card back';e.innerHTML='<span>&nbsp;</span>';return e;}
+function playable(c){const top=discard[discard.length-1];return c.r==='8'||c.s===curSuit||c.r===top.r;}
+function render(){
+  const cpuEl=document.getElementById('cpu');cpuEl.innerHTML='';
+  cpu.forEach(()=>cpuEl.appendChild(backEl()));
+  const disEl=document.getElementById('discard');disEl.innerHTML='';
+  const top=discard[discard.length-1];const t=cardEl(top,false,false);t.style.cursor='default';disEl.appendChild(t);
+  if(top.r==='8'){const badge=document.createElement('div');badge.className='lbl';badge.textContent='suit: '+curSuit;disEl.appendChild(badge);}
+  const stEl=document.getElementById('stock');stEl.innerHTML='';const sb=backEl();
+  sb.style.cursor=(turn==='player'&&!locked)?'pointer':'default';
+  if(turn==='player'&&!locked)sb.onclick=drawCard;stEl.appendChild(sb);
+  const hEl=document.getElementById('hand');hEl.innerHTML='';
+  player.forEach(c=>hEl.appendChild(cardEl(c,turn==='player'&&!locked,!(turn==='player'&&!locked&&playable(c)))));
+}
+function reshuffleIfNeeded(){if(stock.length===0){const top=discard.pop();stock=discard;discard=[top];
+    for(let i=stock.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[stock[i],stock[j]]=[stock[j],stock[i]];}}}
+function drawCard(){if(turn!=='player'||locked)return;reshuffleIfNeeded();
+  if(stock.length===0){endTurn();return;}
+  const c=stock.shift();player.push(c);
+  if(playable(c)){setStatus('You drew '+c.r+c.s+' — playable. Play it or pass.');render();
+    // allow immediate play; also allow pass
+    showPass();}
+  else{setStatus('You drew '+c.r+c.s+' — no play, passing.');render();setTimeout(endTurn,600);}
+}
+function showPass(){let b=document.getElementById('passBtn');if(!b){b=document.createElement('button');b.id='passBtn';b.textContent='Pass';
+    b.onclick=()=>{b.remove();endTurn();};document.getElementById('hand').parentNode.appendChild(b);}}
+function hidePass(){const b=document.getElementById('passBtn');if(b)b.remove();}
+function playCard(c){if(turn!=='player'||locked)return;if(!playable(c))return;hidePass();
+  player=player.filter(x=>x!==c);discard.push(c);
+  if(c.r==='8'){locked=true;document.getElementById('suitPick').style.display='flex';setStatus('You played an 8 — choose a suit.');render();return;}
+  curSuit=c.s;render();
+  if(player.length===0){win('player');return;}
+  endTurn();
+}
+document.querySelectorAll('#suitPick .suit').forEach(b=>b.onclick=()=>{
+  curSuit=b.dataset.s;document.getElementById('suitPick').style.display='none';locked=false;
+  setStatus('Suit set to '+curSuit+'.');render();
+  if(player.length===0){win('player');return;}endTurn();});
+function endTurn(){turn='cpu';render();setTimeout(cpuTurn,700);}
+function cpuTurn(){
+  reshuffleIfNeeded();
+  let choice=cpu.find(c=>playable(c)&&c.r!=='8')||cpu.find(c=>c.r==='8');
+  let drew=0;
+  while(!choice&&stock.length>0&&drew<20){const c=stock.shift();cpu.push(c);drew++;
+    if(playable(c)){choice=c;break;}reshuffleIfNeeded();}
+  if(!choice){setStatus('Computer passes. Your turn.');turn='player';render();return;}
+  cpu=cpu.filter(x=>x!==choice);discard.push(choice);
+  if(choice.r==='8'){const counts={};cpu.forEach(c=>counts[c.s]=(counts[c.s]||0)+1);
+    curSuit=SUITS.reduce((a,b)=>(counts[b]||0)>(counts[a]||0)?b:a,SUITS[0]);
+    setStatus('Computer played an 8 and chose '+curSuit+'.');}
+  else{curSuit=choice.s;setStatus('Computer played '+choice.r+choice.s+'. Your turn.');}
+  if(cpu.length===0){render();win('cpu');return;}
+  turn='player';render();
+}
+function win(who){locked=true;turn=null;
+  setStatus(who==='player'?'🎉 You win! Hand emptied.':'Computer wins this round.');
+  document.getElementById('restart').style.display='inline-block';render();}
+document.getElementById('restart').onclick=deal;
+deal();
+</script>
+</body>
+</html>

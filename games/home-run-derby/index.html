@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+<meta name="robots" content="noindex,nofollow">
+<title>Home Run Derby</title>
+<style>
+  *{box-sizing:border-box}html,body{margin:0;height:100%}
+  body{background:#0a1626;color:#eef;font-family:system-ui,Segoe UI,Roboto,Arial,sans-serif;
+    display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;gap:8px;padding:10px;user-select:none;-webkit-user-select:none}
+  h1{margin:0;font-size:clamp(18px,5vw,26px)}
+  #hud{display:flex;gap:22px;font-weight:800;color:#7fd0ff}
+  canvas{background:linear-gradient(#5aa0e0,#8fd08f 62%,#5a9a3a 62%);border-radius:10px;touch-action:none;max-width:96vw;height:auto}
+  #status{min-height:20px;color:#ffd76a;font-weight:800;font-size:17px;text-align:center}
+  button{background:#4aa3ff;color:#04152a;border:0;border-radius:12px;padding:14px 30px;font-size:18px;font-weight:900;cursor:pointer}
+  .hint{font-size:12px;opacity:.7;text-align:center}
+</style>
+</head>
+<body>
+<h1>Home Run Derby</h1>
+<div id="hud"><span>Home Runs: <b id="hr">0</b></span><span>Outs: <b id="outs">0</b>/10</span><span>Best: <b id="best">0</b></span></div>
+<canvas id="c" width="440" height="320"></canvas>
+<div id="status">Watch the pitch and SWING with the right timing!</div>
+<button id="swing">SWING</button>
+<div class="hint">Click SWING (or press Space) as the ball crosses the plate. Perfect timing = home run!</div>
+<script>
+const cv=document.getElementById('c'),ctx=cv.getContext('2d');const W=cv.width,H=cv.height;
+const PLATE={x:90,y:250};
+let ball,state,hr,outs,best=+localStorage.getItem('hrd_best')||0,pitchT,result,flying;
+document.getElementById('best').textContent=best;
+function init(){hr=0;outs=0;result=null;updateHud();nextPitch();}
+function updateHud(){document.getElementById('hr').textContent=hr;document.getElementById('outs').textContent=outs;document.getElementById('best').textContent=best;}
+function nextPitch(){
+  if(outs>=10){return end();}
+  state='pitching';flying=null;result=null;
+  // ball starts from pitcher (right) heading to plate
+  ball={x:W-70,y:110,r:7,t:0};
+  const speed=0.010+Math.random()*0.006;
+  ball.speed=speed;
+  document.getElementById('status').textContent='Here comes the pitch…';
+}
+function swing(){
+  if(state!=='pitching')return;
+  // timing: perfect when ball.t near 1 (at plate)
+  const t=ball.t;const diff=Math.abs(t-0.92);
+  state='result';
+  if(t<0.55){result={type:'early',dist:0};miss('Swung too early!');return;}
+  if(t>1.15){result={type:'late',dist:0};miss('Swung too late!');return;}
+  // quality by closeness to sweet spot
+  let power,label;
+  if(diff<0.06){power=1;label='💥 HOME RUN!';}
+  else if(diff<0.14){power=0.7;label='Deep fly ball…';}
+  else if(diff<0.24){power=0.45;label='Base hit — but not gone.';}
+  else{power=0.2;label='Foul tip!';}
+  hitBall(power,label);
+}
+function miss(msg){outs++;updateHud();document.getElementById('status').textContent=msg+` (out ${outs})`;
+  setTimeout(nextPitch,1000);}
+function hitBall(power,label){
+  const angle=-Math.PI/3.2-(Math.random()*0.2);
+  const v=10+power*13;
+  flying={x:PLATE.x,y:PLATE.y-20,vx:Math.cos(angle)*v,vy:Math.sin(angle)*v,power};
+  const homer=power>=1||(power>=0.7&&Math.random()<0.5);
+  flying.homer=homer;
+  document.getElementById('status').textContent=label;
+  if(homer){hr++;if(hr>best){best=hr;localStorage.setItem('hrd_best',best);}}
+  else{outs++;}
+  updateHud();
+  flying.settle=()=>{setTimeout(nextPitch,1100);};
+  flying.done=false;
+}
+function end(){state='over';
+  document.getElementById('status').textContent=`Derby over! ${hr} home run${hr===1?'':'s'}. Click SWING to play again.`;
+  document.getElementById('swing').textContent='PLAY AGAIN';
+  document.getElementById('swing').onclick=()=>{document.getElementById('swing').textContent='SWING';document.getElementById('swing').onclick=swing;init();};
+}
+function loop(){
+  requestAnimationFrame(loop);
+  if(state==='pitching'){ball.t+=ball.speed*4;
+    ball.x=W-70+(PLATE.x-(W-70))*ball.t;ball.y=110+(PLATE.y-40-110)*ball.t;
+    if(ball.t>1.3){miss('Called strike — no swing!');}}
+  if(flying&&!flying.done){flying.x+=flying.vx;flying.y+=flying.vy;flying.vy+=0.28;
+    if(flying.y>H-30||flying.x>W+20){flying.done=true;flying.settle();}}
+  draw();
+}
+function draw(){
+  ctx.fillStyle='#5aa0e0';ctx.fillRect(0,0,W,H);
+  ctx.fillStyle='#8fd08f';ctx.fillRect(0,H*0.62,W,H);
+  // outfield wall
+  ctx.fillStyle='#245c8a';ctx.fillRect(W-40,H*0.42,40,H*0.2);
+  ctx.fillStyle='#fff';ctx.font='10px system-ui';ctx.save();ctx.translate(W-24,H*0.5);ctx.rotate(Math.PI/2);ctx.textAlign='center';ctx.fillText('WALL',0,0);ctx.restore();
+  // plate + batter
+  ctx.fillStyle='#eee';ctx.beginPath();ctx.moveTo(PLATE.x,PLATE.y+8);ctx.lineTo(PLATE.x-10,PLATE.y);ctx.lineTo(PLATE.x-10,PLATE.y-6);ctx.lineTo(PLATE.x+10,PLATE.y-6);ctx.lineTo(PLATE.x+10,PLATE.y);ctx.closePath();ctx.fill();
+  ctx.fillStyle='#333';ctx.fillRect(PLATE.x-24,PLATE.y-58,10,52); // batter body
+  ctx.strokeStyle='#a60';ctx.lineWidth=4;ctx.beginPath();ctx.moveTo(PLATE.x-20,PLATE.y-52);ctx.lineTo(PLATE.x+6,PLATE.y-70);ctx.stroke(); // bat
+  // pitcher mound
+  ctx.fillStyle='#c9a56a';ctx.beginPath();ctx.arc(W-60,120,16,0,7);ctx.fill();
+  // incoming ball
+  if(state==='pitching'){ctx.fillStyle='#fff';ctx.beginPath();ctx.arc(ball.x,ball.y,ball.r,0,7);ctx.fill();
+    ctx.strokeStyle='#d33';ctx.beginPath();ctx.arc(ball.x,ball.y,ball.r,0,7);ctx.stroke();}
+  // flying ball
+  if(flying&&!flying.done){ctx.fillStyle='#fff';ctx.beginPath();ctx.arc(flying.x,flying.y,7,0,7);ctx.fill();
+    ctx.strokeStyle='#d33';ctx.beginPath();ctx.arc(flying.x,flying.y,7,0,7);ctx.stroke();}
+}
+document.getElementById('swing').onclick=swing;
+document.addEventListener('keydown',e=>{if(e.key===' '){e.preventDefault();if(state==='over'){}else swing();}});
+init();loop();
+</script>
+</body>
+</html>

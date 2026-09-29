@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+<meta name="robots" content="noindex,nofollow">
+<title>Penalty Kicks</title>
+<style>
+  *{box-sizing:border-box}html,body{margin:0;height:100%}
+  body{background:#0a1a0d;color:#eafff0;font-family:system-ui,Segoe UI,Roboto,Arial,sans-serif;
+    display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;gap:8px;padding:10px;user-select:none;-webkit-user-select:none}
+  h1{margin:0;font-size:clamp(18px,5vw,26px)}
+  #hud{display:flex;gap:24px;font-weight:800;color:#8fe0a8}
+  canvas{background:#2a8f45;border-radius:10px;touch-action:none;max-width:96vw;height:auto;cursor:crosshair}
+  #status{min-height:20px;color:#ffd76a;font-weight:800;font-size:17px;text-align:center}
+  .hint{font-size:12px;opacity:.7;text-align:center}
+  button{background:#7be0a0;color:#04240f;border:0;border-radius:10px;padding:8px 16px;font-weight:800;cursor:pointer}
+</style>
+</head>
+<body>
+<h1>Penalty Kicks</h1>
+<div id="hud"><span>You: <b id="you">0</b></span><span>Round: <b id="round">1</b>/5</span><span>Keeper: <b id="cpu">0</b></span></div>
+<canvas id="c" width="440" height="300"></canvas>
+<div id="status">Tap where you want to shoot. Beat the keeper!</div>
+<div class="hint">Aim near the posts to beat the dive — but don't miss the net</div>
+<button id="reset" style="display:none">Play Again</button>
+<script>
+const cv=document.getElementById('c'),ctx=cv.getContext('2d');const W=cv.width,H=cv.height;
+// goal frame
+const GOAL={x:70,y:40,w:300,h:130};
+let youScore,cpuScore,round,shooting,ball,keeper,over,anim;
+function init(){youScore=0;cpuScore=0;round=1;over=false;shooting=false;
+  ball={x:W/2,y:H-40,r:9};keeper={x:W/2,y:GOAL.y+GOAL.h-20,w:44,h:56,dive:0};
+  document.getElementById('reset').style.display='none';updateHud();
+  document.getElementById('status').textContent='Round 1 — tap where to shoot.';draw();}
+function updateHud(){document.getElementById('you').textContent=youScore;document.getElementById('cpu').textContent=cpuScore;
+  document.getElementById('round').textContent=Math.min(round,5);}
+function pos(e){const rect=cv.getBoundingClientRect();const sx=cv.width/rect.width,sy=cv.height/rect.height;
+  const t=e.touches?e.touches[0]:e;return{x:(t.clientX-rect.left)*sx,y:(t.clientY-rect.top)*sy};}
+function shoot(e){
+  if(shooting||over)return;const p=pos(e);
+  // must aim within goal-ish target area
+  const tx=Math.max(GOAL.x-10,Math.min(GOAL.x+GOAL.w+10,p.x));
+  const ty=Math.max(GOAL.y-10,Math.min(GOAL.y+GOAL.h+10,p.y));
+  shooting=true;
+  // keeper picks a zone: left/center/right, biased toward center
+  const zone=Math.random();const kx=zone<0.34?GOAL.x+50:zone<0.66?GOAL.x+GOAL.w/2:GOAL.x+GOAL.w-50;
+  const target={x:tx,y:ty};const start={x:ball.x,y:ball.y};let t=0;
+  const missNet=(tx<GOAL.x+6||tx>GOAL.x+GOAL.w-6||ty<GOAL.y+6||ty>GOAL.y+GOAL.h-6);
+  function step(){
+    t+=0.05;ball.x=start.x+(target.x-start.x)*t;ball.y=start.y+(target.y-start.y)*t;
+    keeper.x=W/2+((kx-W/2)*Math.min(1,t*1.2));
+    draw();
+    if(t<1){anim=requestAnimationFrame(step);}
+    else{resolve(target,kx,missNet);}
+  }
+  step();
+}
+function resolve(target,kx,missNet){
+  const saved=Math.abs(target.x-kx)<34&&Math.abs(target.y-(GOAL.y+GOAL.h-20))<70;
+  let msg;
+  if(missNet){msg='Missed the goal! ❌';}
+  else if(saved){msg='Saved by the keeper! 🧤';cpuScore++;}
+  else{msg='GOAL! ⚽🎉';youScore++;}
+  updateHud();
+  // keeper's turn to shoot is simulated: 60% keeper scores against you
+  if(Math.random()<0.55&&!missNet){/* handled below as cpu attack */}
+  document.getElementById('status').textContent=msg;
+  round++;
+  setTimeout(()=>{
+    if(round>5){finish();return;}
+    shooting=false;ball={x:W/2,y:H-40,r:9};keeper.x=W/2;
+    document.getElementById('status').textContent=`Round ${round} — tap where to shoot.`;draw();
+  },1100);
+}
+function finish(){over=true;
+  const msg=youScore>cpuScore?'🏆 You win the shootout!':youScore<cpuScore?'The keeper wins. Try again!':"It's a draw!";
+  document.getElementById('status').textContent=`${msg} (${youScore}–${cpuScore})`;
+  document.getElementById('reset').style.display='';}
+cv.addEventListener('click',shoot);
+cv.addEventListener('touchstart',e=>{e.preventDefault();shoot(e);},{passive:false});
+document.getElementById('reset').onclick=init;
+function draw(){
+  ctx.fillStyle='#2a8f45';ctx.fillRect(0,0,W,H);
+  // grass stripes
+  ctx.fillStyle='rgba(0,0,0,.06)';for(let i=0;i<H;i+=30)ctx.fillRect(0,i,W,15);
+  // goal net
+  ctx.fillStyle='rgba(255,255,255,.12)';ctx.fillRect(GOAL.x,GOAL.y,GOAL.w,GOAL.h);
+  ctx.strokeStyle='#fff';ctx.lineWidth=5;ctx.strokeRect(GOAL.x,GOAL.y,GOAL.w,GOAL.h);
+  ctx.strokeStyle='rgba(255,255,255,.35)';ctx.lineWidth=1;
+  for(let x=GOAL.x;x<=GOAL.x+GOAL.w;x+=15){ctx.beginPath();ctx.moveTo(x,GOAL.y);ctx.lineTo(x,GOAL.y+GOAL.h);ctx.stroke();}
+  for(let y=GOAL.y;y<=GOAL.y+GOAL.h;y+=15){ctx.beginPath();ctx.moveTo(GOAL.x,y);ctx.lineTo(GOAL.x+GOAL.w,y);ctx.stroke();}
+  // keeper
+  ctx.fillStyle='#ffd24a';ctx.fillRect(keeper.x-keeper.w/2,keeper.y-keeper.h/2,keeper.w,keeper.h);
+  ctx.fillStyle='#c00';ctx.fillRect(keeper.x-keeper.w/2,keeper.y-keeper.h/2,keeper.w,14);
+  // penalty spot
+  ctx.fillStyle='#fff';ctx.beginPath();ctx.arc(W/2,H-40,3,0,7);ctx.fill();
+  // ball
+  ctx.fillStyle='#fff';ctx.beginPath();ctx.arc(ball.x,ball.y,ball.r,0,7);ctx.fill();
+  ctx.strokeStyle='#333';ctx.lineWidth=1;ctx.beginPath();ctx.arc(ball.x,ball.y,ball.r,0,7);ctx.stroke();
+  ctx.fillStyle='#333';ctx.beginPath();ctx.arc(ball.x,ball.y,2.5,0,7);ctx.fill();
+}
+init();
+</script>
+</body>
+</html>

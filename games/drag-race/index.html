@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+<meta name="robots" content="noindex,nofollow">
+<title>Drag Race</title>
+<style>
+  *{box-sizing:border-box}html,body{margin:0;height:100%}
+  body{background:#0a0a12;color:#eef;font-family:system-ui,Segoe UI,Roboto,Arial,sans-serif;
+    display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;gap:8px;padding:10px;user-select:none;-webkit-user-select:none}
+  h1{margin:0;font-size:clamp(18px,5vw,26px)}
+  #hud{display:flex;gap:20px;font-weight:800;color:#ffcf6b}
+  canvas{background:#15151f;border-radius:10px;touch-action:none;max-width:96vw;height:auto}
+  #status{min-height:20px;color:#ffcf6b;font-weight:800;font-size:17px;text-align:center}
+  button{background:#ff5da2;color:#fff;border:0;border-radius:12px;padding:16px 40px;font-size:20px;font-weight:900;cursor:pointer}
+  button:disabled{opacity:.5}
+  .hint{font-size:12px;opacity:.7;text-align:center}
+</style>
+</head>
+<body>
+<h1>Drag Race</h1>
+<div id="hud"><span>Gear: <b id="gear">N</b></span><span>Speed: <b id="speed">0</b> mph</span><span>Best: <b id="best">—</b></span></div>
+<canvas id="c" width="440" height="260"></canvas>
+<div id="status">Press START. Launch on green, then SHIFT when the RPM needle is in the green zone.</div>
+<button id="action">START</button>
+<div class="hint">Big button = launch / shift up · shift in the green RPM band for max acceleration · redline bogs you down</div>
+<script>
+const cv=document.getElementById('c'),ctx=cv.getContext('2d');const W=cv.width,H=cv.height;
+let phase,lights,rpm,gear,speed,dist,cpuDist,t0,keys,best=+localStorage.getItem('dr_best')||0,reactStart,finishTime;
+document.getElementById('best').textContent=best?best.toFixed(2)+'s':'—';
+const MAXGEAR=5,FINISH=1000;
+function reset(){phase='idle';lights=0;rpm=0;gear=0;speed=0;dist=0;cpuDist=0;finishTime=null;
+  document.getElementById('gear').textContent='N';document.getElementById('speed').textContent='0';
+  document.getElementById('action').textContent='START';document.getElementById('action').disabled=false;
+  document.getElementById('status').textContent='Press START to stage.';draw();}
+function start(){
+  phase='tree';lights=0;
+  document.getElementById('action').textContent='WAIT…';document.getElementById('action').disabled=true;
+  document.getElementById('status').textContent='Staging… watch the tree.';
+  let step=0;const seq=setInterval(()=>{lights=++step;draw();
+    if(step>=3){clearInterval(seq);
+      const delay=500+Math.random()*1500;
+      setTimeout(()=>{lights=4;phase='launch';reactStart=performance.now();
+        document.getElementById('action').textContent='LAUNCH!';document.getElementById('action').disabled=false;
+        document.getElementById('status').textContent='GO!';draw();},delay);
+    }},600);
+}
+function action(){
+  if(phase==='idle'||phase==='done'){if(phase==='done'){reset();return;}start();return;}
+  if(phase==='tree'){ // jumped the start
+    phase='foul';document.getElementById('status').textContent='🚨 Jumped the start — foul! Press START to retry.';
+    document.getElementById('action').textContent='START';phase='done';return;}
+  if(phase==='launch'){
+    const rt=(performance.now()-reactStart)/1000;
+    phase='racing';gear=1;rpm=0.3;t0=performance.now();
+    document.getElementById('gear').textContent='1';
+    document.getElementById('action').textContent='SHIFT ▲';
+    document.getElementById('status').textContent=`Launched! Reaction ${rt.toFixed(3)}s — shift in the green!`;
+    return;}
+  if(phase==='racing'){shift();}
+}
+function shift(){
+  if(gear>=MAXGEAR){return;}
+  // reward shifting in green band (rpm 0.75-0.92)
+  if(rpm>=0.72&&rpm<=0.93){speed+=14;document.getElementById('status').textContent='Perfect shift! 🔥';}
+  else if(rpm<0.72){speed+=4;document.getElementById('status').textContent='Shifted too early.';}
+  else{speed-=6;document.getElementById('status').textContent='Over-revved — bogged down!';}
+  gear++;rpm=0.25;document.getElementById('gear').textContent=gear;
+  if(gear>=MAXGEAR)document.getElementById('action').textContent='TOP GEAR';
+}
+function loop(){
+  requestAnimationFrame(loop);
+  if(phase==='racing'){
+    // rpm climbs; speed increases with gear
+    rpm+=0.012+gear*0.001;if(rpm>1.05)rpm=1.05;
+    speed+=(gear*0.7)*(rpm<1?rpm:0.4)*0.5;
+    speed=Math.max(0,Math.min(180,speed));
+    dist+=speed*0.02;
+    // CPU: steady strong run
+    cpuDist+=2.9;
+    document.getElementById('speed').textContent=Math.round(speed);
+    if(dist>=FINISH||cpuDist>=FINISH){
+      finishTime=(performance.now()-t0)/1000;phase='done';
+      const won=dist>=cpuDist;
+      let msg=won?`🏁 You win! Time ${finishTime.toFixed(2)}s`:`CPU wins. Your time ${finishTime.toFixed(2)}s`;
+      if(won&&(best===0||finishTime<best)){best=finishTime;localStorage.setItem('dr_best',best);msg+=' — new best!';}
+      document.getElementById('best').textContent=best?best.toFixed(2)+'s':'—';
+      document.getElementById('status').textContent=msg;
+      document.getElementById('action').textContent='RACE AGAIN';document.getElementById('action').disabled=false;
+    }
+  }
+  draw();
+}
+function draw(){
+  ctx.fillStyle='#15151f';ctx.fillRect(0,0,W,H);
+  // track
+  ctx.fillStyle='#222';ctx.fillRect(0,H-90,W,80);
+  ctx.strokeStyle='#ff5';ctx.setLineDash([14,14]);ctx.lineWidth=3;ctx.beginPath();ctx.moveTo(0,H-50);ctx.lineTo(W,H-50);ctx.stroke();ctx.setLineDash([]);
+  // finish
+  ctx.fillStyle='#fff';for(let i=0;i<8;i++){ctx.fillStyle=(i%2)?'#fff':'#000';ctx.fillRect(W-16,H-90+i*10,16,10);}
+  // cars
+  const px=20+(dist/FINISH)*(W-70);const cx=20+(cpuDist/FINISH)*(W-70);
+  ctx.fillStyle='#5cf';ctx.fillRect(px,H-84,34,16);
+  ctx.fillStyle='#f66';ctx.fillRect(cx,H-64,34,16);
+  // christmas tree
+  const treeX=W/2;const colY=[30,54,78];
+  ctx.fillStyle='#333';ctx.fillRect(treeX-16,20,32,90);
+  [0,1,2].forEach(i=>{ctx.fillStyle=(lights>i&&lights<4)?'#fb0':'#3a2a00';ctx.beginPath();ctx.arc(treeX,colY[i]+8,9,0,7);ctx.fill();});
+  ctx.fillStyle=(lights>=4)?'#2f2':'#043004';ctx.beginPath();ctx.arc(treeX,104,10,0,7);ctx.fill();
+  // rpm gauge
+  if(phase==='racing'){const gx=70,gy=H-140,rad=34;
+    ctx.strokeStyle='#444';ctx.lineWidth=8;ctx.beginPath();ctx.arc(gx,gy,rad,Math.PI,0);ctx.stroke();
+    // green band
+    ctx.strokeStyle='#2ecc71';ctx.beginPath();ctx.arc(gx,gy,rad,Math.PI+0.72*Math.PI,Math.PI+0.93*Math.PI);ctx.stroke();
+    ctx.strokeStyle='#e6394a';ctx.beginPath();ctx.arc(gx,gy,rad,Math.PI+0.93*Math.PI,Math.PI+Math.PI);ctx.stroke();
+    const a=Math.PI+Math.min(1,rpm)*Math.PI;ctx.strokeStyle='#fff';ctx.lineWidth=2;
+    ctx.beginPath();ctx.moveTo(gx,gy);ctx.lineTo(gx+Math.cos(a)*rad,gy+Math.sin(a)*rad);ctx.stroke();
+    ctx.fillStyle='#fff';ctx.font='10px system-ui';ctx.textAlign='center';ctx.fillText('RPM',gx,gy+14);}
+}
+document.getElementById('action').onclick=action;
+document.addEventListener('keydown',e=>{if(e.key===' '){e.preventDefault();action();}});
+reset();loop();
+</script>
+</body>
+</html>
