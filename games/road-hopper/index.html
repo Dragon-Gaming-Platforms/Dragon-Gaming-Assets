@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+<meta name="robots" content="noindex,nofollow">
+<title>Road Hopper</title>
+<style>
+  html,body{margin:0;height:100%;background:#0a140a;overflow:hidden;
+    font-family:system-ui,Segoe UI,Roboto,Arial,sans-serif;color:#e8ffe8;user-select:none;-webkit-user-select:none}
+  #wrap{position:fixed;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px}
+  #hud{display:flex;gap:16px;font-weight:800}
+  canvas{background:#1a2e1a;border-radius:8px;box-shadow:0 14px 40px rgba(0,0,0,.5);touch-action:none;max-width:96vw;max-height:66vh}
+  #msg{position:fixed;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;background:rgba(6,15,6,.78);text-align:center;padding:20px}
+  #msg h1{margin:0;font-size:clamp(26px,7vw,44px)}#msg p{margin:0;opacity:.85;max-width:400px}
+  button{background:#8ce99a;color:#08210c;border:0;border-radius:12px;padding:13px 30px;font-size:18px;font-weight:800;cursor:pointer}
+  .hidden{display:none!important}
+  .pad{display:grid;grid-template-columns:repeat(3,54px);grid-template-rows:repeat(2,54px);gap:6px;margin-top:4px}
+  .pad button{width:54px;height:54px;font-size:22px;padding:0;background:rgba(140,233,154,.16);color:#8ce99a}
+  .pad .sp{visibility:hidden}
+  @media(hover:hover){.pad{display:none}}
+</style>
+</head>
+<body>
+<div id="wrap">
+  <div id="hud"><span>Score <span id="score">0</span></span><span>Best <span id="best">0</span></span></div>
+  <canvas id="cv"></canvas>
+  <div class="pad">
+    <span class="sp"></span><button data-d="U">▲</button><span class="sp"></span>
+    <button data-d="L">◀</button><button data-d="D">▼</button><button data-d="R">▶</button>
+  </div>
+</div>
+<div id="msg"><h1>Road Hopper</h1><p>Cross the busy road without getting hit! Move up to score, and go as far as you can. Arrow keys, WASD, swipe, or the on-screen pad.</p><button id="start">Play</button></div>
+<script>
+const cv=document.getElementById('cv'),ctx=cv.getContext('2d');
+const COLS=11,ROWS=13,T=40;cv.width=COLS*T;cv.height=ROWS*T;
+let lanes={},player={col:5,row:ROWS-1},score=0,best=0,maxRow=ROWS-1,running=false,anim,last;
+const CARCOLORS=['#ff6b6b','#ffd93d','#4d96ff','#c77dff','#ff9f43'];
+function makeLane(index){
+  const dir=Math.random()<0.5?1:-1;
+  const speed=(0.6+Math.random()*1.6)*dir*(1+index*0.02);
+  const cars=[];const count=1+Math.floor(Math.random()*2);
+  for(let i=0;i<count;i++)cars.push({x:Math.random()*cv.width,w:T*(1.2+Math.random()),color:CARCOLORS[Math.floor(Math.random()*CARCOLORS.length)]});
+  return {speed,cars};
+}
+function newGame(){
+  lanes={};player={col:5,row:ROWS-1};score=0;maxRow=ROWS-1;running=true;last=performance.now();
+  document.getElementById('score').textContent=0;
+  document.getElementById('msg').classList.add('hidden');
+  anim=requestAnimationFrame(loop);
+}
+function laneAt(row){
+  // rows 0 and ROWS-1 are safe grass; row 6 is a median (safe)
+  if(row<=0||row>=ROWS-1||row===6)return null;
+  if(!lanes[row])lanes[row]=makeLane(ROWS-row);
+  return lanes[row];
+}
+function move(d){
+  if(!running)return;
+  if(d==='U'&&player.row>0)player.row--;
+  if(d==='D'&&player.row<ROWS-1)player.row++;
+  if(d==='L'&&player.col>0)player.col--;
+  if(d==='R'&&player.col<COLS-1)player.col++;
+  if(player.row<maxRow){maxRow=player.row;score++;document.getElementById('score').textContent=score;}
+  if(player.row===0){ // reached top -> wrap forward, keep scoring
+    score+=5;document.getElementById('score').textContent=score;
+    player.row=ROWS-1;maxRow=ROWS-1;
+    // reshuffle lanes to get harder
+    lanes={};
+  }
+}
+function loop(now){
+  if(!running)return;
+  const dt=Math.min((now-last)/16.67,3);last=now;
+  for(let row=1;row<ROWS-1;row++){const lane=laneAt(row);if(!lane)continue;
+    lane.cars.forEach(car=>{car.x+=lane.speed*dt*2;
+      if(lane.speed>0&&car.x>cv.width+car.w)car.x=-car.w;
+      if(lane.speed<0&&car.x<-car.w)car.x=cv.width+car.w;});
+  }
+  // collision
+  const px=player.col*T,py=player.row*T;
+  const lane=laneAt(player.row);
+  if(lane){for(const car of lane.cars){
+    if(px+T-6>car.x&&px+6<car.x+car.w){return end();}
+  }}
+  draw();anim=requestAnimationFrame(loop);
+}
+function draw(){
+  for(let row=0;row<ROWS;row++){
+    const y=row*T;
+    if(row===0||row===ROWS-1||row===6){ctx.fillStyle=(row===0)?'#2f7d3a':'#3a8f46';ctx.fillRect(0,y,cv.width,T);}
+    else{ctx.fillStyle=row%2?'#2b2b30':'#333338';ctx.fillRect(0,y,cv.width,T);
+      ctx.strokeStyle='rgba(255,255,255,.25)';ctx.setLineDash([14,14]);ctx.lineWidth=2;
+      ctx.beginPath();ctx.moveTo(0,y+T/2);ctx.lineTo(cv.width,y+T/2);ctx.stroke();ctx.setLineDash([]);}
+    const lane=laneAt(row);
+    if(lane)lane.cars.forEach(car=>{ctx.fillStyle=car.color;roundRect(car.x,y+5,car.w,T-10,7);ctx.fill();
+      ctx.fillStyle='rgba(180,220,255,.6)';roundRect(car.x+(lane.speed>0?car.w-14:6),y+9,8,T-18,3);ctx.fill();});
+  }
+  // player frog
+  const px=player.col*T,py=player.row*T;
+  ctx.font=`${T-8}px serif`;ctx.textAlign='center';ctx.textBaseline='middle';
+  ctx.fillText('🐸',px+T/2,py+T/2+2);
+}
+function roundRect(x,y,w,h,r){ctx.beginPath();ctx.moveTo(x+r,y);ctx.arcTo(x+w,y,x+w,y+h,r);ctx.arcTo(x+w,y+h,x,y+h,r);ctx.arcTo(x,y+h,x,y,r);ctx.arcTo(x,y,x+w,y,r);ctx.closePath();}
+function end(){
+  running=false;cancelAnimationFrame(anim);best=Math.max(best,score);document.getElementById('best').textContent=best;
+  const m=document.getElementById('msg');m.classList.remove('hidden');
+  m.innerHTML=`<h1>Splat!</h1><p>You scored <b>${score}</b>.<br>Best: ${best}</p><button id="start">Play again</button>`;
+  document.getElementById('start').onclick=newGame;
+}
+window.addEventListener('keydown',e=>{
+  const m={ArrowUp:'U',ArrowDown:'D',ArrowLeft:'L',ArrowRight:'R',w:'U',s:'D',a:'L',d:'R',W:'U',S:'D',A:'L',D:'R'};
+  if(m[e.key]){e.preventDefault();move(m[e.key]);}
+});
+document.querySelectorAll('.pad button').forEach(b=>b.onclick=()=>move(b.dataset.d));
+let sx,sy;
+cv.addEventListener('touchstart',e=>{sx=e.touches[0].clientX;sy=e.touches[0].clientY;},{passive:true});
+cv.addEventListener('touchend',e=>{const dx=e.changedTouches[0].clientX-sx,dy=e.changedTouches[0].clientY-sy;
+  if(Math.abs(dx)<12&&Math.abs(dy)<12)return;
+  if(Math.abs(dx)>Math.abs(dy))move(dx>0?'R':'L');else move(dy>0?'D':'U');},{passive:true});
+document.getElementById('start').onclick=newGame;
+draw();  // safe: lanes/player pre-initialized above
+</script>
+</body>
+</html>

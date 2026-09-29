@@ -1,0 +1,9 @@
+{
+  "name": "Nonogram",
+  "desc": "Picross-style logic puzzles: use the number clues along each row and column to work out which squares to fill in and reveal the hidden picture.",
+  "controls": "Left-click / tap to fill, right-click or Mark mode to cross out",
+  "shelf": "Puzzle & Logic",
+  "tags": ["games", "html5", "puzzle", "logic", "picross"],
+  "badge": "New",
+  "creator": "Dragon Gaming Platforms"
+}

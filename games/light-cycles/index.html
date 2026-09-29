@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+<meta name="robots" content="noindex,nofollow">
+<title>Light Cycles</title>
+<style>
+  html,body{margin:0;height:100%;background:#04060f;overflow:hidden;
+    font-family:system-ui,Segoe UI,Roboto,Arial,sans-serif;color:#cfe8ff;user-select:none;-webkit-user-select:none}
+  #wrap{position:fixed;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px}
+  h1{margin:0;font-size:clamp(18px,4vw,26px);letter-spacing:2px;color:#38e8ff;text-shadow:0 0 10px #0891b2}
+  #hud{display:flex;gap:16px;font-weight:800}
+  #hud .you{color:#38e8ff}#hud .cpu{color:#ff7ad9}
+  canvas{background:#060a16;border:2px solid #12324a;border-radius:6px;box-shadow:0 0 40px rgba(56,232,255,.15);touch-action:none;max-width:96vw;max-height:64vh}
+  #msg{position:fixed;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;background:rgba(4,6,15,.8);text-align:center;padding:20px}
+  #msg h2{margin:0;font-size:clamp(24px,6vw,40px)}#msg p{margin:0;opacity:.85;max-width:420px}
+  button{background:#38e8ff;color:#04121a;border:0;border-radius:12px;padding:12px 28px;font-size:17px;font-weight:800;cursor:pointer}
+  .hidden{display:none!important}
+  .pad{display:grid;grid-template-columns:repeat(3,52px);grid-template-rows:repeat(2,52px);gap:6px;margin-top:6px}
+  .pad button{width:52px;height:52px;font-size:20px;padding:0;background:rgba(56,232,255,.15);color:#38e8ff}
+  .pad .sp{visibility:hidden}
+  @media(hover:hover){.pad{display:none}}
+</style>
+</head>
+<body>
+<div id="wrap">
+  <h1>LIGHT CYCLES</h1>
+  <div id="hud"><span class="you">You <span id="youW">0</span></span><span class="cpu">CPU <span id="cpuW">0</span></span></div>
+  <canvas id="cv"></canvas>
+  <div class="pad">
+    <span class="sp"></span><button data-d="U">▲</button><span class="sp"></span>
+    <button data-d="L">◀</button><button data-d="D">▼</button><button data-d="R">▶</button>
+  </div>
+</div>
+<div id="msg"><h2>Light Cycles</h2><p>Steer your cyan cycle with arrow keys, WASD, or the on-screen pad. Don't hit the walls or the trails. Cut off the pink CPU to win!</p><button id="start">Play</button></div>
+<script>
+const cv=document.getElementById('cv'),ctx=cv.getContext('2d');
+const GW=60,GH=44,CELL=10;cv.width=GW*CELL;cv.height=GH*CELL;
+let grid,you,cpu,running,timer,youWins=0,cpuWins=0;
+const DIR={U:[0,-1],D:[0,1],L:[-1,0],R:[1,0]};
+function reset(){
+  grid=Array.from({length:GH},()=>Array(GW).fill(0));
+  you={x:10,y:GH/2|0,dir:'R',next:'R',alive:true};
+  cpu={x:GW-11,y:GH/2|0,dir:'L',next:'L',alive:true};
+  grid[you.y][you.x]=1;grid[cpu.y][cpu.x]=2;
+}
+function start(){reset();running=true;document.getElementById('msg').classList.add('hidden');
+  clearInterval(timer);timer=setInterval(tick,70);draw();}
+function tick(){
+  you.dir=validTurn(you,you.next);
+  cpu.next=aiThink();cpu.dir=cpu.next;
+  moveP(you,1);moveP(cpu,2);
+  // resolve crashes
+  const yc=crashed(you),cc=crashed(cpu);
+  if(yc||cc){
+    running=false;clearInterval(timer);
+    // mark new cells then decide
+    let msg;
+    if(yc&&cc)msg="Draw — both crashed!";
+    else if(yc){cpuWins++;msg="💥 You crashed — CPU wins the round.";}
+    else{youWins++;msg="🏆 CPU crashed — you win the round!";}
+    document.getElementById('youW').textContent=youWins;
+    document.getElementById('cpuW').textContent=cpuWins;
+    draw();
+    const m=document.getElementById('msg');m.classList.remove('hidden');
+    m.innerHTML=`<h2>${msg}</h2><p>Score — You ${youWins} : ${cpuWins} CPU</p><button id="start">Next round</button>`;
+    document.getElementById('start').onclick=start;
+    return;
+  }
+  grid[you.y][you.x]=1;grid[cpu.y][cpu.x]=2;
+  draw();
+}
+function validTurn(p,nd){
+  // prevent 180-degree reversal
+  const opp={U:'D',D:'U',L:'R',R:'L'};
+  if(nd===opp[p.dir])return p.dir;return nd;
+}
+function moveP(p,who){const [dx,dy]=DIR[p.dir];p.x+=dx;p.y+=dy;}
+function crashed(p){return p.x<0||p.y<0||p.x>=GW||p.y>=GH||grid[p.y][p.x]!==0;}
+function aiThink(){
+  // greedy: keep going, avoid imminent crash, prefer open space
+  const opts=['U','D','L','R'].filter(d=>d!=={U:'D',D:'U',L:'R',R:'L'}[cpu.dir]);
+  let best=cpu.dir,bestScore=-1;
+  for(const d of opts){
+    const [dx,dy]=DIR[d];const nx=cpu.x+dx,ny=cpu.y+dy;
+    if(nx<0||ny<0||nx>=GW||ny>=GH||grid[ny][nx]!==0)continue;
+    const space=flood(nx,ny)+Math.random()*3;
+    if(space>bestScore){bestScore=space;best=d;}
+  }
+  return best;
+}
+function flood(sx,sy){
+  // estimate reachable open cells (capped) from a point
+  const seen=new Set();const stack=[[sx,sy]];let n=0;
+  while(stack.length&&n<80){const [x,y]=stack.pop();const k=x+','+y;
+    if(seen.has(k))continue;if(x<0||y<0||x>=GW||y>=GH||grid[y][x]!==0)continue;
+    seen.add(k);n++;stack.push([x+1,y],[x-1,y],[x,y+1],[x,y-1]);}
+  return n;
+}
+function draw(){
+  ctx.clearRect(0,0,cv.width,cv.height);
+  // faint grid
+  ctx.strokeStyle='rgba(30,60,90,.35)';ctx.lineWidth=1;
+  for(let x=0;x<=GW;x+=5){ctx.beginPath();ctx.moveTo(x*CELL,0);ctx.lineTo(x*CELL,cv.height);ctx.stroke();}
+  for(let y=0;y<=GH;y+=5){ctx.beginPath();ctx.moveTo(0,y*CELL);ctx.lineTo(cv.width,y*CELL);ctx.stroke();}
+  for(let y=0;y<GH;y++)for(let x=0;x<GW;x++){if(grid[y][x]===1){ctx.fillStyle='rgba(56,232,255,.55)';ctx.fillRect(x*CELL,y*CELL,CELL,CELL);}
+    else if(grid[y][x]===2){ctx.fillStyle='rgba(255,122,217,.55)';ctx.fillRect(x*CELL,y*CELL,CELL,CELL);}}
+  head(you.x,you.y,'#38e8ff');head(cpu.x,cpu.y,'#ff7ad9');
+}
+function head(x,y,col){ctx.fillStyle=col;ctx.shadowColor=col;ctx.shadowBlur=10;ctx.fillRect(x*CELL-1,y*CELL-1,CELL+2,CELL+2);ctx.shadowBlur=0;}
+window.addEventListener('keydown',e=>{
+  const m={ArrowUp:'U',ArrowDown:'D',ArrowLeft:'L',ArrowRight:'R',w:'U',s:'D',a:'L',d:'R',W:'U',S:'D',A:'L',D:'R'};
+  if(m[e.key]){e.preventDefault();you.next=m[e.key];}
+});
+document.querySelectorAll('.pad button').forEach(b=>b.onclick=()=>{you.next=b.dataset.d;});
+document.getElementById('start').onclick=start;
+reset();draw();
+</script>
+</body>
+</html>

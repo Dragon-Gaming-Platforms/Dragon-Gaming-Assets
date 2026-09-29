@@ -1,0 +1,9 @@
+{
+  "name": "Video Poker",
+  "desc": "Jacks or Better video poker. You're dealt five cards — hold the ones you want, draw the rest, and get paid on pairs of jacks or better up to a royal flush.",
+  "controls": "Mouse / touch to hold cards and press Deal / Draw",
+  "shelf": "Puzzle & Logic",
+  "tags": ["games", "html5", "cards", "poker", "casino"],
+  "badge": "New",
+  "creator": "Dragon Gaming Platforms"
+}

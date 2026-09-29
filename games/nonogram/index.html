@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+<meta name="robots" content="noindex,nofollow">
+<title>Nonogram</title>
+<style>
+  *{box-sizing:border-box}
+  html,body{margin:0;height:100%}
+  body{background:radial-gradient(circle at 50% 0,#22283f,#0a0d16 60%);color:#e8eefc;
+    font-family:system-ui,Segoe UI,Roboto,Arial,sans-serif;display:flex;flex-direction:column;
+    align-items:center;justify-content:center;min-height:100vh;gap:12px;padding:12px;user-select:none;-webkit-user-select:none;touch-action:none}
+  h1{margin:0;font-size:clamp(20px,5vw,30px)}
+  #status{min-height:20px;color:#ffd76a;font-weight:700}
+  #mode{font-size:14px;opacity:.85}
+  table{border-collapse:collapse;background:#0d1120;box-shadow:0 14px 40px rgba(0,0,0,.5);border-radius:6px}
+  td{padding:0;text-align:center;vertical-align:middle}
+  .clue{color:#9fb4d8;font-weight:700;font-size:calc(var(--cs)*0.32);line-height:1.1;background:#141a2e}
+  .rowclue{text-align:right;padding-right:5px;white-space:nowrap}
+  .colclue{vertical-align:bottom;padding-bottom:4px}
+  .cell{width:var(--cs);height:var(--cs);border:1px solid #2a3450;cursor:pointer;background:#1c2embed}
+  .cell{background:#1b2237}
+  .cell.fill{background:#5b8def}
+  .cell.mark{background:#1b2237;position:relative}
+  .cell.mark::after{content:"✕";color:#ff7a6b;font-size:calc(var(--cs)*0.5)}
+  .cell.b3{border-left:2px solid #46567e}
+  .cell.b3r{border-top:2px solid #46567e}
+  .row{display:flex;gap:10px;align-items:center;flex-wrap:wrap;justify-content:center}
+  button,select{background:#5b8def;color:#fff;border:0;border-radius:10px;padding:9px 16px;font-size:14px;font-weight:800;cursor:pointer}
+  select{background:rgba(255,255,255,.1)}
+  #toggle{background:#2fd4b6;color:#04231f}
+</style>
+</head>
+<body>
+<h1>Nonogram</h1>
+<div id="status">Fill the squares that match the number clues.</div>
+<div id="grid"></div>
+<div class="row">
+  <button id="toggle">Mode: Fill</button>
+  <button id="newGame">New Puzzle</button>
+  <select id="size"><option value="5">5×5</option><option value="10" selected>10×10</option><option value="15">15×15</option></select>
+</div>
+<div id="mode">Tip: left-click to fill, right-click (or Mark mode) to cross out.</div>
+<script>
+const gridDiv=document.getElementById('grid');
+let N,solution,state,rowClues,colClues,mode,solved;
+function setCS(){const cs=Math.floor(Math.min(window.innerWidth*0.9,window.innerHeight*0.55,460)/(N+ (N<=5?3:5)));
+  document.documentElement.style.setProperty('--cs',Math.max(16,cs)+'px');}
+function newGame(){
+  N=parseInt(document.getElementById('size').value);
+  solution=Array.from({length:N},()=>Array.from({length:N},()=>Math.random()<0.55?1:0));
+  // ensure no fully empty rows/cols for nicer puzzles
+  for(let r=0;r<N;r++)if(solution[r].every(v=>!v))solution[r][Math.floor(Math.random()*N)]=1;
+  rowClues=solution.map(row=>lineClues(row));
+  colClues=[];for(let c=0;c<N;c++){const col=[];for(let r=0;r<N;r++)col.push(solution[r][c]);colClues.push(lineClues(col));}
+  state=Array.from({length:N},()=>Array(N).fill(0)); // 0 empty,1 fill,2 mark
+  mode='fill';solved=false;document.getElementById('toggle').textContent='Mode: Fill';
+  document.getElementById('status').textContent='Fill the squares that match the number clues.';
+  setCS();render();
+}
+function lineClues(line){const c=[];let n=0;for(const v of line){if(v){n++;}else if(n){c.push(n);n=0;}}if(n)c.push(n);return c.length?c:[0];}
+function render(){
+  const maxRow=Math.max(...rowClues.map(c=>c.length));
+  const maxCol=Math.max(...colClues.map(c=>c.length));
+  let html='<table>';
+  // column clue rows
+  for(let k=0;k<maxCol;k++){
+    html+='<tr>';
+    for(let i=0;i<maxRow;i++)html+='<td></td>';
+    for(let c=0;c<N;c++){const cl=colClues[c];const idx=k-(maxCol-cl.length);
+      html+=`<td class="clue colclue">${idx>=0?cl[idx]:''}</td>`;}
+    html+='</tr>';
+  }
+  for(let r=0;r<N;r++){
+    html+='<tr>';
+    const cl=rowClues[r];
+    for(let i=0;i<maxRow;i++){const idx=i-(maxRow-cl.length);html+=`<td class="clue rowclue">${idx>=0?cl[idx]:''}</td>`;}
+    for(let c=0;c<N;c++){
+      const cls=['cell'];if(state[r][c]===1)cls.push('fill');else if(state[r][c]===2)cls.push('mark');
+      if(c%5===0&&c>0)cls.push('b3');if(r%5===0&&r>0)cls.push('b3r');
+      html+=`<td><div class="${cls.join(' ')}" data-r="${r}" data-c="${c}"></div></td>`;
+    }
+    html+='</tr>';
+  }
+  html+='</table>';
+  gridDiv.innerHTML=html;
+  gridDiv.querySelectorAll('.cell').forEach(el=>{
+    el.addEventListener('click',()=>tap(+el.dataset.r,+el.dataset.c,mode==='fill'?1:2));
+    el.addEventListener('contextmenu',e=>{e.preventDefault();tap(+el.dataset.r,+el.dataset.c,2);});
+  });
+}
+function tap(r,c,val){
+  if(solved)return;
+  state[r][c]=state[r][c]===val?0:val;
+  render();check();
+}
+function check(){
+  for(let r=0;r<N;r++)for(let c=0;c<N;c++){
+    const shouldFill=solution[r][c]===1;
+    if(shouldFill&&state[r][c]!==1)return;
+    if(!shouldFill&&state[r][c]===1)return;
+  }
+  solved=true;document.getElementById('status').textContent='🎉 Solved! Nicely done.';
+}
+document.getElementById('toggle').onclick=()=>{mode=mode==='fill'?'mark':'fill';
+  document.getElementById('toggle').textContent='Mode: '+(mode==='fill'?'Fill':'Mark');};
+document.getElementById('newGame').onclick=newGame;
+document.getElementById('size').onchange=newGame;
+window.addEventListener('resize',()=>{setCS();});
+newGame();
+</script>
+</body>
+</html>

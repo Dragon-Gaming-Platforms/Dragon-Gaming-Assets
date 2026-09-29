@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+<meta name="robots" content="noindex,nofollow">
+<title>Doodle Hop</title>
+<style>
+  html,body{margin:0;height:100%;background:#0c1230;overflow:hidden;
+    font-family:system-ui,Segoe UI,Roboto,Arial,sans-serif;color:#eef;user-select:none;-webkit-user-select:none}
+  #wrap{position:fixed;inset:0;display:flex;align-items:center;justify-content:center}
+  canvas{background:linear-gradient(#1a2350,#0c1230);touch-action:none;max-width:100vw;max-height:100vh}
+  #hud{position:fixed;top:10px;left:0;right:0;display:flex;justify-content:space-between;padding:0 16px;font-weight:800;pointer-events:none;text-shadow:0 1px 3px #000}
+  #msg{position:fixed;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;background:rgba(8,10,25,.76);text-align:center;padding:20px}
+  #msg h1{margin:0;font-size:clamp(26px,7vw,44px)}#msg p{margin:0;opacity:.85;max-width:400px}
+  button{background:#ffd23f;color:#3a2a00;border:0;border-radius:12px;padding:13px 30px;font-size:18px;font-weight:800;cursor:pointer}
+  .hidden{display:none!important}
+</style>
+</head>
+<body>
+<div id="hud"><span>Height <span id="score">0</span></span><span>Best <span id="best">0</span></span></div>
+<div id="wrap"><canvas id="cv"></canvas></div>
+<div id="msg"><h1>Doodle Hop</h1><p>Bounce ever upward from platform to platform! Steer with mouse, arrow keys, or by tilting — the screen wraps side to side. Don't fall off the bottom.</p><button id="start">Play</button></div>
+<script>
+const cv=document.getElementById('cv'),ctx=cv.getContext('2d');
+const W=340,H=600;cv.width=W;cv.height=H;
+const GRAV=0.32,JUMP=-11.2;
+let player,platforms,cameraY,score,best=0,running,keys={},targetX,anim;
+function reset(){
+  player={x:W/2,y:H-90,vx:0,vy:JUMP,r:16};
+  platforms=[];
+  // starting platform
+  platforms.push({x:W/2-40,y:H-60,w:80,type:0,vx:0});
+  let y=H-60;
+  for(let i=0;i<12;i++){y-=Math.random()*70+45;addPlatform(y);}
+  cameraY=0;score=0;targetX=player.x;
+}
+function addPlatform(y){
+  const w=60+Math.random()*30;
+  const type=Math.random()<0.18&&score>300?2:(Math.random()<0.22&&score>150?1:0); // 2=breakable,1=moving
+  platforms.push({x:Math.random()*(W-w),y,w,type,vx:type===1?(Math.random()<0.5?-1.4:1.4):0,broken:false});
+}
+function startGame(){reset();running=true;document.getElementById('msg').classList.add('hidden');anim=requestAnimationFrame(loop);}
+function loop(){
+  if(!running)return;
+  update();draw();anim=requestAnimationFrame(loop);
+}
+function update(){
+  if(keys['ArrowLeft'])player.vx=-5.5;
+  else if(keys['ArrowRight'])player.vx=5.5;
+  else player.vx+=(( targetX-player.x)*0.12 - player.vx)*0.5;
+  player.x+=player.vx;
+  if(player.x<-player.r)player.x=W+player.r;
+  if(player.x>W+player.r)player.x=-player.r;
+  player.vy+=GRAV;player.y+=player.vy;
+  // moving platforms
+  platforms.forEach(p=>{if(p.type===1){p.x+=p.vx;if(p.x<0||p.x+p.w>W)p.vx*=-1;}});
+  // collision (only when falling)
+  if(player.vy>0){
+    for(const p of platforms){
+      if(p.broken)continue;
+      if(player.x> p.x-player.r&&player.x<p.x+p.w+player.r&&
+         player.y+player.r>p.y&&player.y+player.r<p.y+16+player.vy){
+        player.vy=JUMP;
+        if(p.type===2)p.broken=true;
+        break;
+      }
+    }
+  }
+  // camera: scroll when player above middle
+  if(player.y<cameraY+H*0.4){
+    const diff=(cameraY+H*0.4)-player.y;cameraY-=diff;score+=Math.round(diff);
+    document.getElementById('score').textContent=score;
+  }
+  // recycle platforms
+  platforms=platforms.filter(p=>p.y<cameraY+H+20);
+  let topY=Math.min(...platforms.map(p=>p.y));
+  while(platforms.length<14){topY-=Math.random()*70+45;addPlatform(topY);}
+  // fall death
+  if(player.y-cameraY>H+30)end();
+}
+function draw(){
+  ctx.clearRect(0,0,W,H);
+  // stars
+  ctx.fillStyle='rgba(255,255,255,.25)';
+  for(let i=0;i<30;i++){const sx=(i*53)%W;const sy=((i*97 - cameraY*0.3)%H+H)%H;ctx.fillRect(sx,sy,2,2);}
+  // platforms
+  for(const p of platforms){if(p.broken)continue;const y=p.y-cameraY;
+    let col=p.type===2?'#e08a5a':p.type===1?'#7dd3fc':'#8ce99a';
+    ctx.fillStyle=col;roundRect(p.x,y,p.w,12,6);ctx.fill();
+    ctx.fillStyle='rgba(0,0,0,.15)';roundRect(p.x,y+8,p.w,4,3);ctx.fill();
+  }
+  // player
+  const py=player.y-cameraY;
+  ctx.save();ctx.translate(player.x,py);
+  ctx.fillStyle='#ffd23f';ctx.beginPath();ctx.arc(0,0,player.r,0,7);ctx.fill();
+  ctx.fillStyle='#3a2a00';ctx.beginPath();ctx.arc(-5,-4,3,0,7);ctx.arc(5,-4,3,0,7);ctx.fill();
+  ctx.strokeStyle='#3a2a00';ctx.lineWidth=2;ctx.beginPath();ctx.arc(0,3,6,0.1*Math.PI,0.9*Math.PI);ctx.stroke();
+  ctx.restore();
+}
+function roundRect(x,y,w,h,r){ctx.beginPath();ctx.moveTo(x+r,y);ctx.arcTo(x+w,y,x+w,y+h,r);ctx.arcTo(x+w,y+h,x,y+h,r);ctx.arcTo(x,y+h,x,y,r);ctx.arcTo(x,y,x+w,y,r);ctx.closePath();}
+function end(){running=false;cancelAnimationFrame(anim);best=Math.max(best,score);document.getElementById('best').textContent=best;
+  const m=document.getElementById('msg');m.classList.remove('hidden');
+  m.innerHTML=`<h1>You fell!</h1><p>Height reached: <b>${score}</b><br>Best: ${best}</p><button id="start">Play again</button>`;
+  document.getElementById('start').onclick=startGame;}
+window.addEventListener('keydown',e=>{keys[e.key]=true;});
+window.addEventListener('keyup',e=>keys[e.key]=false);
+cv.addEventListener('mousemove',e=>{const r=cv.getBoundingClientRect();targetX=(e.clientX-r.left)*(W/r.width);});
+cv.addEventListener('touchmove',e=>{e.preventDefault();const r=cv.getBoundingClientRect();targetX=(e.touches[0].clientX-r.left)*(W/r.width);},{passive:false});
+document.getElementById('start').onclick=startGame;
+</script>
+</body>
+</html>

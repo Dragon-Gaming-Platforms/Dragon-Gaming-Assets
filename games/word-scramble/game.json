@@ -1,0 +1,9 @@
+{
+  "name": "Word Scramble",
+  "desc": "Unscramble the jumbled letters to find the hidden word. Use the hint, reveal a letter if you're stuck, and build a streak across animal, food, and space themes.",
+  "controls": "Click letters or type on your keyboard; Backspace to undo",
+  "shelf": "Puzzle & Logic",
+  "tags": ["games", "html5", "word", "puzzle", "casual"],
+  "badge": "New",
+  "creator": "Dragon Gaming Platforms"
+}

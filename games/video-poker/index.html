@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+<meta name="robots" content="noindex,nofollow">
+<title>Video Poker</title>
+<style>
+  *{box-sizing:border-box}
+  html,body{margin:0;height:100%}
+  body{background:radial-gradient(circle at 50% 0,#123d24,#06170d 60%);color:#eafff0;
+    font-family:system-ui,Segoe UI,Roboto,Arial,sans-serif;display:flex;flex-direction:column;
+    align-items:center;justify-content:center;min-height:100vh;gap:14px;padding:14px;user-select:none;-webkit-user-select:none}
+  h1{margin:0;font-size:clamp(20px,5vw,30px)}
+  .hud{display:flex;gap:14px;font-weight:800}
+  .hud div{background:rgba(255,255,255,.08);border-radius:10px;padding:8px 16px}
+  #hand{display:flex;gap:10px;justify-content:center;flex-wrap:wrap}
+  .card{width:clamp(58px,17vw,88px);aspect-ratio:2.5/3.5;border-radius:10px;background:#f7fbff;color:#111;
+    display:flex;flex-direction:column;justify-content:space-between;padding:7px;font-weight:800;
+    box-shadow:0 6px 14px rgba(0,0,0,.45);cursor:pointer;position:relative;font-size:clamp(15px,4vw,22px)}
+  .card .bottom{transform:rotate(180deg)}
+  .card.red{color:#d81e3f}
+  .card.back{background:repeating-linear-gradient(45deg,#1f6feb,#1f6feb 8px,#144fb0 8px,#144fb0 16px);cursor:default}
+  .card.held{outline:3px solid #ffd23f;transform:translateY(-8px)}
+  .card .hold{position:absolute;left:0;right:0;bottom:-22px;text-align:center;font-size:12px;color:#ffd23f}
+  #status{min-height:24px;font-weight:800;color:#ffd23f;font-size:18px}
+  .row{display:flex;gap:10px;align-items:center;flex-wrap:wrap;justify-content:center}
+  button{background:#ffd23f;color:#3a2a00;border:0;border-radius:12px;padding:12px 26px;font-size:17px;font-weight:800;cursor:pointer}
+  button:disabled{opacity:.4;cursor:default}
+  table{border-collapse:collapse;font-size:13px;background:rgba(0,0,0,.25);border-radius:10px;overflow:hidden}
+  td{padding:4px 12px;border-bottom:1px solid rgba(255,255,255,.08)}
+  td:last-child{text-align:right;color:#ffd23f;font-weight:800}
+  tr.hit{background:rgba(255,210,63,.2)}
+  .pay{margin-top:4px}
+</style>
+</head>
+<body>
+<h1>Video Poker</h1>
+<div class="hud"><div>Credits <span id="credits">100</span></div><div>Bet <span id="bet">5</span></div><div>Last win <span id="win">0</span></div></div>
+<div id="hand"></div>
+<div id="status">Jacks or Better. Press Deal to start.</div>
+<div class="row">
+  <button id="deal">Deal</button>
+  <button id="draw" disabled>Draw</button>
+  <button id="betBtn">Bet: 5</button>
+</div>
+<table class="pay" id="paytable"></table>
+<script>
+const SUITS=[['♠',false],['♥',true],['♦',true],['♣',false]];
+const RANKS=['2','3','4','5','6','7','8','9','10','J','Q','K','A'];
+const PAY={'Royal Flush':250,'Straight Flush':50,'Four of a Kind':25,'Full House':9,'Flush':6,'Straight':4,'Three of a Kind':3,'Two Pair':2,'Jacks or Better':1};
+let deck,hand,held,credits=100,bet=5,phase='deal';
+function buildDeck(){deck=[];for(let s=0;s<4;s++)for(let r=0;r<13;r++)deck.push({r,s});
+  for(let i=deck.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[deck[i],deck[j]]=[deck[j],deck[i]];}}
+function renderPaytable(hit){
+  const t=document.getElementById('paytable');t.innerHTML='';
+  for(const [name,mult] of Object.entries(PAY)){
+    const tr=document.createElement('tr');if(name===hit)tr.className='hit';
+    tr.innerHTML=`<td>${name}</td><td>${mult}×</td>`;t.appendChild(tr);
+  }
+}
+function deal(){
+  if(phase!=='deal')return;
+  if(credits<bet){document.getElementById('status').textContent='Not enough credits! Lower your bet.';return;}
+  credits-=bet;document.getElementById('credits').textContent=credits;
+  buildDeck();hand=[];held=[false,false,false,false,false];
+  for(let i=0;i<5;i++)hand.push(deck.pop());
+  phase='draw';
+  document.getElementById('deal').disabled=true;document.getElementById('draw').disabled=false;
+  document.getElementById('betBtn').disabled=true;
+  document.getElementById('status').textContent='Tap cards to HOLD, then press Draw.';
+  document.getElementById('win').textContent='0';
+  render();renderPaytable();
+}
+function draw(){
+  if(phase!=='draw')return;
+  for(let i=0;i<5;i++)if(!held[i])hand[i]=deck.pop();
+  phase='deal';
+  document.getElementById('deal').disabled=false;document.getElementById('draw').disabled=true;
+  document.getElementById('betBtn').disabled=false;
+  const result=evaluate(hand);
+  let payout=0;
+  if(result){payout=PAY[result]*bet;credits+=payout;document.getElementById('credits').textContent=credits;}
+  document.getElementById('win').textContent=payout;
+  document.getElementById('status').textContent=result?`${result}! You win ${payout} credits.`:'No win. Deal again!';
+  render(true);renderPaytable(result);
+  if(credits<=0){document.getElementById('status').textContent='Out of credits! Refilling to 100.';credits=100;document.getElementById('credits').textContent=100;}
+}
+function render(reveal){
+  const h=document.getElementById('hand');h.innerHTML='';
+  hand.forEach((c,i)=>{
+    const d=document.createElement('div');
+    const red=SUITS[c.s][1];
+    d.className='card'+(red?' red':'')+(held[i]?' held':'');
+    const face=`${RANKS[c.r]}${SUITS[c.s][0]}`;
+    d.innerHTML=`<div class="top">${face}</div><div class="bottom">${face}</div>`+(held[i]?'<div class="hold">HELD</div>':'');
+    if(phase==='draw')d.onclick=()=>{held[i]=!held[i];render();};
+    h.appendChild(d);
+  });
+}
+function evaluate(cards){
+  const rs=cards.map(c=>c.r).sort((a,b)=>a-b);
+  const ss=cards.map(c=>c.s);
+  const counts={};rs.forEach(r=>counts[r]=(counts[r]||0)+1);
+  const vals=Object.values(counts).sort((a,b)=>b-a);
+  const flush=ss.every(s=>s===ss[0]);
+  let straight=rs.every((r,i)=>i===0||r===rs[i-1]+1);
+  // Ace-low straight A,2,3,4,5 -> ranks 12,0,1,2,3
+  const aceLow=JSON.stringify(rs)===JSON.stringify([0,1,2,3,12]);
+  if(aceLow)straight=true;
+  const highStraightRoyal=JSON.stringify(rs)===JSON.stringify([8,9,10,11,12]);
+  if(flush&&highStraightRoyal)return 'Royal Flush';
+  if(flush&&straight)return 'Straight Flush';
+  if(vals[0]===4)return 'Four of a Kind';
+  if(vals[0]===3&&vals[1]===2)return 'Full House';
+  if(flush)return 'Flush';
+  if(straight)return 'Straight';
+  if(vals[0]===3)return 'Three of a Kind';
+  if(vals[0]===2&&vals[1]===2)return 'Two Pair';
+  if(vals[0]===2){
+    // pair of Jacks or better: rank index >=9 (J=9,Q=10,K=11,A=12)
+    const pairRank=Object.keys(counts).find(r=>counts[r]===2);
+    if(+pairRank>=9)return 'Jacks or Better';
+  }
+  return null;
+}
+function initCards(){hand=[{r:12,s:0},{r:12,s:1},{r:5,s:2},{r:8,s:3},{r:1,s:0}];held=[0,0,0,0,0];render();}
+document.getElementById('deal').onclick=deal;
+document.getElementById('draw').onclick=draw;
+document.getElementById('betBtn').onclick=()=>{if(phase!=='deal')return;bet=bet>=25?1:bet+ (bet<5?4:5);
+  document.getElementById('bet').textContent=bet;document.getElementById('betBtn').textContent='Bet: '+bet;};
+renderPaytable();initCards();
+</script>
+</body>
+</html>

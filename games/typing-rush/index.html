@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+<meta name="robots" content="noindex,nofollow">
+<title>Typing Rush</title>
+<style>
+  html,body{margin:0;height:100%;background:#0a0e1a;overflow:hidden;
+    font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;color:#dfe7ff;user-select:none;-webkit-user-select:none}
+  #wrap{position:fixed;inset:0;display:flex;flex-direction:column;align-items:center}
+  #hud{width:100%;display:flex;justify-content:space-between;padding:12px 18px;font-weight:800;font-family:system-ui}
+  #hud .lives{color:#ff7a6b}
+  #field{position:relative;flex:1;width:100%;max-width:800px;overflow:hidden}
+  .word{position:absolute;white-space:nowrap;font-size:22px;font-weight:700;padding:6px 12px;border-radius:8px;
+    background:rgba(30,42,72,.7);box-shadow:0 2px 8px rgba(0,0,0,.4)}
+  .word .done{color:#5ee6a8}
+  .word.active{outline:2px solid #ffd23f}
+  #entry{width:100%;max-width:800px;padding:10px}
+  #typed{width:100%;font-family:ui-monospace,monospace;font-size:20px;padding:12px 14px;border-radius:10px;border:2px solid #2a3a5f;
+    background:#0d1426;color:#fff;text-align:center;outline:none}
+  #msg{position:fixed;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;background:rgba(6,9,18,.82);text-align:center;padding:20px}
+  #msg h1{margin:0;font-size:clamp(26px,7vw,44px)}#msg p{margin:0;opacity:.85;max-width:420px;line-height:1.5}
+  button{background:#5b8def;color:#fff;border:0;border-radius:12px;padding:13px 30px;font-size:18px;font-weight:800;cursor:pointer;font-family:system-ui}
+  select{background:rgba(255,255,255,.1);color:#fff;border:0;border-radius:10px;padding:9px 14px;font-family:system-ui;font-weight:700}
+  .hidden{display:none!important}
+</style>
+</head>
+<body>
+<div id="wrap">
+  <div id="hud"><span>Score <span id="score">0</span></span><span>WPM <span id="wpm">0</span></span><span class="lives">Lives <span id="lives">5</span></span></div>
+  <div id="field"></div>
+  <div id="entry"><input id="typed" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false" placeholder="type here…"></div>
+</div>
+<div id="msg"><h1>Typing Rush</h1><p>Words fall from the top — type them and press Space or Enter to blast them before they hit the bottom. Clear words to score; miss five and it's over!</p><button id="start">Play</button></div>
+<script>
+const WORDS=('time year people way day man thing woman life child world school state family student group country problem hand part place case week company system program question work government number night point home water room mother area money story fact month lot right study book eye job word business issue side kind head house service friend father power hour game line end member law car city community name president team minute idea body information back parent face others level office door health person art war history party result change morning reason research girl guy moment air teacher force education rocket planet dragon puzzle keyboard victory').split(' ');
+const HARD=('asynchronous coordination extravaganza kaleidoscope juxtapose quintessential labyrinth serendipity onomatopoeia bureaucracy conscientious idiosyncratic perpendicular archipelago miscellaneous').split(' ');
+const field=document.getElementById('field'),input=document.getElementById('typed');
+let words,score,lives,running,spawnTimer,tickTimer,startTime,typedCount,speed;
+function newGame(){
+  words=[];score=0;lives=5;typedCount=0;speed=parseFloat(document.getElementById('speed')?.value||0.5);
+  document.getElementById('score').textContent=0;document.getElementById('lives').textContent=5;document.getElementById('wpm').textContent=0;
+  field.innerHTML='';running=true;startTime=Date.now();
+  document.getElementById('msg').classList.add('hidden');
+  input.value='';input.focus();
+  clearInterval(spawnTimer);clearInterval(tickTimer);
+  spawnTimer=setInterval(spawn,1400);
+  tickTimer=setInterval(tick,30);
+  spawn();
+}
+function spawn(){
+  if(!running)return;
+  const pool=score>200&&Math.random()<0.3?HARD:WORDS;
+  const text=pool[Math.floor(Math.random()*pool.length)];
+  const el=document.createElement('div');el.className='word';el.dataset.text=text;el.dataset.typed='0';
+  el.innerHTML=`<span class="done"></span><span class="rest">${text}</span>`;
+  field.appendChild(el);
+  const maxX=Math.max(10,field.clientWidth-el.offsetWidth-10);
+  const w={el,text,x:Math.random()*maxX,y:-30,vy:0.35+Math.random()*0.4+score*0.0006};
+  el.style.left=w.x+'px';words.push(w);
+}
+function tick(){
+  if(!running)return;
+  const h=field.clientHeight;
+  for(let i=words.length-1;i>=0;i--){const w=words[i];w.y+=w.vy;w.el.style.top=w.y+'px';
+    if(w.y>h-24){field.removeChild(w.el);words.splice(i,1);loseLife();}}
+  // update WPM
+  const mins=(Date.now()-startTime)/60000;
+  if(mins>0)document.getElementById('wpm').textContent=Math.round((typedCount/5)/mins);
+}
+function loseLife(){lives--;document.getElementById('lives').textContent=lives;if(lives<=0)end();}
+function handleInput(){
+  const val=input.value.trim().toLowerCase();
+  // highlight matching progress on the lowest matching word
+  let active=null;
+  words.forEach(w=>w.el.classList.remove('active'));
+  // find best matching word (prefix), prefer nearest to bottom
+  const matches=words.filter(w=>w.text.toLowerCase().startsWith(val)&&val.length>0);
+  matches.sort((a,b)=>b.y-a.y);
+  if(matches.length){active=matches[0];active.el.classList.add('active');
+    active.el.querySelector('.done').textContent=active.text.slice(0,val.length);
+    active.el.querySelector('.rest').textContent=active.text.slice(val.length);
+  }
+  // reset non-actives
+  words.forEach(w=>{if(w!==active){w.el.querySelector('.done').textContent='';w.el.querySelector('.rest').textContent=w.text;}});
+}
+function submit(){
+  const val=input.value.trim().toLowerCase();
+  input.value='';
+  if(!val){handleInput();return;}
+  const idx=words.findIndex(w=>w.text.toLowerCase()===val);
+  if(idx>=0){const w=words[idx];typedCount+=w.text.length;
+    score+=w.text.length*5;document.getElementById('score').textContent=score;
+    field.removeChild(w.el);words.splice(idx,1);}
+  handleInput();
+}
+input.addEventListener('input',handleInput);
+input.addEventListener('keydown',e=>{if(e.key==='Enter'||e.key===' '){e.preventDefault();submit();}});
+function end(){running=false;clearInterval(spawnTimer);clearInterval(tickTimer);
+  const wpm=document.getElementById('wpm').textContent;
+  const m=document.getElementById('msg');m.classList.remove('hidden');
+  m.innerHTML=`<h1>Game Over</h1><p>Score: <b>${score}</b><br>Speed: ${wpm} WPM</p><button id="start">Play again</button>`;
+  document.getElementById('start').onclick=newGame;}
+document.getElementById('start').onclick=newGame;
+</script>
+</body>
+</html>
