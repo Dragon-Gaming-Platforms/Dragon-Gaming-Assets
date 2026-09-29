@@ -1,0 +1,9 @@
+{
+  "name": "Whack-a-Mole",
+  "desc": "The arcade classic: bop as many moles as you can before the 30-second timer runs out. Moles pop faster the higher your score climbs. Beat your best.",
+  "controls": "Mouse / touch to whack the moles",
+  "shelf": "Arcade & Action",
+  "tags": ["games", "html5", "arcade", "casual", "reflex"],
+  "badge": "New",
+  "creator": "Dragon Gaming Platforms"
+}

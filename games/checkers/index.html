@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+<meta name="robots" content="noindex,nofollow">
+<title>Checkers</title>
+<style>
+  :root{--text:#f0e9dd}
+  *{box-sizing:border-box}
+  html,body{margin:0;height:100%}
+  body{background:radial-gradient(circle at 50% -10%,#3a2b1c,#160f08 60%);color:var(--text);
+    font-family:system-ui,Segoe UI,Roboto,Arial,sans-serif;display:flex;flex-direction:column;
+    align-items:center;justify-content:center;min-height:100vh;gap:12px;padding:14px;user-select:none;-webkit-user-select:none}
+  h1{margin:0;font-size:clamp(20px,5vw,30px)}
+  #status{min-height:22px;font-size:15px;color:#f5c877}
+  #board{display:grid;grid-template-columns:repeat(8,1fr);width:min(92vw,92vh,460px);aspect-ratio:1;
+    border:6px solid #2a1c0f;border-radius:8px;box-shadow:0 14px 40px rgba(0,0,0,.55);overflow:hidden}
+  .sq{display:flex;align-items:center;justify-content:center;position:relative}
+  .light{background:#e8c99a}.dark{background:#8a5a34}
+  .sq.playable{cursor:pointer}
+  .sel{box-shadow:inset 0 0 0 4px #ffd76a}
+  .move::after{content:"";position:absolute;width:26%;height:26%;border-radius:50%;background:rgba(80,220,120,.7)}
+  .man{width:74%;height:74%;border-radius:50%;position:relative}
+  .red{background:radial-gradient(circle at 35% 30%,#ff7a6b,#b3271a);box-shadow:0 3px 5px rgba(0,0,0,.5)}
+  .blk{background:radial-gradient(circle at 35% 30%,#4a5266,#12151f);box-shadow:0 3px 5px rgba(0,0,0,.5)}
+  .king::after{content:"♚";position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
+    font-size:60%;color:#ffd76a;text-shadow:0 1px 2px #000}
+  button{background:#f5c877;color:#3a2610;border:0;border-radius:10px;padding:10px 20px;font-size:15px;font-weight:700;cursor:pointer}
+</style>
+</head>
+<body>
+<h1>Checkers</h1>
+<div id="status">Your move (red)</div>
+<div id="board"></div>
+<button id="newGame">New Game</button>
+<script>
+// 8x8, red = player (moves up, -row), black = CPU (moves down, +row)
+const R=1,RK=2,BL=3,BK=4;
+const boardEl=document.getElementById('board');
+const statusEl=document.getElementById('status');
+let board,selected,legalForSel,turn,gameOver,mustFrom;
+
+function init(){
+  board=Array.from({length:8},()=>Array(8).fill(0));
+  for(let r=0;r<8;r++)for(let c=0;c<8;c++){
+    if((r+c)%2===1){
+      if(r<3)board[r][c]=BL;
+      else if(r>4)board[r][c]=R;
+    }
+  }
+  turn='red';gameOver=false;selected=null;legalForSel=[];mustFrom=null;
+  statusEl.textContent='Your move (red)';
+  render();
+}
+const isRed=v=>v===R||v===RK;
+const isBlk=v=>v===BL||v===BK;
+const isKing=v=>v===RK||v===BK;
+function inside(r,c){return r>=0&&r<8&&c>=0&&c<8;}
+function dirsFor(v){
+  if(v===R)return[[-1,-1],[-1,1]];
+  if(v===BL)return[[1,-1],[1,1]];
+  return[[-1,-1],[-1,1],[1,-1],[1,1]];
+}
+function pieceMoves(bd,r,c){
+  const v=bd[r][c];const own=isRed(v)?isRed:isBlk;const opp=isRed(v)?isBlk:isRed;
+  const jumps=[],steps=[];
+  for(const[dr,dc]of dirsFor(v)){
+    const r1=r+dr,c1=c+dc;
+    if(inside(r1,c1)&&bd[r1][c1]===0)steps.push({from:[r,c],to:[r1,c1],cap:null});
+    const r2=r+2*dr,c2=c+2*dc;
+    if(inside(r2,c2)&&bd[r2][c2]===0&&inside(r1,c1)&&bd[r1][c1]!==0&&opp(bd[r1][c1]))
+      jumps.push({from:[r,c],to:[r2,c2],cap:[r1,c1]});
+  }
+  return{jumps,steps};
+}
+function allMoves(bd,side){
+  const check=side==='red'?isRed:isBlk;
+  let jumps=[],steps=[];
+  for(let r=0;r<8;r++)for(let c=0;c<8;c++)if(bd[r][c]&&check(bd[r][c])){
+    const m=pieceMoves(bd,r,c);jumps=jumps.concat(m.jumps);steps=steps.concat(m.steps);
+  }
+  return jumps.length?jumps:steps; // forced captures
+}
+function doMove(bd,mv){
+  const[fr,fc]=mv.from,[tr,tc]=mv.to;
+  let v=bd[fr][fc];bd[fr][fc]=0;
+  if(mv.cap)bd[mv.cap[0]][mv.cap[1]]=0;
+  // king promotion
+  if(v===R&&tr===0)v=RK;
+  if(v===BL&&tr===7)v=BK;
+  bd[tr][tc]=v;
+  return v;
+}
+function furtherJumps(bd,r,c){
+  return pieceMoves(bd,r,c).jumps;
+}
+function render(){
+  boardEl.innerHTML='';
+  const moves=(turn==='red'&&!gameOver)?allMoves(board,'red'):[];
+  const selMoves=selected?moves.filter(m=>m.from[0]===selected[0]&&m.from[1]===selected[1]):[];
+  const targets=new Set(selMoves.map(m=>m.to[0]*8+m.to[1]));
+  const fromSet=new Set(moves.map(m=>m.from[0]*8+m.from[1]));
+  for(let r=0;r<8;r++)for(let c=0;c<8;c++){
+    const sq=document.createElement('div');
+    const dark=(r+c)%2===1;
+    sq.className='sq '+(dark?'dark':'light');
+    const v=board[r][c];
+    if(v){const p=document.createElement('div');p.className='man '+(isRed(v)?'red':'blk')+(isKing(v)?' king':'');sq.appendChild(p);}
+    if(dark&&turn==='red'&&!gameOver){
+      if(selected&&targets.has(r*8+c)){sq.classList.add('move','playable');sq.onclick=()=>choose(r,c);}
+      else if(fromSet.has(r*8+c)){sq.classList.add('playable');sq.onclick=()=>select(r,c);}
+    }
+    if(selected&&selected[0]===r&&selected[1]===c)sq.classList.add('sel');
+    boardEl.appendChild(sq);
+  }
+}
+function select(r,c){
+  if(mustFrom&&(mustFrom[0]!==r||mustFrom[1]!==c))return;
+  selected=[r,c];render();
+}
+function choose(r,c){
+  const moves=allMoves(board,'red');
+  const mv=moves.find(m=>m.from[0]===selected[0]&&m.from[1]===selected[1]&&m.to[0]===r&&m.to[1]===c);
+  if(!mv)return;
+  doMove(board,mv);
+  if(mv.cap){
+    const more=furtherJumps(board,r,c);
+    if(more.length){selected=[r,c];mustFrom=[r,c];render();return;}
+  }
+  selected=null;mustFrom=null;turn='black';render();
+  if(checkEnd())return;
+  statusEl.textContent='CPU thinking…';
+  setTimeout(cpuTurn,400);
+}
+function cpuTurn(){
+  if(gameOver)return;
+  let mv=bestMove(board,'black',4);
+  if(!mv){return finish('red');}
+  doMove(board,mv);
+  // multi-jump chain for cpu
+  while(mv.cap){
+    const more=furtherJumps(board,mv.to[0],mv.to[1]);
+    if(!more.length)break;
+    mv=more.reduce((a,b)=>scoreMove(board,b)>scoreMove(board,a)?b:a);
+    doMove(board,mv);
+  }
+  turn='red';render();
+  if(checkEnd())return;
+  statusEl.textContent='Your move (red)';
+}
+function scoreMove(bd,mv){const nb=bd.map(x=>x.slice());doMove(nb,mv);return evaluate(nb);}
+function checkEnd(){
+  const redMoves=allMoves(board,'red').length;
+  const blkMoves=allMoves(board,'black').length;
+  const redPieces=count('red'),blkPieces=count('black');
+  if(redPieces===0||redMoves===0){finish('black');return true;}
+  if(blkPieces===0||blkMoves===0){finish('red');return true;}
+  return false;
+}
+function count(side){let n=0;const chk=side==='red'?isRed:isBlk;for(const row of board)for(const v of row)if(v&&chk(v))n++;return n;}
+function finish(winner){
+  gameOver=true;render();
+  statusEl.textContent=winner==='red'?'🎉 You win!':'CPU wins — try again';
+}
+// AI
+function evaluate(bd){
+  let s=0;
+  for(let r=0;r<8;r++)for(let c=0;c<8;c++){
+    const v=bd[r][c];if(!v)continue;
+    let val=isKing(v)?5:3;
+    // advancement bonus
+    if(v===BL)val+=r*0.1;if(v===R)val+=(7-r)*0.1;
+    s+=isBlk(v)?val:-val;
+  }
+  return s;
+}
+function bestMove(bd,side,depth){
+  const moves=allMoves(bd,side);
+  if(!moves.length)return null;
+  let best=null,bestVal=side==='black'?-Infinity:Infinity;
+  for(const mv of moves){
+    const nb=bd.map(x=>x.slice());doMove(nb,mv);
+    const val=minimax(nb,depth-1,side==='black'?'red':'black',-Infinity,Infinity);
+    if(side==='black'?val>bestVal:val<bestVal){bestVal=val;best=mv;}
+  }
+  return best;
+}
+function minimax(bd,depth,side,alpha,beta){
+  if(depth===0)return evaluate(bd);
+  const moves=allMoves(bd,side);
+  if(!moves.length)return side==='black'?-1000:1000;
+  if(side==='black'){
+    let best=-Infinity;
+    for(const mv of moves){const nb=bd.map(x=>x.slice());doMove(nb,mv);
+      best=Math.max(best,minimax(nb,depth-1,'red',alpha,beta));alpha=Math.max(alpha,best);if(beta<=alpha)break;}
+    return best;
+  }else{
+    let best=Infinity;
+    for(const mv of moves){const nb=bd.map(x=>x.slice());doMove(nb,mv);
+      best=Math.min(best,minimax(nb,depth-1,'black',alpha,beta));beta=Math.min(beta,best);if(beta<=alpha)break;}
+    return best;
+  }
+}
+document.getElementById('newGame').onclick=init;
+init();
+</script>
+</body>
+</html>

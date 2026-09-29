@@ -1,0 +1,9 @@
+{
+  "name": "Memory Match",
+  "desc": "Flip cards two at a time to find every matching pair in as few moves as possible. Three grid sizes and a move-and-time tracker for beating your own record.",
+  "controls": "Mouse / touch to flip cards",
+  "shelf": "Puzzle & Logic",
+  "tags": ["games", "html5", "memory", "cards", "casual"],
+  "badge": "New",
+  "creator": "Dragon Gaming Platforms"
+}

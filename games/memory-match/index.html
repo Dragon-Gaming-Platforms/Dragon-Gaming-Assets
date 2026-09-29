@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+<meta name="robots" content="noindex,nofollow">
+<title>Memory Match</title>
+<style>
+  *{box-sizing:border-box}
+  html,body{margin:0;height:100%}
+  body{background:radial-gradient(circle at 50% 0,#25325e,#0d1226 60%);color:#eef;
+    font-family:system-ui,Segoe UI,Roboto,Arial,sans-serif;display:flex;flex-direction:column;
+    align-items:center;justify-content:center;min-height:100vh;gap:14px;padding:14px;user-select:none;-webkit-user-select:none}
+  h1{margin:0;font-size:clamp(22px,5vw,32px)}
+  .hud{display:flex;gap:12px;font-size:16px;font-weight:700}
+  .hud div{background:rgba(255,255,255,.08);border-radius:10px;padding:8px 14px}
+  #grid{display:grid;gap:10px;width:min(92vw,460px)}
+  .card{aspect-ratio:1;perspective:600px;cursor:pointer}
+  .inner{position:relative;width:100%;height:100%;transition:transform .35s;transform-style:preserve-3d}
+  .card.flip .inner,.card.done .inner{transform:rotateY(180deg)}
+  .face{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
+    border-radius:12px;backface-visibility:hidden;font-size:clamp(24px,7vw,42px)}
+  .front{background:linear-gradient(135deg,#4f6bd1,#7b4fd1);box-shadow:0 4px 12px rgba(0,0,0,.4)}
+  .front::after{content:"?";color:rgba(255,255,255,.55);font-weight:800}
+  .back{background:#f4f7ff;transform:rotateY(180deg);box-shadow:0 4px 12px rgba(0,0,0,.4)}
+  .card.done .back{background:#bdf0c9}
+  button,select{background:#7b8cff;color:#0d1226;border:0;border-radius:10px;padding:10px 18px;font-size:15px;font-weight:800;cursor:pointer}
+  select{background:rgba(255,255,255,.1);color:#eef}
+  #win{min-height:22px;font-size:16px;color:#ffd76a;font-weight:700}
+  .row{display:flex;gap:10px}
+</style>
+</head>
+<body>
+<h1>Memory Match</h1>
+<div class="hud"><div>Moves <span id="moves">0</span></div><div>Pairs <span id="pairs">0</span>/<span id="total">8</span></div><div>Time <span id="time">0</span>s</div></div>
+<div id="grid"></div>
+<div id="win"></div>
+<div class="row">
+  <button id="newGame">New Game</button>
+  <select id="size">
+    <option value="4">Easy (4×4)</option>
+    <option value="6" selected>Medium (6×4)</option>
+    <option value="8">Hard (6×6... )</option>
+  </select>
+</div>
+<script>
+const EMOJI=['🍎','🍌','🍒','🍇','🍉','🍑','🍍','🥝','🍓','🫐','🥥','🍋','🍊','🥭','🍈','🍏','🥕','🌽','🍄','⭐'];
+const grid=document.getElementById('grid');
+let first=null,lock=false,moves,matched,total,timer,seconds,started;
+function newGame(){
+  const pairs=parseInt(document.getElementById('size').value);
+  const cols=pairs===4?4:6;
+  total=pairs;matched=0;moves=0;first=null;lock=false;started=false;seconds=0;
+  clearInterval(timer);
+  document.getElementById('moves').textContent=0;
+  document.getElementById('pairs').textContent=0;
+  document.getElementById('total').textContent=pairs;
+  document.getElementById('time').textContent=0;
+  document.getElementById('win').textContent='';
+  let deck=[];const picks=shuffle(EMOJI.slice()).slice(0,pairs);
+  picks.forEach(e=>{deck.push(e,e);});
+  deck=shuffle(deck);
+  grid.style.gridTemplateColumns=`repeat(${cols},1fr)`;
+  grid.innerHTML='';
+  deck.forEach(sym=>{
+    const card=document.createElement('div');card.className='card';card.dataset.sym=sym;
+    card.innerHTML=`<div class="inner"><div class="face front"></div><div class="face back">${sym}</div></div>`;
+    card.onclick=()=>flip(card);
+    grid.appendChild(card);
+  });
+}
+function shuffle(a){for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
+function startTimer(){if(started)return;started=true;timer=setInterval(()=>{seconds++;document.getElementById('time').textContent=seconds;},1000);}
+function flip(card){
+  if(lock||card.classList.contains('flip')||card.classList.contains('done'))return;
+  startTimer();
+  card.classList.add('flip');
+  if(!first){first=card;return;}
+  moves++;document.getElementById('moves').textContent=moves;
+  if(first.dataset.sym===card.dataset.sym){
+    first.classList.add('done');card.classList.add('done');
+    first.classList.remove('flip');card.classList.remove('flip');
+    first=null;matched++;document.getElementById('pairs').textContent=matched;
+    if(matched===total)win();
+  }else{
+    lock=true;const a=first,b=card;first=null;
+    setTimeout(()=>{a.classList.remove('flip');b.classList.remove('flip');lock=false;},700);
+  }
+}
+function win(){clearInterval(timer);document.getElementById('win').textContent=`🎉 Solved in ${moves} moves and ${seconds}s!`;}
+document.getElementById('newGame').onclick=newGame;
+document.getElementById('size').onchange=newGame;
+newGame();
+</script>
+</body>
+</html>

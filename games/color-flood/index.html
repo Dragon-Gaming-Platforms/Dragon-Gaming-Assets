@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+<meta name="robots" content="noindex,nofollow">
+<title>Color Flood</title>
+<style>
+  :root{--bg:#0f1020;--panel:#1b1c36;--text:#eef}
+  *{box-sizing:border-box}
+  html,body{margin:0;height:100%}
+  body{background:radial-gradient(circle at 50% 0,#242652,#0f1020 60%);color:var(--text);
+    font-family:system-ui,Segoe UI,Roboto,Arial,sans-serif;display:flex;flex-direction:column;
+    align-items:center;justify-content:center;min-height:100vh;gap:14px;padding:14px;user-select:none;-webkit-user-select:none}
+  h1{margin:0;font-size:clamp(20px,5vw,30px)}
+  #status{font-size:16px;min-height:22px}
+  #status b{color:#ffd76a}
+  #grid{display:grid;gap:3px;padding:6px;background:#0a0b16;border-radius:10px;
+    box-shadow:0 14px 40px rgba(0,0,0,.5);width:min(92vw,60vh,420px);aspect-ratio:1}
+  .cell{border-radius:4px;transition:background .25s}
+  #palette{display:flex;gap:10px}
+  .swatch{width:46px;height:46px;border-radius:10px;border:3px solid rgba(255,255,255,.15);cursor:pointer;transition:transform .1s}
+  .swatch:hover{transform:scale(1.08)}
+  .swatch:active{transform:scale(.95)}
+  .row{display:flex;gap:10px;align-items:center}
+  button,select{background:#3b3d78;color:#fff;border:0;border-radius:10px;padding:10px 18px;font-size:15px;font-weight:700;cursor:pointer}
+  select{background:var(--panel)}
+</style>
+</head>
+<body>
+<h1>Color Flood</h1>
+<div id="status">Moves: <b id="moves">0</b> / <span id="max">25</span></div>
+<div id="grid"></div>
+<div id="palette"></div>
+<div class="row">
+  <button id="newGame">New Game</button>
+  <select id="size">
+    <option value="12">12 × 12</option>
+    <option value="14" selected>14 × 14</option>
+    <option value="18">18 × 18</option>
+  </select>
+</div>
+<script>
+const COLORS=['#e6524a','#f5a623','#f8e71c','#4caf50','#3a8ee6','#9b59b6'];
+const gridEl=document.getElementById('grid');
+let N,cells,moves,maxMoves,won;
+
+function newGame(){
+  N=parseInt(document.getElementById('size').value);
+  cells=[];moves=0;won=false;
+  maxMoves=Math.round(N*1.8);
+  document.getElementById('max').textContent=maxMoves;
+  document.getElementById('moves').textContent=0;
+  gridEl.style.gridTemplateColumns=`repeat(${N},1fr)`;
+  gridEl.innerHTML='';
+  for(let i=0;i<N*N;i++){
+    const c=Math.floor(Math.random()*COLORS.length);
+    cells.push(c);
+    const d=document.createElement('div');d.className='cell';d.style.background=COLORS[c];
+    gridEl.appendChild(d);
+  }
+  document.getElementById('status').innerHTML='Moves: <b id="moves">0</b> / <span id="max">'+maxMoves+'</span>';
+  buildPalette();
+  paint();
+}
+function buildPalette(){
+  const pal=document.getElementById('palette');pal.innerHTML='';
+  COLORS.forEach((col,i)=>{
+    const s=document.createElement('div');s.className='swatch';s.style.background=col;
+    s.onclick=()=>flood(i);pal.appendChild(s);
+  });
+}
+function paint(){
+  const nodes=gridEl.children;
+  for(let i=0;i<cells.length;i++)nodes[i].style.background=COLORS[cells[i]];
+}
+function flood(newColor){
+  if(won)return;
+  const start=cells[0];
+  if(newColor===start)return;
+  const stack=[0];const seen=new Set();
+  // BFS over connected region of start color
+  const region=[];const visited=new Uint8Array(N*N);
+  const q=[0];visited[0]=1;
+  while(q.length){
+    const idx=q.pop();region.push(idx);
+    const r=Math.floor(idx/N),c=idx%N;
+    for(const[dr,dc]of[[-1,0],[1,0],[0,-1],[0,1]]){
+      const nr=r+dr,nc=c+dc;
+      if(nr<0||nc<0||nr>=N||nc>=N)continue;
+      const ni=nr*N+nc;
+      if(!visited[ni]&&cells[ni]===start){visited[ni]=1;q.push(ni);}
+    }
+  }
+  region.forEach(i=>cells[i]=newColor);
+  moves++;
+  document.getElementById('moves').textContent=moves;
+  paint();
+  checkState();
+}
+function checkState(){
+  const first=cells[0];
+  const all=cells.every(v=>v===first);
+  const st=document.getElementById('status');
+  if(all){won=true;st.innerHTML='🎉 <b>Solved in '+moves+' moves!</b> Press New Game.';return;}
+  if(moves>=maxMoves){won=true;st.innerHTML='💀 <b>Out of moves!</b> Try again.';return;}
+}
+document.getElementById('newGame').onclick=newGame;
+document.getElementById('size').onchange=newGame;
+newGame();
+</script>
+</body>
+</html>

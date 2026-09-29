@@ -1,0 +1,9 @@
+{
+  "name": "Color Flood",
+  "desc": "Flood the whole board with a single color before you run out of moves. Pick a color to spread your region from the top-left corner across the grid.",
+  "controls": "Mouse / touch to pick a color from the palette",
+  "shelf": "Puzzle & Logic",
+  "tags": ["games", "html5", "puzzle", "casual", "color"],
+  "badge": "New",
+  "creator": "Dragon Gaming Platforms"
+}

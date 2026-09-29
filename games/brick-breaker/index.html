@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+<meta name="robots" content="noindex,nofollow">
+<title>Brick Breaker</title>
+<style>
+  html,body{margin:0;height:100%;background:#070912;overflow:hidden;
+    font-family:system-ui,Segoe UI,Roboto,Arial,sans-serif;color:#dfe7ff;user-select:none;-webkit-user-select:none}
+  #wrap{position:fixed;inset:0;display:flex;align-items:center;justify-content:center}
+  canvas{background:linear-gradient(#0b1024,#050710);touch-action:none;max-width:100vw;max-height:100vh}
+  #hud{position:fixed;top:10px;left:0;right:0;display:flex;justify-content:space-between;
+    padding:0 16px;font-size:16px;font-weight:700;pointer-events:none;text-shadow:0 1px 3px #000}
+  #msg{position:fixed;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;
+    gap:14px;background:rgba(4,6,14,.72);text-align:center;padding:20px}
+  #msg h1{margin:0;font-size:clamp(26px,7vw,44px)}
+  #msg p{margin:0;opacity:.85}
+  button{background:#4fd1c5;color:#04231f;border:0;border-radius:12px;padding:12px 26px;font-size:17px;font-weight:800;cursor:pointer}
+  .hidden{display:none!important}
+</style>
+</head>
+<body>
+<div id="hud"><span>Score <span id="score">0</span></span><span>Lvl <span id="level">1</span></span><span>Lives <span id="lives">3</span></span></div>
+<div id="wrap"><canvas id="cv"></canvas></div>
+<div id="msg"><h1>Brick Breaker</h1><p>Move with mouse / touch / arrow keys.<br>Clear every brick to advance.</p><button id="start">Play</button></div>
+<script>
+const cv=document.getElementById('cv'),ctx=cv.getContext('2d');
+const W=480,H=640;cv.width=W;cv.height=H;
+let paddle,ball,bricks,score,lives,level,running,keys={};
+const COLORS=['#ff6b6b','#ffb057','#ffe66d','#7bed9f','#54a0ff','#c56cf0'];
+function resetPaddle(){paddle={w:96,h:14,x:W/2-48,y:H-40,speed:8};}
+function launchBall(){ball={x:W/2,y:paddle.y-12,r:8,dx:0,dy:0,stuck:true,speed:5};}
+function buildLevel(){
+  bricks=[];
+  const rows=Math.min(4+level,8),cols=8;
+  const bw=(W-40)/cols,bh=22,top=70;
+  for(let r=0;r<rows;r++)for(let c=0;c<cols;c++){
+    if(Math.random()<0.06&&level>1)continue;
+    bricks.push({x:20+c*bw+2,y:top+r*(bh+6),w:bw-4,h:bh,hp:1+ (r<2&&level>2?1:0),color:COLORS[r%COLORS.length]});
+  }
+}
+function startGame(){score=0;lives=3;level=1;newLevel();document.getElementById('msg').classList.add('hidden');running=true;loop();}
+function newLevel(){resetPaddle();launchBall();buildLevel();updateHUD();}
+function updateHUD(){document.getElementById('score').textContent=score;document.getElementById('lives').textContent=lives;document.getElementById('level').textContent=level;}
+function showMsg(title,sub,btn){
+  const m=document.getElementById('msg');m.classList.remove('hidden');
+  m.innerHTML=`<h1>${title}</h1><p>${sub}</p><button id="start">${btn}</button>`;
+  document.getElementById('start').onclick=start;
+}
+function start(){startGame();}
+// input
+cv.addEventListener('mousemove',e=>{const r=cv.getBoundingClientRect();const x=(e.clientX-r.left)*(W/r.width);paddle&&(paddle.x=x-paddle.w/2);});
+cv.addEventListener('touchmove',e=>{e.preventDefault();const r=cv.getBoundingClientRect();const x=(e.touches[0].clientX-r.left)*(W/r.width);paddle&&(paddle.x=x-paddle.w/2);},{passive:false});
+window.addEventListener('keydown',e=>{keys[e.key]=true;if(e.key===' '||e.key==='ArrowUp')releaseBall();});
+window.addEventListener('keyup',e=>keys[e.key]=false);
+cv.addEventListener('mousedown',releaseBall);
+cv.addEventListener('touchstart',e=>{releaseBall();},{passive:true});
+function releaseBall(){if(ball&&ball.stuck){ball.stuck=false;ball.dx=ball.speed*(Math.random()<.5?-1:1)*0.6;ball.dy=-ball.speed;}}
+function loop(){
+  if(!running)return;
+  if(keys['ArrowLeft'])paddle.x-=paddle.speed;
+  if(keys['ArrowRight'])paddle.x+=paddle.speed;
+  paddle.x=Math.max(0,Math.min(W-paddle.w,paddle.x));
+  if(ball.stuck){ball.x=paddle.x+paddle.w/2;ball.y=paddle.y-ball.r-2;}
+  else{
+    ball.x+=ball.dx;ball.y+=ball.dy;
+    if(ball.x<ball.r){ball.x=ball.r;ball.dx*=-1;}
+    if(ball.x>W-ball.r){ball.x=W-ball.r;ball.dx*=-1;}
+    if(ball.y<ball.r){ball.y=ball.r;ball.dy*=-1;}
+    // paddle
+    if(ball.dy>0&&ball.y+ball.r>=paddle.y&&ball.y+ball.r<=paddle.y+paddle.h+10&&ball.x>=paddle.x&&ball.x<=paddle.x+paddle.w){
+      const hit=(ball.x-(paddle.x+paddle.w/2))/(paddle.w/2);
+      const ang=hit*1.05;const sp=Math.min(ball.speed+0.15,9);ball.speed=sp;
+      ball.dx=sp*Math.sin(ang);ball.dy=-sp*Math.cos(ang);ball.y=paddle.y-ball.r-1;
+    }
+    // bricks
+    for(let i=bricks.length-1;i>=0;i--){const b=bricks[i];
+      if(ball.x+ball.r>b.x&&ball.x-ball.r<b.x+b.w&&ball.y+ball.r>b.y&&ball.y-ball.r<b.y+b.h){
+        const overL=ball.x+ball.r-b.x,overR=b.x+b.w-(ball.x-ball.r);
+        const overT=ball.y+ball.r-b.y,overB=b.y+b.h-(ball.y-ball.r);
+        const m=Math.min(overL,overR,overT,overB);
+        if(m===overL||m===overR)ball.dx*=-1;else ball.dy*=-1;
+        b.hp--;score+=10;
+        if(b.hp<=0)bricks.splice(i,1);
+        updateHUD();break;
+      }
+    }
+    if(ball.y-ball.r>H){
+      lives--;updateHUD();
+      if(lives<=0){running=false;showMsg('Game Over','Final score: '+score,'Play again');return;}
+      resetPaddle();launchBall();
+    }
+    if(!bricks.length){level++;newLevel();}
+  }
+  draw();
+  requestAnimationFrame(loop);
+}
+function draw(){
+  ctx.clearRect(0,0,W,H);
+  for(const b of bricks){ctx.fillStyle=b.color;ctx.globalAlpha=b.hp>1?1:0.9;roundRect(b.x,b.y,b.w,b.h,4);ctx.fill();
+    if(b.hp>1){ctx.strokeStyle='#fff';ctx.globalAlpha=.5;ctx.stroke();}ctx.globalAlpha=1;}
+  ctx.fillStyle='#e8eefc';roundRect(paddle.x,paddle.y,paddle.w,paddle.h,7);ctx.fill();
+  ctx.beginPath();ctx.arc(ball.x,ball.y,ball.r,0,7);ctx.fillStyle='#4fd1c5';ctx.fill();
+}
+function roundRect(x,y,w,h,r){ctx.beginPath();ctx.moveTo(x+r,y);ctx.arcTo(x+w,y,x+w,y+h,r);ctx.arcTo(x+w,y+h,x,y+h,r);ctx.arcTo(x,y+h,x,y,r);ctx.arcTo(x,y,x+w,y,r);ctx.closePath();}
+document.getElementById('start').onclick=start;
+</script>
+</body>
+</html>

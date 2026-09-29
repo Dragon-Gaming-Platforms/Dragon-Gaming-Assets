@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+<meta name="robots" content="noindex,nofollow">
+<title>Reversi</title>
+<style>
+  :root{--bg:#0e1524;--panel:#16203a;--line:#25406b;--accent:#4fd1c5;--text:#e8eefc;}
+  *{box-sizing:border-box}
+  html,body{margin:0;height:100%}
+  body{background:radial-gradient(circle at 50% -10%,#1b2b4d,#0e1524 60%);color:var(--text);
+    font-family:system-ui,Segoe UI,Roboto,Arial,sans-serif;display:flex;flex-direction:column;
+    align-items:center;justify-content:center;min-height:100vh;gap:14px;padding:14px;user-select:none;-webkit-user-select:none}
+  h1{margin:0;font-size:clamp(20px,5vw,30px);letter-spacing:1px}
+  .scores{display:flex;gap:12px}
+  .score{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:8px 16px;min-width:110px;text-align:center}
+  .score b{font-size:26px;display:block}
+  .disc{display:inline-block;width:14px;height:14px;border-radius:50%;vertical-align:middle;margin-right:6px}
+  .black{background:#10151f;border:1px solid #46536e}
+  .white{background:#f2f6ff}
+  #turn{min-height:22px;font-size:15px;color:var(--accent)}
+  #board{background:#0c7a4b;border:6px solid #094e31;border-radius:8px;display:grid;
+    grid-template-columns:repeat(8,1fr);gap:2px;padding:6px;box-shadow:0 14px 40px rgba(0,0,0,.5);
+    width:min(92vw,92vh,460px);aspect-ratio:1}
+  .cell{background:#0e8a56;border-radius:4px;display:flex;align-items:center;justify-content:center;cursor:pointer;position:relative}
+  .cell:hover{background:#12a066}
+  .piece{width:80%;height:80%;border-radius:50%;transition:transform .18s}
+  .p-black{background:radial-gradient(circle at 35% 30%,#3a4256,#10151f);box-shadow:0 2px 4px rgba(0,0,0,.5)}
+  .p-white{background:radial-gradient(circle at 35% 30%,#fff,#c4ccdb);box-shadow:0 2px 4px rgba(0,0,0,.35)}
+  .hint{width:26%;height:26%;border-radius:50%;background:rgba(255,255,255,.35)}
+  button{background:var(--accent);color:#04231f;border:0;border-radius:10px;padding:10px 20px;
+    font-size:15px;font-weight:700;cursor:pointer}
+  button:active{transform:translateY(1px)}
+  .row{display:flex;gap:10px;align-items:center}
+  select{background:var(--panel);color:var(--text);border:1px solid var(--line);border-radius:8px;padding:8px}
+</style>
+</head>
+<body>
+<h1>Reversi</h1>
+<div class="scores">
+  <div class="score"><span class="disc black"></span>You<b id="sBlack">2</b></div>
+  <div class="score"><span class="disc white"></span>CPU<b id="sWhite">2</b></div>
+</div>
+<div id="turn">Your move</div>
+<div id="board"></div>
+<div class="row">
+  <button id="newGame">New Game</button>
+  <select id="level">
+    <option value="1">Easy</option>
+    <option value="2" selected>Normal</option>
+    <option value="3">Hard</option>
+  </select>
+</div>
+<script>
+const B=1,W=2,SIZE=8;
+const boardEl=document.getElementById('board');
+let board,turn,gameOver;
+const dirs=[[-1,-1],[-1,0],[-1,1],[0,-1],[0,1],[1,-1],[1,0],[1,1]];
+const WEIGHTS=[
+ [120,-20,20,5,5,20,-20,120],
+ [-20,-40,-5,-5,-5,-5,-40,-20],
+ [20,-5,15,3,3,15,-5,20],
+ [5,-5,3,3,3,3,-5,5],
+ [5,-5,3,3,3,3,-5,5],
+ [20,-5,15,3,3,15,-5,20],
+ [-20,-40,-5,-5,-5,-5,-40,-20],
+ [120,-20,20,5,5,20,-20,120]];
+
+function init(){
+  board=Array.from({length:SIZE},()=>Array(SIZE).fill(0));
+  board[3][3]=W;board[3][4]=B;board[4][3]=B;board[4][4]=W;
+  turn=B;gameOver=false;render();
+}
+function inside(r,c){return r>=0&&r<SIZE&&c>=0&&c<SIZE;}
+function flips(bd,r,c,player){
+  if(bd[r][c]!==0)return[];
+  const opp=player===B?W:B;let res=[];
+  for(const[dr,dc]of dirs){
+    let rr=r+dr,cc=c+dc,line=[];
+    while(inside(rr,cc)&&bd[rr][cc]===opp){line.push([rr,cc]);rr+=dr;cc+=dc;}
+    if(line.length&&inside(rr,cc)&&bd[rr][cc]===player)res=res.concat(line);
+  }
+  return res;
+}
+function legalMoves(bd,player){
+  const m=[];
+  for(let r=0;r<SIZE;r++)for(let c=0;c<SIZE;c++)if(flips(bd,r,c,player).length)m.push([r,c]);
+  return m;
+}
+function applyMove(bd,r,c,player){
+  const f=flips(bd,r,c,player);bd[r][c]=player;
+  for(const[rr,cc]of f)bd[rr][cc]=player;
+}
+function count(bd){let b=0,w=0;for(const row of bd)for(const v of row){if(v===B)b++;else if(v===W)w++;}return{b,w};}
+
+function render(){
+  boardEl.innerHTML='';
+  const legal=(!gameOver&&turn===B)?legalMoves(board,B):[];
+  const lset=new Set(legal.map(([r,c])=>r*8+c));
+  for(let r=0;r<SIZE;r++)for(let c=0;c<SIZE;c++){
+    const cell=document.createElement('div');cell.className='cell';
+    const v=board[r][c];
+    if(v){const p=document.createElement('div');p.className='piece '+(v===B?'p-black':'p-white');cell.appendChild(p);}
+    else if(lset.has(r*8+c)){const h=document.createElement('div');h.className='hint';cell.appendChild(h);}
+    cell.onclick=()=>playerMove(r,c);
+    boardEl.appendChild(cell);
+  }
+  const{b,w}=count(board);
+  document.getElementById('sBlack').textContent=b;
+  document.getElementById('sWhite').textContent=w;
+}
+function playerMove(r,c){
+  if(gameOver||turn!==B)return;
+  if(!flips(board,r,c,B).length)return;
+  applyMove(board,r,c,B);turn=W;render();
+  document.getElementById('turn').textContent='CPU thinking…';
+  setTimeout(nextTurn,350);
+}
+function nextTurn(){
+  if(gameOver)return;
+  const legal=legalMoves(board,turn);
+  if(!legal.length){
+    // pass
+    const other=turn===B?W:B;
+    if(!legalMoves(board,other).length){return endGame();}
+    turn=other;
+    if(turn===W){document.getElementById('turn').textContent='CPU thinking…';setTimeout(nextTurn,350);}
+    else{document.getElementById('turn').textContent='CPU passed — your move';render();}
+    return;
+  }
+  if(turn===W){cpuMove();}
+  else{document.getElementById('turn').textContent='Your move';render();}
+}
+function cpuMove(){
+  const depth=parseInt(document.getElementById('level').value);
+  const legal=legalMoves(board,W);
+  let best=null,bestScore=-Infinity;
+  for(const[r,c]of legal){
+    const nb=board.map(row=>row.slice());applyMove(nb,r,c,W);
+    const s=minimax(nb,depth-1,false,-Infinity,Infinity);
+    if(s>bestScore){bestScore=s;best=[r,c];}
+  }
+  if(best){applyMove(board,best[0],best[1],W);}
+  turn=B;render();nextTurn2();
+}
+function nextTurn2(){
+  // after cpu, check if player has move
+  const legal=legalMoves(board,B);
+  if(!legal.length){
+    if(!legalMoves(board,W).length)return endGame();
+    document.getElementById('turn').textContent='You passed — CPU moves';
+    turn=W;setTimeout(nextTurn,350);
+  }else{
+    document.getElementById('turn').textContent='Your move';
+  }
+}
+function evaluate(bd){
+  let s=0;const{b,w}=count(bd);
+  for(let r=0;r<8;r++)for(let c=0;c<8;c++){if(bd[r][c]===W)s+=WEIGHTS[r][c];else if(bd[r][c]===B)s-=WEIGHTS[r][c];}
+  s+=(w-b);// slight material
+  const wm=legalMoves(bd,W).length,bm=legalMoves(bd,B).length;
+  s+=(wm-bm)*3;
+  return s;
+}
+function minimax(bd,depth,maximizing,alpha,beta){
+  if(depth===0)return evaluate(bd);
+  const player=maximizing?W:B;
+  const legal=legalMoves(bd,player);
+  if(!legal.length){
+    const other=maximizing?B:W;
+    if(!legalMoves(bd,other).length)return evaluate(bd);
+    return minimax(bd,depth-1,!maximizing,alpha,beta);
+  }
+  if(maximizing){
+    let best=-Infinity;
+    for(const[r,c]of legal){const nb=bd.map(x=>x.slice());applyMove(nb,r,c,W);
+      best=Math.max(best,minimax(nb,depth-1,false,alpha,beta));alpha=Math.max(alpha,best);if(beta<=alpha)break;}
+    return best;
+  }else{
+    let best=Infinity;
+    for(const[r,c]of legal){const nb=bd.map(x=>x.slice());applyMove(nb,r,c,B);
+      best=Math.min(best,minimax(nb,depth-1,true,alpha,beta));beta=Math.min(beta,best);if(beta<=alpha)break;}
+    return best;
+  }
+}
+function endGame(){
+  gameOver=true;render();
+  const{b,w}=count(board);
+  let msg=b>w?'🎉 You win!':w>b?'CPU wins':"It's a tie";
+  document.getElementById('turn').textContent=`Game over — ${msg} (${b}–${w})`;
+}
+document.getElementById('newGame').onclick=init;
+document.getElementById('level').onchange=init;
+init();
+</script>
+</body>
+</html>
