@@ -140,3 +140,12 @@ never invent a license.
 | Runfield | `games/runfield/` | kig/runfield (https://github.com/kig/runfield) | GPL-3.0 — vendored upstream web build; external Google Fonts link removed | 2026-09-29 |
 | Fluid Table Tennis | `games/fluid-table-tennis/` | anirudhjoshi/fluid_table_tennis (https://github.com/anirudhjoshi/fluid_table_tennis) | MIT — rebuilt from source per upstream quick_build.sh; analytics/social/external images removed | 2026-09-29 |
 | Gift Grabber | `games/gift-grabber/` | ceva24/gift-grabber (https://github.com/ceva24/gift-grabber) | Apache-2.0 — vendored upstream web build; Google Analytics/Fonts and IE shim CDNs removed | 2026-09-29 |
+| Diablo JS | `games/diablo-js/` | mitallast/diablo-js (https://github.com/mitallast/diablo-js) | MIT — vendored upstream; dev tools (shadowmaker/dttool) dropped | 2026-09-29 |
+| Open Panzer | `games/open-panzer/` | nicupavel/openpanzer (https://github.com/nicupavel/openpanzer) | GPL-2.0-or-later — vendored client; multiplayer server (shaid) and dev tools dropped | 2026-09-29 |
+| Tower Defense 3D | `games/tower-defense/` | Casmo/tower-defense (https://github.com/Casmo/tower-defense) | MIT — vendored upstream; unused Bootstrap glyphicon @font-face removed | 2026-09-29 |
+| JavaScript E.T. | `games/javascript-et/` | FranciscoG/javascript-E.T. (https://github.com/FranciscoG/javascript-E.T.) | MIT — vendored upstream; all libraries local | 2026-09-29 |
+| Supaxl | `games/supaxl/` | eguneys/supaxl (https://github.com/eguneys/supaxl) | MIT — vendored upstream prebuilt dist | 2026-09-29 |
+| Roguish | `games/roguish/` | CamHenlin/Roguish (https://github.com/CamHenlin/Roguish) | BSD-3-Clause — vendored upstream prebuilt build; JSDoc docs (external IE shim) and dev/test files removed | 2026-09-29 |
+| Tower Building | `games/tower-building-game/` | iamkun/tower_game (https://github.com/iamkun/tower_game) | MIT — vendored upstream prebuilt dist; Google Analytics (gtag) removed | 2026-09-29 |
+| Hextris | `games/hextris/` | Hextris/Hextris (https://github.com/Hextris/Hextris) | GPL-3.0 — vendored upstream; Google Analytics/Fonts and AdSense removed | 2026-09-29 |
+| Enduro Tribute | `games/enduro-tribute/` | rafaelcastrocouto/enduro (https://github.com/rafaelcastrocouto/enduro) | MIT — vendored upstream; two cdnjs refs (normalize.css, prefixfree.js) removed | 2026-09-29 |

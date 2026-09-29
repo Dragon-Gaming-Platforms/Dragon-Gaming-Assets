@@ -1,0 +1,9 @@
+{
+  "name": "Open Panzer",
+  "desc": "A turn-based strategy wargame in the spirit of Panzer General. Command tanks, infantry and aircraft across historical hex-map battles, manage your core units, and outmaneuver the enemy to seize victory hexes.",
+  "controls": "Mouse to select units, move and attack on the hex grid",
+  "shelf": "Strategy & Idle",
+  "tags": ["games", "html5", "strategy", "war", "hex"],
+  "badge": "New",
+  "creator": "Nicu Pavel"
+}

@@ -1,0 +1,9 @@
+{
+  "name": "JavaScript E.T.",
+  "desc": "A browser remake paying tribute to the infamous Atari 2600 game. Guide the little alien around the map, avoid the agent and scientist, collect the pieces of your phone, and try to call home.",
+  "controls": "Arrow keys to move",
+  "shelf": "Arcade & Action",
+  "tags": ["games", "html5", "retro", "atari", "adventure"],
+  "badge": "New",
+  "creator": "Francisco Garcia"
+}

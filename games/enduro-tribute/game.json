@@ -1,0 +1,9 @@
+{
+  "name": "Enduro Tribute",
+  "desc": "A tribute to the classic Atari 2600 racer Enduro. Race a pseudo-3D highway from dawn to dusk, passing as many cars as you can each day while dodging traffic, fog and nightfall across nine grueling laps.",
+  "controls": "Arrow keys to steer, accelerate and brake",
+  "shelf": "Sports & Racing",
+  "tags": ["games", "html5", "racing", "retro", "arcade"],
+  "badge": "New",
+  "creator": "Rafael Castro Couto"
+}

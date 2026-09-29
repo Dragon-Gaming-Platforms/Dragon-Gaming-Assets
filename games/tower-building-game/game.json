@@ -1,0 +1,9 @@
+{
+  "name": "Tower Building",
+  "desc": "A one-tap stacking arcade game. Drop each moving block as precisely as you can to build the tallest tower possible; misjudge the timing and your platform shrinks until there is nothing left to land on.",
+  "controls": "Click or tap to drop each block",
+  "shelf": "Arcade & Action",
+  "tags": ["games", "html5", "arcade", "casual", "stacking"],
+  "badge": "New",
+  "creator": "iamkun"
+}

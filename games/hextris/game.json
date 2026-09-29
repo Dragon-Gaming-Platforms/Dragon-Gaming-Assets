@@ -1,0 +1,9 @@
+{
+  "name": "Hextris",
+  "desc": "A fast, addictive puzzle game inspired by Tetris but built around a central hexagon. Rotate the hex to route falling blocks onto matching colors, clear stacks before they reach the center, and chain combos for big scores.",
+  "controls": "Arrow keys or click left/right to rotate the hexagon",
+  "shelf": "Puzzle & Logic",
+  "tags": ["games", "html5", "puzzle", "hexagon", "arcade"],
+  "badge": "New",
+  "creator": "Hextris Team"
+}

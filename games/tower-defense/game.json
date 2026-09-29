@@ -1,0 +1,9 @@
+{
+  "name": "Tower Defense 3D",
+  "desc": "A fully 3D tower-defense game rendered with WebGL. Place and upgrade cannons, rockets and advanced turrets along the path, then hold the line against relentless waves of enemies marching to your base.",
+  "controls": "Mouse to place towers and rotate the camera",
+  "shelf": "Strategy & Idle",
+  "tags": ["games", "html5", "webgl", "tower-defense", "3d"],
+  "badge": "New",
+  "creator": "Casmo"
+}

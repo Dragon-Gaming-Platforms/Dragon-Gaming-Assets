@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html class="no-js"> 
+    <head>
+        <meta charset="utf-8">
+       
+        <title>Sprite Test</title>
+        <style type="text/css">
+          .br { height: 20px;} 
+        </style>
+    </head>
+    <body>
+      <canvas id="cv" width="320" height="192"></canvas>
+      <div class="br"></div>
+      <canvas id="cv2" width="320" height="192"></canvas>
+
+      <script src="drawer.js"></script>
+      <script src="../assets/sprites.js"></script>
+      <script>
+
+        /*****************************************
+         * setup canvases
+         */
+        
+        var cv = document.getElementById('cv');
+        var ctx = cv.getContext("2d");
+        ctx.fillStyle = "#000";
+
+        var scale = 2;
+
+        cv.width = cv.width * scale;
+        cv.height = cv.height * scale;
+        ctx.scale(scale * 2,scale * 2) // only scales what's placed on the canvas
+        ctx.webkitImageSmoothingEnabled = false;
+        ctx.mozImageSmoothingEnabled = false;
+        ctx.imageSmoothingEnabled = false;
+
+        var cv2 = document.getElementById('cv2');
+        var ctx2 = cv2.getContext("2d");
+        ctx2.fillStyle = "#000";
+
+        cv2.width = cv2.width * scale;
+        cv2.height = cv2.height * scale;
+        ctx2.scale(scale * 2,scale * 2) // only scales what's placed on the canvas
+        ctx2.webkitImageSmoothingEnabled = false;
+        ctx2.mozImageSmoothingEnabled = false;
+        ctx2.imageSmoothingEnabled = false;
+        
+        /************************************************
+         * create images off screen using drawer.js lib
+         */
+        
+        var options = {
+          hex: true,
+          color: "#fce08c"
+        };
+
+        var ET_walkA = [
+          SpriteDrawer(options, ETWalkSprite_A0),
+          SpriteDrawer(options, ETWalkSprite_A1),
+          SpriteDrawer(options, ETWalkSprite_A2),
+        ];
+
+        var ET_walkB = [
+          SpriteDrawer(options, ETWalkSprite_B0),
+          SpriteDrawer(options, ETWalkSprite_B1),
+          SpriteDrawer(options, ETWalkSprite_B2)
+        ];
+
+        var ET_title = [
+          SpriteDrawer(options, TitleETGraphics_1.reverse()),
+          SpriteDrawer(options, TitleETGraphics_2.reverse()),
+          SpriteDrawer(options, TitleETGraphics_3.reverse()),
+          SpriteDrawer(options, TitleETGraphics_4.reverse()),
+          SpriteDrawer(options, TitleETGraphics_5.reverse()),
+          SpriteDrawer(options, TitleETGraphics_0.reverse())
+        ];
+
+        options.hex = false;
+        var troll = SpriteDrawer(options, trollfaceSprite);
+
+        options.hex = true;
+        var ET_test = SpriteDrawer(options, testET);
+
+
+        /**************************************************
+         * Walking Player animation sprite
+         */
+
+        // this loops through each walk image and puts it on the screen
+        var _i = 0;
+        function doWalk(){
+          ctx.fillRect(0, 0, cv.width, cv.height);
+          ctx.drawImage(ET_walkA[_i], 20, 20);
+          ctx.drawImage(ET_walkB[_i], 20, 50);
+          // ctx.drawImage(troll, 50, 20);
+          ctx.drawImage(ET_test, 50, 50);
+          _i++;
+          if (_i > 2) {_i = 0;}
+        };
+
+        // using requestAnimationFrame to make it walk
+        var framesToSkip = 5, counter = 0;
+
+        function loop() {
+          if (counter < framesToSkip) {
+              counter++;
+              requestAnimationFrame(loop);
+              return;
+          }
+          doWalk();
+          counter = 0;
+          requestAnimationFrame(loop);
+        }
+
+        loop();
+
+        /**************************************************
+         * Title Screen ET
+         */
+
+        function showTitle(){
+          ctx2.fillRect(0, 0, cv.width, cv.height);
+          
+          var loc = 20;
+          var top = 15;
+          ctx2.drawImage(ET_title[0], loc + 8, top);
+          ctx2.drawImage(ET_title[1], loc + (8*2), top);
+          ctx2.drawImage(ET_title[2], loc + (8*3), top);
+          ctx2.drawImage(ET_title[3], loc + (8*4), top);
+          ctx2.drawImage(ET_title[4], loc + (8*5), top);
+          ctx2.drawImage(ET_title[5], loc + (8*6), top + 7);
+        }
+
+        showTitle();
+
+
+      </script>
+
+    </body>
+</html>

@@ -1,0 +1,9 @@
+{
+  "name": "Roguish",
+  "desc": "A turn-based tactical roguelike played on a grid. Explore procedural maps, battle robots and dragons with careful positioning, manage fog of war, and push deeper toward the end of each dungeon.",
+  "controls": "Mouse and keyboard to move and act on the grid",
+  "shelf": "Strategy & Idle",
+  "tags": ["games", "html5", "roguelike", "tactics", "dungeon"],
+  "badge": "New",
+  "creator": "Cameron Henlin"
+}
