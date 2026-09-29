@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+<meta name="robots" content="noindex,nofollow">
+<title>Bug Blaster</title>
+<style>
+  *{box-sizing:border-box}html,body{margin:0;height:100%}
+  body{background:#050a05;color:#dfe;font-family:system-ui,Segoe UI,Roboto,Arial,sans-serif;
+    display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;gap:8px;padding:10px;user-select:none;-webkit-user-select:none}
+  h1{margin:0;font-size:clamp(18px,5vw,26px)}
+  #hud{display:flex;gap:22px;font-weight:800;color:#8f8}
+  canvas{background:#071007;border-radius:10px;border:1px solid #1a2a1a;touch-action:none;max-width:96vw;height:auto}
+  #status{min-height:18px;color:#9d9;font-weight:700;text-align:center}
+  .ctrls{display:flex;gap:6px;flex-wrap:wrap;justify-content:center}
+  button{background:#4a3;color:#031;border:0;border-radius:8px;padding:12px 16px;font-weight:800;cursor:pointer}
+  .hint{font-size:12px;opacity:.7;text-align:center}
+</style>
+</head>
+<body>
+<h1>Bug Blaster</h1>
+<div id="hud"><span>Score: <b id="score">0</b></span><span>Lives: <b id="lives">3</b></span><span>Wave: <b id="wave">1</b></span></div>
+<canvas id="c" width="450" height="480"></canvas>
+<div id="status">Shoot the centipede — hitting a middle segment splits it. Don't let it reach you!</div>
+<div class="ctrls"><button id="bL">◀</button><button id="bU">▲</button><button id="bD">▼</button><button id="bR">▶</button><button id="bF">● Fire</button></div>
+<div class="hint">Arrow keys move (bottom zone) · Space to fire · or use the buttons</div>
+<script>
+const cv=document.getElementById('c'),ctx=cv.getContext('2d');const W=cv.width,H=cv.height;
+const COLS=15,CELL=W/COLS,ROWS=Math.floor(H/CELL);
+let mush,peds,player,bullets,score,lives,wave,keys={},over,tick,stepMs;
+function init(){
+  mush=Array.from({length:ROWS},()=>Array(COLS).fill(0));
+  for(let r=1;r<ROWS-4;r++)for(let c=0;c<COLS;c++)if(Math.random()<0.06)mush[r][c]=3;
+  player={c:Math.floor(COLS/2),r:ROWS-1};bullets=[];score=0;lives=3;wave=1;over=false;tick=0;stepMs=150;
+  spawnPed(10);updateHud();document.getElementById('status').textContent='Blast the centipede!';
+}
+function spawnPed(len){peds=[{segs:Array.from({length:len},(_,i)=>({c:-i-1,r:0})),dir:1,vdir:1}];}
+function updateHud(){document.getElementById('score').textContent=score;document.getElementById('lives').textContent=lives;document.getElementById('wave').textContent=wave;}
+document.addEventListener('keydown',e=>{keys[e.key]=true;if(['ArrowLeft','ArrowRight','ArrowUp','ArrowDown',' '].includes(e.key))e.preventDefault();if(e.key===' ')fire();});
+document.addEventListener('keyup',e=>{keys[e.key]=false;});
+function tap(id,fn){const el=document.getElementById(id);el.addEventListener('click',fn);}
+function hold(id,dc,dr){const el=document.getElementById(id);const mv=()=>movePlayer(dc,dr);
+  el.addEventListener('click',mv);}
+hold('bL',-1,0);hold('bR',1,0);hold('bU',0,-1);hold('bD',0,1);tap('bF',fire);
+document.getElementById('bF').addEventListener('touchstart',e=>{e.preventDefault();fire();},{passive:false});
+function movePlayer(dc,dr){if(over)return;const nc=player.c+dc,nr=player.r+dr;
+  if(nc<0||nc>=COLS)return;if(nr<ROWS-4||nr>=ROWS)return; // bottom band only
+  if(mush[nr]&&mush[nr][nc]){/* can move onto mushroom cell, that's fine */}
+  player.c=nc;player.r=nr;}
+function fire(){if(over)return;if(bullets.length>=3)return;bullets.push({c:player.c,y:player.r*CELL});}
+function loop(ts){
+  requestAnimationFrame(loop);
+  if(over){draw();return;}
+  // continuous key movement (throttled)
+  if(!loop.mt)loop.mt=0;loop.mt++;
+  if(loop.mt%4===0){if(keys['ArrowLeft'])movePlayer(-1,0);if(keys['ArrowRight'])movePlayer(1,0);
+    if(keys['ArrowUp'])movePlayer(0,-1);if(keys['ArrowDown'])movePlayer(0,1);}
+  // bullets
+  bullets.forEach(b=>b.y-=8);
+  for(let i=bullets.length-1;i>=0;i--){const b=bullets[i];const bc=b.c,br=Math.floor(b.y/CELL);
+    if(b.y<0){bullets.splice(i,1);continue;}
+    // mushroom hit
+    if(mush[br]&&mush[br][bc]){mush[br][bc]--;if(mush[br][bc]<=0)score+=1;bullets.splice(i,1);updateHud();continue;}
+    // ped hit
+    let hit=false;
+    for(let p=0;p<peds.length&&!hit;p++){const segs=peds[p].segs;
+      for(let s=0;s<segs.length;s++){if(segs[s].c===bc&&segs[s].r===br){
+        mush[br][bc]=3;score+=10;updateHud();
+        const before=segs.slice(0,s),after=segs.slice(s+1);
+        const rep=[];if(before.length)rep.push({segs:before,dir:peds[p].dir,vdir:peds[p].vdir});
+        if(after.length)rep.push({segs:after,dir:peds[p].dir,vdir:peds[p].vdir});
+        peds.splice(p,1,...rep);bullets.splice(i,1);hit=true;break;}}}
+  }
+  // step centipedes
+  const now=ts||0;if(now-tick>stepMs){tick=now;stepPeds();}
+  if(peds.length===0){wave++;stepMs=Math.max(70,stepMs-12);spawnPed(9+wave);updateHud();
+    document.getElementById('status').textContent='Wave cleared!';}
+  draw();
+}
+function stepPeds(){
+  for(const ped of peds){
+    const head=ped.segs[0];let nc=head.c+ped.dir,nr=head.r;
+    const blocked=(nc<0||nc>=COLS)||(mush[nr]&&mush[nr][nc]);
+    let newHead;
+    if(blocked){ // drop a row and reverse
+      nr=head.r+ped.vdir;
+      if(nr>=ROWS-1){nr=head.r; ped.vdir=-1;}
+      if(nr<0){nr=head.r;ped.vdir=1;}
+      ped.dir*=-1;newHead={c:head.c,r:Math.max(0,Math.min(ROWS-1,nr))};
+      if(nr!==head.r)newHead={c:head.c,r:nr};else newHead={c:Math.max(0,Math.min(COLS-1,head.c+ped.dir)),r:head.r};
+    } else newHead={c:nc,r:nr};
+    // shift body (snake)
+    const old=ped.segs.map(s=>({...s}));
+    ped.segs[0]=newHead;for(let i=1;i<ped.segs.length;i++)ped.segs[i]=old[i-1];
+    // collision with player
+    for(const s of ped.segs){if(s.c===player.c&&s.r===player.r){return loseLife();}
+      if(s.r>=ROWS-1&&s.r===player.r){/* reached bottom near player */}}
+  }
+}
+function loseLife(){lives--;updateHud();
+  if(lives<=0){over=true;document.getElementById('status').textContent=`Game over! Score ${score}. Tap Fire to restart.`;
+    document.getElementById('bF').onclick=()=>{init();document.getElementById('bF').onclick=fire;};
+    const rst=(e)=>{if(e.key===' '){init();document.removeEventListener('keydown',rst);}};document.addEventListener('keydown',rst);
+    return;}
+  // reset centipede position, keep field
+  spawnPed(9+wave-1);player.c=Math.floor(COLS/2);player.r=ROWS-1;
+  document.getElementById('status').textContent='Ouch! Careful now.';
+}
+function draw(){
+  ctx.fillStyle='#071007';ctx.fillRect(0,0,W,H);
+  // mushrooms
+  for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++)if(mush[r][c]){
+    const hp=mush[r][c];ctx.fillStyle=hp>=3?'#c96':hp===2?'#a75':'#853';
+    ctx.beginPath();ctx.arc(c*CELL+CELL/2,r*CELL+CELL/2+2,CELL*0.32,Math.PI,0);ctx.fill();
+    ctx.fillRect(c*CELL+CELL/2-CELL*0.14,r*CELL+CELL/2,CELL*0.28,CELL*0.3);}
+  // player zone line
+  ctx.strokeStyle='rgba(120,220,120,.2)';ctx.beginPath();ctx.moveTo(0,(ROWS-4)*CELL);ctx.lineTo(W,(ROWS-4)*CELL);ctx.stroke();
+  // bullets
+  ctx.fillStyle='#fff';bullets.forEach(b=>ctx.fillRect(b.c*CELL+CELL/2-2,b.y,4,CELL*0.5));
+  // centipedes
+  peds.forEach(ped=>ped.segs.forEach((s,i)=>{ctx.fillStyle=i===0?'#ff5':'#6f6';
+    ctx.beginPath();ctx.arc(s.c*CELL+CELL/2,s.r*CELL+CELL/2,CELL*0.4,0,7);ctx.fill();
+    ctx.fillStyle='#000';ctx.beginPath();ctx.arc(s.c*CELL+CELL/2,s.r*CELL+CELL/2,CELL*0.12,0,7);ctx.fill();}));
+  // player
+  if(!over){ctx.fillStyle='#5cf';ctx.beginPath();ctx.moveTo(player.c*CELL+CELL/2,player.r*CELL+2);
+    ctx.lineTo(player.c*CELL+2,player.r*CELL+CELL-2);ctx.lineTo(player.c*CELL+CELL-2,player.r*CELL+CELL-2);ctx.closePath();ctx.fill();}
+}
+init();loop();
+</script>
+</body>
+</html>

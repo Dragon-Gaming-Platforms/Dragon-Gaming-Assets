@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+<meta name="robots" content="noindex,nofollow">
+<title>Rock Paper Scissors</title>
+<style>
+  *{box-sizing:border-box}html,body{margin:0;height:100%}
+  body{background:radial-gradient(circle at 50% 0,#33244a,#100a1c 60%);color:#f2ecff;
+    font-family:system-ui,Segoe UI,Roboto,Arial,sans-serif;display:flex;flex-direction:column;
+    align-items:center;justify-content:center;min-height:100vh;gap:16px;padding:16px;user-select:none;-webkit-user-select:none}
+  h1{margin:0;font-size:clamp(20px,5vw,30px)}
+  #score{display:flex;gap:24px;font-weight:800;font-size:18px}
+  .you{color:#7cf}.cpu{color:#f88}
+  #arena{display:flex;gap:30px;align-items:center;justify-content:center;font-size:70px;min-height:100px}
+  #vs{font-size:22px;color:#b39ddb;font-weight:800}
+  .hand{filter:drop-shadow(0 4px 8px rgba(0,0,0,.4))}
+  #result{min-height:26px;font-weight:800;font-size:20px}
+  #choices{display:flex;gap:14px}
+  .choice{font-size:44px;background:rgba(255,255,255,.08);border:0;border-radius:18px;padding:12px 18px;cursor:pointer;transition:transform .1s,background .12s}
+  .choice:hover{transform:translateY(-5px);background:rgba(255,255,255,.16)}
+  #newG{background:#b48cff;color:#1a0f2b;border:0;border-radius:10px;padding:9px 18px;font-weight:800;cursor:pointer}
+  .hint{font-size:13px;opacity:.7}
+</style>
+</head>
+<body>
+<h1>Rock Paper Scissors</h1>
+<div id="score"><span class="you">You: <b id="sy">0</b></span><span class="cpu">CPU: <b id="sc">0</b></span><span>Ties: <b id="st">0</b></span></div>
+<div id="arena"><span class="hand" id="hYou">✊</span><span id="vs">VS</span><span class="hand" id="hCpu">✊</span></div>
+<div id="result">Choose your move — first to 5 wins the match.</div>
+<div id="choices">
+  <button class="choice" data-m="rock">✊</button>
+  <button class="choice" data-m="paper">✋</button>
+  <button class="choice" data-m="scissors">✌️</button>
+</div>
+<div class="hint">✊ Rock · ✋ Paper · ✌️ Scissors</div>
+<button id="newG" style="display:none">Play Again</button>
+<script>
+const EMOJI={rock:'✊',paper:'✋',scissors:'✌️'};
+const BEATS={rock:'scissors',paper:'rock',scissors:'paper'};
+let sy=0,sc=0,st=0,over=false,history=[];
+function play(move){
+  if(over)return;
+  // CPU: slight adaptive — counter player's most frequent move sometimes
+  history.push(move);
+  let cpuMove;
+  if(history.length>=3&&Math.random()<0.4){
+    const counts={rock:0,paper:0,scissors:0};history.forEach(h=>counts[h]++);
+    const fav=Object.keys(counts).sort((a,b)=>counts[b]-counts[a])[0];
+    cpuMove=Object.keys(BEATS).find(k=>BEATS[k]===fav); // pick move that beats player's favourite
+  } else {
+    cpuMove=['rock','paper','scissors'][Math.floor(Math.random()*3)];
+  }
+  document.getElementById('hYou').textContent=EMOJI[move];
+  document.getElementById('hCpu').textContent=EMOJI[cpuMove];
+  const r=document.getElementById('result');
+  if(move===cpuMove){st++;r.textContent="Tie! Go again.";r.style.color='#ddd';}
+  else if(BEATS[move]===cpuMove){sy++;r.textContent='You win the round! 🎉';r.style.color='#7cf';}
+  else{sc++;r.textContent='CPU wins the round.';r.style.color='#f88';}
+  document.getElementById('sy').textContent=sy;document.getElementById('sc').textContent=sc;document.getElementById('st').textContent=st;
+  if(sy>=5||sc>=5){over=true;r.textContent=sy>=5?'🏆 You won the match!':'CPU won the match. Try again!';
+    document.getElementById('newG').style.display='';}
+}
+document.querySelectorAll('.choice').forEach(b=>b.onclick=()=>play(b.dataset.m));
+document.getElementById('newG').onclick=()=>{sy=sc=st=0;over=false;history=[];
+  document.getElementById('sy').textContent=0;document.getElementById('sc').textContent=0;document.getElementById('st').textContent=0;
+  document.getElementById('hYou').textContent='✊';document.getElementById('hCpu').textContent='✊';
+  document.getElementById('result').textContent='Choose your move — first to 5 wins the match.';
+  document.getElementById('result').style.color='';document.getElementById('newG').style.display='none';};
+</script>
+</body>
+</html>

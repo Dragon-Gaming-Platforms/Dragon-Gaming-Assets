@@ -1,0 +1,9 @@
+{
+  "name": "Blackjack",
+  "desc": "Play 21 against the dealer. Hit to draw closer to 21 without busting, stand to hold, and beat the dealer's hand. Blackjack pays 3:2 and the dealer stands on 17. Manage your chip stack across hands.",
+  "controls": "Buttons: adjust bet, Deal, Hit, Stand",
+  "shelf": "Arcade & Action",
+  "tags": ["games", "html5", "cards", "casino", "classic"],
+  "badge": "New",
+  "creator": "Dragon Gaming Platforms"
+}

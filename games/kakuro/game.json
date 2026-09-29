@@ -1,0 +1,9 @@
+{
+  "name": "Kakuro",
+  "desc": "A number crossword puzzle. Fill the white cells with digits 1–9 so each horizontal and vertical run adds up to its clue, with no digit repeated inside a run. A logic challenge for math lovers.",
+  "controls": "Tap a white cell and type a digit 1–9; Check to verify",
+  "shelf": "Puzzle & Logic",
+  "tags": ["games", "html5", "puzzle", "logic", "numbers"],
+  "badge": "New",
+  "creator": "Dragon Gaming Platforms"
+}

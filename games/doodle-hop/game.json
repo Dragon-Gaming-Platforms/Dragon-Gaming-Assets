@@ -1,0 +1,9 @@
+{
+  "name": "Doodle Hop",
+  "desc": "Bounce endlessly upward from platform to platform, dodging gaps and using moving and breakable ledges. The screen wraps side to side — just don't fall off the bottom.",
+  "controls": "Mouse / touch / arrow keys to move left and right",
+  "shelf": "Arcade & Action",
+  "tags": ["games", "html5", "arcade", "platformer", "endless"],
+  "badge": "New",
+  "creator": "Dragon Gaming Platforms"
+}

@@ -1,0 +1,9 @@
+{
+  "name": "Block Stacker",
+  "desc": "The classic falling-blocks puzzle. Rotate and slide the descending tetromino pieces to complete solid rows, which then clear. The game speeds up as you level up — how high can you score?",
+  "controls": "← → move, ↑ rotate, ↓ soft drop, Space hard drop, P pause (or on-screen buttons)",
+  "shelf": "Puzzle & Logic",
+  "tags": ["games", "html5", "puzzle", "blocks", "classic"],
+  "badge": "New",
+  "creator": "Dragon Gaming Platforms"
+}

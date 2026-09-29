@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+<meta name="robots" content="noindex,nofollow">
+<title>Pinball</title>
+<style>
+  *{box-sizing:border-box}html,body{margin:0;height:100%}
+  body{background:#0a0612;color:#fde;font-family:system-ui,Segoe UI,Roboto,Arial,sans-serif;
+    display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;gap:8px;padding:10px;user-select:none;-webkit-user-select:none}
+  h1{margin:0;font-size:clamp(18px,5vw,26px)}
+  #hud{display:flex;gap:22px;font-weight:800;color:#f9c}
+  canvas{background:#140a24;border-radius:12px;border:2px solid #33204d;touch-action:none;max-width:96vw;height:auto}
+  #status{min-height:18px;color:#f9c;font-weight:700;text-align:center}
+  .hint{font-size:12px;opacity:.7;text-align:center}
+</style>
+</head>
+<body>
+<h1>Pinball</h1>
+<div id="hud"><span>Score: <b id="score">0</b></span><span>Balls: <b id="balls">3</b></span><span>Best: <b id="best">0</b></span></div>
+<canvas id="c" width="360" height="560"></canvas>
+<div id="status">Hold Space / tap left-right to flip. Launch with Down / tap the plunger area.</div>
+<div class="hint">Left half of screen = left flipper · right half = right flipper · Z / M keys also flip · ↓ or tap bottom-right to launch</div>
+<script>
+const cv=document.getElementById('c'),ctx=cv.getContext('2d');const W=cv.width,H=cv.height;
+const G=0.22;
+let ball,leftUp,rightUp,score,balls,best=+localStorage.getItem('pb_best')||0,inPlay,launched;
+document.getElementById('best').textContent=best;
+const bumpers=[{x:110,y:150,r:26,c:'#ff5da2'},{x:250,y:150,r:26,c:'#5de0ff'},{x:180,y:230,r:30,c:'#ffd75d'}];
+const posts=[{x:70,y:320,r:10},{x:290,y:320,r:10}];
+// flipper pivots
+const LF={x:120,y:500},RF={x:240,y:500},FLEN=64;
+function init(){balls=3;score=0;newBall();document.getElementById('best').textContent=best;updateHud();
+  document.getElementById('status').textContent='Launch the ball with ↓ or tapping the plunger.';}
+function newBall(){ball={x:340,y:520,vx:0,vy:0,r:9};leftUp=false;rightUp=false;inPlay=true;launched=false;updateHud();}
+function updateHud(){document.getElementById('score').textContent=score;document.getElementById('balls').textContent=balls;document.getElementById('best').textContent=best;}
+function launch(){if(!launched&&inPlay){ball.vy=-14-Math.random()*2;ball.vx=-2.4;launched=true;}}
+document.addEventListener('keydown',e=>{const k=e.key.toLowerCase();
+  if(k==='z'||k==='arrowleft')leftUp=true;if(k==='m'||k==='arrowright')rightUp=true;
+  if(k===' '){leftUp=true;rightUp=true;}if(k==='arrowdown'){launch();e.preventDefault();}});
+document.addEventListener('keyup',e=>{const k=e.key.toLowerCase();
+  if(k==='z'||k==='arrowleft')leftUp=false;if(k==='m'||k==='arrowright')rightUp=false;if(k===' '){leftUp=false;rightUp=false;}});
+function ptr(e,down){const rect=cv.getBoundingClientRect();const sx=cv.width/rect.width;const t=e.touches?e.touches[0]:e;
+  const x=(t.clientX-rect.left)*sx;const y=((t.clientY-rect.top)*(cv.height/rect.height));
+  if(y>480&&x>300){if(down)launch();return;}
+  if(x<W/2)leftUp=down;else rightUp=down;}
+cv.addEventListener('mousedown',e=>ptr(e,true));cv.addEventListener('mouseup',e=>ptr(e,false));
+cv.addEventListener('touchstart',e=>{ptr(e,true);e.preventDefault();},{passive:false});
+cv.addEventListener('touchend',e=>{ptr(e,false);e.preventDefault();},{passive:false});
+function flipperLine(pivot,up,isLeft){const rest=isLeft?0.5:Math.PI-0.5;const act=isLeft?-0.35:Math.PI+0.35;
+  const ang=up?act:rest;return{x1:pivot.x,y1:pivot.y,x2:pivot.x+Math.cos(ang)*FLEN,y2:pivot.y+Math.sin(ang)*FLEN};}
+function collideSeg(l){
+  const dx=l.x2-l.x1,dy=l.y2-l.y1;const len2=dx*dx+dy*dy;
+  let t=((ball.x-l.x1)*dx+(ball.y-l.y1)*dy)/len2;t=Math.max(0,Math.min(1,t));
+  const cx=l.x1+t*dx,cy=l.y1+t*dy;const d=Math.hypot(ball.x-cx,ball.y-cy);
+  if(d<ball.r+6){const nx=(ball.x-cx)/(d||1),ny=(ball.y-cy)/(d||1);
+    const dot=ball.vx*nx+ball.vy*ny;ball.vx-=2*dot*nx;ball.vy-=2*dot*ny;ball.vx*=0.9;ball.vy*=0.9;
+    ball.x=cx+nx*(ball.r+6);ball.y=cy+ny*(ball.r+6);
+    // flipper kick
+    return true;}
+  return false;
+}
+function loop(){
+  requestAnimationFrame(loop);
+  if(inPlay&&launched){
+    ball.vy+=G;ball.x+=ball.vx;ball.y+=ball.vy;
+    // walls
+    if(ball.x-ball.r<10){ball.x=10+ball.r;ball.vx*=-0.8;}
+    if(ball.x+ball.r>W-10){ball.x=W-10-ball.r;ball.vx*=-0.8;}
+    if(ball.y-ball.r<10){ball.y=10+ball.r;ball.vy*=-0.8;}
+    // right lane wall (plunger channel) below y 380
+    if(ball.y>380&&ball.x>320){ball.x=320-ball.r;ball.vx=Math.min(ball.vx,-1);}
+    // bumpers
+    bumpers.forEach(b=>{const d=Math.hypot(ball.x-b.x,ball.y-b.y);if(d<b.r+ball.r){
+      const nx=(ball.x-b.x)/d,ny=(ball.y-b.y)/d;const dot=ball.vx*nx+ball.vy*ny;
+      ball.vx-=2*dot*nx;ball.vy-=2*dot*ny;ball.vx+=nx*2.4;ball.vy+=ny*2.4;
+      ball.x=b.x+nx*(b.r+ball.r);ball.y=b.y+ny*(b.r+ball.r);score+=100;updateHud();b.flash=8;}});
+    posts.forEach(p=>{const d=Math.hypot(ball.x-p.x,ball.y-p.y);if(d<p.r+ball.r){
+      const nx=(ball.x-p.x)/d,ny=(ball.y-p.y)/d;const dot=ball.vx*nx+ball.vy*ny;
+      ball.vx-=2*dot*nx;ball.vy-=2*dot*ny;ball.x=p.x+nx*(p.r+ball.r);ball.y=p.y+ny*(p.r+ball.r);score+=25;updateHud();}});
+    // angled walls funneling to flippers
+    if(collideSeg({x1:10,y1:400,x2:LF.x-6,y2:LF.y-6}))score+=1;
+    if(collideSeg({x1:W-10,y1:400,x2:RF.x+6,y2:RF.y-6}))score+=1;
+    // flippers
+    const lL=flipperLine(LF,leftUp,true),rL=flipperLine(RF,rightUp,false);
+    if(collideSeg(lL)&&leftUp){ball.vy-=6;ball.vx-=1;}
+    if(collideSeg(rL)&&rightUp){ball.vy-=6;ball.vx+=1;}
+    // speed cap
+    ball.vx=Math.max(-16,Math.min(16,ball.vx));ball.vy=Math.max(-18,Math.min(18,ball.vy));
+    // drain
+    if(ball.y-ball.r>H){balls--;if(balls<=0){inPlay=false;if(score>best){best=score;localStorage.setItem('pb_best',best);}updateHud();
+        document.getElementById('status').textContent=`Game over! Score ${score}. Tap to play again.`;
+        cv.addEventListener('click',restart,{once:true});}
+      else{newBall();document.getElementById('status').textContent=`Ball drained! ${balls} left. Launch again.`;}}
+  }
+  draw();
+}
+function restart(){init();}
+function draw(){
+  ctx.fillStyle='#140a24';ctx.fillRect(0,0,W,H);
+  ctx.strokeStyle='#4a2f6e';ctx.lineWidth=4;ctx.strokeRect(6,6,W-12,H-12);
+  // plunger lane
+  ctx.strokeStyle='#33204d';ctx.beginPath();ctx.moveTo(320,380);ctx.lineTo(320,H);ctx.stroke();
+  // funnel walls
+  ctx.strokeStyle='#6a4a9e';ctx.lineWidth=5;
+  ctx.beginPath();ctx.moveTo(10,400);ctx.lineTo(LF.x-6,LF.y-6);ctx.stroke();
+  ctx.beginPath();ctx.moveTo(W-10,400);ctx.lineTo(RF.x+6,RF.y-6);ctx.stroke();
+  bumpers.forEach(b=>{ctx.fillStyle=b.flash?'#fff':b.c;ctx.beginPath();ctx.arc(b.x,b.y,b.r,0,7);ctx.fill();
+    ctx.strokeStyle='rgba(255,255,255,.5)';ctx.lineWidth=2;ctx.beginPath();ctx.arc(b.x,b.y,b.r,0,7);ctx.stroke();if(b.flash)b.flash--;});
+  posts.forEach(p=>{ctx.fillStyle='#c9a0ff';ctx.beginPath();ctx.arc(p.x,p.y,p.r,0,7);ctx.fill();});
+  // flippers
+  drawFlip(flipperLine(LF,leftUp,true));drawFlip(flipperLine(RF,rightUp,false));
+  // ball
+  ctx.fillStyle='#eee';ctx.beginPath();ctx.arc(ball.x,ball.y,ball.r,0,7);ctx.fill();
+  ctx.fillStyle='rgba(255,255,255,.6)';ctx.beginPath();ctx.arc(ball.x-3,ball.y-3,3,0,7);ctx.fill();
+  if(!launched&&inPlay){ctx.fillStyle='#9f7';ctx.font='bold 13px system-ui';ctx.textAlign='center';ctx.fillText('↓ launch',340,470);}
+}
+function drawFlip(l){ctx.strokeStyle='#ff5da2';ctx.lineWidth=11;ctx.lineCap='round';
+  ctx.beginPath();ctx.moveTo(l.x1,l.y1);ctx.lineTo(l.x2,l.y2);ctx.stroke();ctx.lineCap='butt';}
+init();loop();
+</script>
+</body>
+</html>

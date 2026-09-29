@@ -1,0 +1,9 @@
+{
+  "name": "Simon Says",
+  "desc": "The classic memory game. Watch the pattern of colors and tones, then repeat it back. Each round adds another step — how long a sequence can you remember?",
+  "controls": "Mouse / touch the colored pads",
+  "shelf": "Puzzle & Logic",
+  "tags": ["games", "html5", "memory", "casual", "classic"],
+  "badge": "New",
+  "creator": "Dragon Gaming Platforms"
+}

@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+<meta name="robots" content="noindex,nofollow">
+<title>Word Scramble</title>
+<style>
+  *{box-sizing:border-box}
+  html,body{margin:0;height:100%}
+  body{background:radial-gradient(circle at 50% 0,#123a34,#06171400 60%),#08120f;color:#e6fff5;
+    font-family:system-ui,Segoe UI,Roboto,Arial,sans-serif;display:flex;flex-direction:column;
+    align-items:center;justify-content:center;min-height:100vh;gap:14px;padding:16px;user-select:none;-webkit-user-select:none}
+  h1{margin:0;font-size:clamp(20px,5vw,30px)}
+  .hud{display:flex;gap:14px;font-weight:800}
+  .hud div{background:rgba(255,255,255,.08);border-radius:10px;padding:8px 16px}
+  #hint{color:#9fe6cf;font-size:15px;min-height:20px}
+  #scrambled{display:flex;gap:8px;flex-wrap:wrap;justify-content:center}
+  .tile{width:clamp(38px,10vw,54px);height:clamp(46px,12vw,64px);border-radius:10px;
+    background:linear-gradient(135deg,#2fd4b6,#1f9c99);color:#04231f;display:flex;align-items:center;justify-content:center;
+    font-size:clamp(22px,6vw,32px);font-weight:800;cursor:pointer;box-shadow:0 3px 8px rgba(0,0,0,.4);transition:transform .08s}
+  .tile:active{transform:scale(.92)}
+  .tile.used{opacity:.25;pointer-events:none}
+  #answer{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;min-height:64px}
+  .slot{width:clamp(38px,10vw,54px);height:clamp(46px,12vw,64px);border-radius:10px;border:2px dashed #2a6b5c;
+    display:flex;align-items:center;justify-content:center;font-size:clamp(22px,6vw,32px);font-weight:800;color:#e6fff5;cursor:pointer}
+  .slot.filled{border-style:solid;background:rgba(47,212,182,.16)}
+  #status{min-height:24px;font-weight:800;color:#ffd76a;font-size:17px}
+  .row{display:flex;gap:10px;align-items:center;flex-wrap:wrap;justify-content:center}
+  button,select{background:#2fd4b6;color:#04231f;border:0;border-radius:10px;padding:10px 18px;font-size:15px;font-weight:800;cursor:pointer}
+  select{background:rgba(255,255,255,.1);color:#e6fff5}
+  button.ghost{background:transparent;color:#9fe6cf;box-shadow:inset 0 0 0 2px #2fd4b6}
+</style>
+</head>
+<body>
+<h1>Word Scramble</h1>
+<div class="hud"><div>Score <span id="score">0</span></div><div>Solved <span id="solved">0</span></div><div>Streak <span id="streak">0</span></div></div>
+<div id="hint"></div>
+<div id="answer"></div>
+<div id="scrambled"></div>
+<div id="status"></div>
+<div class="row">
+  <button id="clear" class="ghost">Clear</button>
+  <button id="hintBtn" class="ghost">Reveal a letter</button>
+  <button id="skip" class="ghost">Skip</button>
+  <select id="cat">
+    <option value="Animals">Animals</option>
+    <option value="Food">Food</option>
+    <option value="Space">Space</option>
+    <option value="Random" selected>Random mix</option>
+  </select>
+</div>
+<script>
+const DATA={
+  Animals:[['DOLPHIN','A clever ocean mammal'],['LEOPARD','A spotted big cat'],['PENGUIN','A tuxedo bird that swims'],['GIRAFFE','Tallest land animal'],['HAMSTER','A tiny pet with cheek pouches'],['TORTOISE','A slow shelled reptile']],
+  Food:[['PANCAKE','Flat breakfast treat with syrup'],['BURRITO','Wrapped tortilla meal'],['NOODLES','Long strands you slurp'],['PRETZEL','Twisted salty snack'],['AVOCADO','Green fruit for guacamole'],['CUPCAKE','A small frosted cake']],
+  Space:[['GALAXY','A huge system of stars'],['COMET','An icy body with a tail'],['NEBULA','A cloud of space gas'],['ECLIPSE','When one body hides another'],['ORBIT','The path around a planet'],['ROCKET','It launches into space']]
+};
+let word,hint,letters,answer,score=0,solved=0,streak=0,revealed;
+function pickWord(){
+  const choice=document.getElementById('cat').value;
+  let cat=choice;
+  if(choice==='Random'){const keys=Object.keys(DATA);cat=keys[Math.floor(Math.random()*keys.length)];}
+  const item=DATA[cat][Math.floor(Math.random()*DATA[cat].length)];
+  word=item[0];hint=item[1];
+}
+function scramble(w){
+  let arr;do{arr=w.split('').sort(()=>Math.random()-0.5);}while(arr.join('')===w&&w.length>1);
+  return arr;
+}
+function newRound(){
+  pickWord();revealed=0;
+  letters=scramble(word).map((ch,i)=>({ch,id:i,used:false}));
+  answer=[];
+  document.getElementById('hint').textContent='Hint: '+hint;
+  document.getElementById('status').textContent='';
+  render();
+}
+function render(){
+  const sc=document.getElementById('scrambled');sc.innerHTML='';
+  letters.forEach(l=>{const t=document.createElement('div');t.className='tile'+(l.used?' used':'');t.textContent=l.ch;
+    t.onclick=()=>placeLetter(l);sc.appendChild(t);});
+  const an=document.getElementById('answer');an.innerHTML='';
+  for(let i=0;i<word.length;i++){const s=document.createElement('div');
+    const filled=answer[i];s.className='slot'+(filled?' filled':'');s.textContent=filled?filled.ch:'';
+    s.onclick=()=>{if(answer[i]){answer[i].used=false;answer[i]=undefined;render();}};
+    an.appendChild(s);}
+}
+function placeLetter(l){
+  if(l.used)return;
+  const idx=answer.findIndex(a=>!a);
+  const slot=idx===-1?answer.length:idx;
+  if(slot>=word.length)return;
+  answer[slot]=l;l.used=true;render();
+  if(answer.filter(Boolean).length===word.length)checkAnswer();
+}
+function checkAnswer(){
+  const guess=answer.map(a=>a?a.ch:'').join('');
+  if(guess===word){
+    const pts=Math.max(10,(word.length*10)-(revealed*5));
+    score+=pts;solved++;streak++;
+    document.getElementById('score').textContent=score;
+    document.getElementById('solved').textContent=solved;
+    document.getElementById('streak').textContent=streak;
+    document.getElementById('status').textContent=`🎉 Correct! +${pts} points`;
+    setTimeout(newRound,1100);
+  }else{
+    streak=0;document.getElementById('streak').textContent=0;
+    document.getElementById('status').textContent='❌ Not quite — tap slots to remove letters.';
+  }
+}
+function clearAnswer(){answer.forEach(a=>{if(a)a.used=false;});answer=[];render();document.getElementById('status').textContent='';}
+function reveal(){
+  const idx=[...word].findIndex((ch,i)=>!answer[i]||answer[i].ch!==ch);
+  if(idx===-1)return;
+  // clear anything wrong at idx
+  if(answer[idx]){answer[idx].used=false;}
+  const l=letters.find(x=>!x.used&&x.ch===word[idx]);
+  if(l){answer[idx]=l;l.used=true;revealed++;render();
+    if(answer.filter(Boolean).length===word.length)checkAnswer();}
+}
+document.getElementById('clear').onclick=clearAnswer;
+document.getElementById('hintBtn').onclick=reveal;
+document.getElementById('skip').onclick=()=>{streak=0;document.getElementById('streak').textContent=0;newRound();};
+document.getElementById('cat').onchange=newRound;
+window.addEventListener('keydown',e=>{
+  const ch=e.key.toUpperCase();
+  if(/^[A-Z]$/.test(ch)){const l=letters.find(x=>!x.used&&x.ch===ch);if(l)placeLetter(l);}
+  else if(e.key==='Backspace'){const last=answer.filter(Boolean).pop();if(last){last.used=false;answer[answer.lastIndexOf(last)]=undefined;render();}}
+});
+newRound();
+</script>
+</body>
+</html>

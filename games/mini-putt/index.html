@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+<meta name="robots" content="noindex,nofollow">
+<title>Mini Putt</title>
+<style>
+  *{box-sizing:border-box}html,body{margin:0;height:100%}
+  body{background:#0e2416;color:#eafff0;font-family:system-ui,Segoe UI,Roboto,Arial,sans-serif;
+    display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;gap:8px;padding:10px;user-select:none;-webkit-user-select:none}
+  h1{margin:0;font-size:clamp(18px,5vw,26px)}
+  #hud{display:flex;gap:20px;font-weight:800;color:#8fe0a8}
+  canvas{background:#1c6b3a;border-radius:12px;touch-action:none;max-width:96vw;height:auto}
+  #status{min-height:18px;color:#bfe;font-weight:700;text-align:center}
+  button{background:#7be0a0;color:#04240f;border:0;border-radius:10px;padding:8px 18px;font-weight:800;cursor:pointer}
+</style>
+</head>
+<body>
+<h1>Mini Putt</h1>
+<div id="hud"><span>Hole: <b id="hole">1</b>/3</span><span>Strokes: <b id="strokes">0</b></span><span>Total: <b id="total">0</b></span><span>Par: <b id="par">2</b></span></div>
+<canvas id="c" width="440" height="560"></canvas>
+<div id="status">Drag from the ball and release to putt. Sink it in the cup!</div>
+<button id="reset">Restart Course</button>
+<script>
+const cv=document.getElementById('c'),ctx=cv.getContext('2d');const W=cv.width,H=cv.height;
+const HOLES=[
+ {ball:{x:W/2,y:H-70},cup:{x:W/2,y:90},par:2,walls:[]},
+ {ball:{x:70,y:H-70},cup:{x:W-70,y:90},par:3,walls:[{x:150,y:180,w:20,h:240}]},
+ {ball:{x:70,y:H-70},cup:{x:W-80,y:120},par:3,walls:[{x:0,y:250,w:280,h:20},{x:W-160,y:H-280,w:160,h:20}]}
+];
+let hi,ball,cup,walls,par,strokes,total=0,aiming,aimNow,moving,sunk;
+function loadHole(i){
+  const h=HOLES[i];ball={x:h.ball.x,y:h.ball.y,vx:0,vy:0,r:9};cup={...h.cup,r:14};walls=h.walls;par=h.par;
+  strokes=0;aiming=false;moving=false;sunk=false;
+  document.getElementById('hole').textContent=i+1;document.getElementById('strokes').textContent=0;
+  document.getElementById('par').textContent=par;document.getElementById('total').textContent=total;
+  document.getElementById('status').textContent='Drag from the ball and release to putt.';
+  draw();
+}
+function pos(e){const rect=cv.getBoundingClientRect();const sx=cv.width/rect.width,sy=cv.height/rect.height;
+  const t=e.touches?e.touches[0]:e;return{x:(t.clientX-rect.left)*sx,y:(t.clientY-rect.top)*sy};}
+function down(e){if(moving||sunk)return;const p=pos(e);if(Math.hypot(p.x-ball.x,p.y-ball.y)<40){aiming=true;aimNow=p;}e.preventDefault();}
+function move(e){if(aiming){aimNow=pos(e);draw();e.preventDefault();}}
+function up(e){if(!aiming)return;aiming=false;const dx=ball.x-aimNow.x,dy=ball.y-aimNow.y;
+  const power=Math.min(Math.hypot(dx,dy),140)/140;const ang=Math.atan2(dy,dx);
+  ball.vx=Math.cos(ang)*power*16;ball.vy=Math.sin(ang)*power*16;
+  moving=true;strokes++;document.getElementById('strokes').textContent=strokes;step();e.preventDefault();}
+cv.addEventListener('mousedown',down);cv.addEventListener('mousemove',move);window.addEventListener('mouseup',up);
+cv.addEventListener('touchstart',down,{passive:false});cv.addEventListener('touchmove',move,{passive:false});cv.addEventListener('touchend',up);
+function step(){
+  ball.x+=ball.vx;ball.y+=ball.vy;ball.vx*=0.985;ball.vy*=0.985;
+  // walls of arena
+  if(ball.x-ball.r<0){ball.x=ball.r;ball.vx*=-0.7;}
+  if(ball.x+ball.r>W){ball.x=W-ball.r;ball.vx*=-0.7;}
+  if(ball.y-ball.r<0){ball.y=ball.r;ball.vy*=-0.7;}
+  if(ball.y+ball.r>H){ball.y=H-ball.r;ball.vy*=-0.7;}
+  // obstacle walls
+  walls.forEach(w=>{
+    if(ball.x+ball.r>w.x&&ball.x-ball.r<w.x+w.w&&ball.y+ball.r>w.y&&ball.y-ball.r<w.y+w.h){
+      // resolve by smallest overlap
+      const overL=ball.x+ball.r-w.x,overR=w.x+w.w-(ball.x-ball.r),overT=ball.y+ball.r-w.y,overB=w.y+w.h-(ball.y-ball.r);
+      const m=Math.min(overL,overR,overT,overB);
+      if(m===overL){ball.x=w.x-ball.r;ball.vx*=-0.7;}
+      else if(m===overR){ball.x=w.x+w.w+ball.r;ball.vx*=-0.7;}
+      else if(m===overT){ball.y=w.y-ball.r;ball.vy*=-0.7;}
+      else{ball.y=w.y+w.h+ball.r;ball.vy*=-0.7;}
+    }
+  });
+  // cup
+  const dc=Math.hypot(ball.x-cup.x,ball.y-cup.y);const speed=Math.hypot(ball.vx,ball.vy);
+  if(dc<cup.r&&speed<9){sink();return;}
+  else if(dc<cup.r){ // pull toward cup
+    ball.vx+=(cup.x-ball.x)*0.02;ball.vy+=(cup.y-ball.y)*0.02;
+  }
+  draw();
+  if(speed<0.25){moving=false;ball.vx=ball.vy=0;draw();return;}
+  requestAnimationFrame(step);
+}
+function sink(){
+  sunk=true;moving=false;total+=strokes;document.getElementById('total').textContent=total;
+  const diff=strokes-par;const term=diff<=-2?'Eagle! 🦅':diff===-1?'Birdie! 🐦':diff===0?'Par':diff===1?'Bogey':'+'+diff;
+  if(hi<HOLES.length-1){document.getElementById('status').textContent=`⛳ In the cup! ${term} (${strokes}). Next hole…`;
+    setTimeout(()=>{hi++;loadHole(hi);},1400);}
+  else{document.getElementById('status').textContent=`🏆 Course complete! Total ${total} strokes. Restart to play again.`;draw();}
+}
+function draw(){
+  ctx.clearRect(0,0,W,H);
+  ctx.fillStyle='#1c6b3a';ctx.fillRect(0,0,W,H);
+  // cup
+  ctx.fillStyle='#06210f';ctx.beginPath();ctx.arc(cup.x,cup.y,cup.r,0,7);ctx.fill();
+  ctx.strokeStyle='#0a3a1a';ctx.lineWidth=3;ctx.beginPath();ctx.arc(cup.x,cup.y,cup.r,0,7);ctx.stroke();
+  // flag
+  ctx.strokeStyle='#ddd';ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(cup.x,cup.y);ctx.lineTo(cup.x,cup.y-40);ctx.stroke();
+  ctx.fillStyle='#e6394a';ctx.beginPath();ctx.moveTo(cup.x,cup.y-40);ctx.lineTo(cup.x+22,cup.y-33);ctx.lineTo(cup.x,cup.y-26);ctx.fill();
+  // walls
+  ctx.fillStyle='#8a5a2a';walls.forEach(w=>{ctx.fillRect(w.x,w.y,w.w,w.h);ctx.strokeStyle='#5a3a18';ctx.strokeRect(w.x,w.y,w.w,w.h);});
+  // aim
+  if(aiming){const dx=ball.x-aimNow.x,dy=ball.y-aimNow.y;const p=Math.min(Math.hypot(dx,dy),140);
+    ctx.strokeStyle='rgba(255,255,255,.7)';ctx.lineWidth=3;ctx.setLineDash([6,6]);
+    ctx.beginPath();ctx.moveTo(ball.x,ball.y);ctx.lineTo(ball.x+dx/Math.hypot(dx,dy||1)*p,ball.y+dy/Math.hypot(dx,dy||1)*p);ctx.stroke();ctx.setLineDash([]);}
+  // ball
+  ctx.fillStyle='#fff';ctx.beginPath();ctx.arc(ball.x,ball.y,ball.r,0,7);ctx.fill();
+  ctx.strokeStyle='#bbb';ctx.beginPath();ctx.arc(ball.x,ball.y,ball.r,0,7);ctx.stroke();
+}
+document.getElementById('reset').onclick=()=>{total=0;hi=0;loadHole(0);};
+hi=0;loadHole(0);
+</script>
+</body>
+</html>

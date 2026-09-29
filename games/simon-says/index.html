@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+<meta name="robots" content="noindex,nofollow">
+<title>Simon Says</title>
+<style>
+  *{box-sizing:border-box}
+  html,body{margin:0;height:100%}
+  body{background:radial-gradient(circle at 50% 0,#181a2e,#07070f 60%);color:#e8eefc;
+    font-family:system-ui,Segoe UI,Roboto,Arial,sans-serif;display:flex;flex-direction:column;
+    align-items:center;justify-content:center;min-height:100vh;gap:16px;padding:14px;user-select:none;-webkit-user-select:none}
+  h1{margin:0;font-size:clamp(20px,5vw,30px)}
+  .hud{display:flex;gap:14px;font-weight:800}
+  .hud div{background:rgba(255,255,255,.08);border-radius:10px;padding:8px 16px}
+  #board{position:relative;width:min(84vw,340px);aspect-ratio:1;border-radius:50%;
+    background:#0c0c16;box-shadow:0 14px 40px rgba(0,0,0,.55);display:grid;
+    grid-template-columns:1fr 1fr;grid-template-rows:1fr 1fr;gap:10px;padding:16px;overflow:hidden}
+  .pad{cursor:pointer;transition:filter .1s, opacity .1s;opacity:.55}
+  .pad.lit{opacity:1;filter:brightness(1.6) saturate(1.3)}
+  .g{background:#12b886;border-radius:100% 0 0 0}
+  .r{background:#fa5252;border-radius:0 100% 0 0}
+  .y{background:#fab005;border-radius:0 0 0 100%}
+  .b{background:#4dabf7;border-radius:0 0 100% 0}
+  #center{position:absolute;inset:34%;background:#0c0c16;border-radius:50%;display:flex;
+    align-items:center;justify-content:center;font-weight:800;color:#9fb4d8;text-align:center;font-size:14px;border:4px solid #1a1a2c}
+  #status{min-height:22px;color:#ffd76a;font-weight:700}
+  button{background:#7c5cff;color:#fff;border:0;border-radius:12px;padding:12px 28px;font-size:17px;font-weight:800;cursor:pointer}
+  select{background:rgba(255,255,255,.1);color:#e8eefc;border:0;border-radius:10px;padding:9px 14px;font-weight:700}
+  .row{display:flex;gap:10px;align-items:center}
+</style>
+</head>
+<body>
+<h1>Simon Says</h1>
+<div class="hud"><div>Round <span id="round">0</span></div><div>Best <span id="best">0</span></div></div>
+<div id="board">
+  <div class="pad g" data-i="0"></div>
+  <div class="pad r" data-i="1"></div>
+  <div class="pad y" data-i="2"></div>
+  <div class="pad b" data-i="3"></div>
+  <div id="center">Watch<br>&amp; repeat</div>
+</div>
+<div id="status">Press Start and repeat the pattern.</div>
+<div class="row">
+  <button id="start">Start</button>
+  <select id="speed"><option value="600">Slow</option><option value="420" selected>Normal</option><option value="280">Fast</option></select>
+</div>
+<script>
+const pads=[...document.querySelectorAll('.pad')];
+const FREQ=[329.63,261.63,220,174.61];
+let seq,input,playing,acceptingInput,best=0;
+let audio;
+function tone(i,dur){
+  try{
+    audio=audio||new (window.AudioContext||window.webkitAudioContext)();
+    const o=audio.createOscillator(),g=audio.createGain();
+    o.type='sine';o.frequency.value=FREQ[i];o.connect(g);g.connect(audio.destination);
+    g.gain.setValueAtTime(0.0001,audio.currentTime);
+    g.gain.exponentialRampToValueAtTime(0.25,audio.currentTime+0.02);
+    g.gain.exponentialRampToValueAtTime(0.0001,audio.currentTime+dur/1000);
+    o.start();o.stop(audio.currentTime+dur/1000+0.02);
+  }catch(e){}
+}
+function flash(i,dur){pads[i].classList.add('lit');tone(i,dur);setTimeout(()=>pads[i].classList.remove('lit'),dur*0.8);}
+function start(){
+  seq=[];best=Math.max(best,0);playing=true;
+  document.getElementById('start').textContent='Restart';
+  nextRound();
+}
+function nextRound(){
+  input=[];acceptingInput=false;
+  seq.push(Math.floor(Math.random()*4));
+  document.getElementById('round').textContent=seq.length;
+  document.getElementById('status').textContent='Watch…';
+  playSeq();
+}
+function playSeq(){
+  const speed=parseInt(document.getElementById('speed').value);
+  let k=0;
+  const step=()=>{
+    if(k>=seq.length){acceptingInput=true;document.getElementById('status').textContent='Your turn — repeat it!';return;}
+    flash(seq[k],speed*0.7);k++;setTimeout(step,speed);
+  };
+  setTimeout(step,500);
+}
+function tap(i){
+  if(!acceptingInput)return;
+  flash(i,220);input.push(i);
+  const idx=input.length-1;
+  if(input[idx]!==seq[idx]){return fail();}
+  if(input.length===seq.length){
+    acceptingInput=false;
+    best=Math.max(best,seq.length);document.getElementById('best').textContent=best;
+    document.getElementById('status').textContent='✔ Correct!';
+    setTimeout(nextRound,800);
+  }
+}
+function fail(){
+  acceptingInput=false;playing=false;
+  document.getElementById('status').textContent=`❌ Wrong! You reached round ${seq.length}.`;
+  document.getElementById('start').textContent='Start';
+  pads.forEach(p=>{p.classList.add('lit');});
+  setTimeout(()=>pads.forEach(p=>p.classList.remove('lit')),400);
+}
+pads.forEach(p=>{
+  const i=+p.dataset.i;
+  p.addEventListener('pointerdown',()=>tap(i));
+});
+document.getElementById('start').onclick=start;
+</script>
+</body>
+</html>

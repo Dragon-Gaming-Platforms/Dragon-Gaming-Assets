@@ -1,0 +1,9 @@
+{
+  "name": "Flow Connect",
+  "desc": "Connect every pair of matching coloured dots by drawing pipes across the grid without crossing paths. A relaxing, brain-teasing flow puzzle.",
+  "controls": "Tap a dot then tap adjacent cells to draw its path; tap the dot again to restart that colour",
+  "shelf": "Puzzle & Logic",
+  "tags": ["games", "html5", "puzzle", "logic", "flow"],
+  "badge": "New",
+  "creator": "Dragon Gaming Platforms"
+}

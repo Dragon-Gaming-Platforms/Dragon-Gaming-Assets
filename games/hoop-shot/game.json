@@ -1,0 +1,9 @@
+{
+  "name": "Hoop Shot",
+  "desc": "A physics basketball challenge. Drag back from the ball to set your angle and power, then release to shoot. Sink it through the hoop and the basket moves to a tougher spot. Chase a shooting streak.",
+  "controls": "Drag from the ball and release to shoot",
+  "shelf": "Sports & Racing",
+  "tags": ["games", "html5", "sports", "basketball", "physics"],
+  "badge": "New",
+  "creator": "Dragon Gaming Platforms"
+}

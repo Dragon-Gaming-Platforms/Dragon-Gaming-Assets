@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+<meta name="robots" content="noindex,nofollow">
+<title>Fruit Slots</title>
+<style>
+  *{box-sizing:border-box}html,body{margin:0;height:100%}
+  body{background:radial-gradient(circle at 50% 0,#3a1030,#140510 60%);color:#ffe;
+    font-family:system-ui,Segoe UI,Roboto,Arial,sans-serif;display:flex;flex-direction:column;
+    align-items:center;justify-content:center;min-height:100vh;gap:14px;padding:16px;user-select:none;-webkit-user-select:none}
+  h1{margin:0;font-size:clamp(20px,5vw,30px);color:#ffd24a;text-shadow:0 2px 0 #a06b00}
+  #bank{font-weight:800;font-size:18px;color:#ffd24a}
+  #machine{background:linear-gradient(#4a1440,#2a0a24);border:4px solid #ffd24a;border-radius:18px;padding:16px;box-shadow:0 8px 24px rgba(0,0,0,.5)}
+  #reels{display:flex;gap:10px}
+  .reel{width:84px;height:104px;background:#fff;border-radius:12px;overflow:hidden;position:relative;box-shadow:inset 0 0 12px rgba(0,0,0,.4)}
+  .strip{position:absolute;left:0;width:100%;display:flex;flex-direction:column;align-items:center}
+  .sym{height:104px;display:flex;align-items:center;justify-content:center;font-size:56px}
+  #status{min-height:24px;font-weight:800;font-size:18px;color:#7fffab;text-align:center}
+  .row{display:flex;gap:10px;align-items:center;flex-wrap:wrap;justify-content:center}
+  button{background:#ffd24a;color:#5a3a00;border:0;border-radius:12px;padding:12px 24px;font-size:17px;font-weight:900;cursor:pointer}
+  button:disabled{opacity:.4;cursor:default}
+  #spin{background:linear-gradient(#ff5da2,#c0246a);color:#fff}
+  .pay{font-size:12px;opacity:.85;text-align:center;line-height:1.5}
+</style>
+</head>
+<body>
+<h1>🎰 Fruit Slots</h1>
+<div id="bank">Credits: <span id="credits">100</span> · Bet: <span id="bet">5</span></div>
+<div id="machine"><div id="reels"><div class="reel"><div class="strip" id="r0"></div></div><div class="reel"><div class="strip" id="r1"></div></div><div class="reel"><div class="strip" id="r2"></div></div></div></div>
+<div id="status">Spin to win! Match three symbols across the middle row.</div>
+<div class="row"><button id="betDown">− Bet</button><button id="spin">SPIN</button><button id="betUp">+ Bet</button></div>
+<div class="pay">🍒×3 = 4× &nbsp; 🍋×3 = 6× &nbsp; 🍊×3 = 8× &nbsp; 🍉×3 = 12× &nbsp; 🔔×3 = 20× &nbsp; ⭐×3 = 40× &nbsp; 7️⃣×3 = 100×<br>Any two matching = 1× your bet back</div>
+<script>
+const SYMS=['🍒','🍋','🍊','🍉','🔔','⭐','7️⃣'];
+const WEIGHTS=[9,8,7,5,4,3,2]; // rarer = higher payout
+const PAY={'🍒':4,'🍋':6,'🍊':8,'🍉':12,'🔔':20,'⭐':40,'7️⃣':100};
+let credits=100,bet=5,spinning=false;
+function weightedPick(){const total=WEIGHTS.reduce((a,b)=>a+b,0);let x=Math.random()*total;
+  for(let i=0;i<SYMS.length;i++){x-=WEIGHTS[i];if(x<0)return i;}return 0;}
+function buildStrip(el,finalIdx){
+  el.innerHTML='';const seq=[];
+  for(let i=0;i<20;i++)seq.push(SYMS[weightedPick()]);
+  seq.push(SYMS[finalIdx]); // final resting symbol at end (middle)
+  seq.push(SYMS[weightedPick()]);
+  seq.forEach(s=>{const d=document.createElement('div');d.className='sym';d.textContent=s;el.appendChild(d);});
+  return seq;
+}
+function updateBank(){document.getElementById('credits').textContent=credits;document.getElementById('bet').textContent=bet;}
+function spin(){
+  if(spinning)return;
+  if(credits<bet){document.getElementById('status').textContent='Not enough credits! Lower your bet.';return;}
+  spinning=true;credits-=bet;updateBank();
+  document.getElementById('spin').disabled=true;document.getElementById('status').textContent='Spinning…';
+  const results=[weightedPick(),weightedPick(),weightedPick()];
+  [0,1,2].forEach(i=>{const el=document.getElementById('r'+i);buildStrip(el,results[i]);
+    el.style.transition='none';el.style.top='0px';
+    // force reflow
+    void el.offsetHeight;
+    const stopTop=-(20)*104; // land so the final symbol is in the middle window
+    el.style.transition=`top ${1.4+i*0.5}s cubic-bezier(.2,.7,.2,1)`;
+    el.style.top=stopTop+'px';
+  });
+  setTimeout(()=>evaluate(results),1400+2*500+150);
+}
+function evaluate(r){
+  const s=r.map(i=>SYMS[i]);
+  let win=0,msg;
+  if(s[0]===s[1]&&s[1]===s[2]){win=bet*PAY[s[0]];msg=`🎉 ${s[0]}${s[0]}${s[0]} — you win ${win} credits!`;}
+  else if(s[0]===s[1]||s[1]===s[2]||s[0]===s[2]){win=bet;msg='Two of a kind — bet returned.';}
+  else msg='No match. Spin again!';
+  credits+=win;
+  if(credits<=0){credits=100;msg+=' (Out of credits — topped up to 100.)';}
+  updateBank();
+  document.getElementById('status').textContent=msg;
+  document.getElementById('status').style.color=win>bet?'#ffd24a':(win?'#7fffab':'#ff9aa8');
+  spinning=false;document.getElementById('spin').disabled=false;
+}
+document.getElementById('spin').onclick=spin;
+document.getElementById('betUp').onclick=()=>{if(!spinning){bet=Math.min(50,bet+5,credits);updateBank();}};
+document.getElementById('betDown').onclick=()=>{if(!spinning){bet=Math.max(5,bet-5);updateBank();}};
+// init reels display
+[0,1,2].forEach(i=>{const el=document.getElementById('r'+i);buildStrip(el,weightedPick());el.style.top='-'+(20*104)+'px';});
+updateBank();
+</script>
+</body>
+</html>

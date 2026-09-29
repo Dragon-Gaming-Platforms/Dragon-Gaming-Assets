@@ -1,0 +1,9 @@
+{
+  "name": "Word Ladder",
+  "desc": "Transform the start word into the goal word one letter at a time. Every rung of the ladder has to be a real four-letter word. A classic word puzzle invented by Lewis Carroll.",
+  "controls": "Type a four-letter word and press Add or Enter",
+  "shelf": "Puzzle & Logic",
+  "tags": ["games", "html5", "puzzle", "word", "logic"],
+  "badge": "New",
+  "creator": "Dragon Gaming Platforms"
+}

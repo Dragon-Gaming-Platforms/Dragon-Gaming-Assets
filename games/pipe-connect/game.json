@@ -1,0 +1,9 @@
+{
+  "name": "Pipe Connect",
+  "desc": "Rotate the scrambled pipe tiles so water flows all the way from the green source to the pink sink. Every tile lights up once it joins the connected network. Solve ever-larger grids.",
+  "controls": "Tap a tile to rotate it 90 degrees",
+  "shelf": "Puzzle & Logic",
+  "tags": ["games", "html5", "puzzle", "logic", "pipes"],
+  "badge": "New",
+  "creator": "Dragon Gaming Platforms"
+}

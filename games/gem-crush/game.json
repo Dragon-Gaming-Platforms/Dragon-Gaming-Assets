@@ -1,0 +1,9 @@
+{
+  "name": "Gem Crush",
+  "desc": "A sparkling match-3 puzzle. Swap adjacent gems to line up three or more, trigger cascading combos, and rack up the highest score before your moves run out.",
+  "controls": "Mouse / touch to select and swap adjacent gems",
+  "shelf": "Puzzle & Logic",
+  "tags": ["games", "html5", "match3", "puzzle", "casual"],
+  "badge": "New",
+  "creator": "Dragon Gaming Platforms"
+}

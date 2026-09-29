@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+<meta name="robots" content="noindex,nofollow">
+<title>Block Stacker</title>
+<style>
+  *{box-sizing:border-box}html,body{margin:0;height:100%}
+  body{background:#0b1020;color:#eef;font-family:system-ui,Segoe UI,Roboto,Arial,sans-serif;
+    display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;gap:8px;padding:10px;user-select:none;-webkit-user-select:none}
+  h1{margin:0;font-size:clamp(18px,5vw,26px)}
+  #wrap{display:flex;gap:14px;align-items:flex-start}
+  canvas{background:#05070f;border-radius:8px;border:2px solid #223;touch-action:none}
+  #side{display:flex;flex-direction:column;gap:10px;font-weight:800;color:#9cf}
+  #next{background:#05070f;border-radius:8px;border:2px solid #223}
+  #status{min-height:18px;color:#7fd;font-weight:700;text-align:center}
+  .ctrls{display:flex;gap:6px;flex-wrap:wrap;justify-content:center;margin-top:4px}
+  button{background:#4aa3ff;color:#04152a;border:0;border-radius:8px;padding:10px 14px;font-weight:800;cursor:pointer}
+  .hint{font-size:12px;opacity:.65;text-align:center}
+</style>
+</head>
+<body>
+<h1>Block Stacker</h1>
+<div id="status">Clear lines by filling rows. Arrow keys or the buttons below.</div>
+<div id="wrap">
+  <canvas id="c" width="240" height="440"></canvas>
+  <div id="side">
+    <div>Score<br><span id="score">0</span></div>
+    <div>Lines<br><span id="lines">0</span></div>
+    <div>Level<br><span id="level">1</span></div>
+    <div>Next</div>
+    <canvas id="next" width="80" height="80"></canvas>
+  </div>
+</div>
+<div class="ctrls">
+  <button id="bL">◀</button><button id="bR">▶</button><button id="bD">▼</button>
+  <button id="bRot">⟳</button><button id="bDrop">Drop</button><button id="bPause">Pause</button>
+</div>
+<div class="hint">← → move · ↑ rotate · ↓ soft drop · Space hard drop · P pause</div>
+<script>
+const COLS=10,ROWS=22,CELL=22;
+const cv=document.getElementById('c'),ctx=cv.getContext('2d');
+const nx=document.getElementById('next'),nxc=nx.getContext('2d');
+const SHAPES={
+  I:{c:'#3ad0e0',cells:[[0,1],[1,1],[2,1],[3,1]]},
+  O:{c:'#f5d020',cells:[[1,0],[2,0],[1,1],[2,1]]},
+  T:{c:'#b06bff',cells:[[1,0],[0,1],[1,1],[2,1]]},
+  S:{c:'#4ce06a',cells:[[1,0],[2,0],[0,1],[1,1]]},
+  Z:{c:'#e6564a',cells:[[0,0],[1,0],[1,1],[2,1]]},
+  J:{c:'#4a7bff',cells:[[0,0],[0,1],[1,1],[2,1]]},
+  L:{c:'#f5941e',cells:[[2,0],[0,1],[1,1],[2,1]]},
+};
+const KEYS=Object.keys(SHAPES);
+let grid,cur,next,score,lines,level,dropT,over,paused,bag;
+function newGrid(){return Array.from({length:ROWS},()=>Array(COLS).fill(null));}
+function randPiece(){if(!bag||!bag.length)bag=KEYS.slice().sort(()=>Math.random()-0.5);
+  const k=bag.pop();return {k,cells:SHAPES[k].cells.map(c=>[...c]),x:3,y:0,c:SHAPES[k].c};}
+function init(){grid=newGrid();cur=randPiece();next=randPiece();score=0;lines=0;level=1;dropT=0;over=false;paused=false;
+  updateHud();document.getElementById('status').textContent='Clear lines by filling rows.';loop();}
+function updateHud(){document.getElementById('score').textContent=score;document.getElementById('lines').textContent=lines;
+  document.getElementById('level').textContent=level;}
+function collide(cells,x,y){return cells.some(([cx,cy])=>{const gx=x+cx,gy=y+cy;
+  return gx<0||gx>=COLS||gy>=ROWS||(gy>=0&&grid[gy][gx]);});}
+function rotate(cells){ // rotate around block bounding
+  return cells.map(([x,y])=>[ -y+ (0), x ]).map(([x,y])=>[x,y]); // simple 90deg; normalize below
+}
+function tryRotate(){
+  if(cur.k==='O')return;
+  // rotate cells about center of 3-ish box
+  const rotated=cur.cells.map(([x,y])=>[ (cur.k==='I'?3:2)-y, x]);
+  // normalize into positive
+  if(!collide(rotated,cur.x,cur.y)){cur.cells=rotated;}
+  else if(!collide(rotated,cur.x-1,cur.y)){cur.x--;cur.cells=rotated;}
+  else if(!collide(rotated,cur.x+1,cur.y)){cur.x++;cur.cells=rotated;}
+}
+function move(dx){if(!collide(cur.cells,cur.x+dx,cur.y))cur.x+=dx;draw();}
+function softDrop(){if(!collide(cur.cells,cur.x,cur.y+1)){cur.y++;score+=1;updateHud();}else lock();draw();}
+function hardDrop(){while(!collide(cur.cells,cur.x,cur.y+1)){cur.y++;score+=2;}lock();updateHud();draw();}
+function lock(){
+  cur.cells.forEach(([cx,cy])=>{const gx=cur.x+cx,gy=cur.y+cy;if(gy>=0)grid[gy][gx]=cur.c;});
+  // clear lines
+  let cleared=0;
+  for(let r=ROWS-1;r>=0;r--){if(grid[r].every(c=>c)){grid.splice(r,1);grid.unshift(Array(COLS).fill(null));cleared++;r++;}}
+  if(cleared){lines+=cleared;score+=[0,100,300,500,800][cleared]*level;level=1+Math.floor(lines/10);updateHud();}
+  cur=next;next=randPiece();
+  if(collide(cur.cells,cur.x,cur.y)){over=true;document.getElementById('status').textContent=`Game over! Score ${score}. Press New.`;}
+}
+let lastTime=0;
+function loop(t){
+  if(over){draw();return;}
+  requestAnimationFrame(loop);
+  if(paused)return;
+  const now=t||0;const dt=now-lastTime;lastTime=now;
+  dropT+=dt;const speed=Math.max(80,650-(level-1)*55);
+  if(dropT>speed){dropT=0;if(!collide(cur.cells,cur.x,cur.y+1))cur.y++;else lock();}
+  draw();
+}
+function draw(){
+  ctx.fillStyle='#05070f';ctx.fillRect(0,0,cv.width,cv.height);
+  // grid stack (skip top 2 hidden rows)
+  for(let r=2;r<ROWS;r++)for(let c=0;c<COLS;c++)if(grid[r][c])cell(ctx,c,r-2,grid[r][c]);
+  // ghost
+  let gy=cur.y;while(!collide(cur.cells,cur.x,gy+1))gy++;
+  cur.cells.forEach(([cx,cy])=>{const y=gy+cy-2;if(y>=0){ctx.globalAlpha=.25;cell(ctx,cur.x+cx,y,cur.c);ctx.globalAlpha=1;}});
+  // current
+  if(!over)cur.cells.forEach(([cx,cy])=>{const y=cur.y+cy-2;if(y>=0)cell(ctx,cur.x+cx,y,cur.c);});
+  // next preview
+  nxc.fillStyle='#05070f';nxc.fillRect(0,0,80,80);
+  next.cells.forEach(([cx,cy])=>{nxc.fillStyle=next.c;nxc.fillRect(cx*18+6,cy*18+12,16,16);
+    nxc.strokeStyle='rgba(0,0,0,.3)';nxc.strokeRect(cx*18+6,cy*18+12,16,16);});
+}
+function cell(c,x,y,color){c.fillStyle=color;c.fillRect(x*CELL,y*CELL,CELL,CELL);
+  c.fillStyle='rgba(255,255,255,.18)';c.fillRect(x*CELL,y*CELL,CELL,4);
+  c.strokeStyle='rgba(0,0,0,.35)';c.strokeRect(x*CELL,y*CELL,CELL,CELL);}
+document.addEventListener('keydown',e=>{if(over)return;const k=e.key.toLowerCase();
+  if(k==='arrowleft'){move(-1);e.preventDefault();}
+  else if(k==='arrowright'){move(1);e.preventDefault();}
+  else if(k==='arrowdown'){softDrop();e.preventDefault();}
+  else if(k==='arrowup'){tryRotate();draw();e.preventDefault();}
+  else if(k===' '){hardDrop();e.preventDefault();}
+  else if(k==='p'){paused=!paused;}});
+document.getElementById('bL').onclick=()=>!over&&move(-1);
+document.getElementById('bR').onclick=()=>!over&&move(1);
+document.getElementById('bD').onclick=()=>!over&&softDrop();
+document.getElementById('bRot').onclick=()=>{if(!over){tryRotate();draw();}};
+document.getElementById('bDrop').onclick=()=>!over&&hardDrop();
+document.getElementById('bPause').onclick=()=>{if(over){init();document.getElementById('bPause').textContent='Pause';}else paused=!paused;};
+init();
+</script>
+</body>
+</html>

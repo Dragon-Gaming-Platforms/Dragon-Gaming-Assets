@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+<meta name="robots" content="noindex,nofollow">
+<title>Block Slide</title>
+<style>
+  *{box-sizing:border-box}html,body{margin:0;height:100%}
+  body{background:radial-gradient(circle at 50% 0,#2b1e14,#120b06 60%);color:#f2e6d6;
+    font-family:system-ui,Segoe UI,Roboto,Arial,sans-serif;display:flex;flex-direction:column;
+    align-items:center;justify-content:center;min-height:100vh;gap:12px;padding:14px;user-select:none;-webkit-user-select:none}
+  h1{margin:0;font-size:clamp(20px,5vw,28px)}
+  #status{min-height:20px;color:#e7b471;font-weight:700;text-align:center}
+  #wrap{position:relative;width:min(92vw,420px);aspect-ratio:1/1;background:#3a2a1a;border-radius:14px;padding:8px}
+  #exit{position:absolute;right:-8px;top:calc(50% + 8px - 8px);width:16px;height:calc((100% - 16px)/6);background:#e7b471;border-radius:3px}
+  .block{position:absolute;border-radius:8px;background:linear-gradient(#c9a06a,#8a6a3e);box-shadow:0 3px 6px rgba(0,0,0,.5);cursor:pointer;border:2px solid rgba(0,0,0,.25)}
+  .block.hero{background:linear-gradient(#e6564a,#a5352c)}
+  .block.sel{outline:3px solid #ffe08a}
+  button{background:#e7b471;color:#3a2610;border:0;border-radius:10px;padding:9px 16px;font-weight:800;cursor:pointer}
+</style>
+</head>
+<body>
+<h1>Block Slide</h1>
+<div id="status">Select a block, then tap where to slide it. Free the red block to the exit →</div>
+<div id="wrap"><div id="exit"></div></div>
+<div>Moves: <b id="moves">0</b> &nbsp; Level <b id="lvl">1</b> &nbsp; <button id="reset">Reset</button> <button id="next" style="display:none">Next Level ▶</button></div>
+<script>
+const GRID=6;
+const LEVELS=[
+ [ // level 1
+  {id:'H',x:1,y:2,w:2,h:1,hero:true},
+  {x:0,y:0,w:1,h:2},{x:3,y:0,w:1,h:1},{x:2,y:3,w:2,h:1},
+  {x:0,y:4,w:2,h:1},{x:4,y:1,w:1,h:3},{x:3,y:4,w:1,h:2}
+ ],
+ [ // level 2
+  {id:'H',x:0,y:2,w:2,h:1,hero:true},
+  {x:2,y:0,w:1,h:2},{x:3,y:0,w:2,h:1},{x:5,y:0,w:1,h:3},
+  {x:2,y:2,w:1,h:2},{x:3,y:2,w:2,h:1},{x:0,y:4,w:1,h:2},{x:2,y:4,w:2,h:1}
+ ]
+];
+let blocks,sel,moves,level=0,solved;
+const wrap=document.getElementById('wrap');
+function load(){
+  blocks=JSON.parse(JSON.stringify(LEVELS[level]));
+  sel=null;moves=0;solved=false;
+  document.getElementById('moves').textContent=0;
+  document.getElementById('lvl').textContent=level+1;
+  document.getElementById('next').style.display='none';
+  document.getElementById('status').textContent='Select a block, then tap where to slide it.';
+  render();
+}
+function occ(exclude){
+  const m=Array.from({length:GRID},()=>Array(GRID).fill(false));
+  blocks.forEach((b,i)=>{if(i===exclude)return;for(let y=0;y<b.h;y++)for(let x=0;x<b.w;x++)m[b.y+y][b.x+x]=true;});
+  return m;
+}
+function render(){
+  wrap.querySelectorAll('.block').forEach(e=>e.remove());
+  const pad=8,inner=wrap.clientWidth-pad*2||404;const cell=inner/GRID;
+  blocks.forEach((b,i)=>{
+    const el=document.createElement('div');el.className='block'+(b.hero?' hero':'')+(sel===i?' sel':'');
+    el.style.left=(pad+b.x*cell)+'px';el.style.top=(pad+b.y*cell)+'px';
+    el.style.width=(b.w*cell-4)+'px';el.style.height=(b.h*cell-4)+'px';
+    el.onclick=e=>{e.stopPropagation();sel=i;render();};
+    wrap.appendChild(el);
+  });
+}
+wrap.onclick=e=>{
+  if(sel===null||solved)return;
+  const rect=wrap.getBoundingClientRect();const pad=8;const inner=wrap.clientWidth-pad*2;const cell=inner/GRID;
+  const cx=Math.floor((e.clientX-rect.left-pad)/cell);const cy=Math.floor((e.clientY-rect.top-pad)/cell);
+  slideToward(cx,cy);
+};
+function slideToward(cx,cy){
+  const b=blocks[sel];const o=occ(sel);
+  const horizontal=b.h===1; // 1-tall slides horizontally, 1-wide slides vertically (for this puzzle set hero & most)
+  if(b.w===1&&b.h>1){ // vertical mover
+    let dir=cy<b.y?-1:1;let ty=b.y;
+    while(true){const ny=ty+dir;if(ny<0||ny+b.h>GRID)break;let blocked=false;for(let x=0;x<b.w;x++)if(o[ny+(dir<0?0:b.h-1)][b.x+x])blocked=true;if(blocked)break;ty=ny;if(ty===cy)break;}
+    if(ty!==b.y){b.y=ty;bump();}
+  } else if(b.h===1&&b.w>=1){ // horizontal mover
+    let dir=cx<b.x?-1:1;let tx=b.x;
+    while(true){const nx=tx+dir;if(nx<0||nx+b.w>GRID)break;let blocked=false;for(let y=0;y<b.h;y++)if(o[b.y+y][nx+(dir<0?0:b.w-1)])blocked=true;if(blocked)break;tx=nx;if(tx===cx)break;}
+    if(tx!==b.x){b.x=tx;bump();}
+  }
+  render();checkWin();
+}
+function bump(){moves++;document.getElementById('moves').textContent=moves;}
+function checkWin(){
+  const hero=blocks.find(b=>b.hero);
+  if(hero.x+hero.w===GRID&&hero.y===2){
+    solved=true;document.getElementById('status').textContent=`🎉 Solved in ${moves} moves!`;
+    if(level<LEVELS.length-1)document.getElementById('next').style.display='';
+    else document.getElementById('status').textContent+=' All levels done!';
+  }
+}
+document.getElementById('reset').onclick=load;
+document.getElementById('next').onclick=()=>{level=Math.min(level+1,LEVELS.length-1);load();};
+window.addEventListener('resize',render);
+load();
+</script>
+</body>
+</html>

@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+<meta name="robots" content="noindex,nofollow">
+<title>Copter Cave</title>
+<style>
+  *{box-sizing:border-box}html,body{margin:0;height:100%}
+  body{background:#0a0f14;color:#dfe;font-family:system-ui,Segoe UI,Roboto,Arial,sans-serif;
+    display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;gap:8px;padding:10px;user-select:none;-webkit-user-select:none}
+  h1{margin:0;font-size:clamp(18px,5vw,26px)}
+  #hud{display:flex;gap:22px;font-weight:800;color:#6dd}
+  canvas{background:#0d141c;border-radius:10px;touch-action:none;max-width:96vw;height:auto;cursor:pointer}
+  #status{min-height:18px;color:#9ad;font-weight:700;text-align:center}
+  .hint{font-size:13px;opacity:.7}
+</style>
+</head>
+<body>
+<h1>Copter Cave</h1>
+<div id="hud"><span>Distance: <b id="dist">0</b></span><span>Best: <b id="best">0</b></span></div>
+<canvas id="c" width="520" height="360"></canvas>
+<div id="status">Hold to fly up, release to descend. Don't hit the cave!</div>
+<div class="hint">Click / tap / hold Space to thrust</div>
+<script>
+const cv=document.getElementById('c'),ctx=cv.getContext('2d');const W=cv.width,H=cv.height;
+let copter,thrust,segs,scroll,dist,best=+localStorage.getItem('cc_best')||0,running,started,speed,gap,obstacles,obTimer;
+document.getElementById('best').textContent=best;
+function init(){
+  copter={y:H/2,vy:0};thrust=false;dist=0;scroll=0;speed=3;gap=170;started=false;running=true;
+  obstacles=[];obTimer=120;
+  segs=[];const n=Math.ceil(W/10)+4;let top=60,bot=H-60;
+  for(let i=0;i<n;i++)segs.push({top,bot});
+  updateHud();document.getElementById('status').textContent='Hold to fly up, release to descend.';
+  draw();loop();
+}
+function updateHud(){document.getElementById('dist').textContent=Math.floor(dist);document.getElementById('best').textContent=best;}
+function press(e){thrust=true;started=true;if(!running)init();if(e&&e.preventDefault)e.preventDefault();}
+function release(){thrust=false;}
+cv.addEventListener('mousedown',press);window.addEventListener('mouseup',release);
+cv.addEventListener('touchstart',press,{passive:false});window.addEventListener('touchend',release);
+document.addEventListener('keydown',e=>{if(e.code==='Space'){press(e);}});
+document.addEventListener('keyup',e=>{if(e.code==='Space')release();});
+function newSeg(){
+  const last=segs[segs.length-1];
+  // wander the cave center, keep a gap
+  let center=(last.top+last.bot)/2+(Math.random()-0.5)*40;
+  center=Math.max(gap/2+20,Math.min(H-gap/2-20,center));
+  let g=gap;
+  segs.push({top:center-g/2,bot:center+g/2});
+}
+function loop(){
+  if(!running)return;
+  if(started){
+    copter.vy+=thrust?-0.5:0.42;copter.vy=Math.max(-6,Math.min(6,copter.vy));copter.y+=copter.vy;
+    scroll+=speed;dist+=speed/12;
+    // shift cave
+    while(scroll>=10){scroll-=10;segs.shift();newSeg();}
+    speed=3+dist/250;gap=Math.max(120,170-dist/40);
+    // spawn stalactite obstacles occasionally
+    obTimer--;if(obTimer<=0){const s=segs[Math.min(segs.length-1,Math.floor(W/10)+2)];
+      const fromTop=Math.random()<0.5;const len=25+Math.random()*35;
+      obstacles.push({x:W+20,fromTop,len,w:14});obTimer=90+Math.random()*80;}
+    obstacles.forEach(o=>o.x-=speed);obstacles=obstacles.filter(o=>o.x>-30);
+    // collision with cave
+    const ci=Math.floor(60/10);const seg=segs[ci]||segs[0];
+    const cx=60;
+    if(copter.y-8<seg.top||copter.y+8>seg.bot){return gameOver();}
+    // collision with obstacles
+    for(const o of obstacles){if(Math.abs(o.x-cx)<o.w/2+10){
+      const s=segs[Math.floor(o.x/10)]||seg;
+      if(o.fromTop){if(copter.y-8<s.top+o.len)return gameOver();}
+      else{if(copter.y+8>s.bot-o.len)return gameOver();}
+    }}
+    updateHud();
+  }
+  draw();requestAnimationFrame(loop);
+}
+function gameOver(){
+  running=false;if(dist>best){best=Math.floor(dist);localStorage.setItem('cc_best',best);}updateHud();
+  document.getElementById('status').textContent=`💥 Crashed at ${Math.floor(dist)}m! Click to fly again.`;
+  draw();
+  const restart=()=>{cv.removeEventListener('mousedown',restart);init();};
+  // next press restarts via press()
+}
+function draw(){
+  ctx.fillStyle='#0d141c';ctx.fillRect(0,0,W,H);
+  // cave
+  ctx.fillStyle='#1c3a2e';
+  ctx.beginPath();ctx.moveTo(0,0);for(let i=0;i<segs.length;i++)ctx.lineTo(i*10-scroll,segs[i].top);ctx.lineTo(W,0);ctx.closePath();ctx.fill();
+  ctx.beginPath();ctx.moveTo(0,H);for(let i=0;i<segs.length;i++)ctx.lineTo(i*10-scroll,segs[i].bot);ctx.lineTo(W,H);ctx.closePath();ctx.fill();
+  // obstacles
+  ctx.fillStyle='#2e5a44';obstacles.forEach(o=>{const s=segs[Math.floor(o.x/10)]||segs[0];
+    if(o.fromTop)ctx.fillRect(o.x-o.w/2,s.top,o.w,o.len);else ctx.fillRect(o.x-o.w/2,s.bot-o.len,o.w,o.len);});
+  // copter
+  const cx=60;ctx.fillStyle='#ffd24a';ctx.fillRect(cx-12,copter.y-6,22,12);
+  ctx.fillStyle='#333';ctx.fillRect(cx-14,copter.y-10,28,3); // rotor
+  ctx.fillStyle='#ffb020';ctx.fillRect(cx+8,copter.y-2,6,4); // tail
+  if(!started){ctx.fillStyle='rgba(255,255,255,.85)';ctx.font='bold 18px system-ui';ctx.textAlign='center';
+    ctx.fillText('Hold to fly',W/2,H/2);}
+}
+init();
+</script>
+</body>
+</html>

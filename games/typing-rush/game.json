@@ -1,0 +1,9 @@
+{
+  "name": "Typing Rush",
+  "desc": "Words rain down the screen — type them and hit Space or Enter to blast them before they land. A fast, addictive typing game that tracks your score and WPM.",
+  "controls": "Type on your keyboard; Space / Enter to submit a word",
+  "shelf": "Arcade & Action",
+  "tags": ["games", "html5", "typing", "arcade", "skill"],
+  "badge": "New",
+  "creator": "Dragon Gaming Platforms"
+}

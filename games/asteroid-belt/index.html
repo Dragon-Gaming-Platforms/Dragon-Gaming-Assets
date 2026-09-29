@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+<meta name="robots" content="noindex,nofollow">
+<title>Asteroid Belt</title>
+<style>
+  *{box-sizing:border-box}html,body{margin:0;height:100%}
+  body{background:#02030a;color:#dff;font-family:system-ui,Segoe UI,Roboto,Arial,sans-serif;
+    display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;gap:8px;padding:10px;user-select:none;-webkit-user-select:none}
+  h1{margin:0;font-size:clamp(18px,5vw,26px)}
+  #hud{display:flex;gap:22px;font-weight:800;color:#8cf}
+  canvas{background:#03040d;border-radius:10px;border:1px solid #16203a;touch-action:none;max-width:96vw;height:auto}
+  #status{min-height:18px;color:#9ad;font-weight:700;text-align:center}
+  .ctrls{display:flex;gap:6px;flex-wrap:wrap;justify-content:center}
+  button{background:#39c;color:#02121a;border:0;border-radius:8px;padding:12px 16px;font-weight:800;cursor:pointer}
+  .hint{font-size:12px;opacity:.7;text-align:center}
+</style>
+</head>
+<body>
+<h1>Asteroid Belt</h1>
+<div id="hud"><span>Score: <b id="score">0</b></span><span>Lives: <b id="lives">3</b></span><span>Best: <b id="best">0</b></span></div>
+<canvas id="c" width="560" height="440"></canvas>
+<div id="status">Rotate, thrust, and shoot the asteroids. Big rocks split into smaller ones!</div>
+<div class="ctrls">
+  <button id="bL">⟲ Left</button><button id="bThr">▲ Thrust</button><button id="bR">Right ⟳</button><button id="bFire">● Fire</button>
+</div>
+<div class="hint">← → rotate · ↑ thrust · Space fire (keyboard or buttons)</div>
+<script>
+const cv=document.getElementById('c'),ctx=cv.getContext('2d');const W=cv.width,H=cv.height;
+let ship,bullets,rocks,score,lives,best=+localStorage.getItem('ab_best')||0,keys={},over,invuln,level;
+document.getElementById('best').textContent=best;
+function init(){
+  ship={x:W/2,y:H/2,a:-Math.PI/2,vx:0,vy:0,r:12};
+  bullets=[];rocks=[];score=0;lives=3;over=false;invuln=90;level=1;keys={};
+  spawnWave(4);updateHud();document.getElementById('status').textContent='Rotate, thrust, and shoot!';
+}
+function spawnWave(n){for(let i=0;i<n;i++){let x,y;do{x=Math.random()*W;y=Math.random()*H;}while(Math.hypot(x-ship.x,y-ship.y)<120);
+  rocks.push(mkRock(x,y,3));}}
+function mkRock(x,y,size){const sp=(4-size)*0.5+0.4;const ang=Math.random()*7;
+  return{x,y,vx:Math.cos(ang)*sp,vy:Math.sin(ang)*sp,size,r:size*14,rot:Math.random()*7,spin:(Math.random()-0.5)*0.05,
+    shape:Array.from({length:9},()=>0.7+Math.random()*0.5)};}
+function updateHud(){document.getElementById('score').textContent=score;document.getElementById('lives').textContent=lives;document.getElementById('best').textContent=best;}
+document.addEventListener('keydown',e=>{keys[e.key]=true;if(['ArrowLeft','ArrowRight','ArrowUp',' '].includes(e.key))e.preventDefault();
+  if(e.key===' ')fire();});
+document.addEventListener('keyup',e=>{keys[e.key]=false;});
+function hold(id,key){const el=document.getElementById(id);
+  const on=e=>{keys[key]=true;e.preventDefault();};const off=e=>{keys[key]=false;};
+  el.addEventListener('mousedown',on);el.addEventListener('mouseup',off);el.addEventListener('mouseleave',off);
+  el.addEventListener('touchstart',on,{passive:false});el.addEventListener('touchend',off);}
+hold('bL','ArrowLeft');hold('bR','ArrowRight');hold('bThr','ArrowUp');
+document.getElementById('bFire').onclick=fire;
+document.getElementById('bFire').addEventListener('touchstart',e=>{e.preventDefault();fire();},{passive:false});
+function fire(){if(over)return;if(bullets.length>=5)return;
+  bullets.push({x:ship.x+Math.cos(ship.a)*14,y:ship.y+Math.sin(ship.a)*14,vx:Math.cos(ship.a)*7+ship.vx,vy:Math.sin(ship.a)*7+ship.vy,life:60});}
+function wrap(o){if(o.x<0)o.x+=W;if(o.x>W)o.x-=W;if(o.y<0)o.y+=H;if(o.y>H)o.y-=H;}
+function loop(){
+  requestAnimationFrame(loop);
+  if(!over){
+    if(keys['ArrowLeft'])ship.a-=0.07;if(keys['ArrowRight'])ship.a+=0.07;
+    if(keys['ArrowUp']){ship.vx+=Math.cos(ship.a)*0.12;ship.vy+=Math.sin(ship.a)*0.12;}
+    ship.vx*=0.99;ship.vy*=0.99;ship.x+=ship.vx;ship.y+=ship.vy;wrap(ship);
+    if(invuln>0)invuln--;
+    bullets.forEach(b=>{b.x+=b.vx;b.y+=b.vy;b.life--;wrap(b);});bullets=bullets.filter(b=>b.life>0);
+    rocks.forEach(r=>{r.x+=r.vx;r.y+=r.vy;r.rot+=r.spin;wrap(r);});
+    // bullet-rock
+    for(let i=rocks.length-1;i>=0;i--){const r=rocks[i];
+      for(let j=bullets.length-1;j>=0;j--){if(Math.hypot(bullets[j].x-r.x,bullets[j].y-r.y)<r.r){
+        bullets.splice(j,1);score+=(4-r.size)*20;updateHud();
+        if(r.size>1){rocks.push(mkRock(r.x,r.y,r.size-1));rocks.push(mkRock(r.x,r.y,r.size-1));}
+        rocks.splice(i,1);break;}}}
+    // ship-rock
+    if(invuln<=0)for(const r of rocks){if(Math.hypot(ship.x-r.x,ship.y-r.y)<r.r+ship.r-2){hitShip();break;}}
+    if(rocks.length===0){level++;spawnWave(3+level);invuln=60;}
+  }
+  draw();
+}
+function hitShip(){lives--;updateHud();ship.x=W/2;ship.y=H/2;ship.vx=ship.vy=0;ship.a=-Math.PI/2;invuln=100;
+  if(lives<=0){over=true;if(score>best){best=score;localStorage.setItem('ab_best',best);updateHud();}
+    document.getElementById('status').textContent=`Game over! Score ${score}. Tap Fire or Space to restart.`;
+    document.getElementById('bFire').onclick=()=>init();
+    const rst=(e)=>{if(e.key===' '){init();document.removeEventListener('keydown',rst);document.getElementById('bFire').onclick=fire;}};
+    document.addEventListener('keydown',rst);}
+}
+function draw(){
+  ctx.fillStyle='#03040d';ctx.fillRect(0,0,W,H);
+  // ship
+  if(!over&&!(invuln>0&&Math.floor(invuln/5)%2)){
+    ctx.save();ctx.translate(ship.x,ship.y);ctx.rotate(ship.a);ctx.strokeStyle='#7cf';ctx.lineWidth=2;
+    ctx.beginPath();ctx.moveTo(14,0);ctx.lineTo(-10,-9);ctx.lineTo(-6,0);ctx.lineTo(-10,9);ctx.closePath();ctx.stroke();
+    if(keys['ArrowUp']){ctx.strokeStyle='#f80';ctx.beginPath();ctx.moveTo(-6,0);ctx.lineTo(-14,0);ctx.stroke();}
+    ctx.restore();
+  }
+  ctx.fillStyle='#fff';bullets.forEach(b=>{ctx.beginPath();ctx.arc(b.x,b.y,2.5,0,7);ctx.fill();});
+  ctx.strokeStyle='#bcd';ctx.lineWidth=2;
+  rocks.forEach(r=>{ctx.save();ctx.translate(r.x,r.y);ctx.rotate(r.rot);ctx.beginPath();
+    r.shape.forEach((m,i)=>{const ang=i/r.shape.length*Math.PI*2;const x=Math.cos(ang)*r.r*m,y=Math.sin(ang)*r.r*m;
+      i?ctx.lineTo(x,y):ctx.moveTo(x,y);});ctx.closePath();ctx.stroke();ctx.restore();});
+}
+init();loop();
+</script>
+</body>
+</html>

@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+<meta name="robots" content="noindex,nofollow">
+<title>Darts 501</title>
+<style>
+  *{box-sizing:border-box}html,body{margin:0;height:100%}
+  body{background:#12100c;color:#f4e9d8;font-family:system-ui,Segoe UI,Roboto,Arial,sans-serif;
+    display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;gap:8px;padding:10px;user-select:none;-webkit-user-select:none}
+  h1{margin:0;font-size:clamp(18px,5vw,26px)}
+  #hud{display:flex;gap:20px;font-weight:800;color:#ffcf6b}
+  #hud b{color:#fff}
+  canvas{border-radius:50%;touch-action:none;max-width:92vw;height:auto;cursor:crosshair}
+  #status{min-height:18px;color:#9fd;font-weight:700;text-align:center}
+  button{background:#ffcf6b;color:#2a1c08;border:0;border-radius:10px;padding:8px 18px;font-weight:800;cursor:pointer}
+</style>
+</head>
+<body>
+<h1>Darts 501</h1>
+<div id="hud"><span>Score: <b id="score">501</b></span><span>Darts: <b id="darts">0</b></span><span>Turn: <b id="turn"></b></span></div>
+<canvas id="c" width="380" height="380"></canvas>
+<div id="status">Tap the board to throw. Finish exactly on 0 with a double (or bullseye).</div>
+<button id="reset">New Game</button>
+<script>
+const cv=document.getElementById('c'),ctx=cv.getContext('2d');const W=cv.width,H=cv.height,CX=W/2,CY=H/2,R=W/2-6;
+const ORDER=[20,1,18,4,13,6,10,15,2,17,3,19,7,16,8,11,14,9,12,5];
+let score,darts,turnThrows,over,marks;
+let cross,crossT,aimRAF;
+function init(){score=501;darts=0;turnThrows=[];over=false;marks=[];crossT=0;
+  document.getElementById('score').textContent=501;document.getElementById('darts').textContent=0;
+  document.getElementById('turn').textContent='—';
+  document.getElementById('status').textContent='Tap the board to throw (crosshair wobbles).';
+  cancelAnimationFrame(aimRAF);loop();
+}
+function loop(){crossT+=0.05;cross={x:CX+Math.cos(crossT*1.3)*R*0.5,y:CY+Math.sin(crossT*1.7)*R*0.5};draw();aimRAF=requestAnimationFrame(loop);}
+function throwAt(px,py){
+  if(over)return;
+  // scatter around crosshair (player skill = small error)
+  const ex=cross.x+(Math.random()-0.5)*36,ey=cross.y+(Math.random()-0.5)*36;
+  const res=regionScore(ex,ey);
+  marks.push({x:ex,y:ey});
+  darts++;document.getElementById('darts').textContent=darts;
+  turnThrows.push(res.label);
+  document.getElementById('turn').textContent=turnThrows.join(', ');
+  let newScore=score-res.value;
+  let bust=false;
+  if(newScore<0||newScore===1){bust=true;}
+  else if(newScore===0&&!res.isDouble){bust=true;}
+  if(bust){
+    document.getElementById('status').textContent=`${res.label} — BUST! Score stays at ${score}.`;
+    endTurn();
+  } else {
+    score=newScore;document.getElementById('score').textContent=score;
+    if(score===0){over=true;document.getElementById('status').textContent=`🎯 Checkout on ${res.label}! Won in ${darts} darts.`;cancelAnimationFrame(aimRAF);draw();return;}
+    document.getElementById('status').textContent=`${res.label} scored ${res.value}. ${3-turnThrows.length} darts left this turn.`;
+    if(turnThrows.length>=3)endTurn();
+  }
+}
+function endTurn(){setTimeout(()=>{if(over)return;turnThrows=[];document.getElementById('turn').textContent='new turn';},900);}
+function regionScore(px,py){
+  const dx=px-CX,dy=py-CY;const dist=Math.hypot(dx,dy)/R;
+  if(dist>1.0)return{value:0,label:'Miss',isDouble:false};
+  if(dist<=0.037)return{value:50,label:'Bull 50',isDouble:true};
+  if(dist<=0.094)return{value:25,label:'25',isDouble:false};
+  let ang=Math.atan2(dy,dx)*180/Math.PI; // 0 = +x (right)
+  // convert so 20 is at top. top is -90deg. sector width 18. index0 (20) centered at top.
+  let a=(ang+90+9+360)%360; // shift so sector boundaries align
+  const idx=Math.floor(a/18)%20;
+  const base=ORDER[idx];
+  let mult=1,isDouble=false;
+  if(dist>=0.582&&dist<=0.629){mult=3;}
+  else if(dist>=0.953&&dist<=1.0){mult=2;isDouble=true;}
+  const value=base*mult;
+  const label=(mult===3?'T':mult===2?'D':'')+base;
+  return{value,label,isDouble};
+}
+function draw(){
+  ctx.clearRect(0,0,W,H);
+  ctx.fillStyle='#111';ctx.beginPath();ctx.arc(CX,CY,R,0,7);ctx.fill();
+  for(let i=0;i<20;i++){
+    const a0=(-90-9+i*18)*Math.PI/180,a1=a0+18*Math.PI/180;
+    const wedgeLight=i%2===0;
+    // singles
+    drawRing(a0,a1,0.094,0.953,wedgeLight?'#e8d3a0':'#1c1c1c');
+    // triple
+    drawRing(a0,a1,0.582,0.629,i%2===0?'#c0392b':'#27ae60');
+    // double
+    drawRing(a0,a1,0.953,1.0,i%2===0?'#c0392b':'#27ae60');
+  }
+  // bulls
+  ctx.fillStyle='#27ae60';ctx.beginPath();ctx.arc(CX,CY,R*0.094,0,7);ctx.fill();
+  ctx.fillStyle='#c0392b';ctx.beginPath();ctx.arc(CX,CY,R*0.037,0,7);ctx.fill();
+  // numbers
+  ctx.fillStyle='#fff';ctx.font='bold 15px system-ui';ctx.textAlign='center';ctx.textBaseline='middle';
+  for(let i=0;i<20;i++){const a=(-90+i*18)*Math.PI/180;const rr=R*1.0-12;
+    ctx.fillText(ORDER[i],CX+Math.cos(a)*(R-13),CY+Math.sin(a)*(R-13));}
+  // dart marks
+  marks.forEach(m=>{ctx.fillStyle='#fff';ctx.beginPath();ctx.arc(m.x,m.y,3,0,7);ctx.fill();
+    ctx.strokeStyle='#000';ctx.beginPath();ctx.arc(m.x,m.y,3,0,7);ctx.stroke();});
+  // crosshair
+  if(!over&&cross){ctx.strokeStyle='rgba(255,255,255,.9)';ctx.lineWidth=2;
+    ctx.beginPath();ctx.arc(cross.x,cross.y,8,0,7);ctx.stroke();
+    ctx.beginPath();ctx.moveTo(cross.x-12,cross.y);ctx.lineTo(cross.x+12,cross.y);ctx.moveTo(cross.x,cross.y-12);ctx.lineTo(cross.x,cross.y+12);ctx.stroke();}
+}
+function drawRing(a0,a1,r0,r1,color){
+  ctx.fillStyle=color;ctx.beginPath();
+  ctx.arc(CX,CY,R*r1,a0,a1);ctx.arc(CX,CY,R*r0,a1,a0,true);ctx.closePath();ctx.fill();
+}
+cv.addEventListener('click',()=>throwAt());
+cv.addEventListener('touchstart',e=>{e.preventDefault();throwAt();},{passive:false});
+document.getElementById('reset').onclick=init;
+init();
+</script>
+</body>
+</html>

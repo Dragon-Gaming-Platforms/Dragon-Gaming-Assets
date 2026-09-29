@@ -1,0 +1,9 @@
+{
+  "name": "Mastermind",
+  "desc": "Crack the hidden four-colour code in ten guesses. After each row, black pegs mark right colour in the right spot and white pegs mark right colour in the wrong spot. Deduce your way to victory.",
+  "controls": "Pick a colour, tap slots to place it, then Check",
+  "shelf": "Puzzle & Logic",
+  "tags": ["games", "html5", "puzzle", "logic", "deduction"],
+  "badge": "New",
+  "creator": "Dragon Gaming Platforms"
+}

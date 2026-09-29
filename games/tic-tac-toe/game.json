@@ -1,0 +1,9 @@
+{
+  "name": "Tic-Tac-Toe",
+  "desc": "The timeless noughts-and-crosses game. Get three in a row before the computer does. Choose Easy for a beatable opponent or Unbeatable for a perfect minimax AI that never loses.",
+  "controls": "Tap a square to place your mark",
+  "shelf": "Puzzle & Logic",
+  "tags": ["games", "html5", "strategy", "classic", "ai"],
+  "badge": "New",
+  "creator": "Dragon Gaming Platforms"
+}

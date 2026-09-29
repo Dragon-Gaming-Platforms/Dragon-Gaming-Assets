@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+<meta name="robots" content="noindex,nofollow">
+<title>Dice Poker</title>
+<style>
+  *{box-sizing:border-box}html,body{margin:0;height:100%}
+  body{background:radial-gradient(circle at 50% 0,#0f3324,#05130c 60%);color:#eafff0;
+    font-family:system-ui,Segoe UI,Roboto,Arial,sans-serif;display:flex;flex-direction:column;
+    align-items:center;min-height:100vh;gap:12px;padding:16px;user-select:none;-webkit-user-select:none}
+  h1{margin:4px 0;font-size:clamp(20px,5vw,28px)}
+  #status{min-height:22px;color:#8fe0a8;font-weight:800;text-align:center}
+  #dice{display:flex;gap:10px;justify-content:center}
+  .die{width:58px;height:58px;border-radius:12px;background:#fff;color:#111;display:flex;align-items:center;justify-content:center;
+    font-size:30px;font-weight:900;cursor:pointer;box-shadow:0 3px 6px rgba(0,0,0,.4);transition:transform .1s}
+  .die.held{background:#ffd76a;transform:translateY(-6px);box-shadow:0 0 0 3px #b8860b inset}
+  .die.rolling{animation:sh .3s}
+  @keyframes sh{25%{transform:translateY(-4px) rotate(-8deg)}75%{transform:translateY(-4px) rotate(8deg)}}
+  #card{width:min(94vw,360px);border-collapse:collapse}
+  #card td{border:1px solid #2c5c40;padding:7px 10px;font-size:14px}
+  #card td.name{text-align:left}
+  #card td.val{text-align:right;width:60px;font-weight:800;cursor:pointer}
+  #card tr.avail td.val{background:#164a2e;color:#bfe;cursor:pointer}
+  #card tr.avail:hover td{background:#1e6b40}
+  #card tr.used td.val{color:#7a9;}
+  .row{display:flex;gap:10px;align-items:center}
+  button{background:#7be0a0;color:#04240f;border:0;border-radius:10px;padding:10px 18px;font-weight:800;cursor:pointer}
+  button:disabled{opacity:.4;cursor:default}
+  #total{font-weight:800;color:#ffd76a}
+</style>
+</head>
+<body>
+<h1>Dice Poker</h1>
+<div id="status">Roll the dice, hold the ones you want, then score a category.</div>
+<div id="dice"></div>
+<div class="row"><button id="roll">Roll (3 left)</button> <span id="total">Total: 0</span></div>
+<table id="card"><tbody></tbody></table>
+<button id="newG" style="display:none">New Game</button>
+<script>
+const CATS=[
+ {k:'ones',n:'Ones (sum of 1s)',f:d=>sumOf(d,1)},
+ {k:'twos',n:'Twos (sum of 2s)',f:d=>sumOf(d,2)},
+ {k:'threes',n:'Threes (sum of 3s)',f:d=>sumOf(d,3)},
+ {k:'fours',n:'Fours (sum of 4s)',f:d=>sumOf(d,4)},
+ {k:'fives',n:'Fives (sum of 5s)',f:d=>sumOf(d,5)},
+ {k:'sixes',n:'Sixes (sum of 6s)',f:d=>sumOf(d,6)},
+ {k:'three',n:'Three of a Kind (sum all)',f:d=>ofAKind(d,3)?sum(d):0},
+ {k:'four',n:'Four of a Kind (sum all)',f:d=>ofAKind(d,4)?sum(d):0},
+ {k:'full',n:'Full House (25)',f:d=>fullHouse(d)?25:0},
+ {k:'sm',n:'Small Straight (30)',f:d=>straight(d,4)?30:0},
+ {k:'lg',n:'Large Straight (40)',f:d=>straight(d,5)?40:0},
+ {k:'five',n:'Five of a Kind (50)',f:d=>ofAKind(d,5)?50:0},
+ {k:'chance',n:'Chance (sum all)',f:d=>sum(d)},
+];
+function counts(d){const c=[0,0,0,0,0,0,0];d.forEach(v=>c[v]++);return c;}
+function sumOf(d,n){return counts(d)[n]*n;}
+function sum(d){return d.reduce((a,b)=>a+b,0);}
+function ofAKind(d,n){return counts(d).some(c=>c>=n);}
+function fullHouse(d){const c=counts(d).filter(x=>x>0).sort();return (c.length===2&&c[0]===2&&c[1]===3)||c.some(x=>x===5);}
+function straight(d,len){const s=[...new Set(d)].sort();let best=1,run=1;for(let i=1;i<s.length;i++){if(s[i]===s[i-1]+1){run++;best=Math.max(best,run);}else run=1;}return best>=len;}
+let dice,held,rollsLeft,scores,over;
+function init(){dice=[1,2,3,4,5];held=[false,false,false,false,false];rollsLeft=3;scores={};over=false;
+  document.getElementById('newG').style.display='none';document.getElementById('roll').disabled=false;
+  document.getElementById('roll').textContent='Roll (3 left)';
+  document.getElementById('status').textContent='Roll the dice, hold the ones you want, then score a category.';
+  renderDice();renderCard();}
+const PIPS={1:'⚀',2:'⚁',3:'⚂',4:'⚃',5:'⚄',6:'⚅'};
+function renderDice(){const el=document.getElementById('dice');el.innerHTML='';
+  dice.forEach((v,i)=>{const d=document.createElement('div');d.className='die'+(held[i]?' held':'');d.textContent=PIPS[v];
+    d.onclick=()=>{if(rollsLeft<3&&!over){held[i]=!held[i];renderDice();}};el.appendChild(d);});}
+function renderCard(){
+  const tb=document.querySelector('#card tbody');tb.innerHTML='';let total=0;
+  CATS.forEach(cat=>{const tr=document.createElement('tr');
+    const used=scores[cat.k]!==undefined;
+    const potential=(rollsLeft<3&&!used)?cat.f(dice):null;
+    tr.className=used?'used':(rollsLeft<3?'avail':'');
+    tr.innerHTML=`<td class="name">${cat.n}</td>`;
+    const td=document.createElement('td');td.className='val';
+    td.textContent=used?scores[cat.k]:(potential!==null?potential:'—');
+    if(!used&&rollsLeft<3)td.onclick=()=>score(cat);
+    tr.appendChild(td);tb.appendChild(tr);
+    if(used)total+=scores[cat.k];
+  });
+  document.getElementById('total').textContent='Total: '+total;
+  return total;
+}
+function roll(){
+  if(over||rollsLeft<=0)return;
+  document.querySelectorAll('.die').forEach((el,i)=>{if(!held[i])el.classList.add('rolling');});
+  dice=dice.map((v,i)=>held[i]?v:1+Math.floor(Math.random()*6));
+  rollsLeft--;
+  setTimeout(()=>{renderDice();renderCard();
+    document.getElementById('roll').textContent=`Roll (${rollsLeft} left)`;
+    document.getElementById('roll').disabled=rollsLeft<=0;
+    document.getElementById('status').textContent=rollsLeft>0?'Hold dice and roll again, or score a category.':'No rolls left — pick a category to score.';
+  },300);
+}
+function score(cat){
+  if(over||scores[cat.k]!==undefined||rollsLeft===3)return;
+  scores[cat.k]=cat.f(dice);
+  // next turn
+  held=[false,false,false,false,false];rollsLeft=3;
+  document.getElementById('roll').disabled=false;document.getElementById('roll').textContent='Roll (3 left)';
+  const total=renderCard();renderDice();
+  if(Object.keys(scores).length>=CATS.length){over=true;
+    document.getElementById('status').textContent=`🎲 Game over! Final score: ${total}.`;
+    document.getElementById('roll').disabled=true;document.getElementById('newG').style.display='';
+  } else {
+    document.getElementById('status').textContent=`Scored ${scores[cat.k]}. Next turn — roll the dice.`;
+  }
+}
+document.getElementById('roll').onclick=roll;
+document.getElementById('newG').onclick=init;
+init();
+</script>
+</body>
+</html>

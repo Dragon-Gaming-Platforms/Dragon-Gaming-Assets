@@ -1,0 +1,110 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+<meta name="robots" content="noindex,nofollow">
+<title>Gem Crush</title>
+<style>
+  *{box-sizing:border-box}
+  html,body{margin:0;height:100%}
+  body{background:radial-gradient(circle at 50% 0,#2a1840,#0c0716 60%);color:#f0e9ff;
+    font-family:system-ui,Segoe UI,Roboto,Arial,sans-serif;display:flex;flex-direction:column;
+    align-items:center;justify-content:center;min-height:100vh;gap:12px;padding:12px;user-select:none;-webkit-user-select:none;touch-action:none}
+  h1{margin:0;font-size:clamp(20px,5vw,30px)}
+  .hud{display:flex;gap:14px;font-weight:800}
+  .hud div{background:rgba(255,255,255,.08);border-radius:10px;padding:8px 16px}
+  #grid{display:grid;gap:4px;padding:8px;background:#160b26;border-radius:14px;box-shadow:0 14px 40px rgba(0,0,0,.55)}
+  .gem{width:var(--cs);height:var(--cs);border-radius:12px;display:flex;align-items:center;justify-content:center;
+    font-size:calc(var(--cs)*0.55);cursor:pointer;transition:transform .12s, opacity .18s;box-shadow:inset 0 -4px 8px rgba(0,0,0,.3)}
+  .gem.sel{transform:scale(0.82);box-shadow:0 0 0 3px #fff, inset 0 -4px 8px rgba(0,0,0,.3)}
+  .gem.pop{transform:scale(0);opacity:0}
+  #status{min-height:20px;color:#ffd76a;font-weight:700}
+  .row{display:flex;gap:10px;align-items:center}
+  button{background:#b48cff;color:#160d2b;border:0;border-radius:10px;padding:10px 18px;font-size:15px;font-weight:800;cursor:pointer}
+</style>
+</head>
+<body>
+<h1>Gem Crush</h1>
+<div class="hud"><div>Score <span id="score">0</span></div><div>Moves <span id="moves">20</span></div></div>
+<div id="grid"></div>
+<div id="status">Swap two adjacent gems to line up 3 or more.</div>
+<div class="row"><button id="newGame">New Game</button></div>
+<script>
+const N=8;const TYPES=['🔴','🟡','🟢','🔵','🟣','🟠'];
+const gridEl=document.getElementById('grid');
+let board,sel,score,moves,busy,over;
+function setCS(){const cs=Math.floor(Math.min(window.innerWidth*0.92,window.innerHeight*0.55,440)/N);
+  document.documentElement.style.setProperty('--cs',cs+'px');}
+function rnd(){return Math.floor(Math.random()*TYPES.length);}
+function newGame(){
+  setCS();
+  board=Array.from({length:N},()=>Array.from({length:N},rnd));
+  // remove initial matches
+  let g=0;while(findMatches().size&&g++<200){for(const k of findMatches()){const[r,c]=k.split(',').map(Number);board[r][c]=rnd();}}
+  sel=null;score=0;moves=20;busy=false;over=false;
+  document.getElementById('score').textContent=0;document.getElementById('moves').textContent=20;
+  document.getElementById('status').textContent='Swap two adjacent gems to line up 3 or more.';
+  render();
+}
+function render(){
+  gridEl.style.gridTemplateColumns=`repeat(${N},var(--cs))`;
+  gridEl.innerHTML='';
+  for(let r=0;r<N;r++)for(let c=0;c<N;c++){
+    const d=document.createElement('div');d.className='gem';d.dataset.r=r;d.dataset.c=c;
+    d.textContent=TYPES[board[r][c]];
+    d.style.background=`hsl(${board[r][c]*57},55%,32%)`;
+    if(sel&&sel[0]===r&&sel[1]===c)d.classList.add('sel');
+    d.onclick=()=>pick(r,c);
+    gridEl.appendChild(d);
+  }
+}
+function pick(r,c){
+  if(busy||over)return;
+  if(!sel){sel=[r,c];render();return;}
+  const[sr,sc]=sel;
+  if(sr===r&&sc===c){sel=null;render();return;}
+  if(Math.abs(sr-r)+Math.abs(sc-c)===1){
+    swap(sr,sc,r,c);
+    if(findMatches().size){sel=null;moves--;document.getElementById('moves').textContent=moves;render();
+      busy=true;setTimeout(()=>resolve(),180);}
+    else{swap(sr,sc,r,c);sel=null;render();document.getElementById('status').textContent='No match there — try again.';}
+  }else{sel=[r,c];render();}
+}
+function swap(r1,c1,r2,c2){const t=board[r1][c1];board[r1][c1]=board[r2][c2];board[r2][c2]=t;}
+function findMatches(){
+  const m=new Set();
+  for(let r=0;r<N;r++)for(let c=0;c<N-2;c++){const v=board[r][c];if(v<0)continue;
+    if(v===board[r][c+1]&&v===board[r][c+2]){m.add(`${r},${c}`);m.add(`${r},${c+1}`);m.add(`${r},${c+2}`);
+      let k=c+3;while(k<N&&board[r][k]===v){m.add(`${r},${k}`);k++;}}}
+  for(let c=0;c<N;c++)for(let r=0;r<N-2;r++){const v=board[r][c];if(v<0)continue;
+    if(v===board[r+1][c]&&v===board[r+2][c]){m.add(`${r},${c}`);m.add(`${r+1},${c}`);m.add(`${r+2},${c}`);
+      let k=r+3;while(k<N&&board[k][c]===v){m.add(`${k},${c}`);k++;}}}
+  return m;
+}
+function resolve(){
+  const m=findMatches();
+  if(!m.size){busy=false;checkOver();return;}
+  score+=m.size*10;document.getElementById('score').textContent=score;
+  // animate pop
+  m.forEach(k=>{const[r,c]=k.split(',').map(Number);const el=gridEl.children[r*N+c];if(el)el.classList.add('pop');});
+  setTimeout(()=>{
+    m.forEach(k=>{const[r,c]=k.split(',').map(Number);board[r][c]=-1;});
+    // gravity
+    for(let c=0;c<N;c++){
+      let col=[];for(let r=N-1;r>=0;r--)if(board[r][c]>=0)col.push(board[r][c]);
+      for(let r=N-1;r>=0;r--)board[r][c]=col[N-1-r]!==undefined?col[N-1-r]:rnd();
+    }
+    render();setTimeout(()=>resolve(),160);
+  },180);
+}
+function checkOver(){
+  if(moves<=0){over=true;document.getElementById('status').textContent=`Game over — final score ${score}!`;return;}
+  document.getElementById('status').textContent='Swap two adjacent gems to line up 3 or more.';
+}
+document.getElementById('newGame').onclick=newGame;
+window.addEventListener('resize',()=>{setCS();render();});
+newGame();
+</script>
+</body>
+</html>

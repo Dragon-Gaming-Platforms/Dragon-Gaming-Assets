@@ -1,0 +1,9 @@
+{
+  "name": "Bubble Shooter",
+  "desc": "Aim and fire bubbles to match three or more of the same color and pop them off the board. Clear every bubble and don't let them reach the bottom line.",
+  "controls": "Mouse / touch to aim, click or tap to fire",
+  "shelf": "Arcade & Action",
+  "tags": ["games", "html5", "arcade", "puzzle", "casual"],
+  "badge": "New",
+  "creator": "Dragon Gaming Platforms"
+}

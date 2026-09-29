@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+<meta name="robots" content="noindex,nofollow">
+<title>Higher or Lower</title>
+<style>
+  *{box-sizing:border-box}html,body{margin:0;height:100%}
+  body{background:radial-gradient(circle at 50% 0,#2a1338,#0d0714 60%);color:#f4eaff;
+    font-family:system-ui,Segoe UI,Roboto,Arial,sans-serif;display:flex;flex-direction:column;
+    align-items:center;justify-content:center;min-height:100vh;gap:16px;padding:16px;user-select:none;-webkit-user-select:none}
+  h1{margin:0;font-size:clamp(20px,5vw,28px)}
+  #hud{display:flex;gap:24px;font-weight:800;color:#d3a6ff}
+  .card{width:130px;height:190px;border-radius:16px;background:#fff;color:#111;display:flex;flex-direction:column;
+    align-items:center;justify-content:center;box-shadow:0 6px 16px rgba(0,0,0,.5);position:relative}
+  .card .rank{font-size:52px;font-weight:800}.card .suit{font-size:40px}
+  .card.red{color:#d22}
+  .card.flip{animation:flip .4s}
+  @keyframes flip{from{transform:rotateY(90deg);opacity:.3}to{transform:none;opacity:1}}
+  #status{min-height:24px;color:#f3a6c8;font-weight:800;font-size:18px;text-align:center}
+  .row{display:flex;gap:14px}
+  button{border:0;border-radius:14px;padding:14px 26px;font-size:17px;font-weight:800;cursor:pointer}
+  #hi{background:#5ce08a;color:#04240f}#lo{background:#e08a8a;color:#2a0808}
+  #newG{background:#b48cff;color:#1a0f2b}
+  button:disabled{opacity:.4;cursor:default}
+</style>
+</head>
+<body>
+<h1>Higher or Lower</h1>
+<div id="hud"><span>Streak: <b id="streak">0</b></span><span>Best: <b id="best">0</b></span></div>
+<div class="card" id="card"><div class="rank">?</div></div>
+<div id="status">Will the next card be higher or lower? (Ace is high)</div>
+<div class="row"><button id="hi">▲ Higher</button><button id="lo">▼ Lower</button></div>
+<button id="newG" style="display:none">Play Again</button>
+<script>
+const SUITS=[['♠',0],['♥',1],['♣',0],['♦',1]];const RANKS=['2','3','4','5','6','7','8','9','10','J','Q','K','A'];
+let deck,current,streak=0,best=+localStorage.getItem('hl_best')||0,over;
+document.getElementById('best').textContent=best;
+function buildDeck(){const d=[];for(let r=0;r<13;r++)for(const[s,red] of SUITS)d.push({v:r+2,rank:RANKS[r],suit:s,red});return shuffle(d);}
+function shuffle(a){for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
+function init(){deck=buildDeck();current=deck.pop();streak=0;over=false;
+  document.getElementById('streak').textContent=0;
+  document.getElementById('hi').style.display='';document.getElementById('lo').style.display='';
+  document.getElementById('newG').style.display='none';
+  show(current);document.getElementById('status').textContent='Higher or lower than this card?';
+}
+function show(c){const el=document.getElementById('card');el.className='card flip'+(c.red?' red':'');
+  el.innerHTML=`<div class="rank">${c.rank}</div><div class="suit">${c.suit}</div>`;
+  setTimeout(()=>el.classList.remove('flip'),400);}
+function guess(dir){
+  if(over)return;
+  if(deck.length===0)deck=buildDeck().filter(c=>c.v!==current.v||c.suit!==current.suit);
+  const next=deck.pop();show(next);
+  const correct=(dir==='hi'&&next.v>current.v)||(dir==='lo'&&next.v<current.v);
+  const tie=next.v===current.v;
+  if(tie){document.getElementById('status').textContent=`Tie on ${next.rank}! That one's free — keep going.`;current=next;return;}
+  if(correct){streak++;document.getElementById('streak').textContent=streak;
+    if(streak>best){best=streak;localStorage.setItem('hl_best',best);document.getElementById('best').textContent=best;}
+    document.getElementById('status').textContent=`✅ ${next.rank} — correct! Streak ${streak}.`;current=next;
+  } else {
+    over=true;document.getElementById('status').textContent=`❌ It was ${next.rank}. Final streak: ${streak}.`;
+    document.getElementById('hi').style.display='none';document.getElementById('lo').style.display='none';
+    document.getElementById('newG').style.display='';
+  }
+}
+document.getElementById('hi').onclick=()=>guess('hi');
+document.getElementById('lo').onclick=()=>guess('lo');
+document.getElementById('newG').onclick=init;
+init();
+</script>
+</body>
+</html>

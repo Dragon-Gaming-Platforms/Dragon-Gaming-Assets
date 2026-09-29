@@ -1,0 +1,9 @@
+{
+  "name": "Block Slide",
+  "desc": "A sliding-block escape puzzle. Shift the wooden blocks out of the way so the red block can slide free to the exit on the right. Solve each layout in as few moves as you can.",
+  "controls": "Tap a block to select it, then tap where to slide it",
+  "shelf": "Puzzle & Logic",
+  "tags": ["games", "html5", "puzzle", "logic", "sliding"],
+  "badge": "New",
+  "creator": "Dragon Gaming Platforms"
+}

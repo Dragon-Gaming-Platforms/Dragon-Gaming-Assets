@@ -1,0 +1,9 @@
+{
+  "name": "Light Cycles",
+  "desc": "A neon Tron-style duel. Leave a wall of light behind you and force the CPU rider to crash into a trail or the arena walls — but don't box yourself in first.",
+  "controls": "Arrow keys / WASD / on-screen pad to steer",
+  "shelf": "Arcade & Action",
+  "tags": ["games", "html5", "arcade", "action", "retro"],
+  "badge": "New",
+  "creator": "Dragon Gaming Platforms"
+}

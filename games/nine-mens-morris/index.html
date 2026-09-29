@@ -1,0 +1,176 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+<meta name="robots" content="noindex,nofollow">
+<title>Nine Men's Morris</title>
+<style>
+  *{box-sizing:border-box}html,body{margin:0;height:100%}
+  body{background:radial-gradient(circle at 50% 0,#243318,#0c1207 60%);color:#eef0e0;
+    font-family:system-ui,Segoe UI,Roboto,Arial,sans-serif;display:flex;flex-direction:column;
+    align-items:center;justify-content:center;min-height:100vh;gap:10px;padding:14px;user-select:none;-webkit-user-select:none}
+  h1{margin:0;font-size:clamp(19px,5vw,28px)}
+  #status{min-height:22px;color:#bfe08a;font-weight:700;text-align:center}
+  svg{width:min(92vw,440px);height:auto;background:#33471f;border-radius:14px;touch-action:manipulation}
+  line{stroke:#20300f;stroke-width:2}
+  .spot{fill:#20300f;cursor:pointer}
+  .spot.can{fill:#e0d060}
+  .p1{fill:radial-gradient}
+  circle.piece{cursor:pointer}
+  button{background:#bfe08a;color:#22300f;border:0;border-radius:10px;padding:9px 16px;font-weight:800;cursor:pointer}
+</style>
+</head>
+<body>
+<h1>Nine Men's Morris</h1>
+<div id="status"></div>
+<svg id="board" viewBox="0 0 300 300"></svg>
+<button id="newG">New Game</button>
+<script>
+// 24 points, coordinates on a 3-ring board
+const P=[
+ [30,30],[150,30],[270,30],     //0,1,2  outer top
+ [70,70],[150,70],[230,70],     //3,4,5  mid top
+ [110,110],[150,110],[190,110], //6,7,8  inner top
+ [30,150],[70,150],[110,150],   //9,10,11 outer/mid/inner left
+ [190,150],[230,150],[270,150], //12,13,14 inner/mid/outer right
+ [110,190],[150,190],[190,190], //15,16,17 inner bottom
+ [70,230],[150,230],[230,230],  //18,19,20 mid bottom
+ [30,270],[150,270],[270,270]   //21,22,23 outer bottom
+];
+const ADJ={0:[1,9],1:[0,2,4],2:[1,14],3:[4,10],4:[1,3,5,7],5:[4,13],6:[7,11],7:[4,6,8],8:[7,12],
+ 9:[0,10,21],10:[3,9,11,18],11:[6,10,15],12:[8,13,17],13:[5,12,14,20],14:[2,13,23],
+ 15:[11,16],16:[15,17,19],17:[12,16],18:[10,19],19:[16,18,20,22],20:[13,19],21:[9,22],22:[19,21,23],23:[14,22]};
+const MILLS=[[0,1,2],[3,4,5],[6,7,8],[9,10,11],[12,13,14],[15,16,17],[18,19,20],[21,22,23],
+ [0,9,21],[3,10,18],[6,11,15],[1,4,7],[16,19,22],[8,12,17],[5,13,20],[2,14,23]];
+const svg='http://www.w3.org/2000/svg';
+let board,phase,turn,toPlace,sel,removeMode,over;
+const boardEl=document.getElementById('board');
+function init(){
+  board=Array(24).fill(0); // 0 empty,1 you,2 cpu
+  phase='place';turn=1;toPlace={1:9,2:9};sel=-1;removeMode=false;over=false;
+  msg('Placing phase — tap a spot to place a piece.');draw();
+}
+function msg(t){document.getElementById('status').textContent=t;}
+function millFormed(b,pt,player){return MILLS.some(m=>m.includes(pt)&&m.every(x=>b[x]===player));}
+function inMill(b,pt,player){return MILLS.some(m=>m.includes(pt)&&m.every(x=>b[x]===player));}
+function count(player){return board.filter(x=>x===player).length;}
+function pieces(player){return board.map((v,i)=>v===player?i:-1).filter(i=>i>=0);}
+function canFly(player){return count(player)+ (phase==='place'?toPlace[player]:0)<=3 && phase==='move';}
+function legalMoves(player){
+  // returns list of {from,to} for move phase, or placements
+  const moves=[];
+  const fly=count(player)===3&&toPlace[player]===0;
+  for(const from of pieces(player)){
+    const dests=fly?board.map((v,i)=>v===0?i:-1).filter(i=>i>=0):ADJ[from].filter(t=>board[t]===0);
+    dests.forEach(to=>moves.push({from,to}));
+  }
+  return moves;
+}
+function draw(){
+  boardEl.innerHTML='';
+  // draw connecting lines from ADJ (dedupe)
+  const drawn=new Set();
+  for(const a in ADJ)for(const b of ADJ[a]){const k=[Math.min(a,b),Math.max(a,b)].join('-');if(drawn.has(k))continue;drawn.add(k);
+    const l=document.createElementNS(svg,'line');l.setAttribute('x1',P[a][0]);l.setAttribute('y1',P[a][1]);
+    l.setAttribute('x2',P[b][0]);l.setAttribute('y2',P[b][1]);boardEl.appendChild(l);}
+  const highlight=validSpots();
+  P.forEach((p,i)=>{
+    if(board[i]===0){
+      const c=document.createElementNS(svg,'circle');c.setAttribute('cx',p[0]);c.setAttribute('cy',p[1]);c.setAttribute('r',highlight.includes(i)?11:7);
+      c.setAttribute('class','spot'+(highlight.includes(i)?' can':''));c.onclick=()=>tap(i);boardEl.appendChild(c);
+    } else {
+      const c=document.createElementNS(svg,'circle');c.setAttribute('cx',p[0]);c.setAttribute('cy',p[1]);c.setAttribute('r',12);
+      c.setAttribute('class','piece');c.setAttribute('fill',board[i]===1?'#e0d060':'#c04a4a');
+      c.setAttribute('stroke',sel===i?'#fff':'#00000055');c.setAttribute('stroke-width',sel===i?3:1);
+      c.onclick=()=>tap(i);boardEl.appendChild(c);
+    }
+  });
+}
+function validSpots(){
+  if(over||turn!==1)return [];
+  if(removeMode){ // opponent pieces removable (not in mill unless all in mills)
+    const opp=pieces(2);const nonMill=opp.filter(pt=>!inMill(board,pt,2));
+    return (nonMill.length?nonMill:opp);
+  }
+  if(phase==='place')return board.map((v,i)=>v===0?i:-1).filter(i=>i>=0);
+  if(sel>=0){const fly=count(1)===3&&toPlace[1]===0;return (fly?board.map((v,i)=>v===0?i:-1).filter(i=>i>=0):ADJ[sel].filter(t=>board[t]===0));}
+  return [];
+}
+function tap(i){
+  if(over||turn!==1)return;
+  if(removeMode){
+    const rem=validSpots();if(!rem.includes(i))return;
+    board[i]=0;removeMode=false;afterMove(1);return;
+  }
+  if(phase==='place'){
+    if(board[i]!==0)return;board[i]=1;toPlace[1]--;
+    if(millFormed(board,i,1)&&pieces(2).length){removeMode=true;msg('Mill! Tap an opponent piece to remove.');draw();return;}
+    afterMove(1);return;
+  }
+  // move phase
+  if(board[i]===1){sel=i;draw();return;}
+  if(sel>=0&&validSpots().includes(i)){
+    board[i]=1;board[sel]=0;const from=sel;sel=-1;
+    if(millFormed(board,i,1)&&pieces(2).length){removeMode=true;msg('Mill! Tap an opponent piece to remove.');draw();return;}
+    afterMove(1);
+  }
+}
+function afterMove(player){
+  // transition place->move
+  if(phase==='place'&&toPlace[1]===0&&toPlace[2]===0)phase='move';
+  if(checkWin())return;
+  turn=player===1?2:1;draw();
+  if(turn===2&&!over){msg('CPU thinking…');setTimeout(cpu,500);}
+  else if(!over)msg(phase==='place'?'Place a piece.':'Select your piece, then a spot.');
+}
+function checkWin(){
+  if(phase==='move'){
+    if(count(2)<3){over=true;msg('🎉 You win — opponent down to 2 pieces!');draw();return true;}
+    if(count(1)<3){over=true;msg('CPU wins — you are down to 2 pieces.');draw();return true;}
+    // no legal moves = loss for side to move (checked at their turn start)
+  }
+  return false;
+}
+function cpu(){
+  if(over)return;
+  // placement / move selection with simple heuristic
+  let move=null;
+  if(phase==='place'){
+    const empties=board.map((v,i)=>v===0?i:-1).filter(i=>i>=0);
+    // 1 complete own mill, 2 block, 3 random adjacency-rich
+    move=empties.find(i=>{const b=[...board];b[i]=2;return millFormed(b,i,2);});
+    if(move==null)move=empties.find(i=>{const b=[...board];b[i]=1;return millFormed(b,i,1);});
+    if(move==null)move=empties.sort((a,b)=>ADJ[b].length-ADJ[a].length)[0];
+    board[move]=2;toPlace[2]--;
+    if(millFormed(board,move,2))cpuRemove();
+    afterMove(2);return;
+  }
+  // move phase
+  const moves=legalMoves(2);
+  if(!moves.length){over=true;msg('🎉 You win — CPU has no moves!');draw();return;}
+  // prefer a move forming a mill
+  let best=moves.find(m=>{const b=[...board];b[m.to]=2;b[m.from]=0;return millFormed(b,m.to,2);});
+  if(!best){ // block player's imminent mill
+    best=moves.find(m=>{const b=[...board];b[m.to]=2;b[m.from]=0;return !playerCanMill(b);});
+  }
+  if(!best)best=moves[Math.floor(Math.random()*moves.length)];
+  board[best.to]=2;board[best.from]=0;
+  if(millFormed(board,best.to,2))cpuRemove();
+  afterMove(2);
+}
+function playerCanMill(b){
+  const empties=b.map((v,i)=>v===0?i:-1).filter(i=>i>=0);
+  return empties.some(i=>{const bb=[...b];bb[i]=1;return millFormed(bb,i,1);});
+}
+function cpuRemove(){
+  const opp=pieces(1);const nonMill=opp.filter(pt=>!inMill(board,pt,1));
+  const targetList=nonMill.length?nonMill:opp;
+  const t=targetList[Math.floor(Math.random()*targetList.length)];
+  board[t]=0;
+}
+document.getElementById('newG').onclick=init;
+init();
+</script>
+</body>
+</html>

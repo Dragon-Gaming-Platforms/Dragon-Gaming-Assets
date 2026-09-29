@@ -1,0 +1,9 @@
+{
+  "name": "Color Lines",
+  "desc": "Move coloured balls around the 9x9 board to line up five or more of the same colour and clear them. Three new balls appear each turn — keep the board from filling up and chase a high score.",
+  "controls": "Tap a ball, then tap an empty cell it can reach",
+  "shelf": "Puzzle & Logic",
+  "tags": ["games", "html5", "puzzle", "logic", "arcade"],
+  "badge": "New",
+  "creator": "Dragon Gaming Platforms"
+}

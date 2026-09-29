@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+<meta name="robots" content="noindex,nofollow">
+<title>Pipe Connect</title>
+<style>
+  *{box-sizing:border-box}html,body{margin:0;height:100%}
+  body{background:radial-gradient(circle at 50% 0,#0f2733,#05121a 60%);color:#dff;
+    font-family:system-ui,Segoe UI,Roboto,Arial,sans-serif;display:flex;flex-direction:column;
+    align-items:center;justify-content:center;min-height:100vh;gap:10px;padding:14px;user-select:none;-webkit-user-select:none}
+  h1{margin:0;font-size:clamp(20px,5vw,28px)}
+  #status{min-height:20px;color:#5fd7d0;font-weight:700;text-align:center}
+  #board{display:grid;gap:4px;background:#14323f;padding:8px;border-radius:12px;width:min(92vw,420px);aspect-ratio:1/1}
+  .tile{background:#0a2028;border-radius:8px;position:relative;cursor:pointer;transition:transform .12s}
+  .tile:active{transform:scale(.94)}
+  .tile svg{width:100%;height:100%;display:block}
+  .arm{stroke:#3a6b78;stroke-width:14;stroke-linecap:round}
+  .tile.on .arm{stroke:#33e0c8;filter:drop-shadow(0 0 4px #33e0c8)}
+  .tile.src{background:#123f2a}.tile.sink{background:#3f1230}
+  button{background:#33e0c8;color:#052024;border:0;border-radius:10px;padding:9px 16px;font-weight:800;cursor:pointer}
+</style>
+</head>
+<body>
+<h1>Pipe Connect</h1>
+<div id="status">Tap tiles to rotate the pipes. Connect the green source to the pink sink.</div>
+<div id="board"></div>
+<div>Level <b id="lvl">1</b> &nbsp; <button id="newG">New Level</button></div>
+<script>
+// connection bitmask: 1=up,2=right,4=down,8=left
+const svgns='http://www.w3.org/2000/svg';
+let SIZE=5,grid,rot,srcIdx,sinkIdx,level=1;
+const boardEl=document.getElementById('board');
+function opp(d){return {1:4,2:8,4:1,8:2}[d];}
+function rotMask(m,times){for(let t=0;t<times;t++){let n=0;if(m&1)n|=2;if(m&2)n|=4;if(m&4)n|=8;if(m&8)n|=1;m=n;}return m;}
+function genLevel(){
+  SIZE=4+Math.min(2,Math.floor(level/2));
+  // build a random spanning path from top-left to bottom-right, set pipe masks along path, fill rest random
+  grid=Array.from({length:SIZE*SIZE},()=>0);
+  srcIdx=0;sinkIdx=SIZE*SIZE-1;
+  // random walk carving a guaranteed path
+  let r=0,c=0;const path=[[0,0]];
+  while(r!==SIZE-1||c!==SIZE-1){
+    const opts=[];
+    if(c<SIZE-1)opts.push([0,1]);if(r<SIZE-1)opts.push([1,0]);
+    // bias to reach corner; occasionally both
+    const[dr,dc]=opts[Math.floor(Math.random()*opts.length)];
+    r+=dr;c+=dc;path.push([r,c]);
+  }
+  for(let i=0;i<path.length;i++){
+    const[pr,pc]=path[i],idx=pr*SIZE+pc;
+    if(i>0){const[ar,ac]=path[i-1];grid[idx]|=dir(pr,pc,ar,ac);}
+    if(i<path.length-1){const[br,bc]=path[i+1];grid[idx]|=dir(pr,pc,br,bc);}
+  }
+  // fill empty tiles with random simple pipes so they look part of puzzle
+  for(let i=0;i<grid.length;i++)if(grid[i]===0)grid[i]=[3,6,12,9,5,10][Math.floor(Math.random()*6)];
+  // random initial rotation for every tile
+  rot=grid.map(()=>Math.floor(Math.random()*4));
+  boardEl.style.gridTemplateColumns=`repeat(${SIZE},1fr)`;
+  render();
+}
+function dir(r,c,r2,c2){if(r2<r)return 1;if(c2>c)return 2;if(r2>r)return 4;return 8;}
+function current(i){return rotMask(grid[i],rot[i]);}
+function connectedSet(){
+  const seen=new Set([srcIdx]);const stack=[srcIdx];
+  while(stack.length){const i=stack.pop();const m=current(i);const r=Math.floor(i/SIZE),c=i%SIZE;
+    [[1,-1,0],[2,0,1],[4,1,0],[8,0,-1]].forEach(([d,dr,dc])=>{
+      if(!(m&d))return;const nr=r+dr,nc=c+dc;if(nr<0||nr>=SIZE||nc<0||nc>=SIZE)return;
+      const ni=nr*SIZE+nc;if(seen.has(ni))return;if(current(ni)&opp(d)){seen.add(ni);stack.push(ni);}
+    });}
+  return seen;
+}
+function render(){
+  boardEl.innerHTML='';
+  const conn=connectedSet();
+  for(let i=0;i<grid.length;i++){
+    const t=document.createElement('div');t.className='tile'+(conn.has(i)?' on':'');
+    if(i===srcIdx)t.classList.add('src');if(i===sinkIdx)t.classList.add('sink');
+    const svg=document.createElementNS(svgns,'svg');svg.setAttribute('viewBox','0 0 100 100');
+    const m=current(i);const cx=50,cy=50;
+    const ends={1:[50,8],2:[92,50],4:[50,92],8:[8,50]};
+    // center dot
+    const dot=document.createElementNS(svgns,'circle');dot.setAttribute('cx',cx);dot.setAttribute('cy',cy);dot.setAttribute('r',9);dot.setAttribute('class','arm');dot.setAttribute('fill','none');svg.appendChild(dot);
+    [1,2,4,8].forEach(d=>{if(m&d){const l=document.createElementNS(svgns,'line');l.setAttribute('x1',cx);l.setAttribute('y1',cy);
+      l.setAttribute('x2',ends[d][0]);l.setAttribute('y2',ends[d][1]);l.setAttribute('class','arm');svg.appendChild(l);}});
+    t.appendChild(svg);t.onclick=()=>{rot[i]=(rot[i]+1)%4;render();};
+    boardEl.appendChild(t);
+  }
+  if(conn.has(sinkIdx)){document.getElementById('status').textContent='💧 Connected! Flow reaches the sink.';}
+  else document.getElementById('status').textContent='Rotate tiles to connect source → sink.';
+}
+document.getElementById('newG').onclick=()=>{level++;document.getElementById('lvl').textContent=level;genLevel();};
+document.getElementById('lvl').textContent=level;
+genLevel();
+</script>
+</body>
+</html>

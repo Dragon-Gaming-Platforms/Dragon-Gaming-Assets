@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+<meta name="robots" content="noindex,nofollow">
+<title>Word Guess</title>
+<style>
+  *{box-sizing:border-box}html,body{margin:0;height:100%}
+  body{background:#121213;color:#fff;font-family:system-ui,Segoe UI,Roboto,Arial,sans-serif;
+    display:flex;flex-direction:column;align-items:center;min-height:100vh;gap:10px;padding:12px;user-select:none;-webkit-user-select:none}
+  h1{margin:6px 0;font-size:clamp(20px,5vw,28px)}
+  #status{min-height:20px;color:#9ad;font-weight:700;text-align:center}
+  #grid{display:grid;grid-template-rows:repeat(6,1fr);gap:5px}
+  .grow{display:grid;grid-template-columns:repeat(5,1fr);gap:5px}
+  .tile{width:52px;height:52px;border:2px solid #3a3a3c;display:flex;align-items:center;justify-content:center;
+    font-size:26px;font-weight:800;text-transform:uppercase;transition:transform .1s}
+  .tile.filled{border-color:#565758}
+  .tile.correct{background:#538d4e;border-color:#538d4e}
+  .tile.present{background:#b59f3b;border-color:#b59f3b}
+  .tile.absent{background:#3a3a3c;border-color:#3a3a3c}
+  .tile.pop{transform:scale(1.1)}
+  #kb{display:flex;flex-direction:column;gap:6px;width:min(96vw,500px);margin-top:6px}
+  .krow{display:flex;gap:5px;justify-content:center}
+  .key{flex:1;max-width:44px;height:52px;border:0;border-radius:6px;background:#818384;color:#fff;font-weight:800;font-size:14px;cursor:pointer;text-transform:uppercase}
+  .key.wide{max-width:66px;font-size:11px}
+  .key.correct{background:#538d4e}.key.present{background:#b59f3b}.key.absent{background:#3a3a3c}
+  #newG{background:#538d4e;color:#fff;border:0;border-radius:8px;padding:9px 18px;font-weight:800;cursor:pointer;margin-top:6px}
+</style>
+</head>
+<body>
+<h1>Word Guess</h1>
+<div id="status">Guess the 5-letter word in 6 tries.</div>
+<div id="grid"></div>
+<div id="kb"></div>
+<button id="newG">New Word</button>
+<script>
+const ANSWERS=("about above actor acute admit adopt after again agent alarm album alert alike alive allow alone along aloud amber angle angry apart apple apply arena argue arise armor aroma array aside asset audio audit avoid awake award aware badge baker basic beach beard beast began begin being below bench berry birth black blame blank blast blaze bleak blend bless blind block blood bloom board boast bonus boost booth brain brake brand brave bread break brick bride brief bring broad brook brown brush build built bunch burst cabin cable candy cargo carve catch cause chain chair chalk charm chart chase cheap check chess chest chief child chill chose civic civil claim clamp clash class clean clear clerk click cliff climb cloak clock close cloth cloud clown coach coast color comet coral could count court cover crack craft crane crash crazy cream creek crest crime crisp cross crowd crown crumb crush curve cycle daily dairy dance dealt death debut decay delay dense depth diary dirty ditch dizzy donor dough dozen draft drain drama drank dream dress dried drift drill drink drive drone drove drown eager eagle early earth eight elbow elder elect elite empty enemy enjoy enter entry equal error essay event every exact exalt exist extra fable faint fairy faith false fancy fatal fault feast fence ferry fetch fever fiber field fiery fifty fight final first fixed flame flash fleet flesh float flock flood floor flour fluid flush focus force forge forth forty forum found frame frank fraud fresh fried front frost fruit funny gauge ghost giant given glass gleam globe glory glove going grace grade grain grand grant grape graph grasp grass grave great green greet grief grill grind groan group grove grown guard guess guest guide guild habit hairy happy hardy harsh haste hatch haunt heart heavy hedge hello hobby honey honor horse hotel house hover human humor hurry ideal image imply index inner input issue ivory japan jazz jeans jelly jewel joint jolly judge juice knife knock known label labor large laser later laugh layer learn lease least leave legal lemon level light limit linen liver lobby local logic loose lorry lower loyal lucky lunar lunch lyric magic major maker maple march match maybe mayor meant medal media merit metal meter might minor mixed model money month moral motor mount mouse mouth movie music naval nerve never newly night noble noise north novel nurse ocean offer often olive onion opera orbit order organ other ought ounce outer owner paint panel panic paper party pasta patch pause peace peach pearl phase phone photo piano piece pilot pinch pitch pixel pizza place plain plane plank plant plate plaza plead plot plum point porch pound power press price pride prime print prior prize probe proof proud prove pulse punch pupil puppy purse queen query quest quick quiet quite quota radar radio raise rally ranch range rapid ratio reach ready realm rebel refer relax reply rider ridge rifle right rigid rinse rival river roast robot rocky rough round route royal rugby ruler rumor rural saint salad salon sauce scale scare scarf scene scope score scout scrap screw seize sense serve seven shade shady shaft shake shall shame shape share shark sharp sheep sheer sheet shelf shell shift shine shiny shirt shock shoot shore short shout shown shrub sight silly since siren skill skirt skull slate sleep slice slide slope small smart smile smoke snack snake sneak solar solid solve sorry sound south space spare spark speak spear speed spell spend spice spike spill spine spite split spoke spoon sport spray squad stack staff stage stain stair stake stale stamp stand stare stark start state steak steal steam steel steep steer stern stick stiff still sting stock stone stool store storm story stout stove strap straw strip study stuff style sugar suite sunny super surge sweat sweet swept swift swing sword table tacit taste teach tenth thank theft their theme there these thick thief thing think third those three threw throw thumb tiger tight timer title toast today token tooth topic torch total touch tough tower toxic trace track trade trail train trait trash tread treat trend trial tribe trick tried trend troop trout truck truly trust truth twice twist ultra uncle under unify union unite unity until upper upset urban usage usual valid value vapor vault verse video villa vinyl viral virus visit vital vivid vocal voice voter wagon waist waste watch water weary weave wedge weigh weird whale wheat wheel where which while white whole whose widen widow width witch woman world worry worse worst worth would wound wrist write wrong yield young youth").split(/\s+/);
+const ALLOWED=new Set(ANSWERS);
+let answer,row,col,grid,over,keyState;
+function init(){answer=ANSWERS[Math.floor(Math.random()*ANSWERS.length)].toUpperCase();
+  row=0;col=0;grid=Array.from({length:6},()=>Array(5).fill(''));over=false;keyState={};
+  document.getElementById('status').textContent='Guess the 5-letter word in 6 tries.';buildGrid();buildKb();}
+function buildGrid(){const g=document.getElementById('grid');g.innerHTML='';
+  for(let r=0;r<6;r++){const rowEl=document.createElement('div');rowEl.className='grow';
+    for(let c=0;c<5;c++){const t=document.createElement('div');t.className='tile';t.id=`t${r}_${c}`;rowEl.appendChild(t);}g.appendChild(rowEl);}}
+const KEYS=['QWERTYUIOP','ASDFGHJKL','ZXCVBNM'];
+function buildKb(){const kb=document.getElementById('kb');kb.innerHTML='';
+  KEYS.forEach((line,i)=>{const kr=document.createElement('div');kr.className='krow';
+    if(i===2){kr.appendChild(mkKey('ENTER',true));}
+    for(const ch of line)kr.appendChild(mkKey(ch,false));
+    if(i===2){kr.appendChild(mkKey('DEL',true));}
+    kb.appendChild(kr);});
+}
+function mkKey(label,wide){const b=document.createElement('button');b.className='key'+(wide?' wide':'');b.textContent=label;
+  if(keyState[label])b.classList.add(keyState[label]);b.onclick=()=>press(label);return b;}
+function press(k){
+  if(over)return;
+  if(k==='ENTER')return submit();
+  if(k==='DEL'){if(col>0){col--;grid[row][col]='';paint();}return;}
+  if(col<5&&/^[A-Z]$/.test(k)){grid[row][col]=k;const t=document.getElementById(`t${row}_${col}`);t.classList.add('pop');setTimeout(()=>t.classList.remove('pop'),100);col++;paint();}
+}
+function paint(){for(let c=0;c<5;c++){const t=document.getElementById(`t${row}_${c}`);t.textContent=grid[row][c];
+  t.classList.toggle('filled',!!grid[row][c]);}}
+function submit(){
+  if(col<5){flash('Not enough letters');return;}
+  const guess=grid[row].join('');
+  if(!ALLOWED.has(guess.toLowerCase())){flash('Not in word list');return;}
+  const ans=answer.split('');const res=Array(5).fill('absent');const used=Array(5).fill(false);
+  for(let i=0;i<5;i++)if(guess[i]===ans[i]){res[i]='correct';used[i]=true;}
+  for(let i=0;i<5;i++)if(res[i]!=='correct'){const j=ans.findIndex((a,k)=>a===guess[i]&&!used[k]);if(j>=0){res[i]='present';used[j]=true;}}
+  for(let i=0;i<5;i++){const t=document.getElementById(`t${row}_${i}`);t.classList.add(res[i]);
+    const rank={correct:3,present:2,absent:1};if(!keyState[guess[i]]||rank[res[i]]>rank[keyState[guess[i]]])keyState[guess[i]]=res[i];}
+  buildKb();
+  if(guess===answer){over=true;document.getElementById('status').textContent=`🎉 Correct in ${row+1}!`;return;}
+  row++;col=0;
+  if(row>=6){over=true;document.getElementById('status').textContent=`Out of guesses — the word was ${answer}.`;}
+}
+function flash(m){const s=document.getElementById('status');const prev=s.textContent;s.textContent=m;setTimeout(()=>{if(!over)s.textContent=prev;},1200);}
+document.addEventListener('keydown',e=>{const k=e.key.toUpperCase();
+  if(k==='BACKSPACE')press('DEL');else if(k==='ENTER')press('ENTER');else if(/^[A-Z]$/.test(k))press(k);});
+document.getElementById('newG').onclick=init;
+init();
+</script>
+</body>
+</html>

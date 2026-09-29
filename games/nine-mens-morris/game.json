@@ -1,0 +1,9 @@
+{
+  "name": "Nine Men's Morris",
+  "desc": "A classic strategy board game from antiquity. Place and slide your pieces to form mills of three in a row, then remove your opponent's men. Reduce the CPU to two pieces to win.",
+  "controls": "Tap to place a piece; tap your piece then a spot to move; tap an enemy piece to remove after a mill",
+  "shelf": "Strategy & Idle",
+  "tags": ["games", "html5", "strategy", "board", "classic"],
+  "badge": "New",
+  "creator": "Dragon Gaming Platforms"
+}

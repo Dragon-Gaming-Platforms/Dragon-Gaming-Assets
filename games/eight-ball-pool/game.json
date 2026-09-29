@@ -1,0 +1,9 @@
+{
+  "name": "8-Ball Pool",
+  "desc": "Two-player pool on a felt table with realistic ball physics. Break the rack, claim solids or stripes, and pocket all your balls before sinking the 8-ball to win. Drag to aim and control your power.",
+  "controls": "Drag from the cue ball to aim and set power, release to shoot",
+  "shelf": "Sports & Racing",
+  "tags": ["games", "html5", "sports", "pool", "physics"],
+  "badge": "New",
+  "creator": "Dragon Gaming Platforms"
+}

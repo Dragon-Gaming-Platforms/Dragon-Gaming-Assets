@@ -1,0 +1,9 @@
+{
+  "name": "Reaction Test",
+  "desc": "How fast are your reflexes? Wait for the screen to flash green, then tap as quickly as you can. Tap too early and you have to restart. Tracks your best and average reaction time.",
+  "controls": "Tap / click anywhere (or press Space)",
+  "shelf": "Arcade & Action",
+  "tags": ["games", "html5", "reflex", "casual", "test"],
+  "badge": "New",
+  "creator": "Dragon Gaming Platforms"
+}

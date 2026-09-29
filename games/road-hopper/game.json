@@ -1,0 +1,9 @@
+{
+  "name": "Road Hopper",
+  "desc": "Hop across a busy multi-lane highway without getting flattened. Time your moves between the traffic, reach the far side, and go as far as you can for a high score.",
+  "controls": "Arrow keys / WASD / swipe / on-screen pad to move",
+  "shelf": "Arcade & Action",
+  "tags": ["games", "html5", "arcade", "action", "casual"],
+  "badge": "New",
+  "creator": "Dragon Gaming Platforms"
+}

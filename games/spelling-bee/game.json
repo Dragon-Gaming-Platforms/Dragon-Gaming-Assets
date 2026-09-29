@@ -1,0 +1,9 @@
+{
+  "name": "Spelling Bee",
+  "desc": "Make as many words as you can from seven letters, and every word must use the centre letter. Words are four letters or longer; using all seven letters scores a bonus pangram. Climb the ranks to Genius.",
+  "controls": "Tap the letter hive or type; Enter to submit, Delete to erase, Shuffle to rearrange",
+  "shelf": "Puzzle & Logic",
+  "tags": ["games", "html5", "word", "puzzle", "vocabulary"],
+  "badge": "New",
+  "creator": "Dragon Gaming Platforms"
+}

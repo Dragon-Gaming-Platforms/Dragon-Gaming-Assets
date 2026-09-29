@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+<meta name="robots" content="noindex,nofollow">
+<title>Tic-Tac-Toe</title>
+<style>
+  *{box-sizing:border-box}html,body{margin:0;height:100%}
+  body{background:radial-gradient(circle at 50% 0,#1d2a3a,#0a0f16 60%);color:#eef;
+    font-family:system-ui,Segoe UI,Roboto,Arial,sans-serif;display:flex;flex-direction:column;
+    align-items:center;justify-content:center;min-height:100vh;gap:14px;padding:16px;user-select:none;-webkit-user-select:none}
+  h1{margin:0;font-size:clamp(20px,5vw,30px)}
+  #status{min-height:24px;color:#7fd0ff;font-weight:800;font-size:18px;text-align:center}
+  #board{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;width:min(86vw,340px);aspect-ratio:1/1}
+  .cell{background:rgba(255,255,255,.06);border-radius:14px;display:flex;align-items:center;justify-content:center;
+    font-size:64px;font-weight:900;cursor:pointer;transition:background .12s}
+  .cell:hover{background:rgba(255,255,255,.12)}
+  .cell.x{color:#5ce0ff}.cell.o{color:#ff8a8a}
+  .cell.win{background:rgba(120,220,150,.3)}
+  .row{display:flex;gap:10px;align-items:center;flex-wrap:wrap;justify-content:center}
+  button,select{background:#4aa3ff;color:#04152a;border:0;border-radius:10px;padding:10px 18px;font-size:15px;font-weight:800;cursor:pointer}
+  select{background:rgba(255,255,255,.1);color:#eee}
+  #score{color:#9fd;font-weight:700}
+</style>
+</head>
+<body>
+<h1>Tic-Tac-Toe</h1>
+<div id="status">Your turn — you're X.</div>
+<div id="board"></div>
+<div id="score">You 0 · CPU 0 · Draws 0</div>
+<div class="row">
+  <button id="newG">New Game</button>
+  <select id="level"><option value="easy">Easy</option><option value="hard" selected>Unbeatable</option></select>
+</div>
+<script>
+const WINS=[[0,1,2],[3,4,5],[6,7,8],[0,3,6],[1,4,7],[2,5,8],[0,4,8],[2,4,6]];
+let board,turn,over,wins={you:0,cpu:0,draw:0};
+const boardEl=document.getElementById('board');
+function init(){board=Array(9).fill('');turn='X';over=false;
+  document.getElementById('status').textContent="Your turn — you're X.";render();}
+function render(){
+  boardEl.innerHTML='';
+  const line=winner(board);
+  board.forEach((v,i)=>{const c=document.createElement('div');c.className='cell'+(v==='X'?' x':v==='O'?' o':'');
+    if(line&&line.combo.includes(i))c.classList.add('win');c.textContent=v;c.onclick=()=>play(i);boardEl.appendChild(c);});
+}
+function winner(b){for(const combo of WINS){const[a,c,d]=combo;if(b[a]&&b[a]===b[c]&&b[a]===b[d])return{p:b[a],combo};}return b.every(x=>x)?{p:'draw',combo:[]}:null;}
+function play(i){
+  if(over||board[i]||turn!=='X')return;board[i]='X';render();
+  let w=winner(board);if(w){return finish(w);}
+  turn='O';document.getElementById('status').textContent='CPU thinking…';
+  setTimeout(cpu,350);
+}
+function cpu(){
+  if(over)return;
+  const level=document.getElementById('level').value;let move;
+  if(level==='easy'&&Math.random()<0.5){const empties=board.map((v,i)=>v?-1:i).filter(i=>i>=0);move=empties[Math.floor(Math.random()*empties.length)];}
+  else move=bestMove(board,'O');
+  board[move]='O';turn='X';render();
+  let w=winner(board);if(w)return finish(w);
+  document.getElementById('status').textContent="Your turn — you're X.";
+}
+function bestMove(b,player){
+  let best=-Infinity,mv=-1;
+  for(let i=0;i<9;i++)if(!b[i]){b[i]=player;const s=minimax(b,false,player);b[i]='';if(s>best){best=s;mv=i;}}
+  return mv;
+}
+function minimax(b,maxing,ai){
+  const w=winner(b);
+  if(w){if(w.p==='draw')return 0;return w.p===ai?1:-1;}
+  const human=ai==='O'?'X':'O';
+  if(maxing){let best=-Infinity;for(let i=0;i<9;i++)if(!b[i]){b[i]=ai;best=Math.max(best,minimax(b,false,ai));b[i]='';}return best;}
+  else{let best=Infinity;for(let i=0;i<9;i++)if(!b[i]){b[i]=human;best=Math.min(best,minimax(b,true,ai));b[i]='';}return best;}
+}
+function finish(w){
+  over=true;render();
+  if(w.p==='draw'){wins.draw++;document.getElementById('status').textContent="It's a draw!";}
+  else if(w.p==='X'){wins.you++;document.getElementById('status').textContent='🎉 You win!';}
+  else{wins.cpu++;document.getElementById('status').textContent='CPU wins.';}
+  document.getElementById('score').textContent=`You ${wins.you} · CPU ${wins.cpu} · Draws ${wins.draw}`;
+}
+document.getElementById('newG').onclick=init;
+document.getElementById('level').onchange=init;
+init();
+</script>
+</body>
+</html>

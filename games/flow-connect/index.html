@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+<meta name="robots" content="noindex,nofollow">
+<title>Flow Connect</title>
+<style>
+  *{box-sizing:border-box}html,body{margin:0;height:100%}
+  body{background:radial-gradient(circle at 50% 0,#101018,#050508 60%);color:#eef;
+    font-family:system-ui,Segoe UI,Roboto,Arial,sans-serif;display:flex;flex-direction:column;
+    align-items:center;justify-content:center;min-height:100vh;gap:10px;padding:14px;user-select:none;-webkit-user-select:none}
+  h1{margin:0;font-size:clamp(20px,5vw,28px)}
+  #status{min-height:20px;color:#9ad;font-weight:700;text-align:center}
+  #board{display:grid;gap:4px;background:#1a1a24;padding:8px;border-radius:12px;width:min(90vw,400px);aspect-ratio:1/1}
+  .cell{background:#0e0e16;border-radius:6px;display:flex;align-items:center;justify-content:center;cursor:pointer;position:relative}
+  .dot{width:70%;height:70%;border-radius:50%}
+  .fill{position:absolute;inset:16%;border-radius:5px;opacity:.85}
+  button{background:#4aa3ff;color:#04152a;border:0;border-radius:10px;padding:9px 16px;font-weight:800;cursor:pointer}
+</style>
+</head>
+<body>
+<h1>Flow Connect</h1>
+<div id="status">Connect each pair of matching dots. Tap a dot, then adjacent cells to draw.</div>
+<div id="board"></div>
+<div>Connected: <b id="done">0</b>/<b id="total">4</b> &nbsp; <button id="reset">Reset</button></div>
+<script>
+const N=5;
+const COLORS={r:'#e6394a',g:'#2ecc71',b:'#3aa0ff',y:'#f5d020',o:'#f5941e'};
+// endpoints [ [r,c],[r,c] ]
+const PUZZLE={
+  r:[[0,0],[0,4]], g:[[2,0],[2,4]], b:[[4,0],[4,4]], y:[[0,2],[4,2]]
+};
+let owner,paths,active,over;
+const boardEl=document.getElementById('board');
+boardEl.style.gridTemplateColumns=`repeat(${N},1fr)`;
+document.getElementById('total').textContent=Object.keys(PUZZLE).length;
+function init(){
+  owner=Array.from({length:N},()=>Array(N).fill(null)); // color letter or null (path cells)
+  paths={};active=null;over=false;
+  render();updateStatus();
+}
+function endpointAt(r,c){
+  for(const k in PUZZLE)for(const[er,ec] of PUZZLE[k])if(er===r&&ec===c)return k;
+  return null;
+}
+function render(){
+  boardEl.innerHTML='';
+  // compute fill map
+  const fill=Array.from({length:N},()=>Array(N).fill(null));
+  for(const k in paths)paths[k].forEach(([r,c])=>fill[r][c]=k);
+  for(let r=0;r<N;r++)for(let c=0;c<N;c++){
+    const cell=document.createElement('div');cell.className='cell';
+    if(fill[r][c]){const f=document.createElement('div');f.className='fill';f.style.background=COLORS[fill[r][c]];cell.appendChild(f);}
+    const ep=endpointAt(r,c);
+    if(ep){const d=document.createElement('div');d.className='dot';d.style.background=COLORS[ep];
+      if(active===ep)d.style.boxShadow='0 0 0 3px #fff';cell.appendChild(d);}
+    cell.onclick=()=>click(r,c);boardEl.appendChild(cell);
+  }
+}
+function inPath(k,r,c){return paths[k]&&paths[k].some(([a,b])=>a===r&&b===c);}
+function cellFree(r,c,forColor){
+  const ep=endpointAt(r,c);
+  if(ep&&ep!==forColor)return false; // other endpoint
+  for(const k in paths)if(k!==forColor&&inPath(k,r,c))return false;
+  return true;
+}
+function click(r,c){
+  if(over)return;
+  const ep=endpointAt(r,c);
+  if(ep&&(active===null||active!==ep)){active=ep;paths[ep]=[[r,c]];render();return;}
+  if(active===null)return;
+  const path=paths[active];const[hr,hc]=path[path.length-1];
+  // click on existing cell of active path -> truncate
+  const idx=path.findIndex(([a,b])=>a===r&&b===c);
+  if(idx>=0){paths[active]=path.slice(0,idx+1);render();updateStatus();return;}
+  // must be adjacent to head and free
+  if(Math.abs(r-hr)+Math.abs(c-hc)!==1)return;
+  if(!cellFree(r,c,active))return;
+  path.push([r,c]);
+  const ep2=endpointAt(r,c);
+  if(ep2===active){ // completed
+    active=null;
+  }
+  render();updateStatus();
+}
+function connectedCount(){
+  let n=0;
+  for(const k in PUZZLE){
+    const [[ar,ac],[br,bc]]=PUZZLE[k];
+    const p=paths[k];if(!p||p.length<2)continue;
+    const first=p[0],last=p[p.length-1];
+    const touches=(x,y)=>(x[0]===ar&&x[1]===ac&&y[0]===br&&y[1]===bc)||(x[0]===br&&x[1]===bc&&y[0]===ar&&y[1]===ac);
+    // verify contiguous
+    let ok=true;for(let i=1;i<p.length;i++){if(Math.abs(p[i][0]-p[i-1][0])+Math.abs(p[i][1]-p[i-1][1])!==1){ok=false;break;}}
+    if(ok&&touches(first,last))n++;
+  }
+  return n;
+}
+function updateStatus(){
+  const n=connectedCount();document.getElementById('done').textContent=n;
+  if(n===Object.keys(PUZZLE).length){over=true;document.getElementById('status').textContent='🎉 All flows connected!';}
+  else document.getElementById('status').textContent='Tap a dot, then adjacent cells to draw its pipe.';
+}
+document.getElementById('reset').onclick=init;
+init();
+</script>
+</body>
+</html>
