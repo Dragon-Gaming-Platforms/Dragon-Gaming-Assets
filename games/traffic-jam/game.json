@@ -1,0 +1,9 @@
+{
+  "name": "Traffic Jam",
+  "desc": "A sliding block puzzle in a crowded parking lot. Shuffle the cars and trucks forwards and backwards to open a lane, then steer the red car out through the exit. Solve each level in as few moves as you can.",
+  "controls": "Tap a car to select it, then tap an empty square in its lane",
+  "shelf": "Puzzle & Logic",
+  "tags": ["games", "html5", "puzzle", "sliding", "brain"],
+  "badge": "New",
+  "creator": "Dragon Gaming Platforms"
+}

@@ -1,0 +1,9 @@
+{
+  "name": "Old Maid",
+  "desc": "The classic card game with one Queen missing. Draw from the computer, discard every rank pair you form, and pass along cards you do not need. Whoever is stuck holding the lone Queen at the end loses.",
+  "controls": "Tap one of the computer\u2019s cards to draw it",
+  "shelf": "Arcade & Action",
+  "tags": ["games", "html5", "cards", "family", "casual"],
+  "badge": "New",
+  "creator": "Dragon Gaming Platforms"
+}

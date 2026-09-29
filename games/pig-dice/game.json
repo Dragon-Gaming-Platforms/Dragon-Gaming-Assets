@@ -1,0 +1,9 @@
+{
+  "name": "Pig Dice",
+  "desc": "A press-your-luck dice duel to one hundred. Keep rolling to pile up points, but bank them before a dreaded one wipes your whole turn. Outguess the computer and know exactly when to hold.",
+  "controls": "Press Roll to add the die, or Hold to bank your points",
+  "shelf": "Strategy & Idle",
+  "tags": ["games", "html5", "dice", "family", "luck"],
+  "badge": "New",
+  "creator": "Dragon Gaming Platforms"
+}

@@ -1,0 +1,9 @@
+{
+  "name": "Long Jump",
+  "desc": "Sprint down the runway building speed, then hit the board and pick your take-off angle. Aim for a forty-five degree launch to soar the furthest into the pit. Foul-free jumps only — nail the timing for a record.",
+  "controls": "Mash RUN (or ← →) then press JUMP to lock the angle",
+  "shelf": "Sports & Racing",
+  "tags": ["games", "html5", "athletics", "sports", "timing"],
+  "badge": "New",
+  "creator": "Dragon Gaming Platforms"
+}

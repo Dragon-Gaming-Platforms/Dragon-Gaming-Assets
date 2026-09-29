@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+<meta name="robots" content="noindex,nofollow">
+<title>Hurdles</title>
+<style>
+  *{box-sizing:border-box}html,body{margin:0;height:100%}
+  body{background:#0d1b2a;color:#eef;font-family:system-ui,Segoe UI,Roboto,Arial,sans-serif;
+    display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;gap:10px;padding:12px;user-select:none;-webkit-user-select:none}
+  h1{margin:0;font-size:clamp(18px,5vw,26px)}
+  #status{min-height:20px;font-weight:700;color:#ffe08a;text-align:center}
+  canvas{background:#c2412d;border-radius:10px;max-width:96vw;height:auto}
+  .pads{display:flex;gap:10px}
+  button{background:#ffcc33;color:#20150a;border:0;border-radius:10px;padding:16px 24px;font-weight:800;font-size:16px;cursor:pointer}
+  .hint{font-size:12px;opacity:.7;text-align:center;max-width:380px}
+</style>
+</head>
+<body>
+<h1>Hurdles</h1>
+<div id="status">Mash RUN to sprint. Press JUMP to clear each hurdle!</div>
+<canvas id="c" width="440" height="200"></canvas>
+<div class="pads"><button id="run">RUN</button><button id="jump">JUMP</button></div>
+<div class="hint">Alternate Left/Right or mash RUN to build speed; press JUMP (↑ / Space) just before a hurdle. Clipping one slows you down.</div>
+<script>
+const cv=document.getElementById('c'),ctx=cv.getContext('2d');
+const RACE=100;
+let dist,vel,lastFoot,running,over,startT,py,vy,jumping,hurdles,best,clip;
+best=parseFloat(localStorage.getItem('hurdles_best')||'0')||0;
+function reset(){dist=0;vel=0;lastFoot=null;running=false;over=false;startT=0;py=0;vy=0;jumping=false;clip=0;
+  hurdles=[];for(let m=12;m<=96;m+=12)hurdles.push({m,hit:false});
+  setStatus('Mash RUN to start sprinting!');draw();}
+function setStatus(t){document.getElementById('status').textContent=t;}
+function begin(){if(!running&&!over){running=true;startT=performance.now();last=0;requestAnimationFrame(loop);}}
+function run(foot){if(over){reset();return;}begin();if(foot&&foot===lastFoot){vel+=0.2;return;}vel+=1.0;if(foot)lastFoot=foot;}
+function jump(){if(over)return;begin();if(!jumping){jumping=true;vy=-4.6;}}
+document.getElementById('run').onclick=()=>run(null);
+document.getElementById('jump').onclick=jump;
+document.addEventListener('keydown',e=>{
+  if(e.key==='ArrowLeft'||e.key==='a')run('l');
+  else if(e.key==='ArrowRight'||e.key==='d')run('r');
+  else if(e.key==='ArrowUp'||e.key===' '){e.preventDefault();jump();}});
+let last=0;
+function loop(t){if(over)return;if(!last)last=t;const dt=Math.min(0.05,(t-last)/1000);last=t;
+  vel=Math.max(0,vel-dt*2.6);
+  if(clip>0){clip-=dt;vel*=0.985;}
+  dist+=vel*dt*3.4;
+  if(jumping){py+=vy;vy+=0.42;if(py>=0){py=0;jumping=false;}}
+  // collision with hurdles: when passing a hurdle position while low
+  hurdles.forEach(h=>{if(!h.hit&&Math.abs(dist-h.m)<0.8){h.hit=true;const airborne=(-py)>16;if(!airborne){clip=0.5;vel*=0.55;setStatus('Clipped a hurdle! Time JUMP better.');}}});
+  draw();
+  if(dist>=RACE){finish();return;}
+  requestAnimationFrame(loop);
+}
+function finish(){over=true;const time=(performance.now()-startT)/1000;
+  if(best===0||time<best){best=time;localStorage.setItem('hurdles_best',time.toFixed(2));}
+  draw();setStatus(`🏁 Finished in ${time.toFixed(2)}s! Tap RUN to race again.`);}
+function draw(){
+  ctx.fillStyle='#c2412d';ctx.fillRect(0,0,cv.width,cv.height);
+  const ground=cv.height-40;
+  ctx.strokeStyle='#e8e8e8';ctx.setLineDash([10,8]);ctx.beginPath();ctx.moveTo(0,ground+18);ctx.lineTo(cv.width,ground+18);ctx.stroke();ctx.setLineDash([]);
+  // camera follows: show a window of 30m around player, player fixed at x=90
+  const view=30,pxAt=90;
+  function sx(m){return pxAt+(m-dist)/view*cv.width;}
+  ctx.fillStyle='#fff';hurdles.forEach(h=>{const x=sx(h.m);if(x>-20&&x<cv.width+20){
+    ctx.fillStyle=h.hit?'#f6c':'#fff';ctx.fillRect(x-2,ground-22,4,22);ctx.fillRect(x-10,ground-22,20,4);}});
+  // finish line
+  const fx=sx(RACE);if(fx<cv.width+20){ctx.fillStyle='#000';for(let i=0;i<6;i++){ctx.fillStyle=i%2?'#000':'#fff';ctx.fillRect(fx-6,ground-30+i*5,12,5);}}
+  // athlete
+  const ay=ground+py;
+  ctx.fillStyle='#ffd43b';ctx.fillRect(pxAt-6,ay-26,12,22);ctx.beginPath();ctx.arc(pxAt,ay-30,7,0,7);ctx.fill();
+  ctx.fillStyle='#fff';ctx.font='12px sans-serif';ctx.textAlign='left';ctx.fillText(dist.toFixed(0)+'m  spd '+(vel*3.4).toFixed(1),12,22);
+  ctx.textAlign='right';ctx.fillText('Best: '+(best?best.toFixed(2)+'s':'--'),cv.width-12,22);
+}
+reset();
+</script>
+</body>
+</html>

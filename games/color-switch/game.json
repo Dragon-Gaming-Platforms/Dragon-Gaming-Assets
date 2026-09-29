@@ -1,0 +1,9 @@
+{
+  "name": "Color Switch",
+  "desc": "Hop a bouncing ball up through spinning rings, but only pass through the arc that matches your colour. Grab the stars to switch colours and time every tap to climb as high as you can without a mismatch.",
+  "controls": "Tap, click, or press Space to hop upward",
+  "shelf": "Arcade & Action",
+  "tags": ["games", "html5", "arcade", "reflex", "casual"],
+  "badge": "New",
+  "creator": "Dragon Gaming Platforms"
+}

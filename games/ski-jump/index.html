@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+<meta name="robots" content="noindex,nofollow">
+<title>Ski Jump</title>
+<style>
+  *{box-sizing:border-box}html,body{margin:0;height:100%}
+  body{background:#0b1a2b;color:#eef;font-family:system-ui,Segoe UI,Roboto,Arial,sans-serif;
+    display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;gap:10px;padding:12px;user-select:none;-webkit-user-select:none}
+  h1{margin:0;font-size:clamp(18px,5vw,26px)}
+  #status{min-height:20px;font-weight:700;color:#ffe08a;text-align:center}
+  canvas{background:linear-gradient(#9dd3f0,#e8f4fb);border-radius:10px;max-width:96vw;height:auto}
+  button{background:#ffcc33;color:#20150a;border:0;border-radius:10px;padding:16px 30px;font-weight:800;font-size:17px;cursor:pointer}
+  .hint{font-size:12px;opacity:.7;text-align:center;max-width:380px}
+</style>
+</head>
+<body>
+<h1>Ski Jump</h1>
+<div id="status">Press JUMP at the ramp edge for a powerful takeoff!</div>
+<canvas id="c" width="440" height="260"></canvas>
+<button id="act">JUMP</button>
+<div class="hint">Time the takeoff in the green zone, then hold JUMP to lean forward for distance — but level out before landing or you crash. Best saved locally.</div>
+<script>
+const cv=document.getElementById('c'),ctx=cv.getContext('2d');
+let phase,marker,mdir,takeoff,x,y,vx,vy,lean,dist,over,best,holding,style;
+best=parseFloat(localStorage.getItem('skijump_best')||'0')||0;
+function reset(){phase='timing';marker=0;mdir=1;takeoff=0;x=70;y=90;vx=0;vy=0;lean=0;dist=0;over=false;holding=false;style=100;
+  setBtn('JUMP');setStatus('Press JUMP when the marker is in the green zone!');last=0;requestAnimationFrame(loop);}
+function setStatus(t){document.getElementById('status').textContent=t;}
+function setBtn(t){document.getElementById('act').textContent=t;}
+function press(){
+  if(over){reset();return;}
+  if(phase==='timing'){
+    // green zone 0.75..0.95
+    const q=marker;takeoff=(q>=0.72&&q<=0.98)?(1-Math.abs(0.85-q)*3):(0.45-Math.abs(0.85-q)*0.4);
+    takeoff=Math.max(0.2,Math.min(1,takeoff));
+    phase='fly';vx=3.2+takeoff*2.4;vy=-1.4-takeoff*2.2;setBtn('LEAN');setStatus('Hold LEAN for distance, release to level out!');
+  }
+}
+function down(){if(phase==='fly'){holding=true;}else press();}
+function upEvt(){holding=false;}
+const b=document.getElementById('act');
+b.addEventListener('mousedown',down);b.addEventListener('mouseup',upEvt);
+b.addEventListener('touchstart',e=>{e.preventDefault();down();},{passive:false});
+b.addEventListener('touchend',e=>{e.preventDefault();upEvt();},{passive:false});
+document.addEventListener('keydown',e=>{if(e.key===' '||e.key==='Enter'){e.preventDefault();if(!e.repeat)down();else if(phase==='fly')holding=true;}});
+document.addEventListener('keyup',e=>{if(e.key===' '||e.key==='Enter')upEvt();});
+let last=0;
+function loop(t){
+  if(!last)last=t;const dt=Math.min(0.05,(t-last)/1000);last=t;
+  if(phase==='timing'){marker+=mdir*dt*0.9;if(marker>1){marker=1;mdir=-1;}if(marker<0){marker=0;mdir=1;}}
+  else if(phase==='fly'){
+    if(holding){lean=Math.min(1,lean+dt*1.6);vy-=dt*0.9;style-=dt*12;}else{lean=Math.max(0,lean-dt*2.2);}
+    x+=vx;y+=vy;vy+=0.055;
+    const ground=groundY(x);
+    if(y>=ground){y=ground;phase='done';over=true;
+      dist=Math.max(0,(x-160)/3.1);
+      const crashed=lean>0.55; // too much lean at landing = fall
+      if(crashed){dist*=0.4;setStatus(`Rough landing! ${dist.toFixed(1)}m. Tap to jump again.`);}
+      else{if(dist>best){best=dist;localStorage.setItem('skijump_best',dist.toFixed(1));}
+        setStatus(`Clean landing! ${dist.toFixed(1)}m `+(dist>=best?'— new best! ':'')+'Tap to jump again.');}
+      setBtn('AGAIN');
+    }
+  }
+  draw();requestAnimationFrame(loop);
+}
+function groundY(px){ // ramp then downhill landing slope
+  if(px<160)return 90+ (px-70)*0.9; // ramp going down to edge at x=160
+  return Math.min(cv.height-16, 90+81 + (px-160)*0.28); // landing hill
+}
+function draw(){
+  ctx.clearRect(0,0,cv.width,cv.height);
+  ctx.fillStyle='#fff';ctx.beginPath();ctx.moveTo(0,cv.height);
+  for(let px=0;px<=cv.width;px+=8)ctx.lineTo(px,groundY(px));
+  ctx.lineTo(cv.width,cv.height);ctx.closePath();ctx.fill();
+  // timing bar
+  if(phase==='timing'){ctx.fillStyle='#333';ctx.fillRect(40,20,200,14);
+    ctx.fillStyle='#2ecc71';ctx.fillRect(40+200*0.72,20,200*0.26,14);
+    ctx.fillStyle='#e63946';ctx.fillRect(40+200*marker-2,17,4,20);
+    ctx.fillStyle='#204';ctx.font='11px sans-serif';ctx.textAlign='left';ctx.fillText('Takeoff timing',40,48);}
+  // skier
+  ctx.save();ctx.translate(x,y-8);
+  let ang=phase==='fly'? -0.5-lean*0.6 : (phase==='timing'?0.7:0.2);
+  ctx.rotate(ang);
+  ctx.fillStyle='#e63946';ctx.fillRect(-6,-14,12,16);ctx.beginPath();ctx.arc(0,-18,5,0,7);ctx.fill();
+  ctx.strokeStyle='#204';ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(-14,4);ctx.lineTo(14,4);ctx.stroke();
+  ctx.restore();
+  ctx.fillStyle='#204';ctx.font='12px sans-serif';ctx.textAlign='right';
+  ctx.fillText('Best: '+(best?best.toFixed(1)+'m':'--'),cv.width-12,20);
+  if(phase==='fly'||phase==='done'){ctx.textAlign='left';ctx.fillText('Dist: '+Math.max(0,((x-160)/3.1)).toFixed(1)+'m',12,20);}
+}
+reset();
+</script>
+</body>
+</html>

@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+<meta name="robots" content="noindex,nofollow">
+<title>Rhythm Tap</title>
+<style>
+  *{box-sizing:border-box}html,body{margin:0;height:100%}
+  body{background:#08070f;color:#eef;font-family:system-ui,Segoe UI,Roboto,Arial,sans-serif;
+    display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;gap:8px;padding:10px;user-select:none;-webkit-user-select:none}
+  h1{margin:0;font-size:clamp(18px,5vw,26px)}
+  #status{min-height:18px;font-weight:700;color:#ffe08a;text-align:center}
+  canvas{background:#0d0b1a;border-radius:10px;touch-action:none;max-width:96vw;height:auto}
+  .lanes{display:grid;grid-template-columns:repeat(4,60px);gap:8px}
+  .lanes button{border:0;border-radius:8px;padding:16px 0;font-weight:800;color:#08070f;cursor:pointer}
+  .hint{font-size:12px;opacity:.7;text-align:center}
+</style>
+</head>
+<body>
+<h1>Rhythm Tap</h1>
+<div id="status">Tap the lane when the note reaches the line!</div>
+<canvas id="c" width="280" height="440"></canvas>
+<div class="lanes">
+  <button id="l0" style="background:#ff5d73">D</button>
+  <button id="l1" style="background:#4dd2ff">F</button>
+  <button id="l2" style="background:#ffd93b">J</button>
+  <button id="l3" style="background:#7cff8a">K</button>
+</div>
+<div class="hint">Keys D F J K or tap the buttons. Perfect timing scores more &amp; builds combo.</div>
+<script>
+const cv=document.getElementById('c'),ctx=cv.getContext('2d');
+const W=cv.width,H=cv.height,LANES=4,LW=W/LANES,HITY=H-56,WIN=34;
+const COLORS=['#ff5d73','#4dd2ff','#ffd93b','#7cff8a'];
+let notes,score,combo,maxCombo,misses,state,speed,beatT,flash;
+function reset(){notes=[];score=0;combo=0;maxCombo=0;misses=0;state='play';speed=3.4;beatT=0;flash=[0,0,0,0];
+  setStatus('Tap when notes hit the line!');last=0;requestAnimationFrame(loop);}
+function setStatus(t){document.getElementById('status').textContent=t;}
+let last=0;
+function loop(t){if(state!=='play'){draw();return;}
+  if(!last)last=t;const dt=Math.min(2.5,(t-last)/16.67);last=t;
+  beatT-=dt;
+  if(beatT<=0){const n=1+(Math.random()<0.28?1:0);const used=[];
+    for(let i=0;i<n;i++){let l;do{l=Math.floor(Math.random()*LANES);}while(used.includes(l));used.push(l);notes.push({lane:l,y:-20});}
+    beatT=42+Math.random()*26;}
+  notes.forEach(nt=>nt.y+=speed*dt);
+  // misses
+  for(let i=notes.length-1;i>=0;i--){if(notes[i].y>HITY+WIN){notes.splice(i,1);miss();}}
+  speed+=0.0006*dt;
+  for(let i=0;i<4;i++)if(flash[i]>0)flash[i]-=dt;
+  draw();requestAnimationFrame(loop);
+}
+function hit(lane){if(state!=='play')return;flash[lane]=8;
+  let bi=-1,bd=1e9;notes.forEach((nt,i)=>{if(nt.lane===lane){const d=Math.abs(nt.y-HITY);if(d<bd){bd=d;bi=i;}}});
+  if(bi>=0&&bd<=WIN){notes.splice(bi,1);combo++;maxCombo=Math.max(maxCombo,combo);
+    const pts=bd<12?50:bd<22?30:15;score+=pts+combo;setStatus((bd<12?'PERFECT':'Good')+'!  Combo '+combo);}
+  else{combo=0;setStatus('Too early!');}
+}
+function miss(){combo=0;misses++;setStatus('Missed! ('+misses+'/12)');if(misses>=12)endGame();}
+function endGame(){state='over';setStatus('Song over! Score '+score+' · Max combo '+maxCombo+'. Tap a lane to replay.');}
+for(let i=0;i<4;i++){const b=document.getElementById('l'+i);
+  const go=(e)=>{e.preventDefault();if(state==='over'){reset();return;}hit(i);};
+  b.addEventListener('mousedown',go);b.addEventListener('touchstart',go,{passive:false});}
+document.addEventListener('keydown',e=>{const m={d:0,f:1,j:2,k:3};const k=e.key.toLowerCase();
+  if(k in m){if(state==='over'){reset();return;}hit(m[k]);}});
+function draw(){
+  ctx.fillStyle='#0d0b1a';ctx.fillRect(0,0,W,H);
+  for(let i=0;i<LANES;i++){ctx.strokeStyle='#221d3a';ctx.strokeRect(i*LW,0,LW,H);
+    if(flash[i]>0){ctx.fillStyle=COLORS[i]+'33';ctx.fillRect(i*LW,0,LW,H);}}
+  // hit line
+  ctx.strokeStyle='#fff';ctx.lineWidth=2;ctx.beginPath();ctx.moveTo(0,HITY);ctx.lineTo(W,HITY);ctx.stroke();
+  for(let i=0;i<LANES;i++){ctx.strokeStyle=COLORS[i];ctx.beginPath();ctx.arc(i*LW+LW/2,HITY,16,0,7);ctx.stroke();}
+  notes.forEach(nt=>{ctx.fillStyle=COLORS[nt.lane];ctx.beginPath();
+    ctx.roundRect?ctx.roundRect(nt.lane*LW+8,nt.y-12,LW-16,24,6):ctx.rect(nt.lane*LW+8,nt.y-12,LW-16,24);ctx.fill();});
+  ctx.fillStyle='#fff';ctx.font='bold 15px sans-serif';ctx.textAlign='left';ctx.fillText('Score '+score,8,22);
+  ctx.textAlign='right';ctx.fillText('Combo '+combo,W-8,22);
+}
+reset();
+</script>
+</body>
+</html>

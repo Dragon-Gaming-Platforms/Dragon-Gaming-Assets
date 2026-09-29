@@ -1,0 +1,9 @@
+{
+  "name": "Futoshiki",
+  "desc": "A Latin-square logic puzzle. Fill every row and column with the numbers one to five with no repeats, while satisfying all the greater-than and less-than signs between cells. Each new puzzle is freshly generated.",
+  "controls": "Tap a cell to cycle its value from 1 to 5 and back to blank",
+  "shelf": "Puzzle & Logic",
+  "tags": ["games", "html5", "logic", "numbers", "brain"],
+  "badge": "New",
+  "creator": "Dragon Gaming Platforms"
+}

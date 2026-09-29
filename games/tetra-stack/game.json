@@ -1,0 +1,9 @@
+{
+  "name": "Tetra Stack",
+  "desc": "Steer falling blocks into tidy rows and clear them before the stack tops out. Rotate and drop seven classic shapes, chase four-line clears, and survive as the pace ramps up every ten lines.",
+  "controls": "← → move · ↑ rotate · ↓ soft drop · Space hard drop",
+  "shelf": "Arcade & Action",
+  "tags": ["games", "html5", "blocks", "arcade", "retro"],
+  "badge": "New",
+  "creator": "Dragon Gaming Platforms"
+}

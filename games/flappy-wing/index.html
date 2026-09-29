@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+<meta name="robots" content="noindex,nofollow">
+<title>Flappy Wing</title>
+<style>
+  *{box-sizing:border-box}html,body{margin:0;height:100%}
+  body{background:#0b1020;color:#eef;font-family:system-ui,Segoe UI,Roboto,Arial,sans-serif;
+    display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;gap:8px;padding:10px;user-select:none;-webkit-user-select:none}
+  h1{margin:0;font-size:clamp(18px,5vw,26px)}
+  #status{min-height:18px;font-weight:700;color:#ffe08a;text-align:center}
+  canvas{background:linear-gradient(#4ec0f0,#bdeafc);border-radius:10px;touch-action:none;cursor:pointer;max-width:96vw;height:auto}
+  .hint{font-size:12px;opacity:.7;text-align:center}
+</style>
+</head>
+<body>
+<h1>Flappy Wing</h1>
+<div id="status">Tap / click / Space to flap through the gaps!</div>
+<canvas id="c" width="360" height="480"></canvas>
+<div class="hint">Best score is saved locally.</div>
+<script>
+const cv=document.getElementById('c'),ctx=cv.getContext('2d');
+const W=cv.width,H=cv.height,GAP=140,PW=56,SPEED=2.3;
+let bird,pipes,score,best,state; // state: ready|play|dead
+best=parseInt(localStorage.getItem('flappy_best')||'0')||0;
+function reset(){bird={x:90,y:H/2,v:0};pipes=[];score=0;state='ready';
+  for(let i=0;i<3;i++)pipes.push(makePipe(W+120+i*200));
+  setStatus('Tap / click / Space to flap!');draw();}
+function makePipe(x){const gy=60+Math.random()*(H-120-GAP);return {x,gy,passed:false};}
+function setStatus(t){document.getElementById('status').textContent=t;}
+function flap(){
+  if(state==='ready'){state='play';last=0;requestAnimationFrame(loop);}
+  if(state==='play')bird.v=-5.6;
+  if(state==='dead'){reset();}
+}
+cv.addEventListener('mousedown',e=>{e.preventDefault();flap();});
+cv.addEventListener('touchstart',e=>{e.preventDefault();flap();},{passive:false});
+document.addEventListener('keydown',e=>{if(e.key===' '||e.key==='ArrowUp'){e.preventDefault();flap();}});
+let last=0;
+function loop(t){if(state!=='play'){draw();return;}
+  if(!last)last=t;const dt=Math.min(2,(t-last)/16.67);last=t;
+  bird.v+=0.32*dt;bird.y+=bird.v*dt;
+  pipes.forEach(p=>{p.x-=SPEED*dt;
+    if(!p.passed&&p.x+PW<bird.x){p.passed=true;score++;setStatus('Score: '+score);}});
+  if(pipes[0].x<-PW){pipes.shift();pipes.push(makePipe(pipes[pipes.length-1].x+200));}
+  // collision
+  if(bird.y-12<0){bird.y=12;bird.v=0;}
+  if(bird.y+12>H-40){die();}
+  for(const p of pipes){if(bird.x+12>p.x&&bird.x-12<p.x+PW){if(bird.y-12<p.gy||bird.y+12>p.gy+GAP){die();break;}}}
+  draw();requestAnimationFrame(loop);
+}
+function die(){state='dead';if(score>best){best=score;localStorage.setItem('flappy_best',best);}
+  setStatus('💥 Crashed! Score '+score+'. Tap to try again.');draw();}
+function draw(){
+  ctx.fillStyle='#7ec8f0';ctx.fillRect(0,0,W,H);
+  // pipes
+  pipes.forEach(p=>{ctx.fillStyle='#3cb043';ctx.fillRect(p.x,0,PW,p.gy);ctx.fillRect(p.x,p.gy+GAP,PW,H-40-(p.gy+GAP));
+    ctx.fillStyle='#2e8b3a';ctx.fillRect(p.x-3,p.gy-16,PW+6,16);ctx.fillRect(p.x-3,p.gy+GAP,PW+6,16);});
+  // ground
+  ctx.fillStyle='#d9c27a';ctx.fillRect(0,H-40,W,40);ctx.fillStyle='#c2ab63';for(let x=0;x<W;x+=20)ctx.fillRect(x,H-40,10,6);
+  // bird
+  ctx.save();ctx.translate(bird.x,bird.y);ctx.rotate(Math.max(-0.5,Math.min(1,bird.v*0.08)));
+  ctx.fillStyle='#ffd93b';ctx.beginPath();ctx.arc(0,0,12,0,7);ctx.fill();
+  ctx.fillStyle='#fff';ctx.beginPath();ctx.arc(4,-4,4,0,7);ctx.fill();ctx.fillStyle='#000';ctx.beginPath();ctx.arc(5,-4,2,0,7);ctx.fill();
+  ctx.fillStyle='#ff8c42';ctx.beginPath();ctx.moveTo(10,0);ctx.lineTo(18,3);ctx.lineTo(10,6);ctx.fill();ctx.restore();
+  // score
+  ctx.fillStyle='#fff';ctx.strokeStyle='#333';ctx.lineWidth=3;ctx.font='bold 34px sans-serif';ctx.textAlign='center';
+  ctx.strokeText(score,W/2,60);ctx.fillText(score,W/2,60);
+  ctx.font='13px sans-serif';ctx.fillStyle='#204';ctx.fillText('Best: '+best,W/2,80);
+}
+reset();
+</script>
+</body>
+</html>

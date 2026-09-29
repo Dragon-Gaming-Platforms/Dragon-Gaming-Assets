@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<title>Futoshiki</title>
+<style>
+  *{box-sizing:border-box}body{margin:0;min-height:100vh;background:#12131c;color:#eef;
+    font-family:system-ui,Segoe UI,Roboto,Arial,sans-serif;display:flex;flex-direction:column;align-items:center;gap:12px;padding:14px;user-select:none;-webkit-user-select:none}
+  h1{margin:2px 0;font-size:clamp(18px,5vw,24px)}
+  #status{min-height:18px;font-weight:700;color:#ffe08a;text-align:center;max-width:420px}
+  #grid{display:grid;gap:0}
+  .cell{width:46px;height:46px;display:flex;align-items:center;justify-content:center;font-size:22px;font-weight:800;
+    background:#1e2233;border:2px solid #2e3550;border-radius:8px;cursor:pointer}
+  .cell.given{background:#2a3350;color:#ffd76a;cursor:default}
+  .cell.bad{border-color:#ff5d5d}
+  .sign{display:flex;align-items:center;justify-content:center;color:#8fb3ff;font-weight:800;font-size:18px}
+  .hsign{width:22px;height:46px}.vsign{width:46px;height:22px}
+  .blank{width:22px;height:22px}
+  button{background:#ffcc33;color:#20150a;border:0;border-radius:9px;padding:9px 15px;font-weight:800;cursor:pointer}
+  .hint{font-size:12px;opacity:.75;text-align:center;max-width:420px}
+</style>
+</head>
+<body>
+<h1>Futoshiki</h1>
+<div id="status">Fill each row and column with 1–5, obeying every inequality sign.</div>
+<div id="grid"></div>
+<button id="newg">New Puzzle</button>
+<div class="hint">Tap a cell to cycle 1→5→blank. Each arrow/sign points toward the smaller number.</div>
+<script>
+const N=5;
+let sol,grid,given,hcon,vcon; // hcon[r][c]=rel between (r,c) and (r,c+1); vcon[r][c]=rel between (r,c)&(r+1,c); rel: 1 means left/top < right/bottom, -1 means >
+function shuffle(a){for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
+function genLatin(){
+  let base=[];for(let r=0;r<N;r++){base.push([]);for(let c=0;c<N;c++)base[r].push((r+c)%N+1);}
+  // shuffle rows, cols, and relabel symbols
+  const rp=shuffle([0,1,2,3,4]),cp=shuffle([0,1,2,3,4]),sym=shuffle([1,2,3,4,5]);
+  let g=[];for(let r=0;r<N;r++){g.push([]);for(let c=0;c<N;c++)g[r].push(sym[base[rp[r]][cp[c]]-1]);}
+  return g;
+}
+function gen(){
+  sol=genLatin();
+  hcon=Array.from({length:N},()=>Array(N-1).fill(0));
+  vcon=Array.from({length:N-1},()=>Array(N).fill(0));
+  // pick ~9 inequality clues
+  const hpos=[],vpos=[];
+  for(let r=0;r<N;r++)for(let c=0;c<N-1;c++)hpos.push([r,c]);
+  for(let r=0;r<N-1;r++)for(let c=0;c<N;c++)vpos.push([r,c]);
+  shuffle(hpos);shuffle(vpos);
+  hpos.slice(0,5).forEach(([r,c])=>hcon[r][c]=sol[r][c]<sol[r][c+1]?1:-1);
+  vpos.slice(0,5).forEach(([r,c])=>vcon[r][c]=sol[r][c]<sol[r+1][c]?1:-1);
+  // givens: reveal a few
+  given=Array.from({length:N},()=>Array(N).fill(false));
+  const all=[];for(let r=0;r<N;r++)for(let c=0;c<N;c++)all.push([r,c]);
+  shuffle(all).slice(0,5).forEach(([r,c])=>given[r][c]=true);
+  grid=Array.from({length:N},()=>Array(N).fill(0));
+  for(let r=0;r<N;r++)for(let c=0;c<N;c++)if(given[r][c])grid[r][c]=sol[r][c];
+  setStatus('Fill 1–5 with no repeats in any row/column, obeying the signs.');
+  render();
+}
+function setStatus(t){document.getElementById('status').textContent=t;}
+function render(){
+  const g=document.getElementById('grid');g.innerHTML='';
+  g.style.gridTemplateColumns=`repeat(${N},46px) `.replace(/46px/g,'46px 22px').trim().split(' ').slice(0,2*N-1).join(' ');
+  // build explicit grid of (2N-1)x(2N-1)
+  g.style.gridTemplateColumns=Array.from({length:2*N-1},(_,i)=>i%2?'22px':'46px').join(' ');
+  for(let r=0;r<N;r++){
+    for(let c=0;c<N;c++){
+      const cell=document.createElement('div');cell.className='cell'+(given[r][c]?' given':'');
+      cell.textContent=grid[r][c]||'';
+      if(isBad(r,c))cell.classList.add('bad');
+      if(!given[r][c])cell.onclick=()=>{grid[r][c]=(grid[r][c]+1)%(N+1);render();checkWin();};
+      g.appendChild(cell);
+      if(c<N-1){const s=document.createElement('div');s.className='sign hsign';
+        s.textContent=hcon[r][c]===0?'':(hcon[r][c]===1?'<':'>');g.appendChild(s);}
+    }
+    if(r<N-1){for(let c=0;c<N;c++){const s=document.createElement('div');s.className='sign vsign';
+        s.textContent=vcon[r][c]===0?'':(vcon[r][c]===1?'∧':'∨');g.appendChild(s);
+        if(c<N-1){const b=document.createElement('div');b.className='blank';g.appendChild(b);}}}
+  }
+}
+function isBad(r,c){const v=grid[r][c];if(!v)return false;
+  for(let k=0;k<N;k++){if(k!==c&&grid[r][k]===v)return true;if(k!==r&&grid[k][c]===v)return true;}
+  // inequalities involving filled neighbors
+  if(c<N-1&&hcon[r][c]&&grid[r][c+1]){if(hcon[r][c]===1&&!(v<grid[r][c+1]))return true;if(hcon[r][c]===-1&&!(v>grid[r][c+1]))return true;}
+  if(c>0&&hcon[r][c-1]&&grid[r][c-1]){if(hcon[r][c-1]===1&&!(grid[r][c-1]<v))return true;if(hcon[r][c-1]===-1&&!(grid[r][c-1]>v))return true;}
+  if(r<N-1&&vcon[r]&&vcon[r][c]&&grid[r+1][c]){if(vcon[r][c]===1&&!(v<grid[r+1][c]))return true;if(vcon[r][c]===-1&&!(v>grid[r+1][c]))return true;}
+  if(r>0&&vcon[r-1]&&vcon[r-1][c]&&grid[r-1][c]){if(vcon[r-1][c]===1&&!(grid[r-1][c]<v))return true;if(vcon[r-1][c]===-1&&!(grid[r-1][c]>v))return true;}
+  return false;
+}
+function valid(){
+  for(let r=0;r<N;r++)for(let c=0;c<N;c++){if(!grid[r][c])return false;if(isBad(r,c))return false;}
+  return true;
+}
+function checkWin(){if(valid())setStatus('🎉 Solved! Every row, column and sign checks out.');}
+document.getElementById('newg').onclick=gen;
+gen();
+</script>
+</body>
+</html>

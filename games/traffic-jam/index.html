@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<title>Traffic Jam</title>
+<style>
+  *{box-sizing:border-box}body{margin:0;min-height:100vh;background:#1a1a22;color:#eef;
+    font-family:system-ui,Segoe UI,Roboto,Arial,sans-serif;display:flex;flex-direction:column;align-items:center;gap:12px;padding:14px;user-select:none;-webkit-user-select:none}
+  h1{margin:2px 0;font-size:clamp(18px,5vw,24px)}
+  #status{min-height:18px;font-weight:700;color:#ffe08a;text-align:center;max-width:440px}
+  #board{position:relative;background:#2b2b38;border-radius:10px;border:4px solid #3a3a4a}
+  .cell{position:absolute;border:1px solid #33333f}
+  .car{position:absolute;border-radius:8px;cursor:pointer;box-shadow:inset 0 0 0 2px rgba(0,0,0,.25);display:flex;align-items:center;justify-content:center;font-weight:800;color:#111}
+  .car.sel{outline:3px solid #fff;z-index:5}
+  .exit{position:absolute;color:#7cff8a;font-size:12px}
+  .bar{display:flex;gap:10px;align-items:center;flex-wrap:wrap;justify-content:center;font-size:14px}
+  button{background:#ffcc33;color:#20150a;border:0;border-radius:9px;padding:8px 13px;font-weight:800;cursor:pointer}
+  button.sm{padding:5px 9px;font-size:12px}
+  .hint{font-size:12px;opacity:.75;text-align:center;max-width:440px}
+</style>
+</head>
+<body>
+<h1>Traffic Jam</h1>
+<div id="status">Slide the cars to clear a path and drive the red car out the right exit!</div>
+<div id="board"></div>
+<div class="bar">
+  <span>Level: <b id="lvl">1</b></span>
+  <span>Moves: <b id="moves">0</b></span>
+  <button id="prev" class="sm">◀</button><button id="next" class="sm">▶</button>
+  <button id="reset">Restart Level</button>
+</div>
+<div class="hint">Tap a car to select it, then tap an empty square in its lane to slide it there. Cars only move along their length.</div>
+<script>
+const SIZE=6,CELL=52,EXITROW=2;
+const LEVELS=[
+  ["....AA",
+   "..B...",
+   "XXB...",
+   "..B...",
+   "......",
+   "CC...."],
+  ["..AAB.",
+   "..C.B.",
+   "XXC.B.",
+   "..C...",
+   "......",
+   "......"],
+  ["AA..O.",
+   ".B..O.",
+   ".BXXO.",
+   ".B....",
+   "....CC",
+   "DD...."],
+  ["..AAA.",
+   ".....B",
+   "XX...B",
+   "CC...B",
+   "...DDD",
+   "EE.F.."],
+  ["..AABB",
+   "..CD.E",
+   "XXCD.E",
+   "..FGGE",
+   "..F.H.",
+   "..F.H."],
+  ["A..BBC",
+   "A..D.C",
+   "XXED.C",
+   "..EFFF",
+   "..E.GG",
+   "HH...."],
+];
+const COLORS={X:'#e63946',A:'#f4a261',B:'#2a9d8f',C:'#e9c46a',D:'#8ecae6',E:'#bc6c25',F:'#c77dff',G:'#f28482',H:'#84a59d',O:'#90be6d'};
+let cars,grid,sel,moves,level;
+function parse(map){
+  const cells={};
+  for(let r=0;r<SIZE;r++)for(let c=0;c<SIZE;c++){const ch=map[r][c];if(ch!=='.'){(cells[ch]=cells[ch]||[]).push([r,c]);}}
+  const cs=[];
+  for(const id in cells){const list=cells[id].sort((a,b)=>a[0]-b[0]||a[1]-b[1]);
+    const horiz=list.every(p=>p[0]===list[0][0]);
+    cs.push({id,cells:list,orient:horiz?'h':'v',len:list.length});}
+  return cs;
+}
+function loadLevel(i){level=((i%LEVELS.length)+LEVELS.length)%LEVELS.length;
+  cars=parse(LEVELS[level]);moves=0;sel=null;rebuildGrid();
+  document.getElementById('lvl').textContent=level+1;document.getElementById('moves').textContent=0;
+  setStatus('Drive the red car to the right exit!');render();}
+function rebuildGrid(){grid=Array.from({length:SIZE},()=>Array(SIZE).fill('.'));
+  cars.forEach(car=>car.cells.forEach(([r,c])=>grid[r][c]=car.id));}
+function setStatus(t){document.getElementById('status').textContent=t;}
+function render(){
+  const bd=document.getElementById('board');bd.style.width=(SIZE*CELL)+'px';bd.style.height=(SIZE*CELL)+'px';bd.innerHTML='';
+  for(let r=0;r<SIZE;r++)for(let c=0;c<SIZE;c++){const d=document.createElement('div');d.className='cell';
+    d.style.left=c*CELL+'px';d.style.top=r*CELL+'px';d.style.width=CELL+'px';d.style.height=CELL+'px';
+    d.onclick=()=>cellClick(r,c);bd.appendChild(d);}
+  const ex=document.createElement('div');ex.className='exit';ex.textContent='EXIT →';ex.style.right='-2px';ex.style.top=(EXITROW*CELL+CELL/2-8)+'px';ex.style.position='absolute';bd.appendChild(ex);
+  cars.forEach(car=>{const el=document.createElement('div');el.className='car'+(sel===car.id?' sel':'');
+    const r0=Math.min(...car.cells.map(p=>p[0])),c0=Math.min(...car.cells.map(p=>p[1]));
+    el.style.left=(c0*CELL+3)+'px';el.style.top=(r0*CELL+3)+'px';
+    el.style.width=((car.orient==='h'?car.len:1)*CELL-6)+'px';
+    el.style.height=((car.orient==='v'?car.len:1)*CELL-6)+'px';
+    el.style.background=COLORS[car.id]||'#bbb';el.textContent=car.id==='X'?'🚗':car.id;
+    el.onclick=(e)=>{e.stopPropagation();sel=(sel===car.id?null:car.id);render();};
+    bd.appendChild(el);});
+}
+function carById(id){return cars.find(c=>c.id===id);}
+function cellClick(r,c){
+  if(!sel)return;const car=carById(sel);
+  if(car.orient==='h'&&r!==car.cells[0][0])return;
+  if(car.orient==='v'&&c!==car.cells[0][1])return;
+  moveTowards(car,r,c);
+}
+function moveTowards(car,tr,tc){
+  const horiz=car.orient==='h';
+  const headR=Math.min(...car.cells.map(p=>p[0])),headC=Math.min(...car.cells.map(p=>p[1]));
+  let moved=0;
+  if(horiz){
+    if(tc>headC+car.len-1){ // move right
+      let steps=tc-(headC+car.len-1);
+      for(let k=0;k<steps;k++){const nc=headC+car.len+moved;if(nc<SIZE&&grid[car.cells[0][0]][nc]==='.'){shift(car,0,1);moved++;}else break;}
+    } else if(tc<headC){ // move left
+      let steps=headC-tc;
+      for(let k=0;k<steps;k++){const nc=headC-1-moved;if(nc>=0&&grid[car.cells[0][0]][nc]==='.'){shift(car,0,-1);moved++;}else break;}
+    }
+  } else {
+    if(tr>headR+car.len-1){let steps=tr-(headR+car.len-1);
+      for(let k=0;k<steps;k++){const nr=headR+car.len+moved;if(nr<SIZE&&grid[nr][car.cells[0][1]]==='.'){shift(car,1,0);moved++;}else break;}
+    } else if(tr<headR){let steps=headR-tr;
+      for(let k=0;k<steps;k++){const nr=headR-1-moved;if(nr>=0&&grid[nr][car.cells[0][1]]==='.'){shift(car,-1,0);moved++;}else break;}
+    }
+  }
+  if(moved){moves++;document.getElementById('moves').textContent=moves;rebuildGrid();render();checkWin();}
+}
+function shift(car,dr,dc){car.cells=car.cells.map(([r,c])=>[r+dr,c+dc]);rebuildGrid();}
+function checkWin(){const x=carById('X');const maxC=Math.max(...x.cells.map(p=>p[1]));
+  if(x.cells[0][0]===EXITROW&&maxC===SIZE-1){setStatus('🎉 Solved in '+moves+' moves! Try the next level (▶).');sel=null;render();}}
+document.getElementById('prev').onclick=()=>loadLevel(level-1);
+document.getElementById('next').onclick=()=>loadLevel(level+1);
+document.getElementById('reset').onclick=()=>loadLevel(level);
+loadLevel(0);
+</script>
+</body>
+</html>

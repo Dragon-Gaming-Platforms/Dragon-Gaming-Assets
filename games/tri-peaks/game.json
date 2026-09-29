@@ -1,0 +1,9 @@
+{
+  "name": "Tri Peaks Solitaire",
+  "desc": "Scale three peaks of cards by playing any card one rank above or below the waste pile. Chain long runs for a bigger score and clear every peak. Aces wrap around from King to two for extra options.",
+  "controls": "Tap a card adjacent in rank to the waste; tap the stock to draw",
+  "shelf": "Puzzle & Logic",
+  "tags": ["games", "html5", "cards", "solitaire", "puzzle"],
+  "badge": "New",
+  "creator": "Dragon Gaming Platforms"
+}

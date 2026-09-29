@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+<meta name="robots" content="noindex,nofollow">
+<title>Alien Invaders</title>
+<style>
+  *{box-sizing:border-box}html,body{margin:0;height:100%}
+  body{background:#000;color:#eef;font-family:system-ui,Segoe UI,Roboto,Arial,sans-serif;
+    display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;gap:8px;padding:10px;user-select:none;-webkit-user-select:none}
+  h1{margin:0;font-size:clamp(18px,5vw,26px)}
+  #status{min-height:18px;font-weight:700;color:#7fff7f;text-align:center}
+  canvas{background:#02020a;border-radius:8px;touch-action:none;max-width:96vw;height:auto}
+  .ctrls{display:grid;grid-template-columns:repeat(3,64px);gap:8px}
+  .ctrls button{background:#123;color:#7fff7f;border:1px solid #2a5;border-radius:8px;padding:14px 0;font-weight:800;cursor:pointer}
+  .hint{font-size:12px;opacity:.7;text-align:center}
+</style>
+</head>
+<body>
+<h1>Alien Invaders</h1>
+<div id="status">Defend Earth! ← → move · Space fire</div>
+<canvas id="c" width="400" height="420"></canvas>
+<div class="ctrls"><button id="left">◀</button><button id="fire">FIRE</button><button id="right">▶</button></div>
+<div class="hint">Clear every wave. They speed up as their numbers fall.</div>
+<script>
+const cv=document.getElementById('c'),ctx=cv.getContext('2d');
+const W=cv.width,H=cv.height;
+let ship,aliens,bullets,bombs,dir,score,lives,wave,over,win,keys,fireCd,moveTimer;
+function reset(){ship={x:W/2,w:34,h:14};bullets=[];bombs=[];score=0;lives=3;wave=1;over=false;win=false;keys={};fireCd=0;
+  makeWave();setStatus('Wave 1 — clear them all!');last=0;requestAnimationFrame(loop);}
+function makeWave(){aliens=[];dir=1;moveTimer=0;
+  const rows=4,cols=8;
+  for(let r=0;r<rows;r++)for(let c=0;c<cols;c++)aliens.push({x:40+c*40,y:50+r*32,w:26,h:18,alive:true,row:r});
+}
+function setStatus(t){document.getElementById('status').textContent=t;}
+document.addEventListener('keydown',e=>{if(e.key==='ArrowLeft')keys.l=1;if(e.key==='ArrowRight')keys.r=1;
+  if(e.key===' '){e.preventDefault();fire();}if(over&&(e.key==='Enter'||e.key===' '))maybeRestart();});
+document.addEventListener('keyup',e=>{if(e.key==='ArrowLeft')keys.l=0;if(e.key==='ArrowRight')keys.r=0;});
+function press(id,on){const b=document.getElementById(id);
+  const set=(v)=>(e)=>{if(id==='fire'){if(v)fire();}else keys[id[0]]=v;e.preventDefault&&e.preventDefault();};
+  b.addEventListener('mousedown',set(1));b.addEventListener('mouseup',set(0));b.addEventListener('mouseleave',set(0));
+  b.addEventListener('touchstart',set(1),{passive:false});b.addEventListener('touchend',set(0),{passive:false});}
+press('left');press('right');press('fire');
+function fire(){if(over){maybeRestart();return;}if(fireCd>0)return;if(bullets.length>=3)return;
+  bullets.push({x:ship.x,y:H-42,r:3});fireCd=14;}
+function maybeRestart(){if(over)reset();}
+let last=0;
+function loop(t){if(over){draw();return;}
+  if(!last)last=t;const dt=Math.min(2.5,(t-last)/16.67);last=t;
+  if(keys.l)ship.x-=4.2*dt;if(keys.r)ship.x+=4.2*dt;
+  ship.x=Math.max(20,Math.min(W-20,ship.x));
+  if(fireCd>0)fireCd-=dt;
+  // aliens move stepwise; speed scales with fewer aliens
+  const alive=aliens.filter(a=>a.alive);
+  const stepEvery=Math.max(8,4+alive.length*1.4);
+  moveTimer+=dt;
+  if(moveTimer>=stepEvery){moveTimer=0;
+    let hitEdge=false;alive.forEach(a=>{if((dir>0&&a.x+a.w/2+8>W)||(dir<0&&a.x-a.w/2-8<0))hitEdge=true;});
+    if(hitEdge){dir*=-1;aliens.forEach(a=>a.y+=16);}else{aliens.forEach(a=>a.x+=dir*10);}
+    // random bombs
+    if(alive.length&&Math.random()<0.5){const shooter=alive[Math.floor(Math.random()*alive.length)];bombs.push({x:shooter.x,y:shooter.y+10,r:3});}
+  }
+  bullets.forEach(b=>b.y-=7*dt);bullets=bullets.filter(b=>b.y>-10);
+  bombs.forEach(b=>b.y+=3.4*dt);bombs=bombs.filter(b=>b.y<H+10);
+  // bullet hits
+  bullets.forEach(b=>{aliens.forEach(a=>{if(a.alive&&Math.abs(b.x-a.x)<a.w/2+3&&Math.abs(b.y-a.y)<a.h/2+3){a.alive=false;b.y=-99;score+=(4-a.row)*10;setStatus('Score: '+score);}});});
+  bullets=bullets.filter(b=>b.y>-10);
+  // bomb hits ship
+  bombs.forEach(b=>{if(Math.abs(b.x-ship.x)<ship.w/2&&b.y>H-46&&b.y<H-26){b.y=H+99;hitShip();}});
+  bombs=bombs.filter(b=>b.y<H+10);
+  // aliens reach bottom
+  if(alive.some(a=>a.y+a.h/2>=H-46)){lives=0;hitShip();}
+  if(!aliens.some(a=>a.alive)){wave++;score+=50;makeWave();setStatus('Wave '+wave+'!');}
+  draw();requestAnimationFrame(loop);
+}
+function hitShip(){lives--;setStatus('Hit! Lives: '+Math.max(0,lives));bombs=[];
+  if(lives<=0){over=true;setStatus('Game over! Score '+score+'. Tap FIRE to restart.');}}
+function draw(){
+  ctx.fillStyle='#02020a';ctx.fillRect(0,0,W,H);
+  aliens.forEach(a=>{if(!a.alive)return;ctx.fillStyle=['#ff6b6b','#ffd93b','#7fff7f','#6bd0ff'][a.row%4];
+    ctx.fillRect(a.x-a.w/2,a.y-a.h/2,a.w,a.h);
+    ctx.fillStyle='#02020a';ctx.fillRect(a.x-6,a.y-2,3,3);ctx.fillRect(a.x+3,a.y-2,3,3);});
+  ctx.fillStyle='#7fff7f';bullets.forEach(b=>ctx.fillRect(b.x-1.5,b.y-6,3,10));
+  ctx.fillStyle='#ff6b6b';bombs.forEach(b=>ctx.fillRect(b.x-1.5,b.y-5,3,10));
+  // ship
+  ctx.fillStyle='#6bd0ff';ctx.fillRect(ship.x-ship.w/2,H-40,ship.w,ship.h);ctx.fillRect(ship.x-3,H-48,6,8);
+  ctx.fillStyle='#fff';ctx.font='13px sans-serif';ctx.textAlign='left';ctx.fillText('Score '+score,10,20);
+  ctx.textAlign='right';ctx.fillText('Lives '+Math.max(0,lives)+'  Wave '+wave,W-10,20);
+}
+reset();
+</script>
+</body>
+</html>
