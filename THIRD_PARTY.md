@@ -16,3 +16,4 @@ never invent a license.
 | Brick Breaker | `games/brick-breaker/` | Original build (Dragon Gaming Platforms) | Original — first-party, no third-party assets | 2026-09-29 |
 | Maze Escape | `games/maze-escape/` | Original build (Dragon Gaming Platforms) | Original — first-party, no third-party assets | 2026-09-29 |
 | Whack-a-Mole | `games/whack-a-mole/` | Original build (Dragon Gaming Platforms) | Original — first-party, no third-party assets | 2026-09-29 |
+| Shell Shockers | `games/shell-shockers/` | Official game © Blue Wizard Digital (https://shellshock.io/) | Official-site iframe embed only — no game files copied or hosted (proprietary live multiplayer title) | 2026-09-29 |
