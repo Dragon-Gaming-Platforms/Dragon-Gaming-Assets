@@ -1,0 +1,9 @@
+{
+  "name": "Golf Solitaire",
+  "desc": "Clear seven columns by sending cards to the waste one rank up or down. Around-the-corner play means Aces link Kings and twos. Draw from the stock when you stall and try to empty the whole tableau.",
+  "controls": "Tap an exposed card adjacent in rank to the waste; tap the stock to draw",
+  "shelf": "Puzzle & Logic",
+  "tags": ["games", "html5", "cards", "solitaire", "puzzle"],
+  "badge": "New",
+  "creator": "Dragon Gaming Platforms"
+}

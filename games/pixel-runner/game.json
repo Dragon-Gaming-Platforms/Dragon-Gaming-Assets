@@ -1,0 +1,9 @@
+{
+  "name": "Pixel Runner",
+  "desc": "An endless dash through a neon night. Leap over cacti and duck beneath birds as the world scrolls faster and faster. Hold jump to clear the tall ones and chase a new distance record every run.",
+  "controls": "Space / tap to jump (hold for higher) · ↓ to duck",
+  "shelf": "Arcade & Action",
+  "tags": ["games", "html5", "runner", "arcade", "endless"],
+  "badge": "New",
+  "creator": "Dragon Gaming Platforms"
+}

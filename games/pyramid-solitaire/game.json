@@ -1,0 +1,9 @@
+{
+  "name": "Pyramid Solitaire",
+  "desc": "Peel away a pyramid of cards by removing pairs that add up to 13. Kings clear on their own, and the stock keeps the options flowing. Plan your matches and expose the cards beneath to reach the top.",
+  "controls": "Tap two exposed cards summing to 13; tap the stock to draw",
+  "shelf": "Puzzle & Logic",
+  "tags": ["games", "html5", "cards", "solitaire", "puzzle"],
+  "badge": "New",
+  "creator": "Dragon Gaming Platforms"
+}

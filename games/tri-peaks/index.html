@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<title>Tri Peaks Solitaire</title>
+<style>
+  *{box-sizing:border-box}body{margin:0;min-height:100vh;background:#0b3d2e;color:#eef;
+    font-family:system-ui,Segoe UI,Roboto,Arial,sans-serif;display:flex;flex-direction:column;align-items:center;gap:10px;padding:12px}
+  h1{margin:2px 0;font-size:clamp(18px,5vw,24px)}
+  #status{min-height:18px;font-weight:700;color:#ffe08a;text-align:center;font-size:14px}
+  #board{position:relative;width:380px;height:180px;margin:0 auto;max-width:96vw}
+  .card{position:absolute;width:40px;height:56px;background:#fff;border-radius:6px;color:#111;
+    display:flex;align-items:center;justify-content:center;font-weight:800;font-size:14px;border:2px solid #fff}
+  .card.red{color:#c62828}
+  .card.face{cursor:pointer}.card.face:hover{transform:translateY(-3px)}
+  .card.back{background:linear-gradient(135deg,#274690,#12203f);border-color:#12203f;color:transparent}
+  .card.playable{outline:2px solid #ffd000}
+  .bottom{display:flex;gap:16px;align-items:center;justify-content:center}
+  .col{display:flex;flex-direction:column;align-items:center;gap:4px}
+  .lbl{font-size:12px;opacity:.85}
+  .slot{width:40px;height:56px;border-radius:6px;border:2px dashed rgba(255,255,255,.4)}
+  button{background:#ffcc33;color:#20150a;border:0;border-radius:9px;padding:8px 13px;font-weight:800;cursor:pointer}
+</style>
+</head>
+<body>
+<h1>Tri Peaks Solitaire</h1>
+<div id="status">Clear the peaks by playing cards one rank above or below the waste card.</div>
+<div id="board"></div>
+<div class="bottom">
+  <div class="col"><div class="lbl">Stock (<b id="sc">0</b>)</div><div id="stock" class="slot"></div></div>
+  <div class="col"><div class="lbl">Waste</div><div id="waste" class="slot"></div></div>
+  <div class="col"><div class="lbl">Score</div><div id="score" style="font-weight:800;font-size:20px">0</div></div>
+  <button id="newg">New Game</button>
+</div>
+<div class="lbl">Aces are high or low (A↔2 and A↔K both work). Longer streaks score more!</div>
+<script>
+const SUITS=['♠','♥','♦','♣'],RANKS=['A','2','3','4','5','6','7','8','9','10','J','Q','K'];
+function isRed(s){return s==='♥'||s==='♦';}
+// tri-peaks layout: 28 cards. rows: 3 peaks(3), 6, 9, 10 (base). indices & children.
+let cards,layout,stock,waste,score,streak,over;
+function buildLayout(){
+  // column-based tri-peaks: a card at column c covers row+1 cards at c-1 and c+1
+  const cols=[
+    [3,9,15],                       // row0: 3 peaks
+    [2,4,8,10,14,16],               // row1: 6
+    [1,3,5,7,9,11,13,15,17],        // row2: 9
+    [0,2,4,6,8,10,12,14,16,18],     // row3: 10 base
+  ];
+  const nodes=[];
+  cols.forEach((row,r)=>row.forEach(col=>nodes.push({r,col,x:col*18+6,y:r*36,children:[]})));
+  const idxOf=(r,col)=>nodes.findIndex(n=>n.r===r&&n.col===col);
+  nodes.forEach(n=>{if(n.r<3){[n.col-1,n.col+1].forEach(cc=>{const ci=idxOf(n.r+1,cc);if(ci>=0)n.children.push(ci);});}});
+  return nodes;
+}
+function deal(){
+  let deck=[];for(const s of SUITS)for(const r of RANKS)deck.push({s,r});
+  for(let i=deck.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[deck[i],deck[j]]=[deck[j],deck[i]];}
+  layout=buildLayout();
+  cards=layout.map(n=>({...n,card:deck.pop(),removed:false}));
+  stock=deck;waste=[deck.length?deck.pop():null];
+  // waste should come from stock: put one card to waste to start
+  if(!waste[0]){waste=[stock.pop()];}
+  score=0;streak=0;over=false;setStatus('Play a card one rank above or below the waste.');render();
+}
+function setStatus(t){document.getElementById('status').textContent=t;}
+function uncovered(i){return cards[i].children.every(ci=>cards[ci].removed);}
+function adjacent(a,b){const va=RANKS.indexOf(a.r),vb=RANKS.indexOf(b.r);
+  const d=Math.abs(va-vb);return d===1||d===12;} // 12 handles A(0)<->K(12) wrap
+function render(){
+  const bd=document.getElementById('board');bd.innerHTML='';
+  const top=waste[waste.length-1];
+  cards.forEach((n,i)=>{if(n.removed)return;const face=uncovered(i);const c=n.card;
+    const el=document.createElement('div');
+    el.className='card '+(face?('face'+(isRed(c.s)?' red':'')):'back')+(face&&top&&adjacent(c,top)?' playable':'');
+    el.style.left=n.x+'px';el.style.top=n.y+'px';el.style.zIndex=n.r+1;
+    el.textContent=face?c.r+c.s:'';
+    if(face)el.onclick=()=>play(i);
+    bd.appendChild(el);});
+  const st=document.getElementById('stock');st.className='slot';st.style.cursor=stock.length?'pointer':'default';
+  st.style.background=stock.length?'linear-gradient(135deg,#274690,#12203f)':'';st.onclick=drawStock;
+  document.getElementById('sc').textContent=stock.length;
+  const w=document.getElementById('waste');w.innerHTML='';
+  if(top){w.className='card'+(isRed(top.s)?' red':'');w.textContent=top.r+top.s;}else{w.className='slot';}
+  document.getElementById('score').textContent=score;
+  if(!over&&cards.every(n=>n.removed)){over=true;score+=stock.length*10;document.getElementById('score').textContent=score;
+    setStatus('🎉 All peaks cleared — you win!');}
+}
+function play(i){if(over)return;const top=waste[waste.length-1];
+  if(!top||!adjacent(cards[i].card,top)){setStatus('That card must be one rank above or below the waste.');return;}
+  cards[i].removed=true;waste.push(cards[i].card);streak++;score+=streak*5;
+  setStatus('Nice! Streak '+streak);render();}
+function drawStock(){if(over)return;if(!stock.length){setStatus('Stock is empty.');return;}
+  waste.push(stock.pop());streak=0;render();}
+document.getElementById('newg').onclick=deal;
+deal();
+</script>
+</body>
+</html>

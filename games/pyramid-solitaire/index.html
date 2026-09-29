@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<title>Pyramid Solitaire</title>
+<style>
+  *{box-sizing:border-box}body{margin:0;min-height:100vh;background:#0b6136;color:#eef;
+    font-family:system-ui,Segoe UI,Roboto,Arial,sans-serif;display:flex;flex-direction:column;align-items:center;gap:10px;padding:12px}
+  h1{margin:2px 0;font-size:clamp(18px,5vw,24px)}
+  #status{min-height:18px;font-weight:700;color:#ffe08a;text-align:center;font-size:14px}
+  #pyr{position:relative;width:340px;height:270px;margin:0 auto}
+  .card{position:absolute;width:42px;height:58px;background:#fff;border-radius:6px;color:#111;
+    display:flex;align-items:center;justify-content:center;font-weight:800;font-size:15px;border:2px solid #fff;cursor:pointer}
+  .card.red{color:#c62828}
+  .card.cov{cursor:default;filter:brightness(.72)}
+  .card.sel{outline:3px solid #ffd000;z-index:50}
+  .bottom{display:flex;gap:16px;align-items:center;justify-content:center;margin-top:6px}
+  .slot{width:42px;height:58px;border-radius:6px;border:2px dashed rgba(255,255,255,.4);display:flex;align-items:center;justify-content:center;color:rgba(255,255,255,.5)}
+  .col{display:flex;flex-direction:column;align-items:center;gap:4px}
+  .lbl{font-size:12px;opacity:.85}
+  button{background:#ffcc33;color:#20150a;border:0;border-radius:9px;padding:8px 13px;font-weight:800;cursor:pointer}
+</style>
+</head>
+<body>
+<h1>Pyramid Solitaire</h1>
+<div id="status">Remove pairs that add up to 13. Kings (13) go on their own.</div>
+<div id="pyr"></div>
+<div class="bottom">
+  <div class="col"><div class="lbl">Stock</div><div id="stock" class="slot">🂠</div></div>
+  <div class="col"><div class="lbl">Waste</div><div id="waste" class="slot"></div></div>
+  <button id="newg">New Game</button>
+</div>
+<div class="lbl">A=1 · J=11 · Q=12 · K=13 · Recycles left: <b id="rec">2</b></div>
+<script>
+const SUITS=['♠','♥','♦','♣'],RANKS=['A','2','3','4','5','6','7','8','9','10','J','Q','K'];
+function val(r){return RANKS.indexOf(r)+1;}
+function isRed(s){return s==='♥'||s==='♦';}
+let rows,removed,stock,waste,sel,recycles,over;
+function deal(){
+  let deck=[];for(const s of SUITS)for(const r of RANKS)deck.push({s,r});
+  for(let i=deck.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[deck[i],deck[j]]=[deck[j],deck[i]];}
+  rows=[];removed=[];for(let r=0;r<7;r++){rows[r]=[];removed[r]=[];for(let i=0;i<=r;i++){rows[r].push(deck.pop());removed[r].push(false);}}
+  stock=deck;waste=[];sel=null;recycles=2;over=false;
+  setStatus('Remove pairs adding to 13. Kings go alone.');render();
+}
+function setStatus(t){document.getElementById('status').textContent=t;}
+function exposed(r,i){if(r===6)return true;return removed[r+1][i]&&removed[r+1][i+1];}
+function render(){
+  const pyr=document.getElementById('pyr');pyr.innerHTML='';
+  const cx=170,ox=44,oy=34;
+  for(let r=0;r<7;r++)for(let i=0;i<=r;i++){
+    if(removed[r][i])continue;const c=rows[r][i];
+    const el=document.createElement('div');const ex=exposed(r,i);
+    el.className='card'+(isRed(c.s)?' red':'')+(ex?'':' cov')+(sel&&sel.type==='pyr'&&sel.r===r&&sel.i===i?' sel':'');
+    el.style.left=(cx+(i-r/2)*ox-21)+'px';el.style.top=(r*oy)+'px';
+    el.textContent=c.r+c.s;if(ex)el.onclick=()=>clickCard({type:'pyr',r,i});
+    pyr.appendChild(el);
+  }
+  const st=document.getElementById('stock');st.textContent=stock.length?'🂠':'';
+  st.className='slot';st.style.cursor='pointer';st.onclick=drawStock;
+  const w=document.getElementById('waste');w.innerHTML='';
+  if(waste.length){const c=waste[waste.length-1];w.className='card'+(isRed(c.s)?' red':'')+(sel&&sel.type==='waste'?' sel':'');
+    w.textContent=c.r+c.s;w.onclick=()=>clickCard({type:'waste'});}
+  else{w.className='slot';w.textContent='';w.onclick=null;}
+  document.getElementById('rec').textContent=recycles;
+  if(!over&&rows.every((row,r)=>row.every((c,i)=>removed[r][i]))){over=true;setStatus('🎉 Pyramid cleared — you win!');}
+}
+function cardVal(sel){if(sel.type==='waste')return val(waste[waste.length-1].r);return val(rows[sel.r][sel.i]);}
+function removeSel(s){if(s.type==='waste')waste.pop();else removed[s.r][s.i]=true;}
+function clickCard(s){
+  if(over)return;const v=cardVal(s);
+  if(v===13){removeSel(s);sel=null;render();return;}
+  if(!sel){sel=s;render();return;}
+  if(sel.type===s.type&&sel.r===s.r&&sel.i===s.i){sel=null;render();return;}
+  if(sel.type==='waste'&&s.type==='waste'){sel=s;render();return;}
+  if(cardVal(sel)+v===13){removeSel(sel);removeSel(s);sel=null;render();}
+  else{sel=s;setStatus('Those don\u2019t add to 13.');render();}
+}
+function drawStock(){if(over)return;sel=null;
+  if(stock.length){waste.push(stock.pop());render();return;}
+  if(recycles>0){recycles--;stock=waste.reverse();waste=[];setStatus('Recycled the waste pile.');render();}
+  else setStatus('No recycles left!');
+}
+document.getElementById('newg').onclick=deal;
+deal();
+</script>
+</body>
+</html>

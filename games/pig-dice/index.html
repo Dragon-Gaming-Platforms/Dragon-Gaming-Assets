@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<title>Pig Dice</title>
+<style>
+  *{box-sizing:border-box}body{margin:0;min-height:100vh;background:radial-gradient(circle at 50% 0,#3a2a12,#1a1206);
+    color:#eef;font-family:system-ui,Segoe UI,Roboto,Arial,sans-serif;display:flex;flex-direction:column;align-items:center;gap:14px;padding:16px}
+  h1{margin:2px 0;font-size:clamp(18px,5vw,26px)}
+  #status{min-height:20px;font-weight:700;color:#ffe08a;text-align:center;max-width:440px}
+  .scores{display:flex;gap:14px}
+  .pl{background:#2a1f10;border:2px solid #5a4520;border-radius:12px;padding:12px 18px;text-align:center;min-width:130px}
+  .pl.active{border-color:#ffcc33;box-shadow:0 0 14px #ffcc3355}
+  .pl .big{font-size:32px;font-weight:800;color:#ffd76a}
+  .die{width:92px;height:92px;background:#fff;color:#111;border-radius:16px;display:flex;align-items:center;justify-content:center;font-size:60px;font-weight:800}
+  .turn{font-size:15px}
+  .ctr{display:flex;gap:12px}
+  button{background:#ffcc33;color:#20150a;border:0;border-radius:10px;padding:12px 22px;font-weight:800;font-size:16px;cursor:pointer}
+  button:disabled{opacity:.4;cursor:default}
+  .hint{font-size:12px;opacity:.7;text-align:center;max-width:420px}
+</style>
+</head>
+<body>
+<h1>Pig Dice</h1>
+<div id="status">First to 100 wins. Roll to build points — but a 1 wipes your turn!</div>
+<div class="scores">
+  <div class="pl" id="pYou"><div>You</div><div class="big" id="sYou">0</div></div>
+  <div class="pl" id="pCpu"><div>Computer</div><div class="big" id="sCpu">0</div></div>
+</div>
+<div class="die" id="die">–</div>
+<div class="turn">This turn: <b id="turn">0</b></div>
+<div class="ctr"><button id="roll">Roll</button><button id="hold">Hold</button></div>
+<div class="hint">Roll to add the die to your turn total, or Hold to bank it. Roll a 1 and you lose the turn total and your turn.</div>
+<script>
+const PIP=['','⚀','⚁','⚂','⚃','⚄','⚅'];
+let you,cpu,turnPts,cur,over;
+function reset(){you=0;cpu=0;turnPts=0;cur='you';over=false;
+  setStatus('Your turn! Roll to build points.');document.getElementById('die').textContent='–';render();}
+function setStatus(t){document.getElementById('status').textContent=t;}
+function render(){
+  document.getElementById('sYou').textContent=you;document.getElementById('sCpu').textContent=cpu;
+  document.getElementById('turn').textContent=turnPts;
+  document.getElementById('pYou').classList.toggle('active',cur==='you'&&!over);
+  document.getElementById('pCpu').classList.toggle('active',cur==='cpu'&&!over);
+  const my=cur==='you'&&!over;
+  document.getElementById('roll').disabled=!my;document.getElementById('hold').disabled=!my;
+}
+function showDie(d){document.getElementById('die').textContent=PIP[d];}
+document.getElementById('roll').onclick=()=>{if(cur!=='you'||over)return;
+  const d=1+Math.floor(Math.random()*6);showDie(d);
+  if(d===1){turnPts=0;setStatus('You rolled a 1 — turn lost!');render();setTimeout(()=>{cur='cpu';turnPts=0;render();cpuTurn();},900);}
+  else{turnPts+=d;setStatus('Rolled '+d+'. Roll again or hold.');render();}
+};
+document.getElementById('hold').onclick=()=>{if(cur!=='you'||over)return;
+  you+=turnPts;turnPts=0;render();
+  if(you>=100){over=true;setStatus('🎉 You banked to '+you+' and win! Tap the die to play again.');render();return;}
+  setStatus('Banked! Computer\u2019s turn.');cur='cpu';render();setTimeout(cpuTurn,700);
+};
+function cpuTurn(){if(over)return;cur='cpu';turnPts=0;render();rollCpu();}
+function rollCpu(){
+  if(over)return;
+  // strategy: hold at 20+, or if reaching 100, and push a bit when far behind
+  const target=(cpu<you-20)?26:20;
+  if(turnPts>=target||cpu+turnPts>=100){
+    cpu+=turnPts;turnPts=0;render();
+    if(cpu>=100){over=true;setStatus('Computer banked to '+cpu+' and wins. Tap the die to play again.');render();return;}
+    setStatus('Computer holds at '+cpu+'. Your turn!');cur='you';turnPts=0;render();return;
+  }
+  const d=1+Math.floor(Math.random()*6);showDie(d);
+  if(d===1){turnPts=0;setStatus('Computer rolled a 1 — turn lost! Your turn.');cur='you';render();return;}
+  turnPts+=d;setStatus('Computer rolled '+d+' (turn '+turnPts+')...');render();setTimeout(rollCpu,850);
+}
+document.addEventListener('keydown',e=>{if(over)return;if(e.key==='r')document.getElementById('roll').click();if(e.key==='h')document.getElementById('hold').click();});
+// New game on click of title area? add simple restart when over via die click
+document.getElementById('die').onclick=()=>{if(over)reset();};
+reset();
+</script>
+</body>
+</html>

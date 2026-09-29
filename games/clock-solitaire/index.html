@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<title>Clock Solitaire</title>
+<style>
+  *{box-sizing:border-box}body{margin:0;min-height:100vh;background:#123524;color:#eef;
+    font-family:system-ui,Segoe UI,Roboto,Arial,sans-serif;display:flex;flex-direction:column;align-items:center;gap:12px;padding:14px}
+  h1{margin:2px 0;font-size:clamp(18px,5vw,24px)}
+  #status{min-height:18px;font-weight:700;color:#ffe08a;text-align:center;font-size:14px;max-width:460px}
+  #clock{position:relative;width:320px;height:320px}
+  .pile{position:absolute;width:46px;height:64px;transform:translate(-50%,-50%);display:flex;align-items:center;justify-content:center;
+    border-radius:7px;font-weight:800;font-size:15px;cursor:default}
+  .pile .card{width:46px;height:64px;border-radius:7px;display:flex;align-items:center;justify-content:center;border:2px solid #fff}
+  .up{background:#fff;color:#111}.up.red{color:#c62828}
+  .down{background:linear-gradient(135deg,#2f8f5b,#1a5636);border-color:#12402a;color:transparent}
+  .done{outline:3px solid #7cff8a}
+  .active{outline:3px solid #ffd000;cursor:pointer}
+  .active:hover{filter:brightness(1.1)}
+  .cnt{position:absolute;bottom:-14px;left:50%;transform:translateX(-50%);font-size:11px;opacity:.8}
+  .hour{position:absolute;transform:translate(-50%,-50%);font-size:11px;opacity:.6}
+  button{background:#ffcc33;color:#20150a;border:0;border-radius:9px;padding:9px 15px;font-weight:800;cursor:pointer}
+  .lbl{font-size:12px;opacity:.85;text-align:center;max-width:420px}
+</style>
+</head>
+<body>
+<h1>Clock Solitaire</h1>
+<div id="status">Flip the center pile. Each card goes to its "hour" — can you turn up all 52 before the 4th King?</div>
+<div id="clock"></div>
+<button id="newg">New Game</button>
+<div class="lbl">A luck-based classic: click the highlighted pile to reveal its top card and send it home. You lose if the 4th King appears with cards still face-down.</div>
+<script>
+const SUITS=['♠','♥','♦','♣'],RANKS=['A','2','3','4','5','6','7','8','9','10','J','Q','K'];
+function isRed(s){return s==='♥'||s==='♦';}
+function pileOf(c){const v=RANKS.indexOf(c.r)+1;return v===13?12:v-1;} // 0..11 hours, 12 center
+let piles,current,over,placed,kings;
+function deal(){
+  let deck=[];for(const s of SUITS)for(const r of RANKS)deck.push({s,r});
+  for(let i=deck.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[deck[i],deck[j]]=[deck[j],deck[i]];}
+  piles=[];for(let i=0;i<13;i++)piles.push({down:[],up:[]});
+  for(let i=0;i<13;i++)for(let k=0;k<4;k++)piles[i].down.push(deck.pop());
+  current=12;over=false;placed=0;kings=0;
+  setStatus('Click the highlighted center pile to begin.');render();
+}
+function setStatus(t){document.getElementById('status').textContent=t;}
+function pos(i){ // returns {x,y} center for pile i (0..11 clock, 12 center)
+  const cx=160,cy=160,R=118;
+  if(i===12)return{x:cx,y:cy};
+  const hour=i+1;const ang=(-90+hour*30)*Math.PI/180;
+  return{x:cx+R*Math.cos(ang),y:cy+R*Math.sin(ang)};
+}
+function render(){
+  const cl=document.getElementById('clock');cl.innerHTML='';
+  piles.forEach((p,i)=>{const {x,y}=pos(i);
+    const el=document.createElement('div');el.className='pile';
+    const complete=p.up.length===4;const active=!over&&i===current&&p.down.length>0;
+    el.style.left=x+'px';el.style.top=y+'px';
+    const inner=document.createElement('div');
+    if(p.up.length){const c=p.up[p.up.length-1];inner.className='card up'+(isRed(c.s)?' red':'');inner.textContent=c.r+c.s;}
+    else{inner.className='card down';}
+    if(complete)inner.classList.add('done');
+    if(active){inner.classList.add('active');inner.onclick=()=>flip();}
+    el.appendChild(inner);
+    const cnt=document.createElement('div');cnt.className='cnt';cnt.textContent=p.up.length+'/4';el.appendChild(cnt);
+    cl.appendChild(el);
+    // hour label
+    const lab=document.createElement('div');lab.className='hour';const lp=pos(i);
+    lab.style.left=(lp.x)+'px';lab.style.top=(lp.y-44)+'px';
+    lab.textContent=i===12?'K':(i+1);cl.appendChild(lab);
+  });
+}
+function flip(){
+  if(over)return;const p=piles[current];if(!p.down.length)return;
+  const c=p.down.pop();const target=pileOf(c);piles[target].up.push(c);placed++;
+  if(c.r==='K')kings++;
+  current=target;
+  render();
+  if(placed===52){over=true;setStatus('🎉 Amazing — all 52 turned up! You beat the clock!');return;}
+  if(!piles[current].down.length){
+    over=true;
+    setStatus(`Stuck! The 4th King turned up with ${52-placed} cards still face-down. (Odds of winning are about 1 in 13.) New game?`);
+    return;
+  }
+  setStatus(`Placed ${c.r}${c.s} at ${target===12?'center (K)':(target+1)+" o'clock"}. Keep flipping!`);
+}
+document.getElementById('newg').onclick=deal;
+deal();
+</script>
+</body>
+</html>

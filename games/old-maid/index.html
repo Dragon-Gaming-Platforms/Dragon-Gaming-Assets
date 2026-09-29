@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<title>Old Maid</title>
+<style>
+  *{box-sizing:border-box}body{margin:0;min-height:100vh;background:radial-gradient(circle at 50% 0,#3a2350,#160d26);
+    color:#eef;font-family:system-ui,Segoe UI,Roboto,Arial,sans-serif;display:flex;flex-direction:column;align-items:center;gap:12px;padding:14px}
+  h1{margin:4px 0;font-size:clamp(18px,5vw,26px)}
+  #status{min-height:20px;font-weight:700;color:#ffe08a;text-align:center;max-width:520px}
+  .lbl{font-size:13px;opacity:.85}
+  .row{display:flex;flex-wrap:wrap;gap:5px;justify-content:center}
+  .card{width:44px;height:62px;background:#fff;border-radius:6px;color:#111;display:flex;align-items:center;justify-content:center;
+    font-weight:800;font-size:15px;border:2px solid #fff}
+  .card.red{color:#c62828}
+  .card.back{background:linear-gradient(135deg,#7b2ff7,#3a1d80);border-color:#241155;cursor:pointer;color:transparent}
+  .card.back:hover{transform:translateY(-5px)}
+  .col{display:flex;flex-direction:column;align-items:center;gap:5px}
+  button{background:#ffcc33;color:#20150a;border:0;border-radius:9px;padding:9px 15px;font-weight:800;cursor:pointer}
+</style>
+</head>
+<body>
+<h1>Old Maid</h1>
+<div id="status">Draw a card from the computer. Match ranks to discard pairs — don't be left with the lone Queen!</div>
+<div class="col"><div class="lbl">Computer's hand (tap one to draw)</div><div class="row" id="cpu"></div></div>
+<div class="lbl">Pairs discarded — You: <b id="pp">0</b> · Computer: <b id="cp">0</b></div>
+<div class="col"><div class="lbl">Your hand</div><div class="row" id="hand"></div></div>
+<button id="newg" style="display:none">New Game</button>
+<script>
+const SUITS=['♠','♥','♦','♣'],RANKS=['A','2','3','4','5','6','7','8','9','10','J','Q','K'];
+let player,cpu,pPairs,cPairs,turn,over;
+function isRed(s){return s==='♥'||s==='♦';}
+function deal(){
+  let deck=[];for(const s of SUITS)for(const r of RANKS)deck.push({s,r});
+  deck=deck.filter(c=>!(c.r==='Q'&&c.s==='♣')); // remove one queen -> lone Old Maid remains
+  for(let i=deck.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[deck[i],deck[j]]=[deck[j],deck[i]];}
+  player=[];cpu=[];deck.forEach((c,i)=>(i%2?cpu:player).push(c));
+  pPairs=0;cPairs=0;over=false;turn='player';
+  pPairs+=discardPairs(player);cPairs+=discardPairs(cpu);
+  document.getElementById('newg').style.display='none';
+  setStatus('Your turn — tap one of the computer\u2019s cards to draw it.');render();
+}
+function setStatus(t){document.getElementById('status').textContent=t;}
+function discardPairs(hand){ // remove cards in rank-pairs; returns number of pairs removed
+  const byRank={};hand.forEach(c=>{(byRank[c.r]=byRank[c.r]||[]).push(c);});
+  let pairs=0;
+  for(const r in byRank){const arr=byRank[r];while(arr.length>=2){const a=arr.pop(),b=arr.pop();
+    hand.splice(hand.indexOf(a),1);hand.splice(hand.indexOf(b),1);pairs++;}}
+  return pairs;
+}
+function drawInto(hand,from,idx){const c=from.splice(idx,1)[0];
+  // check pair with existing same rank
+  const match=hand.findIndex(x=>x.r===c.r);
+  if(match>=0){hand.splice(match,1);return{card:c,paired:true};}
+  hand.push(c);return{card:c,paired:false};}
+function render(){
+  const cpuEl=document.getElementById('cpu');cpuEl.innerHTML='';
+  cpu.forEach((c,i)=>{const e=document.createElement('div');e.className='card back';
+    if(turn==='player'&&!over)e.onclick=()=>playerDraw(i);cpuEl.appendChild(e);});
+  if(cpu.length===0){const e=document.createElement('div');e.className='lbl';e.textContent='(empty)';cpuEl.appendChild(e);}
+  const hEl=document.getElementById('hand');hEl.innerHTML='';
+  player.slice().sort((a,b)=>RANKS.indexOf(a.r)-RANKS.indexOf(b.r)).forEach(c=>{
+    const e=document.createElement('div');e.className='card'+(isRed(c.s)?' red':'');e.textContent=c.r+c.s;hEl.appendChild(e);});
+  if(player.length===0){const e=document.createElement('div');e.className='lbl';e.textContent='(empty)';hEl.appendChild(e);}
+  document.getElementById('pp').textContent=pPairs;document.getElementById('cp').textContent=cPairs;
+}
+function checkEnd(){
+  if(player.length===0&&cpu.length===1){finish('cpu');return true;}
+  if(cpu.length===0&&player.length===1){finish('player');return true;}
+  if(player.length===0&&cpu.length===0){finish('draw');return true;}
+  return false;
+}
+function playerDraw(i){if(turn!=='player'||over)return;
+  const res=drawInto(player,cpu,i);
+  setStatus(res.paired?`You drew ${res.card.r}${res.card.s} and discarded a pair!`:`You drew ${res.card.r}${res.card.s}.`);
+  render();if(checkEnd())return;
+  turn='cpu';render();setTimeout(cpuDraw,900);
+}
+function cpuDraw(){if(over)return;
+  if(player.length===0){if(checkEnd())return;}
+  const i=Math.floor(Math.random()*player.length);
+  const res=drawInto(cpu,player,i);
+  setStatus(res.paired?`Computer drew a card and discarded a pair.`:`Computer drew a card. Your turn.`);
+  render();if(checkEnd())return;
+  turn='player';render();
+}
+function finish(who){over=true;
+  document.getElementById('newg').style.display='inline-block';
+  if(who==='draw'){setStatus('All paired — a rare draw!');}
+  else if(who==='player'){setStatus('🎉 You win! The computer is stuck with the Old Maid.');}
+  else{setStatus('You\u2019re left holding the Old Maid — computer wins. Try again!');}
+  render();
+}
+document.getElementById('newg').onclick=deal;
+deal();
+</script>
+</body>
+</html>

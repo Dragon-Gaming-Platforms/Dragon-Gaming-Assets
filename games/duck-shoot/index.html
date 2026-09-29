@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+<meta name="robots" content="noindex,nofollow">
+<title>Duck Shoot</title>
+<style>
+  *{box-sizing:border-box}html,body{margin:0;height:100%}
+  body{background:#123;color:#eef;font-family:system-ui,Segoe UI,Roboto,Arial,sans-serif;
+    display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;gap:8px;padding:10px;user-select:none;-webkit-user-select:none}
+  h1{margin:0;font-size:clamp(18px,5vw,26px)}
+  #status{min-height:18px;font-weight:700;color:#ffe08a;text-align:center}
+  canvas{background:linear-gradient(#8ec5e8,#cfeafc 60%,#8fd694 60%);border-radius:10px;cursor:crosshair;touch-action:none;max-width:96vw;height:auto}
+  .hint{font-size:12px;opacity:.7;text-align:center}
+</style>
+</head>
+<body>
+<h1>Duck Shoot</h1>
+<div id="status">Click / tap the ducks before time runs out!</div>
+<canvas id="c" width="440" height="300"></canvas>
+<div class="hint">Each round you get 30 seconds. Faster ducks are worth more. Best score saved locally.</div>
+<script>
+const cv=document.getElementById('c'),ctx=cv.getContext('2d');
+const W=cv.width,H=cv.height,GROUND=H*0.6;
+let ducks,score,best,timeLeft,over,shots,hits,spawnT;
+best=parseInt(localStorage.getItem('duck_best')||'0')||0;
+function reset(){ducks=[];score=0;timeLeft=30;over=false;shots=0;hits=0;spawnT=0;
+  setStatus('Click / tap the ducks!');last=0;startT=performance.now();requestAnimationFrame(loop);}
+function setStatus(t){document.getElementById('status').textContent=t;}
+function spawn(){const fromLeft=Math.random()<0.5;const sp=1.1+Math.random()*2.2;
+  ducks.push({x:fromLeft?-20:W+20,y:30+Math.random()*(GROUND-50),vx:fromLeft?sp:-sp,vy:(Math.random()-0.5)*0.6,
+    r:16,hit:false,fall:0,speed:sp});}
+let last=0,startT=0;
+function loop(t){
+  if(!last)last=t;const dt=Math.min(2.5,(t-last)/16.67);last=t;
+  if(!over){timeLeft=Math.max(0,30-(performance.now()-startT)/1000);if(timeLeft<=0)endGame();}
+  spawnT-=dt;if(!over&&spawnT<=0&&ducks.filter(d=>!d.hit).length<5){spawn();spawnT=40+Math.random()*40;}
+  ducks.forEach(d=>{if(d.hit){d.fall+=0.5*dt;d.y+=d.fall*dt;}
+    else{d.x+=d.vx*dt;d.y+=d.vy*dt;if(d.y<24||d.y>GROUND-10)d.vy*=-1;}});
+  ducks=ducks.filter(d=>d.y<H+30&&d.x>-40&&d.x<W+40);
+  draw();requestAnimationFrame(loop);
+}
+function shoot(mx,my){if(over){reset();return;}shots++;
+  let best_=null,bd=1e9;
+  ducks.forEach(d=>{if(d.hit)return;const dd=Math.hypot(mx-d.x,my-d.y);if(dd<d.r+6&&dd<bd){bd=dd;best_=d;}});
+  if(best_){best_.hit=true;best_.fall=-2;hits++;score+=Math.round(10+best_.speed*8);setStatus('Score: '+score);}
+}
+function pos(e){const r=cv.getBoundingClientRect();const t=e.touches?e.touches[0]:e;
+  return{x:(t.clientX-r.left)*(W/r.width),y:(t.clientY-r.top)*(H/r.height)};}
+cv.addEventListener('mousedown',e=>{e.preventDefault();const p=pos(e);shoot(p.x,p.y);});
+cv.addEventListener('touchstart',e=>{e.preventDefault();const p=pos(e);shoot(p.x,p.y);},{passive:false});
+function endGame(){over=true;if(score>best){best=score;localStorage.setItem('duck_best',best);}
+  const acc=shots?Math.round(hits/shots*100):0;
+  setStatus(`Time! Score ${score} · Accuracy ${acc}% · Click to play again.`);}
+function draw(){
+  ctx.fillStyle='#8ec5e8';ctx.fillRect(0,0,W,GROUND);
+  ctx.fillStyle='#8fd694';ctx.fillRect(0,GROUND,W,H-GROUND);
+  ctx.fillStyle='#6bbf72';for(let x=0;x<W;x+=26)ctx.fillRect(x,GROUND-8,14,14);
+  ducks.forEach(d=>{ctx.save();ctx.translate(d.x,d.y);if(d.vx<0&&!d.hit)ctx.scale(-1,1);
+    ctx.fillStyle=d.hit?'#b06':'#8b5a2b';ctx.beginPath();ctx.ellipse(0,0,d.r,d.r*0.7,0,0,7);ctx.fill();
+    ctx.beginPath();ctx.arc(d.r-3,-d.r*0.5,d.r*0.5,0,7);ctx.fill();
+    ctx.fillStyle='#ff8c42';ctx.beginPath();ctx.moveTo(d.r+2,-d.r*0.5);ctx.lineTo(d.r+12,-d.r*0.4);ctx.lineTo(d.r+2,-d.r*0.2);ctx.fill();
+    ctx.fillStyle='#fff';ctx.beginPath();ctx.arc(d.r-3,-d.r*0.6,3,0,7);ctx.fill();ctx.fillStyle='#000';ctx.beginPath();ctx.arc(d.r-2,-d.r*0.6,1.5,0,7);ctx.fill();
+    if(!d.hit){ctx.fillStyle='#6b3d1b';ctx.beginPath();ctx.moveTo(-2,2);ctx.lineTo(-14,-6);ctx.lineTo(-4,-2);ctx.fill();}
+    ctx.restore();});
+  ctx.fillStyle='#fff';ctx.strokeStyle='#204';ctx.lineWidth=3;ctx.font='bold 16px sans-serif';ctx.textAlign='left';
+  ctx.strokeText('Score '+score,10,24);ctx.fillText('Score '+score,10,24);
+  ctx.textAlign='center';ctx.strokeText('⏱ '+Math.ceil(timeLeft),W/2,24);ctx.fillText('⏱ '+Math.ceil(timeLeft),W/2,24);
+  ctx.textAlign='right';ctx.strokeText('Best '+best,W-10,24);ctx.fillText('Best '+best,W-10,24);
+}
+reset();
+</script>
+</body>
+</html>

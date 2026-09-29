@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex,nofollow">
+<title>Golf Solitaire</title>
+<style>
+  *{box-sizing:border-box}body{margin:0;min-height:100vh;background:#0b6136;color:#eef;
+    font-family:system-ui,Segoe UI,Roboto,Arial,sans-serif;display:flex;flex-direction:column;align-items:center;gap:12px;padding:12px}
+  h1{margin:2px 0;font-size:clamp(18px,5vw,24px)}
+  #status{min-height:18px;font-weight:700;color:#ffe08a;text-align:center;font-size:14px}
+  .board{display:flex;gap:6px;justify-content:center}
+  .col{display:flex;flex-direction:column;align-items:center}
+  .card{width:44px;height:62px;background:#fff;border-radius:6px;color:#111;display:flex;align-items:center;justify-content:center;
+    font-weight:800;font-size:15px;border:2px solid #fff;margin-top:-40px}
+  .col .card:first-child{margin-top:0}
+  .card.red{color:#c62828}
+  .card.play{cursor:pointer;outline:2px solid #ffd000}
+  .card.play:hover{transform:translateX(3px)}
+  .bottom{display:flex;gap:18px;align-items:center;justify-content:center}
+  .col2{display:flex;flex-direction:column;align-items:center;gap:4px}
+  .lbl{font-size:12px;opacity:.85}
+  .slot{width:44px;height:62px;border-radius:6px;border:2px dashed rgba(255,255,255,.4)}
+  button{background:#ffcc33;color:#20150a;border:0;border-radius:9px;padding:8px 13px;font-weight:800;cursor:pointer}
+</style>
+</head>
+<body>
+<h1>Golf Solitaire</h1>
+<div id="status">Move a card that is one rank above or below the waste card. Clear all columns!</div>
+<div class="board" id="board"></div>
+<div class="bottom">
+  <div class="col2"><div class="lbl">Stock (<b id="sc">0</b>)</div><div id="stock" class="slot"></div></div>
+  <div class="col2"><div class="lbl">Waste</div><div id="waste" class="slot"></div></div>
+  <button id="newg">New Game</button>
+</div>
+<div class="lbl">Around-the-corner is allowed: A connects to both 2 and K.</div>
+<script>
+const SUITS=['♠','♥','♦','♣'],RANKS=['A','2','3','4','5','6','7','8','9','10','J','Q','K'];
+function isRed(s){return s==='♥'||s==='♦';}
+let cols,stock,waste,over;
+function deal(){
+  let deck=[];for(const s of SUITS)for(const r of RANKS)deck.push({s,r});
+  for(let i=deck.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[deck[i],deck[j]]=[deck[j],deck[i]];}
+  cols=[];for(let c=0;c<7;c++){cols.push([]);for(let k=0;k<5;k++)cols[c].push(deck.pop());}
+  waste=[deck.pop()];stock=deck;over=false;
+  setStatus('Move cards one rank above/below the waste.');render();
+}
+function setStatus(t){document.getElementById('status').textContent=t;}
+function adjacent(a,b){const d=Math.abs(RANKS.indexOf(a.r)-RANKS.indexOf(b.r));return d===1||d===12;}
+function render(){
+  const bd=document.getElementById('board');bd.innerHTML='';
+  cols.forEach((col,ci)=>{const cEl=document.createElement('div');cEl.className='col';
+    if(col.length===0){const s=document.createElement('div');s.className='slot';cEl.appendChild(s);}
+    col.forEach((c,i)=>{const el=document.createElement('div');const last=i===col.length-1;
+      const top=waste[waste.length-1];const canPlay=last&&top&&adjacent(c,top);
+      el.className='card'+(isRed(c.s)?' red':'')+(canPlay?' play':'');el.textContent=c.r+c.s;
+      if(canPlay)el.onclick=()=>play(ci);cEl.appendChild(el);});
+    bd.appendChild(cEl);});
+  const st=document.getElementById('stock');st.className='slot';st.style.cursor=stock.length?'pointer':'default';
+  st.style.background=stock.length?'linear-gradient(135deg,#274690,#12203f)':'';st.onclick=drawStock;
+  document.getElementById('sc').textContent=stock.length;
+  const w=document.getElementById('waste');const top=waste[waste.length-1];
+  if(top){w.className='card'+(isRed(top.s)?' red':'');w.textContent=top.r+top.s;}else{w.className='slot';w.textContent='';}
+  if(!over&&cols.every(c=>c.length===0)){over=true;setStatus('🎉 All columns cleared — you win!');return;}
+  if(!over&&stock.length===0&&!anyMove()){setStatus('No moves and no stock left. Try a new game.');}
+}
+function anyMove(){const top=waste[waste.length-1];if(!top)return false;
+  return cols.some(c=>c.length&&adjacent(c[c.length-1],top));}
+function play(ci){if(over)return;const top=waste[waste.length-1];const c=cols[ci][cols[ci].length-1];
+  if(!adjacent(c,top))return;waste.push(cols[ci].pop());render();}
+function drawStock(){if(over)return;if(!stock.length){setStatus('Stock is empty.');return;}waste.push(stock.pop());render();}
+document.getElementById('newg').onclick=deal;
+deal();
+</script>
+</body>
+</html>

@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+<meta name="robots" content="noindex,nofollow">
+<title>Color Switch</title>
+<style>
+  *{box-sizing:border-box}html,body{margin:0;height:100%}
+  body{background:#0a0a12;color:#eef;font-family:system-ui,Segoe UI,Roboto,Arial,sans-serif;
+    display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;gap:8px;padding:10px;user-select:none;-webkit-user-select:none}
+  h1{margin:0;font-size:clamp(18px,5vw,26px)}
+  #status{min-height:18px;font-weight:700;color:#ffe08a;text-align:center}
+  canvas{background:#0a0a12;border-radius:10px;touch-action:none;cursor:pointer;max-width:96vw;height:auto}
+  .hint{font-size:12px;opacity:.7;text-align:center;max-width:360px}
+</style>
+</head>
+<body>
+<h1>Color Switch</h1>
+<div id="status">Tap to hop up — only pass a ring through the arc matching your color!</div>
+<canvas id="c" width="340" height="500"></canvas>
+<div class="hint">Grab the stars to switch color. Best score saved locally.</div>
+<script>
+const cv=document.getElementById('c'),ctx=cv.getContext('2d');
+const W=cv.width,H=cv.height;
+const COLORS=['#ff5d73','#4dd2ff','#ffd93b','#7cff8a'];
+let ball,rings,stars,theta,score,best,state,dist;
+best=parseInt(localStorage.getItem('colorswitch_best')||'0')||0;
+function reset(){ball={x:W/2,y:H-90,vy:0,py:H-90,color:0,r:11};rings=[];stars=[];theta=0;score=0;dist=0;state='ready';
+  let y=H-220;for(let i=0;i<4;i++){rings.push({y,R:52,passed:false});if(i<3)stars.push({y:y-90,taken:false});y-=170;}
+  setStatus('Tap to hop up!');draw();}
+function setStatus(t){document.getElementById('status').textContent=t;}
+function tap(){if(state==='ready'){state='play';last=0;requestAnimationFrame(loop);}
+  if(state==='play')ball.vy=-6.3;if(state==='dead')reset();}
+cv.addEventListener('mousedown',e=>{e.preventDefault();tap();});
+cv.addEventListener('touchstart',e=>{e.preventDefault();tap();},{passive:false});
+document.addEventListener('keydown',e=>{if(e.key===' '||e.key==='ArrowUp'){e.preventDefault();tap();}});
+function arcAtBottom(){ // which color index sits at the downward point given rotation
+  let a=(Math.PI/2 - theta)%(Math.PI*2);if(a<0)a+=Math.PI*2;
+  return Math.floor(a/(Math.PI/2))%4;}
+let last=0;
+function loop(t){if(state!=='play'){draw();return;}
+  if(!last)last=t;const dt=Math.min(2.4,(t-last)/16.67);last=t;
+  theta+=0.03*dt;
+  ball.py=ball.y;ball.vy+=0.34*dt;ball.y+=ball.vy*dt;
+  // scroll when ball climbs above 42%
+  if(ball.y<H*0.42){const sh=H*0.42-ball.y;ball.y=H*0.42;ball.py+=sh;dist+=sh;
+    rings.forEach(r=>r.y+=sh);stars.forEach(s=>s.y+=sh);}
+  // spawn above
+  let topY=Math.min(...rings.map(r=>r.y));
+  while(topY>-40){topY-=170;rings.push({y:topY,R:52,passed:false});stars.push({y:topY+90,taken:false});}
+  rings=rings.filter(r=>r.y<H+80);stars=stars.filter(s=>s.y<H+80);
+  // ring crossing (moving up: py>ry, y<=ry)
+  for(const r of rings){if(!r.passed&&ball.py> r.y&&ball.y<=r.y){
+      const idx=arcAtBottom();if(idx!==ball.color){die();return;}r.passed=true;score++;setStatus('Score: '+score);}}
+  // stars
+  for(const s of stars){if(!s.taken&&Math.abs(ball.y-s.y)<16&&Math.abs(ball.x-s.x?0:0)<40){}}
+  stars.forEach(s=>{if(!s.taken&&Math.hypot(ball.x-W/2,ball.y-s.y)<20){s.taken=true;let nc;do{nc=Math.floor(Math.random()*4);}while(nc===ball.color);ball.color=nc;}});
+  if(ball.y>H+40)die();
+  draw();requestAnimationFrame(loop);
+}
+function die(){state='dead';if(score>best){best=score;localStorage.setItem('colorswitch_best',best);}
+  setStatus('💥 Wrong color! Score '+score+'. Tap to retry.');draw();}
+function draw(){
+  ctx.fillStyle='#0a0a12';ctx.fillRect(0,0,W,H);
+  rings.forEach(r=>{ctx.lineWidth=9;
+    for(let i=0;i<4;i++){ctx.strokeStyle=COLORS[i];ctx.beginPath();
+      ctx.arc(W/2,r.y,r.R,theta+i*Math.PI/2,theta+(i+1)*Math.PI/2);ctx.stroke();}});
+  stars.forEach(s=>{if(s.taken)return;ctx.fillStyle='#fff';ctx.save();ctx.translate(W/2,s.y);
+    ctx.beginPath();for(let i=0;i<5;i++){const a=-Math.PI/2+i*2*Math.PI/5;ctx.lineTo(Math.cos(a)*9,Math.sin(a)*9);
+      const a2=a+Math.PI/5;ctx.lineTo(Math.cos(a2)*4,Math.sin(a2)*4);}ctx.closePath();ctx.fill();ctx.restore();});
+  ctx.fillStyle=COLORS[ball.color];ctx.beginPath();ctx.arc(ball.x,ball.y,ball.r,0,7);ctx.fill();
+  ctx.fillStyle='#fff';ctx.font='bold 18px sans-serif';ctx.textAlign='left';ctx.fillText('Score '+score,10,26);
+  ctx.textAlign='right';ctx.fillText('Best '+best,W-10,26);
+}
+reset();
+</script>
+</body>
+</html>

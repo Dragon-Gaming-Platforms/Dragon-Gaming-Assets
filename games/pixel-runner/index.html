@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+<meta name="robots" content="noindex,nofollow">
+<title>Pixel Runner</title>
+<style>
+  *{box-sizing:border-box}html,body{margin:0;height:100%}
+  body{background:#1a1030;color:#eef;font-family:system-ui,Segoe UI,Roboto,Arial,sans-serif;
+    display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;gap:8px;padding:10px;user-select:none;-webkit-user-select:none}
+  h1{margin:0;font-size:clamp(18px,5vw,26px)}
+  #status{min-height:18px;font-weight:700;color:#ffe08a;text-align:center}
+  canvas{background:linear-gradient(#2b1055,#7597de);border-radius:10px;touch-action:none;cursor:pointer;max-width:96vw;height:auto}
+  .hint{font-size:12px;opacity:.7;text-align:center}
+</style>
+</head>
+<body>
+<h1>Pixel Runner</h1>
+<div id="status">Tap / Space to jump. Hold to jump higher!</div>
+<canvas id="c" width="480" height="220"></canvas>
+<div class="hint">Jump the cacti and slide under the birds. Speed rises the further you go.</div>
+<script>
+const cv=document.getElementById('c'),ctx=cv.getContext('2d');
+const W=cv.width,H=cv.height,GROUND=H-34;
+let player,obs,speed,score,best,state,spawnT,holdJump;
+best=parseInt(localStorage.getItem('runner_best')||'0')||0;
+function reset(){player={y:GROUND,vy:0,duck:false};obs=[];speed=4;score=0;state='ready';spawnT=0;holdJump=false;
+  setStatus('Tap / Space to jump!');draw();}
+function setStatus(t){document.getElementById('status').textContent=t;}
+function onGround(){return player.y>=GROUND-0.5;}
+function jump(){
+  if(state==='ready'){state='play';last=0;requestAnimationFrame(loop);}
+  if(state==='dead'){reset();return;}
+  if(onGround()){player.vy=-8.4;holdJump=true;}
+}
+function endHold(){holdJump=false;}
+cv.addEventListener('mousedown',e=>{e.preventDefault();jump();});
+cv.addEventListener('mouseup',endHold);
+cv.addEventListener('touchstart',e=>{e.preventDefault();jump();},{passive:false});
+cv.addEventListener('touchend',e=>{e.preventDefault();endHold();},{passive:false});
+document.addEventListener('keydown',e=>{if(e.key===' '||e.key==='ArrowUp'){e.preventDefault();if(!e.repeat)jump();}
+  if(e.key==='ArrowDown'){player.duck=true;e.preventDefault();}});
+document.addEventListener('keyup',e=>{if(e.key===' '||e.key==='ArrowUp')endHold();if(e.key==='ArrowDown')player.duck=false;});
+let last=0;
+function loop(t){if(state!=='play'){draw();return;}
+  if(!last)last=t;const dt=Math.min(2.2,(t-last)/16.67);last=t;
+  // physics
+  player.vy+=(holdJump&&player.vy<0?0.34:0.62)*dt;
+  player.y+=player.vy*dt;if(player.y>GROUND){player.y=GROUND;player.vy=0;}
+  speed+=0.0016*dt;score+=speed*dt*0.35;
+  spawnT-=dt;
+  if(spawnT<=0){spawnObstacle();spawnT=(60+Math.random()*50)/ (speed/4);}
+  obs.forEach(o=>o.x-=speed*dt);
+  if(obs.length&&obs[0].x<-60)obs.shift();
+  // collision
+  const pb=playerBox();
+  for(const o of obs){if(rectHit(pb,o)){die();break;}}
+  draw();requestAnimationFrame(loop);
+}
+function spawnObstacle(){
+  if(Math.random()<0.72){const h=24+Math.random()*22;obs.push({x:W+20,y:GROUND-h,w:16+Math.random()*14,h,type:'cactus'});}
+  else{obs.push({x:W+20,y:GROUND-58,w:26,h:18,type:'bird'});}
+}
+function playerBox(){if(player.duck&&onGround())return{x:60,y:player.y-16,w:30,h:16};return{x:64,y:player.y-32,w:22,h:32};}
+function rectHit(a,b){return a.x<b.x+b.w&&a.x+a.w>b.x&&a.y<b.y+b.h&&a.y+a.h>b.y;}
+function die(){state='dead';const s=Math.floor(score);if(s>best){best=s;localStorage.setItem('runner_best',best);}
+  setStatus('💥 Ouch! Score '+s+'. Tap to run again.');draw();}
+function draw(){
+  ctx.fillStyle='#2b1055';ctx.fillRect(0,0,W,H);
+  ctx.fillStyle='#3a1d6e';for(let i=0;i<4;i++){const bx=(i*140-((score*0.4)%140));ctx.beginPath();ctx.moveTo(bx,GROUND);ctx.lineTo(bx+60,GROUND-70);ctx.lineTo(bx+120,GROUND);ctx.fill();}
+  ctx.fillStyle='#241640';ctx.fillRect(0,GROUND,W,H-GROUND);
+  ctx.strokeStyle='#4a3a6e';ctx.beginPath();ctx.moveTo(0,GROUND);ctx.lineTo(W,GROUND);ctx.stroke();
+  // obstacles
+  obs.forEach(o=>{if(o.type==='cactus'){ctx.fillStyle='#3cb043';ctx.fillRect(o.x,o.y,o.w,o.h);ctx.fillRect(o.x-5,o.y+6,5,8);ctx.fillRect(o.x+o.w,o.y+4,5,8);}
+    else{ctx.fillStyle='#ff6b6b';ctx.fillRect(o.x,o.y,o.w,o.h);ctx.fillStyle='#ffd';ctx.fillRect(o.x+4,o.y-4,10,5);}});
+  // player
+  const pb=playerBox();ctx.fillStyle='#ffd93b';ctx.fillRect(pb.x,pb.y,pb.w,pb.h);
+  ctx.fillStyle='#000';ctx.fillRect(pb.x+pb.w-8,pb.y+5,4,4);
+  ctx.fillStyle='#fff';ctx.font='bold 16px sans-serif';ctx.textAlign='right';ctx.fillText('Score '+Math.floor(score),W-12,24);
+  ctx.fillText('Best '+best,W-12,42);
+}
+reset();
+</script>
+</body>
+</html>

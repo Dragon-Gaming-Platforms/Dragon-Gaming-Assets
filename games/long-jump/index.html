@@ -1,0 +1,84 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+<meta name="robots" content="noindex,nofollow">
+<title>Long Jump</title>
+<style>
+  *{box-sizing:border-box}html,body{margin:0;height:100%}
+  body{background:#0e1a24;color:#eef;font-family:system-ui,Segoe UI,Roboto,Arial,sans-serif;
+    display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;gap:10px;padding:12px;user-select:none;-webkit-user-select:none}
+  h1{margin:0;font-size:clamp(18px,5vw,26px)}
+  #status{min-height:20px;font-weight:700;color:#ffe08a;text-align:center}
+  canvas{background:#87ceeb;border-radius:10px;max-width:96vw;height:auto}
+  .pads{display:flex;gap:10px}
+  button{background:#ffcc33;color:#20150a;border:0;border-radius:10px;padding:16px 26px;font-weight:800;font-size:17px;cursor:pointer}
+  .hint{font-size:12px;opacity:.7;text-align:center;max-width:380px}
+</style>
+</head>
+<body>
+<h1>Long Jump</h1>
+<div id="status">Tap RUN quickly to build speed, then JUMP to pick your angle!</div>
+<canvas id="c" width="440" height="240"></canvas>
+<div class="pads"><button id="act">RUN</button></div>
+<div class="hint">Mash RUN (or ← →) during the run-up. Then press JUMP once to lock the angle — aim for 45°. Best distance saved locally.</div>
+<script>
+const cv=document.getElementById('c'),ctx=cv.getContext('2d');
+let phase,speed,runProg,angle,angDir,dist,jx,jy,vx,vy,over,best,lastFoot,landed;
+best=parseFloat(localStorage.getItem('lj_best')||'0')||0;
+function reset(){phase='run';speed=0;runProg=0;angle=20;angDir=1;dist=0;over=false;lastFoot=null;landed=false;
+  jx=0;jy=0;vx=0;vy=0;setBtn('RUN');setStatus('Mash RUN to build speed!');draw();requestAnimationFrame(loop);}
+function setStatus(t){document.getElementById('status').textContent=t;}
+function setBtn(t){document.getElementById('act').textContent=t;}
+function tap(){
+  if(over){reset();return;}
+  if(phase==='run'){speed=Math.min(100,speed+3.2);runProg=Math.min(100,runProg+2.4);
+    if(runProg>=100){phase='ready';setBtn('JUMP');setStatus('At the line — press JUMP to set your angle!');}}
+  else if(phase==='ready'){phase='angle';setBtn('JUMP');setStatus('Press JUMP to lock the angle!');}
+  else if(phase==='angle'){lockJump();}
+}
+function foot(f){if(over||phase!=='run')return;if(f!==lastFoot){speed=Math.min(100,speed+3.0);runProg=Math.min(100,runProg+2.2);lastFoot=f;}else{speed=Math.min(100,speed+0.8);}
+  if(runProg>=100){phase='ready';setBtn('JUMP');setStatus('At the line — press JUMP to set your angle!');}}
+document.getElementById('act').onclick=tap;
+document.addEventListener('keydown',e=>{if(e.key===' '||e.key==='Enter'){e.preventDefault();tap();}
+  if(e.key==='ArrowLeft')foot('l');if(e.key==='ArrowRight')foot('r');});
+function lockJump(){phase='fly';const rad=angle*Math.PI/180;const power=speed*0.14;
+  vx=power*Math.cos(rad);vy=-power*Math.sin(rad);jx=140;jy=cv.height-70;setBtn('...');
+  setStatus('Flying!');}
+let last=0;
+function loop(t){
+  if(!last)last=t;const dt=Math.min(0.05,(t-last)/1000);last=t;
+  if(phase==='angle'){angle+=angDir*70*dt;if(angle>75){angle=75;angDir=-1;}if(angle<10){angle=10;angDir=1;}}
+  if(phase==='fly'){jx+=vx;jy+=vy;vy+=0.5;
+    if(jy>=cv.height-70){jy=cv.height-70;landed=true;phase='done';over=true;
+      dist=Math.max(0,(jx-140)/13); // scale to meters
+      if(dist>best){best=dist;localStorage.setItem('lj_best',best.toFixed(2));}
+      setBtn('AGAIN');setStatus(`Jump: ${dist.toFixed(2)}m! `+(dist>=best?'New best! ':'')+'Tap to jump again.');}}
+  draw();requestAnimationFrame(loop);
+}
+function draw(){
+  ctx.fillStyle='#87ceeb';ctx.fillRect(0,0,cv.width,cv.height);
+  ctx.fillStyle='#c2b280';ctx.fillRect(0,cv.height-40,cv.width,40); // sand pit
+  ctx.fillStyle='#7a5c3a';ctx.fillRect(0,cv.height-44,140,4); // runway
+  ctx.fillStyle='#fff';ctx.fillRect(138,cv.height-70,3,30); // takeoff board
+  // meters
+  ctx.fillStyle='#204';ctx.fillRect(12,12,120,12);ctx.fillStyle='#ffd43b';ctx.fillRect(12,12,120*speed/100,12);
+  ctx.fillStyle='#fff';ctx.font='11px sans-serif';ctx.textAlign='left';ctx.fillText('Speed',12,36);
+  ctx.fillText('Best: '+(best?best.toFixed(2)+'m':'--'),cv.width-90,20);
+  if(phase==='angle'||phase==='ready'){
+    ctx.save();ctx.translate(140,cv.height-70);ctx.strokeStyle='#e63946';ctx.lineWidth=3;
+    const rad=angle*Math.PI/180;ctx.beginPath();ctx.moveTo(0,0);ctx.lineTo(45*Math.cos(rad),-45*Math.sin(rad));ctx.stroke();ctx.restore();
+    ctx.fillStyle='#204';ctx.textAlign='center';ctx.fillText(Math.round(angle)+'°',170,cv.height-80);
+  }
+  // athlete
+  let ax=140,ay=cv.height-70;
+  if(phase==='run')ax=20+runProg/100*118;
+  if(phase==='fly'||phase==='done'){ax=jx;ay=jy;}
+  ctx.fillStyle='#e63946';ctx.fillRect(ax-5,ay-24,10,20);ctx.beginPath();ctx.arc(ax,ay-28,6,0,7);ctx.fill();
+  if(phase==='done'){ctx.fillStyle='#204';ctx.textAlign='center';ctx.fillText(dist.toFixed(2)+' m',ax,ay-38);}
+}
+reset();
+</script>
+</body>
+</html>

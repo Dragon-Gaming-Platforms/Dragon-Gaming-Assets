@@ -1,0 +1,9 @@
+{
+  "name": "Flappy Wing",
+  "desc": "Tap to keep your little bird airborne and thread the gaps between pipes. One touch is all it takes to fall, so find your rhythm and see how far you can fly. Every pipe cleared adds to your score.",
+  "controls": "Tap, click, or press Space to flap",
+  "shelf": "Arcade & Action",
+  "tags": ["games", "html5", "arcade", "reflex", "casual"],
+  "badge": "New",
+  "creator": "Dragon Gaming Platforms"
+}

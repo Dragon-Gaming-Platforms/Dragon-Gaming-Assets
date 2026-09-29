@@ -1,0 +1,9 @@
+{
+  "name": "Alien Invaders",
+  "desc": "Defend Earth from marching waves of aliens. Slide your cannon left and right, dodge falling bombs, and blast the formation before it reaches the ground. The fewer invaders left, the faster they charge.",
+  "controls": "← → move · Space to fire (or the on-screen buttons)",
+  "shelf": "Arcade & Action",
+  "tags": ["games", "html5", "shooter", "arcade", "retro"],
+  "badge": "New",
+  "creator": "Dragon Gaming Platforms"
+}

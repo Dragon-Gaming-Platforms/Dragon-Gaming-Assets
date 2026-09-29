@@ -1,0 +1,9 @@
+{
+  "name": "Clock Solitaire",
+  "desc": "A luck-driven classic laid out like a clock face. Flip a card and send it to its hour, then keep going from that pile. Turn up all fifty-two cards before the fourth King appears to beat the clock.",
+  "controls": "Tap the highlighted pile to flip its top card",
+  "shelf": "Puzzle & Logic",
+  "tags": ["games", "html5", "cards", "solitaire", "luck"],
+  "badge": "New",
+  "creator": "Dragon Gaming Platforms"
+}

@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+<meta name="robots" content="noindex,nofollow">
+<title>Sprint Runner</title>
+<style>
+  *{box-sizing:border-box}html,body{margin:0;height:100%}
+  body{background:#0d1b2a;color:#eef;font-family:system-ui,Segoe UI,Roboto,Arial,sans-serif;
+    display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;gap:10px;padding:12px;user-select:none;-webkit-user-select:none}
+  h1{margin:0;font-size:clamp(18px,5vw,26px)}
+  #status{min-height:20px;font-weight:700;color:#ffe08a;text-align:center}
+  canvas{background:#132b42;border-radius:10px;max-width:96vw;height:auto}
+  .pads{display:flex;gap:10px}
+  .pads button{background:#ffcc33;color:#20150a;border:0;border-radius:10px;padding:18px 30px;font-weight:800;font-size:18px;cursor:pointer}
+  .hint{font-size:12px;opacity:.7;text-align:center}
+</style>
+</head>
+<body>
+<h1>Sprint Runner</h1>
+<div id="status">Alternate the buttons as fast as you can to run 100m!</div>
+<canvas id="c" width="420" height="180"></canvas>
+<div class="pads"><button id="l">◀ LEFT</button><button id="r">RIGHT ▶</button></div>
+<div class="hint">Alternate Left / Right (or ← →) rapidly. Best time saved locally.</div>
+<script>
+const cv=document.getElementById('c'),ctx=cv.getContext('2d');
+const RACE=100;
+let you,cpu,vel,lastFoot,running,startT,now,over,best;
+best=parseFloat(localStorage.getItem('sprint_best')||'0')||0;
+function reset(){you=0;cpu=0;vel=0;lastFoot=null;running=false;over=false;startT=0;
+  setStatus('Alternate the buttons to start running!');draw();}
+function setStatus(t){document.getElementById('status').textContent=t;}
+function step(foot){
+  if(over)return;
+  if(!running){running=true;startT=performance.now();requestAnimationFrame(loop);}
+  if(foot!==lastFoot){vel+=1.15;lastFoot=foot;} else {vel+=0.15;}
+}
+document.getElementById('l').onclick=()=>step('l');
+document.getElementById('r').onclick=()=>step('r');
+document.addEventListener('keydown',e=>{if(e.key==='ArrowLeft'||e.key==='a')step('l');if(e.key==='ArrowRight'||e.key==='d')step('r');});
+let last=0;
+function loop(t){
+  if(over)return;
+  if(!last)last=t;const dt=Math.min(0.05,(t-last)/1000);last=t;
+  vel=Math.max(0,vel-dt*3.2); // friction
+  you+=vel*dt*3.0;
+  cpu+=dt*7.2*(0.96+Math.random()*0.08); // steady rival ~ finishes ~13-14s
+  draw();
+  if(you>=RACE||cpu>=RACE){finish();return;}
+  requestAnimationFrame(loop);
+}
+function finish(){over=true;const time=(performance.now()-startT)/1000;
+  if(you>=RACE&&(best===0||time<best)){best=time;localStorage.setItem('sprint_best',best.toFixed(2));}
+  draw();
+  if(you>=RACE&&cpu<RACE)setStatus(`🏁 You win! ${time.toFixed(2)}s — tap to race again.`);
+  else if(you>=RACE)setStatus(`Photo finish — you win ${time.toFixed(2)}s! Tap to race again.`);
+  else setStatus('The rival beat you. Tap to race again.');
+  const rs=()=>{document.removeEventListener('keydown',rk);document.removeEventListener('click',rc);reset();};
+  const rk=(e)=>{if(e.key===' '||e.key==='Enter')rs();};const rc=()=>rs();
+  setTimeout(()=>{document.addEventListener('keydown',rk);document.addEventListener('click',rc,{once:true});},400);
+}
+function runner(x,color,label){
+  const gx=30+x/RACE*(cv.width-60);
+  ctx.fillStyle=color;ctx.fillRect(gx-6,cv.height-60,12,26);
+  ctx.beginPath();ctx.arc(gx,cv.height-66,7,0,7);ctx.fill();
+  ctx.fillStyle='#fff';ctx.font='10px sans-serif';ctx.textAlign='center';ctx.fillText(label,gx,cv.height-78);
+}
+function draw(){
+  ctx.fillStyle='#132b42';ctx.fillRect(0,0,cv.width,cv.height);
+  // track lanes
+  ctx.strokeStyle='#22405e';for(let i=0;i<=10;i++){const gx=30+i/10*(cv.width-60);ctx.beginPath();ctx.moveTo(gx,40);ctx.lineTo(gx,cv.height-20);ctx.stroke();}
+  ctx.fillStyle='#e63946';ctx.fillRect(cv.width-32,40,3,cv.height-60); // finish
+  ctx.fillStyle='#9ad';ctx.font='12px sans-serif';ctx.textAlign='left';
+  ctx.fillText('You: '+you.toFixed(0)+'m   Speed: '+(vel*3).toFixed(1),12,24);
+  ctx.textAlign='right';ctx.fillText('Best: '+(best?best.toFixed(2)+'s':'--'),cv.width-12,24);
+  runner(you,'#ffd43b','YOU');
+  ctx.save();ctx.translate(0,-34);runner(cpu,'#5de0ff','CPU');ctx.restore();
+}
+reset();
+</script>
+</body>
+</html>

@@ -1,0 +1,9 @@
+{
+  "name": "Duck Shoot",
+  "desc": "A fast-paced shooting gallery. Ducks dart across the sky and you have thirty seconds to bag as many as you can. Speedy birds are worth more points, so aim quick and keep your accuracy high.",
+  "controls": "Click or tap a duck to shoot it",
+  "shelf": "Arcade & Action",
+  "tags": ["games", "html5", "shooting", "arcade", "casual"],
+  "badge": "New",
+  "creator": "Dragon Gaming Platforms"
+}

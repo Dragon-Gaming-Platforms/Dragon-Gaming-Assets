@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+<meta name="robots" content="noindex,nofollow">
+<title>Tetra Stack</title>
+<style>
+  *{box-sizing:border-box}html,body{margin:0;height:100%}
+  body{background:#0a0a16;color:#eef;font-family:system-ui,Segoe UI,Roboto,Arial,sans-serif;
+    display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;gap:8px;padding:10px;user-select:none;-webkit-user-select:none}
+  h1{margin:0;font-size:clamp(18px,5vw,24px)}
+  #hud{display:flex;gap:20px;font-weight:800;color:#ffd76a}
+  #status{min-height:18px;color:#9ad;font-weight:700;text-align:center}
+  canvas{background:#05050d;border-radius:6px;touch-action:none}
+  .ctrls{display:grid;grid-template-columns:repeat(4,58px);gap:6px}
+  .ctrls button{background:#223;color:#fff;border:0;border-radius:8px;padding:14px 0;font-weight:800;cursor:pointer}
+  .hint{font-size:12px;opacity:.7;text-align:center}
+</style>
+</head>
+<body>
+<h1>Tetra Stack</h1>
+<div id="hud"><span>Score <b id="score">0</b></span><span>Lines <b id="lines">0</b></span><span>Lvl <b id="level">1</b></span></div>
+<canvas id="c" width="220" height="440"></canvas>
+<div id="status">Clear lines by filling rows!</div>
+<div class="ctrls"><button id="left">◀</button><button id="rot">⟳</button><button id="right">▶</button><button id="drop">⤓</button></div>
+<div class="hint">← → move · ↑ rotate · ↓ soft drop · Space hard drop</div>
+<script>
+const cv=document.getElementById('c'),ctx=cv.getContext('2d');
+const COLS=10,ROWS=20,CELL=22;
+const PIECES={
+  I:{c:'#4de1ff',s:[[[0,1],[1,1],[2,1],[3,1]],[[2,0],[2,1],[2,2],[2,3]],[[0,2],[1,2],[2,2],[3,2]],[[1,0],[1,1],[1,2],[1,3]]]},
+  O:{c:'#ffd93b',s:[[[1,0],[2,0],[1,1],[2,1]]]},
+  T:{c:'#c77dff',s:[[[1,0],[0,1],[1,1],[2,1]],[[1,0],[1,1],[2,1],[1,2]],[[0,1],[1,1],[2,1],[1,2]],[[1,0],[0,1],[1,1],[1,2]]]},
+  S:{c:'#5eff8a',s:[[[1,0],[2,0],[0,1],[1,1]],[[1,0],[1,1],[2,1],[2,2]]]},
+  Z:{c:'#ff6b6b',s:[[[0,0],[1,0],[1,1],[2,1]],[[2,0],[1,1],[2,1],[1,2]]]},
+  J:{c:'#5b8cff',s:[[[0,0],[0,1],[1,1],[2,1]],[[1,0],[2,0],[1,1],[1,2]],[[0,1],[1,1],[2,1],[2,2]],[[1,0],[1,1],[0,2],[1,2]]]},
+  L:{c:'#ffa94d',s:[[[2,0],[0,1],[1,1],[2,1]],[[1,0],[1,1],[1,2],[2,2]],[[0,1],[1,1],[2,1],[0,2]],[[0,0],[1,0],[1,1],[1,2]]]},
+};
+const KEYS=Object.keys(PIECES);
+let grid,cur,px,py,rot,score,lines,level,over,bag,dropTimer,acc;
+function newBag(){bag=KEYS.slice();for(let i=bag.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[bag[i],bag[j]]=[bag[j],bag[i]];}}
+function reset(){grid=Array.from({length:ROWS},()=>Array(COLS).fill(0));score=0;lines=0;level=1;over=false;acc=0;bag=[];spawn();updateHud();setStatus('Clear lines by filling rows!');last=0;requestAnimationFrame(loop);}
+function spawn(){if(!bag||!bag.length)newBag();cur=bag.pop();rot=0;px=3;py=0;
+  if(collide(cells(cur,rot),px,py)){over=true;setStatus('Game over! Score '+score+'. Tap a control to restart.');}}
+function cells(k,r){const st=PIECES[k].s;return st[r%st.length];}
+function collide(cl,ox,oy){return cl.some(([cx,cy])=>{const gx=ox+cx,gy=oy+cy;return gx<0||gx>=COLS||gy>=ROWS||(gy>=0&&grid[gy][gx]);});}
+function lock(){cells(cur,rot).forEach(([cx,cy])=>{const gx=px+cx,gy=py+cy;if(gy>=0)grid[gy][gx]=PIECES[cur].c;});
+  clearLines();spawn();}
+function clearLines(){let cleared=0;
+  for(let r=ROWS-1;r>=0;r--){if(grid[r].every(v=>v)){grid.splice(r,1);grid.unshift(Array(COLS).fill(0));cleared++;r++;}}
+  if(cleared){lines+=cleared;score+=[0,40,100,300,1200][cleared]*level;level=1+Math.floor(lines/10);updateHud();}}
+function updateHud(){document.getElementById('score').textContent=score;document.getElementById('lines').textContent=lines;document.getElementById('level').textContent=level;}
+function setStatus(t){document.getElementById('status').textContent=t;}
+function move(dx){if(over)return;if(!collide(cells(cur,rot),px+dx,py))px+=dx;draw();}
+function softDrop(){if(over)return;if(!collide(cells(cur,rot),px,py+1)){py++;score+=1;updateHud();}else lock();draw();}
+function hardDrop(){if(over)return;while(!collide(cells(cur,rot),px,py+1)){py++;score+=2;}lock();updateHud();draw();}
+function rotate(){if(over)return;const nr=(rot+1)%PIECES[cur].s.length;
+  for(const k of [0,-1,1,-2,2]){if(!collide(cells(cur,nr),px+k,py)){rot=nr;px+=k;break;}}draw();}
+function restart(){if(over)reset();}
+document.getElementById('left').onclick=()=>{restart();move(-1);};
+document.getElementById('right').onclick=()=>{restart();move(1);};
+document.getElementById('rot').onclick=()=>{restart();rotate();};
+document.getElementById('drop').onclick=()=>{restart();hardDrop();};
+document.addEventListener('keydown',e=>{
+  if(over){reset();return;}
+  if(e.key==='ArrowLeft'){move(-1);e.preventDefault();}
+  else if(e.key==='ArrowRight'){move(1);e.preventDefault();}
+  else if(e.key==='ArrowUp'){rotate();e.preventDefault();}
+  else if(e.key==='ArrowDown'){softDrop();e.preventDefault();}
+  else if(e.key===' '){hardDrop();e.preventDefault();}});
+let last=0;
+function loop(t){if(over){draw();return;}if(!last)last=t;acc+=t-last;last=t;
+  const gspeed=Math.max(80,650-(level-1)*55);
+  if(acc>=gspeed){acc=0;if(!collide(cells(cur,rot),px,py+1))py++;else lock();}
+  draw();requestAnimationFrame(loop);}
+function draw(){
+  ctx.fillStyle='#05050d';ctx.fillRect(0,0,cv.width,cv.height);
+  ctx.strokeStyle='#12122a';for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++)ctx.strokeRect(c*CELL,r*CELL,CELL,CELL);
+  for(let r=0;r<ROWS;r++)for(let c=0;c<COLS;c++)if(grid[r][c])block(c,r,grid[r][c]);
+  if(!over&&cur){
+    // ghost
+    let gy=py;while(!collide(cells(cur,rot),px,gy+1))gy++;
+    cells(cur,rot).forEach(([cx,cy])=>{if(py+cy>=0){ctx.globalAlpha=0.22;block(px+cx,gy+cy,PIECES[cur].c);ctx.globalAlpha=1;}});
+    cells(cur,rot).forEach(([cx,cy])=>{if(py+cy>=0)block(px+cx,py+cy,PIECES[cur].c);});
+  }
+}
+function block(c,r,color){ctx.fillStyle=color;ctx.fillRect(c*CELL+1,r*CELL+1,CELL-2,CELL-2);
+  ctx.fillStyle='rgba(255,255,255,.25)';ctx.fillRect(c*CELL+1,r*CELL+1,CELL-2,4);}
+reset();
+</script>
+</body>
+</html>
