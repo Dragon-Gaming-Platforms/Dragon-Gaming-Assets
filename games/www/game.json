@@ -1,0 +1,9 @@
+{
+  "name": "www",
+  "desc": "A tough, minimalist precision platformer built on the melonJS engine. Dash and leap across spike-lined rooms, hit checkpoints, and learn each hazard by trial and error. Short levels, brutal difficulty, pure old-school challenge.",
+  "controls": "Arrow keys to move, up to jump",
+  "shelf": "Arcade & Action",
+  "tags": ["games", "html5", "platformer", "action", "retro"],
+  "badge": "New",
+  "creator": "Alexandre Dantas"
+}

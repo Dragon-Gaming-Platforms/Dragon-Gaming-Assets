@@ -1,0 +1,9 @@
+{
+  "name": "Orbium",
+  "desc": "A remake of the classic tile-rotation puzzler Logical. Spin the coloured rotators to route bouncing balls into their matching pots before the board fills up. Dozens of increasingly devious levels of pipe-and-marble logic.",
+  "controls": "Click or tap the rotators to turn them",
+  "shelf": "Puzzle & Logic",
+  "tags": ["games", "html5", "puzzle", "logic", "arcade"],
+  "badge": "New",
+  "creator": "bni"
+}

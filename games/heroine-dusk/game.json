@@ -1,0 +1,9 @@
+{
+  "name": "Heroine Dusk",
+  "desc": "A compact first-person dungeon crawler. Explore a grid-based fantasy world, battle monsters in turn-based encounters, gather gold, and face the final boss. A complete, self-contained retro RPG in the browser.",
+  "controls": "Click or tap the on-screen arrows and actions",
+  "shelf": "Arcade & Action",
+  "tags": ["games", "html5", "rpg", "dungeon", "retro"],
+  "badge": "New",
+  "creator": "Clint Bellanger"
+}

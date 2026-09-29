@@ -127,3 +127,16 @@ never invent a license.
 | High Jump | `games/high-jump/` | Original build (Dragon Gaming Platforms) | Original — first-party, no third-party assets | 2026-09-29 |
 | Horse Race | `games/horse-race/` | Original build (Dragon Gaming Platforms) | Original — first-party, no third-party assets | 2026-09-29 |
 | Cornhole | `games/cornhole/` | Original build (Dragon Gaming Platforms) | Original — first-party, no third-party assets | 2026-09-29 |
+| Canvas Tetris | `games/canvas-tetris/` | dionyziz/canvas-tetris (https://github.com/dionyziz/canvas-tetris) | MIT — vendored upstream web build, self-contained (no external requests) | 2026-09-29 |
+| Crappy Bird | `games/crappybird/` | varunpant/CrappyBird (https://github.com/varunpant/CrappyBird) | MIT — vendored upstream web build, self-contained | 2026-09-29 |
+| HTML5 Pac-Man | `games/html5-pacman/` | daleharvey/pacman (https://github.com/daleharvey/pacman) | WTFPL — vendored upstream web build; author link neutralized for self-hosting | 2026-09-29 |
+| Exolon | `games/exolon/` | newagebegins/exolon (https://github.com/newagebegins/exolon) | MIT — vendored upstream web build; entry renamed to index.html | 2026-09-29 |
+| Orbium | `games/orbium/` | bni/orbium (https://github.com/bni/orbium) | GPL-2.0 — vendored upstream web build, self-contained (source included) | 2026-09-29 |
+| www | `games/www/` | alexdantas/www (https://github.com/alexdantas/www) | GPL-3.0 — vendored upstream web build, self-contained (source included) | 2026-09-29 |
+| Heroine Dusk | `games/heroine-dusk/` | clintbellanger/heroine-dusk (https://github.com/clintbellanger/heroine-dusk) | GPL-3.0 — vendored upstream release build, self-contained | 2026-09-29 |
+| SkiFree.js | `games/skifreejs/` | basicallydan/skifree.js (https://github.com/basicallydan/skifree.js) | MIT — vendored upstream prebuilt dist; dead banner/icon refs removed | 2026-09-29 |
+| JezzBall | `games/jezzball/` | tassaron/jezzball-transgender (https://github.com/tassaron/jezzball-transgender) | MIT — vendored ES-module build; dead bundle/site-chrome refs removed | 2026-09-29 |
+| Pac-Man Canvas | `games/pacman-canvas/` | platzhersh/pacman-canvas (https://github.com/platzhersh/pacman-canvas) | CC-BY-SA-4.0 — vendored upstream build; AdSense removed, entry renamed to index.html | 2026-09-29 |
+| Runfield | `games/runfield/` | kig/runfield (https://github.com/kig/runfield) | GPL-3.0 — vendored upstream web build; external Google Fonts link removed | 2026-09-29 |
+| Fluid Table Tennis | `games/fluid-table-tennis/` | anirudhjoshi/fluid_table_tennis (https://github.com/anirudhjoshi/fluid_table_tennis) | MIT — rebuilt from source per upstream quick_build.sh; analytics/social/external images removed | 2026-09-29 |
+| Gift Grabber | `games/gift-grabber/` | ceva24/gift-grabber (https://github.com/ceva24/gift-grabber) | Apache-2.0 — vendored upstream web build; Google Analytics/Fonts and IE shim CDNs removed | 2026-09-29 |

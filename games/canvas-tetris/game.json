@@ -1,0 +1,9 @@
+{
+  "name": "Canvas Tetris",
+  "desc": "A clean, faithful browser version of the classic falling-block puzzle. Rotate and shift the tetrominoes to complete solid lines, clear them for points, and survive as the pace quickens. Built entirely on the HTML5 canvas.",
+  "controls": "Arrow keys to move and rotate, down to drop",
+  "shelf": "Puzzle & Logic",
+  "tags": ["games", "html5", "puzzle", "blocks", "classic"],
+  "badge": "New",
+  "creator": "Dionysis Zindros"
+}

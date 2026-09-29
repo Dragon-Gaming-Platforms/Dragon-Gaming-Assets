@@ -1,0 +1,9 @@
+{
+  "name": "Crappy Bird",
+  "desc": "A cheeky open-source take on the infamous tap-to-flap arcade hit. Guide your bird through an endless run of pipes, chasing medals and a new high score. One tap keeps you airborne; gravity does the rest.",
+  "controls": "Click, tap, or press a key to flap",
+  "shelf": "Arcade & Action",
+  "tags": ["games", "html5", "arcade", "flappy", "casual"],
+  "badge": "New",
+  "creator": "Varun Pant"
+}

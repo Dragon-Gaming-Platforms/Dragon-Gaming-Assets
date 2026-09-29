@@ -1,0 +1,9 @@
+{
+  "name": "Exolon",
+  "desc": "A browser tribute to the classic side-scrolling run-and-gun. Advance your armoured trooper across hostile alien terrain, blasting enemies and obstacles while collecting gear. Retro arcade action rebuilt for the web.",
+  "controls": "Arrow keys to move, key to fire",
+  "shelf": "Arcade & Action",
+  "tags": ["games", "html5", "arcade", "action", "retro"],
+  "badge": "New",
+  "creator": "newagebegins"
+}

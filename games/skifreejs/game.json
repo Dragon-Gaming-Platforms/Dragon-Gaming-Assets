@@ -1,0 +1,9 @@
+{
+  "name": "SkiFree.js",
+  "desc": "A loving browser remake of the Windows classic SkiFree. Slalom downhill through trees and ramps, pull tricks off jumps, and see how far you can get before the legendary Abominable Snowman catches up and eats you.",
+  "controls": "Arrow keys or mouse to steer, F/T for tricks",
+  "shelf": "Sports & Racing",
+  "tags": ["games", "html5", "skiing", "arcade", "classic"],
+  "badge": "New",
+  "creator": "Dan Hough"
+}

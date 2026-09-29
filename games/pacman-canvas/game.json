@@ -1,0 +1,9 @@
+{
+  "name": "Pac-Man Canvas",
+  "desc": "A polished HTML5 canvas version of the maze arcade legend. Munch all the dots, grab the fruit, and use power pills to hunt the ghosts across multiple levels. Includes sound, pause, and a proper high-score chase.",
+  "controls": "Arrow keys or swipe to steer",
+  "shelf": "Arcade & Action",
+  "tags": ["games", "html5", "arcade", "maze", "classic"],
+  "badge": "New",
+  "creator": "platzhersh"
+}

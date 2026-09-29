@@ -1,0 +1,9 @@
+{
+  "name": "Runfield",
+  "desc": "A fast, one-button endless runner with a hand-drawn look. Time your jumps to clear gaps and obstacles as the world scrolls by ever faster. Simple to pick up, hard to put down, and set to an upbeat soundtrack.",
+  "controls": "Click, tap, or press a key to jump",
+  "shelf": "Arcade & Action",
+  "tags": ["games", "html5", "runner", "arcade", "casual"],
+  "badge": "New",
+  "creator": "Ilmari Heikkinen"
+}

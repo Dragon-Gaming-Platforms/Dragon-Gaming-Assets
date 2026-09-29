@@ -1,0 +1,9 @@
+{
+  "name": "Fluid Table Tennis",
+  "desc": "A mesmerising Plasma-Pong-style table tennis game running a full-colour, real-time fluid simulation at 60 FPS. Bat the ball back and forth while the ball churns swirling, colourful currents across the canvas. As much a toy as a game.",
+  "controls": "Move the mouse to control your paddle",
+  "shelf": "Sports & Racing",
+  "tags": ["games", "html5", "pong", "arcade", "physics"],
+  "badge": "New",
+  "creator": "Anirudh Joshi"
+}

@@ -1,0 +1,9 @@
+{
+  "name": "Gift Grabber",
+  "desc": "A cheerful festive arcade game. Steer left and right to catch the presents tumbling down the screen while dodging the lumps of coal. Rack up your score before the timer runs out in this quick, family-friendly seasonal romp.",
+  "controls": "Left/right arrows or tap to move",
+  "shelf": "Arcade & Action",
+  "tags": ["games", "html5", "arcade", "casual", "family"],
+  "badge": "New",
+  "creator": "ceva24"
+}

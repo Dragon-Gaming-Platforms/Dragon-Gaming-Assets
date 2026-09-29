@@ -1,0 +1,9 @@
+{
+  "name": "JezzBall",
+  "desc": "A remake of the addictive DOS/Windows puzzle arcade game. Build walls to partition the playfield and trap the bouncing atoms into ever-smaller spaces. Clear the required area of each level without getting hit while a wall is forming.",
+  "controls": "Click to place and orient walls",
+  "shelf": "Puzzle & Logic",
+  "tags": ["games", "html5", "puzzle", "arcade", "classic"],
+  "badge": "New",
+  "creator": "Brianna Rainey (tassaron)"
+}
