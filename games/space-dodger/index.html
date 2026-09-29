@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+<meta name="robots" content="noindex,nofollow">
+<title>Space Dodger</title>
+<style>
+  html,body{margin:0;height:100%;background:#05060f;overflow:hidden;
+    font-family:system-ui,Segoe UI,Roboto,Arial,sans-serif;color:#dfe7ff;user-select:none;-webkit-user-select:none}
+  #wrap{position:fixed;inset:0;display:flex;align-items:center;justify-content:center}
+  canvas{background:linear-gradient(#0a0e22,#04060f);touch-action:none;max-width:100vw;max-height:100vh}
+  #hud{position:fixed;top:10px;left:0;right:0;display:flex;justify-content:space-between;padding:0 16px;
+    font-weight:800;pointer-events:none;text-shadow:0 1px 3px #000}
+  #msg{position:fixed;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:14px;
+    background:rgba(4,6,15,.72);text-align:center;padding:20px}
+  #msg h1{margin:0;font-size:clamp(26px,7vw,46px)}
+  #msg p{margin:0;opacity:.85;max-width:420px;line-height:1.5}
+  button{background:#7c5cff;color:#fff;border:0;border-radius:12px;padding:13px 30px;font-size:18px;font-weight:800;cursor:pointer}
+  .hidden{display:none!important}
+</style>
+</head>
+<body>
+<div id="hud"><span>Score <span id="score">0</span></span><span>Best <span id="best">0</span></span></div>
+<div id="wrap"><canvas id="cv"></canvas></div>
+<div id="msg"><h1>Space Dodger</h1><p>Weave through the asteroid field. Move with mouse, touch, or arrow keys. Grab glowing shards for bonus points — survive as long as you can!</p><button id="start">Play</button></div>
+<script>
+const cv=document.getElementById('cv'),ctx=cv.getContext('2d');
+const W=420,H=640;cv.width=W;cv.height=H;
+let ship,rocks,shards,stars,score,best=0,running,spawnT,shardT,speed,tPrev,targetX;
+function reset(){
+  ship={x:W/2,y:H-80,r:15};rocks=[];shards=[];score=0;speed=2.6;spawnT=0;shardT=0;targetX=ship.x;
+  stars=Array.from({length:60},()=>({x:Math.random()*W,y:Math.random()*H,s:Math.random()*2+0.5,v:Math.random()*1.5+0.5}));
+}
+function startGame(){reset();running=true;document.getElementById('msg').classList.add('hidden');tPrev=performance.now();requestAnimationFrame(loop);}
+function gameOver(){running=false;best=Math.max(best,Math.floor(score));document.getElementById('best').textContent=best;
+  const m=document.getElementById('msg');m.classList.remove('hidden');
+  m.innerHTML=`<h1>Boom!</h1><p>You scored <b>${Math.floor(score)}</b>.<br>Best: ${best}</p><button id="start">Play again</button>`;
+  document.getElementById('start').onclick=startGame;
+}
+// input
+cv.addEventListener('mousemove',e=>{const r=cv.getBoundingClientRect();targetX=(e.clientX-r.left)*(W/r.width);});
+cv.addEventListener('touchmove',e=>{e.preventDefault();const r=cv.getBoundingClientRect();targetX=(e.touches[0].clientX-r.left)*(W/r.width);},{passive:false});
+const keys={};
+window.addEventListener('keydown',e=>{keys[e.key]=true;});
+window.addEventListener('keyup',e=>keys[e.key]=false);
+function loop(now){
+  if(!running)return;
+  const dt=Math.min((now-tPrev)/16.67,3);tPrev=now;
+  update(dt);draw();
+  requestAnimationFrame(loop);
+}
+function update(dt){
+  score+=dt*0.35;speed+=dt*0.0016;
+  // ship movement
+  if(keys['ArrowLeft'])targetX-=6*dt;
+  if(keys['ArrowRight'])targetX+=6*dt;
+  ship.x+=(targetX-ship.x)*0.2*dt;
+  ship.x=Math.max(ship.r,Math.min(W-ship.r,ship.x));
+  // stars
+  for(const s of stars){s.y+=s.v*speed*0.4*dt;if(s.y>H){s.y=0;s.x=Math.random()*W;}}
+  // spawn rocks
+  spawnT-=dt;
+  if(spawnT<=0){const rad=14+Math.random()*22;rocks.push({x:rad+Math.random()*(W-2*rad),y:-rad,r:rad,vx:(Math.random()-0.5)*1.5,spin:Math.random()*6,vr:(Math.random()-0.5)*0.1});
+    spawnT=Math.max(14,42-score*0.05);}
+  shardT-=dt;
+  if(shardT<=0){shards.push({x:20+Math.random()*(W-40),y:-10,r:8});shardT=120+Math.random()*120;}
+  // move rocks
+  for(let i=rocks.length-1;i>=0;i--){const r=rocks[i];r.y+=speed*dt;r.x+=r.vx*dt;r.spin+=r.vr*dt;
+    if(r.x<r.r||r.x>W-r.r)r.vx*=-1;
+    if(r.y-r.r>H){rocks.splice(i,1);continue;}
+    if(dist(r,ship)<r.r+ship.r-4)return gameOver();
+  }
+  for(let i=shards.length-1;i>=0;i--){const s=shards[i];s.y+=speed*0.9*dt;
+    if(s.y-s.r>H){shards.splice(i,1);continue;}
+    if(dist(s,ship)<s.r+ship.r){score+=25;shards.splice(i,1);}
+  }
+  document.getElementById('score').textContent=Math.floor(score);
+}
+function dist(a,b){return Math.hypot(a.x-b.x,a.y-b.y);}
+function draw(){
+  ctx.clearRect(0,0,W,H);
+  ctx.fillStyle='#fff';for(const s of stars){ctx.globalAlpha=s.s/2.5;ctx.fillRect(s.x,s.y,s.s,s.s);}ctx.globalAlpha=1;
+  // shards
+  for(const s of shards){ctx.save();ctx.translate(s.x,s.y);ctx.rotate(Math.PI/4);
+    ctx.shadowColor='#5ffbf1';ctx.shadowBlur=14;ctx.fillStyle='#5ffbf1';ctx.fillRect(-s.r/1.6,-s.r/1.6,s.r*1.25,s.r*1.25);ctx.restore();}
+  ctx.shadowBlur=0;
+  // rocks
+  for(const r of rocks){ctx.save();ctx.translate(r.x,r.y);ctx.rotate(r.spin);
+    ctx.fillStyle='#7a6a5c';ctx.strokeStyle='#4a3f36';ctx.lineWidth=2;ctx.beginPath();
+    const pts=8;for(let i=0;i<pts;i++){const a=i/pts*Math.PI*2;const rr=r.r*(0.78+((i*37)%10)/22);ctx.lineTo(Math.cos(a)*rr,Math.sin(a)*rr);}
+    ctx.closePath();ctx.fill();ctx.stroke();ctx.restore();}
+  // ship
+  ctx.save();ctx.translate(ship.x,ship.y);
+  ctx.fillStyle='#ffb24d';ctx.beginPath();ctx.moveTo(0,-ship.r*1.3);ctx.lineTo(ship.r,ship.r);ctx.lineTo(0,ship.r*0.5);ctx.lineTo(-ship.r,ship.r);ctx.closePath();ctx.fill();
+  ctx.fillStyle='#7c5cff';ctx.beginPath();ctx.arc(0,-ship.r*0.2,ship.r*0.4,0,7);ctx.fill();
+  // thruster
+  ctx.fillStyle='rgba(95,251,241,'+(0.4+Math.random()*0.4)+')';ctx.beginPath();
+  ctx.moveTo(-ship.r*0.5,ship.r);ctx.lineTo(0,ship.r+10+Math.random()*10);ctx.lineTo(ship.r*0.5,ship.r);ctx.closePath();ctx.fill();
+  ctx.restore();
+}
+document.getElementById('start').onclick=startGame;
+</script>
+</body>
+</html>

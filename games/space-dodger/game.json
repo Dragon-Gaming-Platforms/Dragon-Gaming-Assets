@@ -1,0 +1,9 @@
+{
+  "name": "Space Dodger",
+  "desc": "Pilot your ship through an endless asteroid field that speeds up the longer you survive. Grab glowing shards for bonus points and chase a new high score.",
+  "controls": "Mouse / touch / arrow keys to steer",
+  "shelf": "Arcade & Action",
+  "tags": ["games", "html5", "arcade", "action", "endless"],
+  "badge": "New",
+  "creator": "Dragon Gaming Platforms"
+}

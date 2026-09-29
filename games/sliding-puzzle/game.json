@@ -1,0 +1,9 @@
+{
+  "name": "Sliding Puzzle",
+  "desc": "The timeless 15-puzzle. Slide numbered tiles into the empty gap to arrange them in order. Three sizes, with a move counter and timer to beat your record.",
+  "controls": "Mouse / touch a tile next to the gap to slide it",
+  "shelf": "Puzzle & Logic",
+  "tags": ["games", "html5", "puzzle", "logic", "casual"],
+  "badge": "New",
+  "creator": "Dragon Gaming Platforms"
+}

@@ -1,0 +1,9 @@
+{
+  "name": "Mancala",
+  "desc": "The ancient sowing game (Kalah rules) versus a minimax computer opponent. Scoop up stones, land in your store for an extra turn, and capture across the board.",
+  "controls": "Mouse / touch to pick one of your pits",
+  "shelf": "Puzzle & Logic",
+  "tags": ["games", "html5", "board", "strategy", "mancala"],
+  "badge": "New",
+  "creator": "Dragon Gaming Platforms"
+}

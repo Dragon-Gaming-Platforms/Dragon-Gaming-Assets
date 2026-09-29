@@ -1,0 +1,9 @@
+{
+  "name": "Word Search",
+  "desc": "Find every hidden word in the letter grid, running in any direction including diagonals and backwards. Pick a theme and drag across letters to score.",
+  "controls": "Click / touch and drag across letters to select a word",
+  "shelf": "Puzzle & Logic",
+  "tags": ["games", "html5", "word", "puzzle", "casual"],
+  "badge": "New",
+  "creator": "Dragon Gaming Platforms"
+}

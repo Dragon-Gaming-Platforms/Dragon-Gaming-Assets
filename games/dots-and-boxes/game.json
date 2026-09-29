@@ -1,0 +1,9 @@
+{
+  "name": "Dots and Boxes",
+  "desc": "The classic pen-and-paper game against a computer opponent. Draw lines to complete boxes, claim them, and take an extra turn each time you close one.",
+  "controls": "Mouse / touch to draw a line between two dots",
+  "shelf": "Puzzle & Logic",
+  "tags": ["games", "html5", "board", "strategy", "casual"],
+  "badge": "New",
+  "creator": "Dragon Gaming Platforms"
+}

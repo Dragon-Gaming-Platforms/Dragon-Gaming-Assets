@@ -1,0 +1,9 @@
+{
+  "name": "Lights Out",
+  "desc": "A classic toggle puzzle: tapping a tile flips it and its neighbors. Turn every light off in as few moves as possible across three grid sizes.",
+  "controls": "Mouse / touch to toggle a tile",
+  "shelf": "Puzzle & Logic",
+  "tags": ["games", "html5", "puzzle", "logic", "casual"],
+  "badge": "New",
+  "creator": "Dragon Gaming Platforms"
+}

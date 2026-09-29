@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+<meta name="robots" content="noindex,nofollow">
+<title>Mancala</title>
+<style>
+  *{box-sizing:border-box}
+  html,body{margin:0;height:100%}
+  body{background:radial-gradient(circle at 50% -10%,#3a2c1a,#160f07 60%);color:#f0e6d6;
+    font-family:system-ui,Segoe UI,Roboto,Arial,sans-serif;display:flex;flex-direction:column;
+    align-items:center;justify-content:center;min-height:100vh;gap:14px;padding:14px;user-select:none;-webkit-user-select:none}
+  h1{margin:0;font-size:clamp(20px,5vw,30px)}
+  #status{min-height:22px;color:#ffd28a;font-weight:700}
+  #board{display:flex;align-items:stretch;gap:10px;background:#5a3d22;padding:14px;border-radius:22px;
+    box-shadow:0 14px 40px rgba(0,0,0,.55);width:min(94vw,620px)}
+  .store{width:64px;background:#3a2614;border-radius:16px;display:flex;flex-direction:column;
+    align-items:center;justify-content:center;gap:6px;color:#ffd28a;font-weight:800;font-size:22px}
+  .mid{flex:1;display:flex;flex-direction:column;gap:10px}
+  .rowpits{display:flex;gap:10px;justify-content:space-between}
+  .pit{flex:1;aspect-ratio:1;background:#3a2614;border-radius:50%;display:flex;flex-direction:column;
+    align-items:center;justify-content:center;color:#f0e6d6;font-weight:800;font-size:20px;position:relative;transition:transform .1s}
+  .pit small{font-size:11px;opacity:.6}
+  .pit.you{cursor:pointer;box-shadow:inset 0 0 0 2px rgba(255,210,138,.5)}
+  .pit.you:hover{transform:scale(1.06);background:#4a3018}
+  .pit.cpu{opacity:.92}
+  .label{display:flex;justify-content:space-between;font-size:12px;opacity:.7;padding:0 4px}
+  .row{display:flex;gap:10px;align-items:center}
+  button,select{background:#ffd28a;color:#3a2610;border:0;border-radius:10px;padding:10px 18px;font-size:15px;font-weight:800;cursor:pointer}
+  select{background:rgba(255,255,255,.1);color:#f0e6d6}
+</style>
+</head>
+<body>
+<h1>Mancala</h1>
+<div id="status">Your turn — pick one of your pits</div>
+<div id="board">
+  <div class="store" id="storeCpu" title="CPU store">0</div>
+  <div class="mid">
+    <div class="label"><span>CPU</span><span>← sow this way</span></div>
+    <div class="rowpits" id="cpuRow"></div>
+    <div class="rowpits" id="youRow"></div>
+    <div class="label"><span>You</span><span>sow this way →</span></div>
+  </div>
+  <div class="store" id="storeYou" title="Your store">0</div>
+</div>
+<div class="row">
+  <button id="newGame">New Game</button>
+  <select id="level"><option value="1">Easy</option><option value="3" selected>Normal</option><option value="5">Hard</option></select>
+</div>
+<script>
+// Kalah board index: 0-5 you pits, 6 your store, 7-12 cpu pits, 13 cpu store
+let board,turn,over;
+const YOU_STORE=6,CPU_STORE=13;
+function init(){
+  board=[4,4,4,4,4,4,0, 4,4,4,4,4,4,0];
+  turn='you';over=false;
+  document.getElementById('status').textContent='Your turn — pick one of your pits';
+  render();
+}
+function render(){
+  const youRow=document.getElementById('youRow'),cpuRow=document.getElementById('cpuRow');
+  youRow.innerHTML='';cpuRow.innerHTML='';
+  for(let i=0;i<6;i++){
+    const p=document.createElement('div');p.className='pit you';p.innerHTML=board[i]+'<small>pit '+(i+1)+'</small>';
+    if(turn==='you'&&!over&&board[i]>0)p.onclick=()=>playerMove(i);else p.style.cursor='default';
+    youRow.appendChild(p);
+  }
+  // cpu pits shown left-to-right as 12..7 to mirror
+  for(let i=12;i>=7;i--){
+    const p=document.createElement('div');p.className='pit cpu';p.textContent=board[i];cpuRow.appendChild(p);
+  }
+  document.getElementById('storeYou').textContent=board[YOU_STORE];
+  document.getElementById('storeCpu').textContent=board[CPU_STORE];
+}
+function sow(bd,pit,side){
+  // returns {extra:bool} ; mutates bd
+  let stones=bd[pit];bd[pit]=0;let i=pit;
+  const ownStore=side==='you'?YOU_STORE:CPU_STORE;
+  const oppStore=side==='you'?CPU_STORE:YOU_STORE;
+  while(stones>0){i=(i+1)%14;if(i===oppStore)continue;bd[i]++;stones--;}
+  // capture
+  const ownPits=side==='you'?[0,1,2,3,4,5]:[7,8,9,10,11,12];
+  if(ownPits.includes(i)&&bd[i]===1){
+    const opp=12-i;
+    if(bd[opp]>0){bd[ownStore]+=bd[opp]+1;bd[i]=0;bd[opp]=0;}
+  }
+  return{extra:i===ownStore};
+}
+function playerMove(pit){
+  if(over||turn!=='you'||board[pit]===0)return;
+  const {extra}=sow(board,pit,'you');render();
+  if(checkEnd())return;
+  if(extra){document.getElementById('status').textContent='Landed in your store — go again!';return;}
+  turn='cpu';document.getElementById('status').textContent='CPU thinking…';setTimeout(cpuTurn,400);
+}
+function cpuTurn(){
+  if(over)return;
+  const depth=parseInt(document.getElementById('level').value);
+  let chain=0;
+  const step=()=>{
+    if(over)return;
+    const pit=pickCpu(depth);
+    if(pit===-1){turn='you';render();document.getElementById('status').textContent='Your turn';return;}
+    const {extra}=sow(board,pit,'cpu');render();
+    if(checkEnd())return;
+    if(extra&&chain++<8){document.getElementById('status').textContent='CPU goes again…';setTimeout(step,500);}
+    else{turn='you';document.getElementById('status').textContent='Your turn';}
+  };
+  step();
+}
+function pickCpu(depth){
+  const moves=[7,8,9,10,11,12].filter(i=>board[i]>0);
+  if(!moves.length)return -1;
+  let best=moves[0],bestScore=-Infinity;
+  for(const m of moves){
+    const nb=board.slice();const {extra}=sow(nb,m,'cpu');
+    let score=minimax(nb,depth-1,extra?'cpu':'you',-Infinity,Infinity);
+    if(score>bestScore){bestScore=score;best=m;}
+  }
+  return best;
+}
+function evaluate(bd){return (bd[CPU_STORE]-bd[YOU_STORE]);}
+function sideMoves(bd,side){const pits=side==='you'?[0,1,2,3,4,5]:[7,8,9,10,11,12];return pits.filter(i=>bd[i]>0);}
+function minimax(bd,depth,side,alpha,beta){
+  if(depth<=0||terminal(bd))return evaluate(bd);
+  const moves=sideMoves(bd,side);
+  if(!moves.length)return evaluate(bd);
+  if(side==='cpu'){
+    let best=-Infinity;
+    for(const m of moves){const nb=bd.slice();const {extra}=sow(nb,m,'cpu');
+      best=Math.max(best,minimax(nb,depth-1,extra?'cpu':'you',alpha,beta));alpha=Math.max(alpha,best);if(beta<=alpha)break;}
+    return best;
+  }else{
+    let best=Infinity;
+    for(const m of moves){const nb=bd.slice();const {extra}=sow(nb,m,'you');
+      best=Math.min(best,minimax(nb,depth-1,extra?'you':'cpu',alpha,beta));beta=Math.min(beta,best);if(beta<=alpha)break;}
+    return best;
+  }
+}
+function terminal(bd){
+  const y=[0,1,2,3,4,5].every(i=>bd[i]===0);
+  const c=[7,8,9,10,11,12].every(i=>bd[i]===0);
+  return y||c;
+}
+function checkEnd(){
+  if(!terminal(board))return false;
+  // sweep remaining
+  for(let i=0;i<6;i++){board[YOU_STORE]+=board[i];board[i]=0;}
+  for(let i=7;i<13;i++){board[CPU_STORE]+=board[i];board[i]=0;}
+  over=true;render();
+  const y=board[YOU_STORE],c=board[CPU_STORE];
+  const m=y>c?'🎉 You win!':c>y?'CPU wins — try again':"It's a tie";
+  document.getElementById('status').textContent=`Game over — ${m} (${y}–${c})`;
+  return true;
+}
+document.getElementById('newGame').onclick=init;
+document.getElementById('level').onchange=init;
+init();
+</script>
+</body>
+</html>

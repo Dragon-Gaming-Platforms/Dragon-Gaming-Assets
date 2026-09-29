@@ -1,0 +1,9 @@
+{
+  "name": "Hangman",
+  "desc": "Guess the hidden word one letter at a time before the drawing is complete. Choose a category and use the on-screen keyboard or your physical keyboard.",
+  "controls": "Click on-screen letters or type on your keyboard",
+  "shelf": "Puzzle & Logic",
+  "tags": ["games", "html5", "word", "puzzle", "classic"],
+  "badge": "New",
+  "creator": "Dragon Gaming Platforms"
+}

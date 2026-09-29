@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+<meta name="robots" content="noindex,nofollow">
+<title>Sliding Puzzle</title>
+<style>
+  *{box-sizing:border-box}
+  html,body{margin:0;height:100%}
+  body{background:radial-gradient(circle at 50% 0,#123a3a,#06171a 60%);color:#e6fffb;
+    font-family:system-ui,Segoe UI,Roboto,Arial,sans-serif;display:flex;flex-direction:column;
+    align-items:center;justify-content:center;min-height:100vh;gap:14px;padding:14px;user-select:none;-webkit-user-select:none}
+  h1{margin:0;font-size:clamp(20px,5vw,30px)}
+  .hud{display:flex;gap:12px;font-weight:700}
+  .hud div{background:rgba(255,255,255,.08);border-radius:10px;padding:8px 14px}
+  #grid{display:grid;gap:6px;padding:8px;background:#0a2529;border-radius:14px;box-shadow:0 14px 40px rgba(0,0,0,.55);width:min(90vw,60vh,400px)}
+  .tile{aspect-ratio:1;border-radius:10px;display:flex;align-items:center;justify-content:center;
+    font-size:clamp(18px,6vw,30px);font-weight:800;cursor:pointer;
+    background:linear-gradient(135deg,#2fd4b6,#1f9c99);color:#04231f;box-shadow:0 3px 8px rgba(0,0,0,.4);transition:transform .08s}
+  .tile:active{transform:scale(.96)}
+  .blank{background:transparent;box-shadow:none;cursor:default}
+  #win{min-height:22px;color:#ffd76a;font-weight:700}
+  .row{display:flex;gap:10px;align-items:center}
+  button,select{background:#2fd4b6;color:#04231f;border:0;border-radius:10px;padding:10px 18px;font-size:15px;font-weight:800;cursor:pointer}
+  select{background:rgba(255,255,255,.1);color:#e6fffb}
+</style>
+</head>
+<body>
+<h1>Sliding Puzzle</h1>
+<div class="hud"><div>Moves <span id="moves">0</span></div><div>Time <span id="time">0</span>s</div></div>
+<div id="grid"></div>
+<div id="win">Arrange the tiles in order. Click a tile next to the gap.</div>
+<div class="row">
+  <button id="shuffle">Shuffle</button>
+  <select id="size"><option value="3">3×3</option><option value="4" selected>4×4</option><option value="5">5×5</option></select>
+</div>
+<script>
+const gridEl=document.getElementById('grid');
+let N,tiles,blank,moves,timer,seconds,started,solved;
+function build(){
+  N=parseInt(document.getElementById('size').value);
+  tiles=[];for(let i=0;i<N*N-1;i++)tiles.push(i+1);tiles.push(0);
+  blank=N*N-1;
+  gridEl.style.gridTemplateColumns=`repeat(${N},1fr)`;
+}
+function shuffle(){
+  build();
+  // random legal moves to guarantee solvable
+  let b=blank;
+  for(let k=0;k<N*N*80;k++){
+    const nbrs=neighbors(b);const pick=nbrs[Math.floor(Math.random()*nbrs.length)];
+    [tiles[b],tiles[pick]]=[tiles[pick],tiles[b]];b=pick;
+  }
+  blank=b;moves=0;seconds=0;started=false;solved=false;
+  clearInterval(timer);
+  document.getElementById('moves').textContent=0;document.getElementById('time').textContent=0;
+  document.getElementById('win').textContent='Arrange the tiles in order.';
+  render();
+}
+function neighbors(i){const r=Math.floor(i/N),c=i%N;const out=[];
+  if(r>0)out.push(i-N);if(r<N-1)out.push(i+N);if(c>0)out.push(i-1);if(c<N-1)out.push(i+1);return out;}
+function click(i){
+  if(solved)return;
+  if(neighbors(blank).includes(i)){
+    if(!started){started=true;timer=setInterval(()=>{seconds++;document.getElementById('time').textContent=seconds;},1000);}
+    [tiles[blank],tiles[i]]=[tiles[i],tiles[blank]];blank=i;
+    moves++;document.getElementById('moves').textContent=moves;render();checkWin();
+  }
+}
+function checkWin(){
+  for(let i=0;i<N*N-1;i++)if(tiles[i]!==i+1)return;
+  if(tiles[N*N-1]!==0)return;
+  solved=true;clearInterval(timer);
+  document.getElementById('win').textContent=`🎉 Solved in ${moves} moves and ${seconds}s!`;
+}
+function render(){
+  gridEl.innerHTML='';
+  tiles.forEach((v,i)=>{
+    const d=document.createElement('div');
+    if(v===0){d.className='tile blank';}
+    else{d.className='tile';d.textContent=v;d.onclick=()=>click(i);
+      const hue=(v/(N*N))*140+150;d.style.background=`linear-gradient(135deg,hsl(${hue},60%,55%),hsl(${hue},60%,42%))`;}
+    gridEl.appendChild(d);
+  });
+}
+document.getElementById('shuffle').onclick=shuffle;
+document.getElementById('size').onchange=shuffle;
+shuffle();
+</script>
+</body>
+</html>
