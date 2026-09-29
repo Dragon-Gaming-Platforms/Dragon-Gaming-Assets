@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+<meta name="robots" content="noindex,nofollow">
+<title>8-Ball Pool</title>
+<style>
+  *{box-sizing:border-box}html,body{margin:0;height:100%}
+  body{background:#08110b;color:#eafff0;font-family:system-ui,Segoe UI,Roboto,Arial,sans-serif;
+    display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;gap:8px;padding:10px;user-select:none;-webkit-user-select:none}
+  h1{margin:0;font-size:clamp(18px,5vw,26px)}
+  #status{min-height:20px;color:#8fe0a8;font-weight:800;text-align:center}
+  canvas{border-radius:14px;touch-action:none;max-width:96vw;height:auto;cursor:crosshair}
+  .hint{font-size:12px;opacity:.7;text-align:center}
+  button{background:#7be0a0;color:#04240f;border:0;border-radius:10px;padding:8px 16px;font-weight:800;cursor:pointer}
+</style>
+</head>
+<body>
+<h1>8-Ball Pool</h1>
+<div id="status">Drag from the cue ball to aim &amp; set power, release to shoot. Sink all your balls, then the 8.</div>
+<canvas id="c" width="500" height="280"></canvas>
+<div class="hint" id="turn"></div>
+<button id="reset">Rack 'em Up</button>
+<script>
+const cv=document.getElementById('c'),ctx=cv.getContext('2d');const W=cv.width,H=cv.height;
+const R=10,FR=0.985,MIN=0.05;
+const pockets=[[20,20],[W/2,14],[W-20,20],[20,H-20],[W/2,H-14],[W-20,H-20]];
+const PR=17;
+let balls,aiming,aimStart,aimNow,moving,turn,assign,msg,gameOver;
+function mkBall(x,y,color,num,type){return{x,y,vx:0,vy:0,color,num,type,in:false};}
+function rack(){
+  balls=[];
+  balls.push(mkBall(W*0.25,H/2,'#fff',0,'cue'));
+  const colors={1:'#e6b800',2:'#1e50ff',3:'#e63030',4:'#7a2fd0',5:'#ff7a1e',6:'#1fa055',7:'#8a2b2b',
+    9:'#e6b800',10:'#1e50ff',11:'#e63030',12:'#7a2fd0',13:'#ff7a1e',14:'#1fa055',15:'#8a2b2b'};
+  const order=[1,9,2,8,10,3,11,4,12,5,13,6,14,7,15]; // rough triangle
+  let idx=0;const startX=W*0.7,dy=R*2+1;
+  for(let col=0;col<5;col++){for(let row=0;row<=col;row++){
+    const n=order[idx++];const x=startX+col*(R*1.8);const y=H/2+(row*dy)-(col*dy/2);
+    const type=n===8?'eight':(n<8?'solid':'stripe');
+    balls.push(mkBall(x,y,colors[n]||'#333',n,type));
+  }}
+  aiming=false;moving=false;turn=1;assign={1:null,2:null};gameOver=false;
+  document.getElementById('status').textContent='Player 1 — drag from the cue ball to shoot.';
+  updateTurn();draw();
+}
+function updateTurn(){document.getElementById('turn').textContent=
+  `Player ${turn}${assign[turn]?' ('+assign[turn]+'s)':''} to shoot`;}
+function cue(){return balls[0];}
+function pos(e){const rect=cv.getBoundingClientRect();const sx=cv.width/rect.width,sy=cv.height/rect.height;
+  const t=e.touches?e.touches[0]:e;return{x:(t.clientX-rect.left)*sx,y:(t.clientY-rect.top)*sy};}
+function down(e){if(moving||gameOver)return;const p=pos(e);const c=cue();if(c.in)return;
+  if(Math.hypot(p.x-c.x,p.y-c.y)<40){aiming=true;aimNow=p;}e.preventDefault();}
+function move(e){if(aiming){aimNow=pos(e);draw();e.preventDefault();}}
+function up(e){if(!aiming)return;aiming=false;const c=cue();
+  const dx=c.x-aimNow.x,dy=c.y-aimNow.y;const power=Math.min(Math.hypot(dx,dy),120)/120;
+  const ang=Math.atan2(dy,dx);c.vx=Math.cos(ang)*power*16;c.vy=Math.sin(ang)*power*16;
+  moving=true;turnState={potted:[],cueScratch:false};step();e.preventDefault();}
+cv.addEventListener('mousedown',down);cv.addEventListener('mousemove',move);window.addEventListener('mouseup',up);
+cv.addEventListener('touchstart',down,{passive:false});cv.addEventListener('touchmove',move,{passive:false});cv.addEventListener('touchend',up);
+let turnState={potted:[],cueScratch:false};
+function step(){
+  let anyMoving=false;
+  balls.forEach(b=>{if(b.in)return;b.x+=b.vx;b.y+=b.vy;b.vx*=FR;b.vy*=FR;
+    if(Math.abs(b.vx)<MIN)b.vx=0;if(Math.abs(b.vy)<MIN)b.vy=0;
+    if(b.vx||b.vy)anyMoving=true;
+    // cushions
+    if(b.x-R<8){b.x=8+R;b.vx*=-0.9;}if(b.x+R>W-8){b.x=W-8-R;b.vx*=-0.9;}
+    if(b.y-R<8){b.y=8+R;b.vy*=-0.9;}if(b.y+R>H-8){b.y=H-8-R;b.vy*=-0.9;}
+  });
+  // collisions
+  for(let i=0;i<balls.length;i++)for(let j=i+1;j<balls.length;j++){
+    const a=balls[i],b=balls[j];if(a.in||b.in)continue;
+    const dx=b.x-a.x,dy=b.y-a.y,d=Math.hypot(dx,dy);
+    if(d<R*2&&d>0){const nx=dx/d,ny=dy/d;const overlap=R*2-d;
+      a.x-=nx*overlap/2;a.y-=ny*overlap/2;b.x+=nx*overlap/2;b.y+=ny*overlap/2;
+      const dvx=a.vx-b.vx,dvy=a.vy-b.vy;const dot=dvx*nx+dvy*ny;
+      if(dot>0){a.vx-=dot*nx;a.vy-=dot*ny;b.vx+=dot*nx;b.vy+=dot*ny;}}
+  }
+  // pockets
+  balls.forEach(b=>{if(b.in)return;for(const[px,py] of pockets){if(Math.hypot(b.x-px,b.y-py)<PR){
+    b.in=true;b.vx=b.vy=0;turnState.potted.push(b);if(b.num===0)turnState.cueScratch=true;}}});
+  draw();
+  if(anyMoving)requestAnimationFrame(step);else endTurn();
+}
+function endTurn(){
+  moving=false;
+  const potted=turnState.potted.filter(b=>b.num!==0);
+  const eight=potted.find(b=>b.num===8);
+  // assign groups on first pot
+  if(!assign[turn]&&potted.length){const first=potted.find(b=>b.type==='solid'||b.type==='stripe');
+    if(first){assign[turn]=first.type;assign[turn===1?2:1]=first.type==='solid'?'stripe':'solid';}}
+  const myType=assign[turn];
+  const myRemaining=balls.filter(b=>!b.in&&b.type===myType).length;
+  if(eight){
+    if(myType&&myRemaining===0&&!turnState.cueScratch)return finish(turn,`Player ${turn} sank the 8-ball and wins! 🎉`);
+    return finish(turn===1?2:1,`Player ${turn} pocketed the 8-ball early — Player ${turn===1?2:1} wins!`);
+  }
+  if(turnState.cueScratch){
+    // respot cue
+    const c=cue();c.in=false;c.x=W*0.25;c.y=H/2;c.vx=c.vy=0;
+    turn=turn===1?2:1;document.getElementById('status').textContent=`Scratch! Cue ball respotted. Player ${turn}'s turn.`;
+  } else {
+    const pottedMine=potted.some(b=>!myType||b.type===myType);
+    if(!potted.length||!pottedMine){turn=turn===1?2:1;document.getElementById('status').textContent=`Player ${turn}'s turn.`;}
+    else document.getElementById('status').textContent=`Nice pot! Player ${turn} shoots again.`;
+  }
+  updateTurn();draw();
+}
+function finish(winner,text){gameOver=true;document.getElementById('status').textContent=text;draw();}
+function draw(){
+  // felt
+  ctx.fillStyle='#0a5c2e';ctx.fillRect(0,0,W,H);
+  ctx.fillStyle='#083f20';ctx.fillRect(0,0,W,H);
+  ctx.fillStyle='#0d6b36';ctx.fillRect(8,8,W-16,H-16);
+  // rails
+  ctx.strokeStyle='#5a3a1a';ctx.lineWidth=8;ctx.strokeRect(4,4,W-8,H-8);
+  // pockets
+  ctx.fillStyle='#000';pockets.forEach(([x,y])=>{ctx.beginPath();ctx.arc(x,y,PR,0,7);ctx.fill();});
+  // balls
+  balls.forEach(b=>{if(b.in)return;
+    ctx.fillStyle=b.type==='eight'?'#111':b.color;ctx.beginPath();ctx.arc(b.x,b.y,R,0,7);ctx.fill();
+    if(b.type==='stripe'){ctx.fillStyle='#fff';ctx.fillRect(b.x-R,b.y-3,R*2,6);}
+    if(b.num>0){ctx.fillStyle='#fff';ctx.beginPath();ctx.arc(b.x,b.y,4.5,0,7);ctx.fill();
+      ctx.fillStyle='#000';ctx.font='bold 7px system-ui';ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(b.num,b.x,b.y+0.5);}
+    ctx.strokeStyle='rgba(0,0,0,.3)';ctx.lineWidth=1;ctx.beginPath();ctx.arc(b.x,b.y,R,0,7);ctx.stroke();
+    ctx.fillStyle='rgba(255,255,255,.4)';ctx.beginPath();ctx.arc(b.x-3,b.y-3,2.5,0,7);ctx.fill();});
+  // aim
+  if(aiming){const c=cue();const dx=c.x-aimNow.x,dy=c.y-aimNow.y;const p=Math.min(Math.hypot(dx,dy),120);
+    const ang=Math.atan2(dy,dx);
+    ctx.strokeStyle='rgba(255,255,255,.8)';ctx.lineWidth=2;ctx.setLineDash([5,5]);
+    ctx.beginPath();ctx.moveTo(c.x,c.y);ctx.lineTo(c.x+Math.cos(ang)*p*2,c.y+Math.sin(ang)*p*2);ctx.stroke();ctx.setLineDash([]);
+    // power bar
+    ctx.fillStyle='#ff5';ctx.fillRect(10,H-16,(p/120)*80,6);}
+}
+document.getElementById('reset').onclick=rack;
+rack();
+</script>
+</body>
+</html>

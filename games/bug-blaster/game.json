@@ -1,0 +1,9 @@
+{
+  "name": "Bug Blaster",
+  "desc": "A retro arcade shooter inspired by the classics. Blast the centipede as it winds down through a mushroom field — hit a middle segment and it splits into two. Don't let it reach your zone!",
+  "controls": "Arrow keys to move in the bottom zone, Space to fire (or on-screen buttons)",
+  "shelf": "Arcade & Action",
+  "tags": ["games", "html5", "arcade", "shooter", "retro"],
+  "badge": "New",
+  "creator": "Dragon Gaming Platforms"
+}

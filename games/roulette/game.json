@@ -1,0 +1,9 @@
+{
+  "name": "Roulette",
+  "desc": "Spin the wheel and test your luck at the casino table. Place chips on straight numbers, red or black, odds or evens, dozens and more, then watch the ball settle. Straight numbers pay 35 to 1.",
+  "controls": "Pick a chip value, tap the table to place bets, then SPIN",
+  "shelf": "Arcade & Action",
+  "tags": ["games", "html5", "casino", "roulette", "casual"],
+  "badge": "New",
+  "creator": "Dragon Gaming Platforms"
+}

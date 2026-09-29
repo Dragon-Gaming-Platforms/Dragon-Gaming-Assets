@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+<meta name="robots" content="noindex,nofollow">
+<title>Kakuro</title>
+<style>
+  *{box-sizing:border-box}html,body{margin:0;height:100%}
+  body{background:#1a1f2b;color:#eef;font-family:system-ui,Segoe UI,Roboto,Arial,sans-serif;
+    display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:100vh;gap:12px;padding:14px;user-select:none;-webkit-user-select:none}
+  h1{margin:0;font-size:clamp(20px,5vw,28px)}
+  #status{min-height:22px;color:#7fd0ff;font-weight:700;text-align:center}
+  #board{display:grid;gap:2px;background:#333c4d;padding:4px;border-radius:8px}
+  .cell{width:52px;height:52px;position:relative}
+  .black{background:#2a3140}
+  .white{background:#f3f4f8}
+  .white input{width:100%;height:100%;border:0;background:transparent;text-align:center;font-size:24px;font-weight:800;color:#1a2b4a;outline:none}
+  .white.bad input{color:#d33}
+  .white.good{background:#d6f5da}
+  .clue{position:absolute;inset:0}
+  .clue .diag{position:absolute;inset:0;background:linear-gradient(to top right,transparent 49.3%,#556 49.3%,#556 50.7%,transparent 50.7%)}
+  .clue .r{position:absolute;top:2px;right:4px;font-size:14px;font-weight:800;color:#cfe}
+  .clue .d{position:absolute;bottom:2px;left:4px;font-size:14px;font-weight:800;color:#fd9}
+  .row{display:flex;gap:10px}
+  button{background:#4aa3ff;color:#04152a;border:0;border-radius:10px;padding:9px 16px;font-weight:800;cursor:pointer}
+  .hint{font-size:12px;opacity:.7;max-width:420px;text-align:center}
+</style>
+</head>
+<body>
+<h1>Kakuro</h1>
+<div id="status">Fill white cells 1–9 so each run matches its clue with no repeats.</div>
+<div id="board"></div>
+<div class="row"><button id="check">Check</button><button id="clear">Clear</button><button id="newG">New Puzzle</button></div>
+<div class="hint">A clue in the upper-right of a dark cell is the sum of the run to its right; lower-left is the sum going down. Digits can't repeat within a run.</div>
+<script>
+// layout: 1 = white, 0 = black. Top row & left col all black.
+const LAYOUT=[
+ [0,0,0,0,0,0],
+ [0,1,1,0,1,1],
+ [0,1,1,1,1,1],
+ [0,0,1,1,1,0],
+ [0,1,1,0,1,1],
+ [0,1,1,0,1,1],
+];
+const R=LAYOUT.length,C=LAYOUT[0].length;
+let sol,runsH,runsV,clues,cellRun;
+function buildRuns(){
+  // assign run ids
+  runsH=[];runsV=[];cellRun={};
+  let hid=0;
+  for(let r=0;r<R;r++){let c=0;while(c<C){if(LAYOUT[r][c]===1){const run=[];while(c<C&&LAYOUT[r][c]===1){run.push([r,c]);c++;}
+    if(run.length){runsH.push(run);run.forEach(([rr,cc])=>{cellRun[rr+','+cc]=cellRun[rr+','+cc]||{};cellRun[rr+','+cc].h=runsH.length-1;});}}else c++;}}
+  for(let c=0;c<C;c++){let r=0;while(r<R){if(LAYOUT[r][c]===1){const run=[];while(r<R&&LAYOUT[r][c]===1){run.push([r,c]);r++;}
+    if(run.length){runsV.push(run);run.forEach(([rr,cc])=>{cellRun[rr+','+cc]=cellRun[rr+','+cc]||{};cellRun[rr+','+cc].v=runsV.length-1;});}}else r++;}}
+}
+function fillSolution(){
+  const whites=[];for(let r=0;r<R;r++)for(let c=0;c<C;c++)if(LAYOUT[r][c]===1)whites.push([r,c]);
+  sol={};
+  function used(runCells,exceptKey){const s=new Set();runCells.forEach(([r,c])=>{const k=r+','+c;if(k!==exceptKey&&sol[k])s.add(sol[k]);});return s;}
+  function bt(i){
+    if(i>=whites.length)return true;
+    const[r,c]=whites[i];const k=r+','+c;
+    const hRun=runsH[cellRun[k].h],vRun=runsV[cellRun[k].v];
+    const uH=used(hRun,k),uV=used(vRun,k);
+    const digits=[1,2,3,4,5,6,7,8,9].sort(()=>Math.random()-0.5);
+    for(const d of digits){if(!uH.has(d)&&!uV.has(d)){sol[k]=d;if(bt(i+1))return true;delete sol[k];}}
+    return false;
+  }
+  bt(0);
+}
+function computeClues(){
+  clues={}; // key r,c black cell -> {right,down}
+  runsH.forEach(run=>{const[r,c]=run[0];const anchor=(r)+','+(c-1);const sum=run.reduce((a,[rr,cc])=>a+sol[rr+','+cc],0);
+    clues[anchor]=clues[anchor]||{};clues[anchor].right=sum;});
+  runsV.forEach(run=>{const[r,c]=run[0];const anchor=(r-1)+','+c;const sum=run.reduce((a,[rr,cc])=>a+sol[rr+','+cc],0);
+    clues[anchor]=clues[anchor]||{};clues[anchor].down=sum;});
+}
+function gen(){buildRuns();fillSolution();computeClues();render();
+  document.getElementById('status').textContent='Fill white cells 1–9 so each run matches its clue with no repeats.';}
+const boardEl=document.getElementById('board');
+function render(){
+  boardEl.style.gridTemplateColumns=`repeat(${C},52px)`;boardEl.innerHTML='';
+  for(let r=0;r<R;r++)for(let c=0;c<C;c++){
+    const cell=document.createElement('div');cell.className='cell '+(LAYOUT[r][c]===1?'white':'black');
+    if(LAYOUT[r][c]===1){
+      const inp=document.createElement('input');inp.maxLength=1;inp.inputMode='numeric';inp.id='k'+r+'_'+c;
+      inp.oninput=()=>{inp.value=inp.value.replace(/[^1-9]/g,'').slice(0,1);};
+      cell.appendChild(inp);
+    } else if(clues[r+','+c]){
+      const cl=document.createElement('div');cl.className='clue';
+      const cinfo=clues[r+','+c];
+      cl.innerHTML='<div class="diag"></div>'+
+        (cinfo.right!=null?`<div class="r">${cinfo.right}</div>`:'')+
+        (cinfo.down!=null?`<div class="d">${cinfo.down}</div>`:'');
+      cell.appendChild(cl);
+    }
+    boardEl.appendChild(cell);
+  }
+}
+function check(){
+  let allFilled=true,allValid=true;
+  document.querySelectorAll('.white').forEach(w=>w.classList.remove('bad','good'));
+  const val=(r,c)=>{const el=document.getElementById('k'+r+'_'+c);return el?+el.value||0:0;};
+  const markRun=(run,sum)=>{
+    const vals=run.map(([r,c])=>val(r,c));
+    const filled=vals.every(v=>v>0);if(!filled)allFilled=false;
+    const distinct=new Set(vals.filter(v=>v>0)).size===vals.filter(v=>v>0).length;
+    const total=vals.reduce((a,b)=>a+b,0);
+    const ok=filled&&distinct&&total===sum;
+    if(!ok&&filled){allValid=false;run.forEach(([r,c])=>document.getElementById('k'+r+'_'+c).parentElement.classList.add('bad'));}
+    return ok;
+  };
+  runsH.forEach(run=>{const[r,c]=run[0];markRun(run,clues[r+','+(c-1)].right);});
+  runsV.forEach(run=>{const[r,c]=run[0];markRun(run,clues[(r-1)+','+c].down);});
+  const st=document.getElementById('status');
+  if(allFilled&&allValid){document.querySelectorAll('.white').forEach(w=>w.classList.add('good'));st.textContent='🎉 Solved! Every run checks out.';}
+  else if(!allFilled)st.textContent='Keep going — some cells are still empty.';
+  else st.textContent='Some runs are wrong (highlighted red). Keep trying!';
+}
+function clearGrid(){document.querySelectorAll('.white input').forEach(i=>i.value='');
+  document.querySelectorAll('.white').forEach(w=>w.classList.remove('bad','good'));
+  document.getElementById('status').textContent='Cleared. Fill the white cells again.';}
+document.getElementById('check').onclick=check;
+document.getElementById('clear').onclick=clearGrid;
+document.getElementById('newG').onclick=gen;
+gen();
+</script>
+</body>
+</html>

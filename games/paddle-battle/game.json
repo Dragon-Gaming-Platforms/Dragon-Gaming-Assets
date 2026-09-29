@@ -1,0 +1,9 @@
+{
+  "name": "Paddle Battle",
+  "desc": "A retro table-tennis duel. Keep the ball in play and slip it past the computer's paddle. Choose your difficulty and race to seven points. Simple to learn, tricky to master.",
+  "controls": "Mouse / touch or ↑ ↓ to move your paddle, Serve button / Space to launch",
+  "shelf": "Arcade & Action",
+  "tags": ["games", "html5", "arcade", "retro", "classic"],
+  "badge": "New",
+  "creator": "Dragon Gaming Platforms"
+}

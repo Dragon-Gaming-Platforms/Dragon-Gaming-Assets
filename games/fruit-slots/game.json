@@ -1,0 +1,9 @@
+{
+  "name": "Fruit Slots",
+  "desc": "A classic three-reel fruit machine. Set your bet and spin the reels — match three symbols across the middle row for a payout, with rarer symbols paying more. Sevens hit the 100x jackpot.",
+  "controls": "Buttons: adjust bet, SPIN",
+  "shelf": "Arcade & Action",
+  "tags": ["games", "html5", "casino", "slots", "casual"],
+  "badge": "New",
+  "creator": "Dragon Gaming Platforms"
+}

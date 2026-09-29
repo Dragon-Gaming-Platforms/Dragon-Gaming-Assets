@@ -1,0 +1,9 @@
+{
+  "name": "Asteroid Belt",
+  "desc": "Pilot a lone ship through a field of tumbling space rocks. Rotate, thrust, and shoot — every big asteroid you hit splits into smaller, faster fragments. Clear the belt wave after wave with three lives.",
+  "controls": "← → rotate, ↑ thrust, Space fire (or on-screen buttons)",
+  "shelf": "Arcade & Action",
+  "tags": ["games", "html5", "arcade", "space", "shooter"],
+  "badge": "New",
+  "creator": "Dragon Gaming Platforms"
+}

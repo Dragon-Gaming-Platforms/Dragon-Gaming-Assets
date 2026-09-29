@@ -1,0 +1,9 @@
+{
+  "name": "Dice Poker",
+  "desc": "A poker-dice scorecard game. Roll five dice up to three times, holding the ones you want, then bank the result in a category — three of a kind, full house, straights, and more. Fill the whole card for your best total.",
+  "controls": "Tap Roll, tap dice to hold, tap a category to score",
+  "shelf": "Puzzle & Logic",
+  "tags": ["games", "html5", "dice", "strategy", "classic"],
+  "badge": "New",
+  "creator": "Dragon Gaming Platforms"
+}

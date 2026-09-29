@@ -1,0 +1,9 @@
+{
+  "name": "Word Guess",
+  "desc": "Guess the hidden five-letter word in six tries. After each guess, tiles turn green for a correct letter in the right spot and yellow for a right letter in the wrong spot. An on-screen keyboard tracks your clues.",
+  "controls": "Type letters and press Enter; Backspace to delete (or use the on-screen keyboard)",
+  "shelf": "Puzzle & Logic",
+  "tags": ["games", "html5", "word", "puzzle", "logic"],
+  "badge": "New",
+  "creator": "Dragon Gaming Platforms"
+}

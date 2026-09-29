@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+<meta name="robots" content="noindex,nofollow">
+<title>Roulette</title>
+<style>
+  *{box-sizing:border-box}html,body{margin:0;height:100%}
+  body{background:radial-gradient(circle at 50% 0,#1a3320,#08130c 60%);color:#eafff0;
+    font-family:system-ui,Segoe UI,Roboto,Arial,sans-serif;display:flex;flex-direction:column;
+    align-items:center;min-height:100vh;gap:10px;padding:14px;user-select:none;-webkit-user-select:none}
+  h1{margin:4px 0;font-size:clamp(20px,5vw,28px);color:#ffd24a}
+  #bank{font-weight:800;color:#ffd24a}
+  canvas{max-width:80vw;height:auto}
+  #result{min-height:24px;font-weight:800;font-size:18px;text-align:center;color:#7fffab}
+  #table{display:grid;grid-template-columns:repeat(13,1fr);gap:3px;width:min(96vw,560px)}
+  .bet{border-radius:5px;padding:6px 2px;text-align:center;font-size:12px;font-weight:800;cursor:pointer;position:relative}
+  .num{color:#fff}.red{background:#c0392b}.black{background:#222}.green{background:#1e8c4a}
+  .out{background:rgba(255,255,255,.1);grid-column:span 3;padding:9px 2px}
+  .zero{grid-row:span 1}
+  .chip{position:absolute;top:-4px;right:-4px;background:#ffd24a;color:#000;border-radius:50%;width:18px;height:18px;font-size:10px;line-height:18px}
+  .row{display:flex;gap:8px;align-items:center;flex-wrap:wrap;justify-content:center}
+  button{background:#7be0a0;color:#04240f;border:0;border-radius:10px;padding:9px 16px;font-weight:800;cursor:pointer}
+  #spin{background:#ffd24a;color:#5a3a00}
+  button:disabled{opacity:.4;cursor:default}
+  .chipsel{display:flex;gap:6px}
+  .cbtn{background:#333;color:#fff;border:2px solid #555;border-radius:20px;padding:6px 12px;font-weight:800;cursor:pointer}
+  .cbtn.on{border-color:#ffd24a;background:#5a4a10}
+  .hint{font-size:12px;opacity:.7;text-align:center}
+</style>
+</head>
+<body>
+<h1>Roulette</h1>
+<div id="bank">Chips: <span id="chips">200</span> · On table: <span id="wager">0</span></div>
+<canvas id="wheel" width="220" height="220"></canvas>
+<div id="result">Place your bets, then spin the wheel.</div>
+<div class="chipsel">Chip: <button class="cbtn on" data-v="5">5</button><button class="cbtn" data-v="10">10</button><button class="cbtn" data-v="25">25</button></div>
+<div id="table"></div>
+<div class="row"><button id="spin">SPIN</button><button id="clear">Clear Bets</button></div>
+<div class="hint">Tap number/colour cells to place chips. Straight number pays 35:1, red/black/even/odd/half pays 1:1, dozen pays 2:1.</div>
+<script>
+const RED=new Set([1,3,5,7,9,12,14,16,18,19,21,23,25,27,30,32,34,36]);
+const WHEEL=[0,32,15,19,4,21,2,25,17,34,6,27,13,36,11,30,8,23,10,5,24,16,33,1,20,14,31,9,22,18,29,7,28,12,35,3,26];
+let chips=200,chipVal=5,bets={},spinning=false;
+const w=document.getElementById('wheel'),wc=w.getContext('2d');
+function color(n){return n===0?'green':RED.has(n)?'red':'black';}
+function buildTable(){
+  const t=document.getElementById('table');t.innerHTML='';
+  // 0 spanning
+  const zero=cellNum(0);zero.style.gridColumn='1';zero.style.gridRow='span 1';t.appendChild(zero);
+  // numbers 1..36 arranged in 3 rows of 12 (columns 2..13)
+  // We'll place row by row: top row 3,6,...36 ; then 2,5.. ; then 1,4..
+  const rows=[[],[],[]];
+  for(let n=1;n<=36;n++){rows[(3-((n-1)%3))-1].push(n);} // 0->? simpler below
+  // simpler: standard layout top=3,6,.. mid=2,5,.. bottom=1,4,..
+  const top=[],mid=[],bot=[];
+  for(let c=0;c<12;c++){bot.push(1+c*3);mid.push(2+c*3);top.push(3+c*3);}
+  // place a spacer for zero occupying first column across 3 rows via separate handling: we already added zero once.
+  // Row 1
+  top.forEach(n=>t.appendChild(cellNum(n)));
+  // pad first column for rows 2,3 - use empty transparent
+  const pad1=document.createElement('div');t.appendChild(pad1);
+  mid.forEach(n=>t.appendChild(cellNum(n)));
+  const pad2=document.createElement('div');t.appendChild(pad2);
+  bot.forEach(n=>t.appendChild(cellNum(n)));
+  // outside bets
+  const outs=[['1st 12','dozen1'],['2nd 12','dozen2'],['3rd 12','dozen3'],
+    ['1-18','low'],['EVEN','even'],['RED','red'],['BLACK','black'],['ODD','odd'],['19-36','high']];
+  outs.forEach(([label,key])=>{const d=document.createElement('div');d.className='bet out';d.textContent=label;
+    if(key==='red')d.classList.add('red');if(key==='black')d.classList.add('black');
+    d.onclick=()=>placeBet(key,d);t.appendChild(d);});
+}
+function cellNum(n){const d=document.createElement('div');d.className='bet num '+color(n);d.textContent=n;
+  d.dataset.key='n'+n;d.onclick=()=>placeBet('n'+n,d);return d;}
+function placeBet(key,el){
+  if(spinning)return;if(chips<chipVal){document.getElementById('result').textContent='Not enough chips!';return;}
+  chips-=chipVal;bets[key]=(bets[key]||0)+chipVal;updateBank();
+  let chip=el.querySelector('.chip');if(!chip){chip=document.createElement('div');chip.className='chip';el.appendChild(chip);}
+  chip.textContent=bets[key];
+}
+function updateBank(){document.getElementById('chips').textContent=chips;
+  document.getElementById('wager').textContent=Object.values(bets).reduce((a,b)=>a+b,0);}
+function clearBets(){if(spinning)return;chips+=Object.values(bets).reduce((a,b)=>a+b,0);bets={};
+  document.querySelectorAll('.chip').forEach(c=>c.remove());updateBank();
+  document.getElementById('result').textContent='Bets cleared.';}
+function payout(n){
+  let win=0;const c=color(n);
+  for(const key in bets){const amt=bets[key];
+    if(key==='n'+n)win+=amt*36; // 35:1 + stake
+    else if(key==='red'&&c==='red')win+=amt*2;
+    else if(key==='black'&&c==='black')win+=amt*2;
+    else if(key==='even'&&n!==0&&n%2===0)win+=amt*2;
+    else if(key==='odd'&&n%2===1)win+=amt*2;
+    else if(key==='low'&&n>=1&&n<=18)win+=amt*2;
+    else if(key==='high'&&n>=19&&n<=36)win+=amt*2;
+    else if(key==='dozen1'&&n>=1&&n<=12)win+=amt*3;
+    else if(key==='dozen2'&&n>=13&&n<=24)win+=amt*3;
+    else if(key==='dozen3'&&n>=25&&n<=36)win+=amt*3;
+  }
+  return win;
+}
+let angle=0;
+function drawWheel(highlightIdx){
+  const cx=110,cy=110,r=104;const seg=Math.PI*2/WHEEL.length;
+  wc.clearRect(0,0,220,220);
+  WHEEL.forEach((n,i)=>{const a0=angle+i*seg,a1=a0+seg;
+    wc.beginPath();wc.moveTo(cx,cy);wc.arc(cx,cy,r,a0,a1);wc.closePath();
+    wc.fillStyle=color(n)==='green'?'#1e8c4a':color(n)==='red'?'#c0392b':'#222';wc.fill();
+    wc.save();wc.translate(cx,cy);wc.rotate(a0+seg/2);wc.fillStyle='#fff';wc.font='bold 9px system-ui';
+    wc.textAlign='right';wc.fillText(n,r-4,3);wc.restore();});
+  wc.fillStyle='#ffd24a';wc.beginPath();wc.arc(cx,cy,20,0,7);wc.fill();
+  // pointer
+  wc.fillStyle='#fff';wc.beginPath();wc.moveTo(cx,4);wc.lineTo(cx-8,20);wc.lineTo(cx+8,20);wc.fill();
+}
+function spin(){
+  if(spinning)return;const wager=Object.values(bets).reduce((a,b)=>a+b,0);
+  if(wager===0){document.getElementById('result').textContent='Place a bet first!';return;}
+  spinning=true;document.getElementById('spin').disabled=true;
+  const winIdx=Math.floor(Math.random()*WHEEL.length);const winNum=WHEEL[winIdx];
+  const seg=Math.PI*2/WHEEL.length;
+  // target angle so winIdx lands at top (pointer at -90deg)
+  const target=(-Math.PI/2)-(winIdx*seg)-seg/2 - angle;
+  const spins=Math.PI*2*5;const totalRot=spins+((target%(Math.PI*2))+Math.PI*2)%(Math.PI*2);
+  const start=angle;const dur=3200;const t0=performance.now();
+  function anim(t){const p=Math.min(1,(t-t0)/dur);const ease=1-Math.pow(1-p,3);
+    angle=start+totalRot*ease;drawWheel();
+    if(p<1)requestAnimationFrame(anim);else settle(winNum);}
+  requestAnimationFrame(anim);
+}
+function settle(n){
+  const win=payout(n);chips+=win;
+  const net=win-Object.values(bets).reduce((a,b)=>a+b,0);
+  bets={};document.querySelectorAll('.chip').forEach(c=>c.remove());
+  if(chips<=0){chips=200;}
+  updateBank();
+  const c=color(n);
+  document.getElementById('result').innerHTML=`Landed on <b style="color:${c==='red'?'#ff6b6b':c==='green'?'#7fffab':'#ccc'}">${n} ${c}</b> — `+
+    (win>0?`you won ${win} chips! (net ${net>=0?'+':''}${net})`:'no win this time.');
+  document.getElementById('result').style.color=win>0?'#7fffab':'#ff9aa8';
+  spinning=false;document.getElementById('spin').disabled=false;
+}
+document.querySelectorAll('.cbtn').forEach(b=>b.onclick=()=>{chipVal=+b.dataset.v;
+  document.querySelectorAll('.cbtn').forEach(x=>x.classList.remove('on'));b.classList.add('on');});
+document.getElementById('spin').onclick=spin;
+document.getElementById('clear').onclick=clearBets;
+buildTable();drawWheel();updateBank();
+</script>
+</body>
+</html>

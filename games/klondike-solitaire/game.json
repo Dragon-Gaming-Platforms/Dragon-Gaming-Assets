@@ -1,0 +1,9 @@
+{
+  "name": "Klondike Solitaire",
+  "desc": "The definitive solitaire card game. Build the four foundations up by suit from Ace to King, stacking the tableau down in alternating colours. Draw from the stock and plan your moves to clear the board.",
+  "controls": "Tap a card to select, tap a destination to move; double-tap sends a card to its foundation; tap the stock to draw",
+  "shelf": "Puzzle & Logic",
+  "tags": ["games", "html5", "cards", "solitaire", "classic"],
+  "badge": "New",
+  "creator": "Dragon Gaming Platforms"
+}

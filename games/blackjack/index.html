@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+<meta name="robots" content="noindex,nofollow">
+<title>Blackjack</title>
+<style>
+  *{box-sizing:border-box}html,body{margin:0;height:100%}
+  body{background:radial-gradient(circle at 50% 0,#0c3a24,#04160d 60%);color:#eafff0;
+    font-family:system-ui,Segoe UI,Roboto,Arial,sans-serif;display:flex;flex-direction:column;
+    align-items:center;justify-content:center;min-height:100vh;gap:14px;padding:16px;user-select:none;-webkit-user-select:none}
+  h1{margin:0;font-size:clamp(20px,5vw,28px)}
+  #bank{font-weight:800;color:#ffd76a}
+  .zone{width:min(94vw,440px);background:rgba(255,255,255,.04);border-radius:14px;padding:10px}
+  .zone h2{margin:0 0 6px;font-size:15px;color:#8fe0a8;display:flex;justify-content:space-between}
+  .hand{display:flex;gap:8px;min-height:96px;flex-wrap:wrap}
+  .card{width:64px;height:92px;border-radius:10px;background:#fff;color:#111;display:flex;flex-direction:column;
+    align-items:center;justify-content:center;font-weight:800;box-shadow:0 3px 6px rgba(0,0,0,.4)}
+  .card .r{font-size:24px}.card .s{font-size:20px}.card.red{color:#d22}
+  .card.back{background:repeating-linear-gradient(45deg,#264,#264 7px,#1b4a34 7px,#1b4a34 14px)}
+  #status{min-height:24px;color:#ffd76a;font-weight:800;font-size:18px;text-align:center}
+  .row{display:flex;gap:10px;flex-wrap:wrap;justify-content:center}
+  button{background:#7be0a0;color:#04240f;border:0;border-radius:10px;padding:11px 20px;font-size:16px;font-weight:800;cursor:pointer}
+  button:disabled{opacity:.4;cursor:default}
+  #deal{background:#ffd76a;color:#3a2a08}
+</style>
+</head>
+<body>
+<h1>Blackjack</h1>
+<div id="bank">Chips: <span id="chips">100</span> · Bet: <span id="bet">10</span></div>
+<div class="zone"><h2>Dealer <span id="dScore"></span></h2><div class="hand" id="dHand"></div></div>
+<div class="zone"><h2>You <span id="pScore"></span></h2><div class="hand" id="pHand"></div></div>
+<div id="status">Place your bet and deal. Dealer stands on 17.</div>
+<div class="row">
+  <button id="betDown">− Bet</button><button id="betUp">+ Bet</button>
+  <button id="deal">Deal</button>
+  <button id="hit" disabled>Hit</button>
+  <button id="stand" disabled>Stand</button>
+</div>
+<script>
+const SUITS=[['♠',0],['♥',1],['♣',0],['♦',1]];const RANKS=['A','2','3','4','5','6','7','8','9','10','J','Q','K'];
+let deck,pHand,dHand,chips=100,bet=10,inRound=false;
+function buildDeck(){const d=[];for(const[s,red] of SUITS)for(const r of RANKS)d.push({r,s,red});return shuffle(d);}
+function shuffle(a){for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
+function val(hand){let sum=0,aces=0;hand.forEach(c=>{if(c.r==='A'){aces++;sum+=11;}else if(['K','Q','J'].includes(c.r))sum+=10;else sum+=+c.r;});
+  while(sum>21&&aces>0){sum-=10;aces--;}return sum;}
+function renderHand(el,hand,hideFirst){
+  el.innerHTML='';hand.forEach((c,i)=>{const d=document.createElement('div');
+    if(hideFirst&&i===0){d.className='card back';}
+    else{d.className='card'+(c.red?' red':'');d.innerHTML=`<div class="r">${c.r}</div><div class="s">${c.s}</div>`;}
+    el.appendChild(d);});
+}
+function updateBank(){document.getElementById('chips').textContent=chips;document.getElementById('bet').textContent=bet;}
+function deal(){
+  if(inRound)return;
+  if(chips<bet){document.getElementById('status').textContent='Not enough chips! Lower your bet.';return;}
+  deck=buildDeck();pHand=[deck.pop(),deck.pop()];dHand=[deck.pop(),deck.pop()];inRound=true;
+  document.getElementById('hit').disabled=false;document.getElementById('stand').disabled=false;
+  document.getElementById('deal').disabled=true;document.getElementById('betUp').disabled=true;document.getElementById('betDown').disabled=true;
+  render(true);
+  const pv=val(pHand),dv=val(dHand);
+  if(pv===21||dv===21){finish();return;}
+  document.getElementById('status').textContent='Hit or Stand?';
+}
+function render(hide){
+  renderHand(document.getElementById('pHand'),pHand,false);
+  renderHand(document.getElementById('dHand'),dHand,hide);
+  document.getElementById('pScore').textContent=val(pHand);
+  document.getElementById('dScore').textContent=hide?'?':val(dHand);
+}
+function hit(){
+  if(!inRound)return;pHand.push(deck.pop());render(true);
+  if(val(pHand)>21){finish();}
+}
+function stand(){if(!inRound)return;
+  document.getElementById('hit').disabled=true;document.getElementById('stand').disabled=true;
+  while(val(dHand)<17)dHand.push(deck.pop());finish();}
+function finish(){
+  inRound=false;render(false);
+  const pv=val(pHand),dv=val(dHand);let msg,delta=0;
+  const pBJ=pv===21&&pHand.length===2,dBJ=dv===21&&dHand.length===2;
+  if(pv>21){msg='Bust! You lose.';delta=-bet;}
+  else if(pBJ&&!dBJ){msg='Blackjack! 🎉';delta=Math.round(bet*1.5);}
+  else if(dv>21){msg='Dealer busts — you win!';delta=bet;}
+  else if(pv>dv){msg='You win!';delta=bet;}
+  else if(pv<dv){msg='Dealer wins.';delta=-bet;}
+  else{msg="Push — it's a tie.";delta=0;}
+  chips+=delta;updateBank();
+  document.getElementById('hit').disabled=true;document.getElementById('stand').disabled=true;
+  document.getElementById('deal').disabled=false;document.getElementById('betUp').disabled=false;document.getElementById('betDown').disabled=false;
+  document.getElementById('deal').textContent='Deal';
+  if(chips<=0){msg+=' Out of chips — reset to 100.';chips=100;updateBank();}
+  document.getElementById('status').textContent=`${msg} (${delta>=0?'+':''}${delta} chips)`;
+}
+document.getElementById('betUp').onclick=()=>{if(!inRound){bet=Math.min(chips,bet+5);updateBank();}};
+document.getElementById('betDown').onclick=()=>{if(!inRound){bet=Math.max(5,bet-5);updateBank();}};
+document.getElementById('deal').onclick=deal;
+document.getElementById('hit').onclick=hit;
+document.getElementById('stand').onclick=stand;
+updateBank();
+</script>
+</body>
+</html>

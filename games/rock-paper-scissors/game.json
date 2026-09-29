@@ -1,0 +1,9 @@
+{
+  "name": "Rock Paper Scissors",
+  "desc": "The hand game everyone knows, against a computer that adapts to your habits. Rock beats scissors, scissors beat paper, paper beats rock. First to five rounds wins the match.",
+  "controls": "Tap Rock, Paper, or Scissors",
+  "shelf": "Arcade & Action",
+  "tags": ["games", "html5", "casual", "classic", "quick"],
+  "badge": "New",
+  "creator": "Dragon Gaming Platforms"
+}

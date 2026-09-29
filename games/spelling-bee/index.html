@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+<meta name="robots" content="noindex,nofollow">
+<title>Spelling Bee</title>
+<style>
+  *{box-sizing:border-box}html,body{margin:0;height:100%}
+  body{background:#fffdf5;color:#222;font-family:system-ui,Segoe UI,Roboto,Arial,sans-serif;
+    display:flex;flex-direction:column;align-items:center;min-height:100vh;gap:10px;padding:16px;user-select:none;-webkit-user-select:none}
+  h1{margin:6px 0;font-size:clamp(20px,5vw,28px)}
+  #rank{font-weight:800;color:#b8860b}
+  #entry{font-size:26px;font-weight:800;letter-spacing:3px;text-transform:uppercase;min-height:34px;color:#333}
+  #msg{min-height:20px;color:#c0392b;font-weight:700}
+  #hive{position:relative;width:260px;height:260px}
+  .cell{position:absolute;width:78px;height:88px;clip-path:polygon(50% 0,100% 25%,100% 75%,50% 100%,0 75%,0 25%);
+    background:#e6e6e6;display:flex;align-items:center;justify-content:center;font-size:28px;font-weight:900;
+    text-transform:uppercase;cursor:pointer;transition:transform .07s}
+  .cell:active{transform:scale(.92)}
+  .cell.center{background:#f7da21}
+  .row{display:flex;gap:10px}
+  button{background:#f7da21;color:#333;border:2px solid #d9c21c;border-radius:30px;padding:10px 20px;font-weight:800;cursor:pointer}
+  #found{width:min(94vw,420px);background:#f4f2e8;border:1px solid #e0dcc8;border-radius:10px;padding:8px;min-height:40px;font-size:14px;color:#555}
+  #score{font-weight:800}
+</style>
+</head>
+<body>
+<h1>Spelling Bee</h1>
+<div id="rank">Rank: Beginner · <span id="score">0</span> pts</div>
+<div id="entry"></div>
+<div id="msg"></div>
+<div id="hive"></div>
+<div class="row"><button id="del">Delete</button><button id="shuffle">Shuffle</button><button id="enter">Enter</button></div>
+<div id="found">Found words will appear here.</div>
+<div style="font-size:13px;color:#888;max-width:420px;text-align:center">Make words of 4+ letters using the centre letter. Pangrams (all 7 letters) score big!</div>
+<script>
+// bundled word list
+const WORDLIST=("about above actor acute admit adopt adore agent alone along amber ample anger angle ankle apple apron argue aroma ashen aside atone attic audio avert badge baker basic beach beard began begin being below bench blade blame bleak blend bless blind block bloom board boast bonus booth bound brace brain brake brand brave bread break breed brick bride brief bring broad brook broom brown brush build built cabin cable cameo candy canoe cargo carol carve catch cause cedar chain chair chalk champ chant charm chart chase cheap cheat check cheek cheer chess chest chief child chill china choir chord chose chunk claim clamp clash class clean clear cleat clerk click cliff climb cloak clock close cloth cloud clove clown coach coast cobra cocoa colon color comet coral cord corn couch could count court cover crack craft cramp crane crank crash crate crawl crazy cream creak creek crest crime crisp crook cross crowd crown crumb crush cubic curve cycle daily dairy dance dandy dealt debut decal decay delta demon dense depot depth diary dimly diner dingo dodge donor dough dozen draft drain drama drank drape drawn dread dream dress dried drift drill drink drive droll drone drove drown eager eagle eaten ebony edict eight elbow elder elect elite ember emcee empty enact ended enjoy enter entry equal equip erase erode error essay ether ethic evade event every evict evoke exact exalt excel exert exile exist extra fable faced facet faint fairy faith false fancy farce fatal fault favor feast fence ferry fetch fever fiber field fiery fifth fifty fight filet final finch first fixed flair flake flame flank flare flash fleck fleet flesh flick fling flint float flock flood floor flora floss flour flown fluid flung flush flute focal focus foggy force forge forth forty forum found frame frank fraud freak fresh fried frill frock front frost froth frown fruit fudge funny gamer gauge gecko genie genre ghost giant given giver gizmo glade gland glare glass gleam glide globe gloom glory glove going gonna goose grace grade grain grand grant grape graph grasp grass grate grave graze great greed green greet grief grill grime grind groan groin groom grope gross group grove growl grown gruff guard guess guest guide guild guilt gully habit hairy handy happy hardy harsh haste hatch haunt haven havoc heart heavy hedge hefty hello hertz hilly hinge hobby hoist honey honor horde horse hotel hound house hover human humid humor hurry ideal idiom igloo image imply index inept ingot inlay inner input intro ionic irate ivory jaunt jazzy jelly jewel joint jolly joust judge juice jumbo kayak kebab kneel knife knock koala label labor laden ladle lance lapel large larva laser latch later laugh layer leach leafy leaky lean learn lease leash least leave ledge legal lemon level lever lilac limbo limit linen liner lingo lipid liter lithe liver llama loach loamy lobby local lodge lofty logic loose lorry lotus lower loyal lucid lucky lunar lunch lunge lurid lyric macho macro madam magic magma maize major maker mango maple march marsh mason match matte mауve maybe mayor meant medal media melon mercy merge merit merry metal meter micro midst might mimic mince miner minor minus mirth mixer model modem money month moody moose moral morph motel motif motor motto mound mount mourn mouse mouth mover movie mucus muddy mulch mummy mural murky mused music musky muted nacho nadir naive naval navel nerdy nerve never newer newly nicer niche niece night ninja ninth noble nobly noise nomad north notch novel nudge nurse nylon oasis occur ocean octet offer often olive omega onion onset opera orbit order organ ought ounce outer owner ozone paced paddy paint panda panel panic paper parka parry party pasta paste patch patio pause peace peach pearl pedal penal perch peril petal petty phase phone photo piano picky piece piety pilot pinch pines pinky pitch pixel pizza place plaid plain plane plank plant plate plaza plead pleat plied plot plume plump plush poach point poise polar polka porch posse pouch pound power prank press price pride prime primo print prior prism prize probe prone prong proof props prose proud prove prowl proxy prune psalm pulse punch pupil puppy purge purse quack quad quaint quake quart queen query quest queue quick quiet quill quilt quirk quota quote rabbi racer radar radio rally ranch range rapid ratio raven razor reach react ready realm rebel refer regal reign relax relay relic renal repay reply reset resin retro rhino rhyme rider ridge rifle right rigid rinse ripen risen rival river roach roast robin robot rocky rodeo rogue roost rotor rough round route rover royal rugby ruler rumor rural sable sadly safer saint salad salon salsa salty scale scalp scaly scamp scant scare scarf scary scene scent scion scoff scold scone scoop scope score scorn scour scout scowl scrap screw scrub scuba seize sense serum serve setup seven sever shack shade shady shaft shake shaky shale shall shame shape shard share shark sharp shave shawl shear sheen sheep sheer sheet shelf shell shine shiny shire shirt shoal shock shone shook shoot shore short shout shove shown showy shrub shrug shuck shush shyly sight sigma silky silly since sinew siren sixth sixty skate skier skiff skill skimp skirt skull skunk slack slain slant slash slate slave sleek sleep sleet slept slice slick slide slime sling slink slope slосh slump slung slush small smart smash smear smell smile smirk smite smock smoke smote snack snail snake snare snarl sneak sniff snipe snoop snore snort snout snowy snuck snuff soapy sober socal solar solid solo sonar sonic sooth sorry sound south space spade spank spare spark spawn speak spear speck speed spell spelt spend spent spice spicy spied spike spill spine spiny spire spite splat split spoil spoke spool spoon spore sport spout spray spree sprig spurt squad squat stack staff stage staid stain stair stake stale stalk stall stamp stand stank stare stark start stash state stave stead steak steal steam steed steel steep steer stein stern stick stiff still stilt sting stink stint stock stoic stoke stole stomp stone stony stood stool stoop store stork storm story stout stove strap straw stray strip strut stuck study stuff stump stung stunt style suave sugar suite sulky sunny super surge surly sushi swami swamp swarm swash swath swear sweat sweep sweet swell swept swift swine swing swirl swish swoop sword swore sworn synod syrup table taboo tacit taffy taint taken tally talon tango taper tapir tardy taste tasty taunt taught teach tease tempo tenor tenth tepid terse thank theft their theme there these thick thief thigh thing think third thong thorn those three threw throb throw thrum thumb thump tiara tibia tidal tiger tight tilde timer times timid tipsy titan title toast today token tonal tonic tooth topaz topic torch total totem touch tough towel tower toxic trace track tract trade trail train trait tramp trash tread treat trend triad trial tribe trick tried tripe trope trout truce truck truly trump trunk trust truth tulip tumor tunic turbo tutor twang tweak tweed tweet twice twine twins twirl twist tying udder ulcer ultra uncle under undue unfit unify union unite unity unlit unmet until untie unzip upper upset urban urged usage usher using usual utter vague valet valid value valve vapor vault veery velum venom venue verge verse vicar video vigil villa vinyl viola viper viral virus visit vista vital vivid vixen vocal vodka vogue voice volt voter vouch vowel wafer wagon waist waive waltz warty waste watch water weary weave wedge weigh weird whale wharf wheat wheel where which while whine whirl whisk white whole whoop whose widen wider width wield wince winch windy wiper wispy witch witty woken woman women woody wooer wooly worry worse worst worth would wound woven wrack wrath wreak wreck wrest wring wrist write wrong wrote wrung yacht yearn yeast yield yodel young youth yummy zebra zesty zonal").split(/\s+/).filter(w=>/^[a-z]+$/.test(w));
+let letters,center,found,score;
+// real words with exactly 7 distinct letters, each verified to yield enough playable words
+const PANGRAMS=['monarch','plastic','panther','clothes','freight','pyramid','network','crimson','bedrock','tangled','hamster','organic','tirades','tangelo'];
+PANGRAMS.forEach(p=>{if(!WORDLIST.includes(p))WORDLIST.push(p);}); // ensure each pangram is findable
+function pickLetters(){
+  const shuffled=[...PANGRAMS].sort(()=>Math.random()-0.5);
+  for(const base of shuffled){
+    const uniq=[...new Set(base)];
+    if(uniq.length!==7)continue;
+    const set=new Set(uniq);
+    const valid=WORDLIST.filter(w=>w.length>=4&&[...w].every(ch=>set.has(ch)));
+    let bestC=null,best=0;
+    for(const c of uniq){const n=valid.filter(w=>w.includes(c)).length;if(n>best){best=n;bestC=c;}}
+    if(best>=6){center=bestC;letters=shuffle(uniq.slice());return;}
+  }
+  // guaranteed fallback
+  center='e';letters=shuffle([...new Set('hamster')]);
+}
+function shuffle(a){for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
+function validWord(w){
+  if(w.length<4)return 'Too short (4+ letters).';
+  if(!w.includes(center))return 'Must use the centre letter.';
+  for(const ch of w)if(!letters.includes(ch))return 'Uses a letter not in the hive.';
+  if(!WORDLIST.includes(w))return 'Not in word list.';
+  if(found.includes(w))return 'Already found.';
+  return null;
+}
+function scoreWord(w){if(w.length===4)return 1;let s=w.length;if(new Set(w).size===7)s+=7;return s;}
+const RANKS=[[0,'Beginner'],[5,'Good Start'],[12,'Moving Up'],[25,'Nice'],[40,'Great'],[60,'Amazing'],[85,'Genius']];
+function rankName(){let n='Beginner';for(const[t,name] of RANKS)if(score>=t)n=name;return n;}
+let entry='';
+function init(){pickLetters();found=[];score=0;entry='';renderHive();update();
+  document.getElementById('found').textContent='Found words will appear here.';document.getElementById('msg').textContent='';}
+function renderHive(){
+  const hive=document.getElementById('hive');hive.innerHTML='';
+  const positions=[[91,86],[16,43],[166,43],[16,129],[166,129],[91,0],[91,172]];
+  // center first
+  const order=[center,...letters.filter(l=>l!==center)];
+  const layout=[[91,86,true],[91,4,false],[162,45,false],[162,127,false],[91,168,false],[20,127,false],[20,45,false]];
+  layout.forEach((pos,i)=>{const l=order[i];const c=document.createElement('div');
+    c.className='cell'+(i===0?' center':'');c.style.left=pos[0]+'px';c.style.top=pos[1]+'px';c.textContent=l;
+    c.onclick=()=>{entry+=l;update();};hive.appendChild(c);});
+}
+function update(){document.getElementById('entry').textContent=entry;
+  document.getElementById('score').textContent=score;document.getElementById('rank').firstChild.textContent='Rank: '+rankName()+' · ';
+  document.getElementById('rank').innerHTML=`Rank: ${rankName()} · <span id="score">${score}</span> pts`;}
+function enter(){
+  const w=entry.toLowerCase();const err=validWord(w);
+  const msg=document.getElementById('msg');
+  if(err){msg.textContent=err;entry='';document.getElementById('entry').textContent='';return;}
+  found.unshift(w);const pts=scoreWord(w);score+=pts;
+  msg.style.color=(new Set(w).size===7)?'#b8860b':'#2e7d32';
+  msg.textContent=(new Set(w).size===7?'PANGRAM! ':'')+`+${pts} — ${w.toUpperCase()}`;
+  entry='';document.getElementById('entry').textContent='';
+  document.getElementById('found').textContent=`${found.length} word${found.length>1?'s':''}: `+found.join(', ');
+  update();
+}
+document.getElementById('enter').onclick=enter;
+document.getElementById('del').onclick=()=>{entry=entry.slice(0,-1);document.getElementById('entry').textContent=entry;};
+document.getElementById('shuffle').onclick=()=>{letters=shuffle(letters);renderHive();};
+document.addEventListener('keydown',e=>{const k=e.key.toLowerCase();
+  if(k==='enter')enter();else if(k==='backspace'){entry=entry.slice(0,-1);document.getElementById('entry').textContent=entry;}
+  else if(/^[a-z]$/.test(k)){const order=[center,...letters];if(order.includes(k)){entry+=k;update();}}});
+init();
+</script>
+</body>
+</html>

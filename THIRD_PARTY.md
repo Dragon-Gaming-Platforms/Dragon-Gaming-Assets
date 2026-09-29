@@ -56,3 +56,19 @@ never invent a license.
 | Star Fighter | `games/star-fighter/` | Original build (Dragon Gaming Platforms) | Original — first-party, no third-party assets | 2026-09-29 |
 | Copter Cave | `games/copter-cave/` | Original build (Dragon Gaming Platforms) | Original — first-party, no third-party assets | 2026-09-29 |
 | Mini Putt | `games/mini-putt/` | Original build (Dragon Gaming Platforms) | Original — first-party, no third-party assets | 2026-09-29 |
+| Block Stacker | `games/block-stacker/` | Original build (Dragon Gaming Platforms) | Original — first-party, no third-party assets | 2026-09-29 |
+| Tic-Tac-Toe | `games/tic-tac-toe/` | Original build (Dragon Gaming Platforms) | Original — first-party, no third-party assets | 2026-09-29 |
+| Blackjack | `games/blackjack/` | Original build (Dragon Gaming Platforms) | Original — first-party, no third-party assets | 2026-09-29 |
+| Klondike Solitaire | `games/klondike-solitaire/` | Original build (Dragon Gaming Platforms) | Original — first-party, no third-party assets | 2026-09-29 |
+| Rock Paper Scissors | `games/rock-paper-scissors/` | Original build (Dragon Gaming Platforms) | Original — first-party, no third-party assets | 2026-09-29 |
+| Dice Poker | `games/dice-poker/` | Original build (Dragon Gaming Platforms) | Original — first-party, no third-party assets | 2026-09-29 |
+| Paddle Battle | `games/paddle-battle/` | Original build (Dragon Gaming Platforms) | Original — first-party, no third-party assets | 2026-09-29 |
+| Asteroid Belt | `games/asteroid-belt/` | Original build (Dragon Gaming Platforms) | Original — first-party, no third-party assets | 2026-09-29 |
+| Pinball | `games/pinball/` | Original build (Dragon Gaming Platforms) | Original — first-party, no third-party assets | 2026-09-29 |
+| Bug Blaster | `games/bug-blaster/` | Original build (Dragon Gaming Platforms) | Original — first-party, no third-party assets | 2026-09-29 |
+| 8-Ball Pool | `games/eight-ball-pool/` | Original build (Dragon Gaming Platforms) | Original — first-party, no third-party assets | 2026-09-29 |
+| Word Guess | `games/word-guess/` | Original build (Dragon Gaming Platforms) | Original — first-party, no third-party assets | 2026-09-29 |
+| Kakuro | `games/kakuro/` | Original build (Dragon Gaming Platforms) | Original — first-party, no third-party assets | 2026-09-29 |
+| Spelling Bee | `games/spelling-bee/` | Original build (Dragon Gaming Platforms) | Original — first-party, no third-party assets | 2026-09-29 |
+| Fruit Slots | `games/fruit-slots/` | Original build (Dragon Gaming Platforms) | Original — first-party, no third-party assets | 2026-09-29 |
+| Roulette | `games/roulette/` | Original build (Dragon Gaming Platforms) | Original — first-party, no third-party assets | 2026-09-29 |

@@ -1,0 +1,9 @@
+{
+  "name": "Pinball",
+  "desc": "A compact pinball table with bouncy bumpers, posts, and a pair of responsive flippers. Launch the ball, rack up points off the bumpers, and keep it alive across three balls for a high score.",
+  "controls": "Tap left/right half of the table (or Z / M / Space) to flip, ↓ or tap the plunger to launch",
+  "shelf": "Arcade & Action",
+  "tags": ["games", "html5", "arcade", "pinball", "physics"],
+  "badge": "New",
+  "creator": "Dragon Gaming Platforms"
+}
