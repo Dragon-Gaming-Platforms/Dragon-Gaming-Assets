@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+<meta name="robots" content="noindex,nofollow">
+<title>Helix Jump</title>
+<style>
+  *{box-sizing:border-box}html,body{margin:0;height:100%}
+  body{background:#0d1020;color:#fff;font-family:system-ui,Segoe UI,Roboto,Arial,sans-serif;
+    display:flex;flex-direction:column;align-items:center;gap:8px;padding:8px;user-select:none;-webkit-user-select:none;touch-action:none}
+  h1{margin:2px 0;font-size:clamp(16px,4vw,22px)}
+  #hud{font-weight:800;color:#ffe08a}
+  canvas{background:radial-gradient(circle at 50% 20%,#1c2444,#0a0d1a);border-radius:12px;touch-action:none;max-width:100%}
+  #msg{position:fixed;inset:0;display:none;align-items:center;justify-content:center;flex-direction:column;gap:12px;background:#000a}
+  button{background:#ffcc33;color:#20150a;border:0;border-radius:9px;padding:10px 18px;font-weight:800;cursor:pointer}
+  .hint{font-size:12px;opacity:.75;text-align:center;max-width:420px}
+</style>
+</head>
+<body>
+<h1>Helix Jump</h1>
+<div id="hud">Level: <span id="lvl">0</span> &nbsp; Best: <span id="best">0</span></div>
+<canvas id="cv" width="360" height="560"></canvas>
+<div class="hint">Drag left/right (or ← →) to rotate the tower so the ball drops through each gap. Landing on a red segment ends the run. Every gap you pass is a level.</div>
+<div id="msg"><div id="mt" style="font-size:24px;font-weight:800"></div><button id="again">Play Again</button></div>
+<script>
+const cv=document.getElementById('cv'),ctx=cv.getContext('2d');
+const W=cv.width,H=cv.height,CX=W/2;
+const GAP=110;              // gap width in px
+const BALLY=90, BR=12;
+let rot;                    // global horizontal rotation of tower (px, wraps over W)
+let platforms, scroll, vy, level, over, best=0;
+function wrap(x){x%=W;if(x<0)x+=W;return x;}
+function makePlatform(y){
+  const gapBase=Math.random()*W;
+  // optional red danger segment somewhere not overlapping the gap
+  let danger=null;
+  if(Math.random()<0.55){
+    for(let t=0;t<8;t++){const dc=Math.random()*W;const dw=60;
+      // must be away from the gap
+      if(Math.abs(((dc-gapBase+W/2+W)%W)-W/2)>GAP/2+dw/2){danger={c:dc,w:dw};break;}
+    }
+  }
+  return {y,gapBase,danger,passed:false};
+}
+function reset(){
+  rot=0;scroll=0;vy=0;level=0;over=false;platforms=[];
+  for(let i=0;i<30;i++)platforms.push(makePlatform(170+i*130));
+  document.getElementById('msg').style.display='none';
+  loop();
+}
+function gapCenter(p){return wrap(p.gapBase+rot);}
+function inGap(p,x){
+  const gc=gapCenter(p);
+  // account for wrap: distance on a ring of width W
+  const d=Math.abs(((x-gc+W/2+W)%W)-W/2);
+  return d<=GAP/2;
+}
+function inDanger(p,x){
+  if(!p.danger)return false;
+  const dc=wrap(p.danger.c+rot);
+  const d=Math.abs(((x-dc+W/2+W)%W)-W/2);
+  return d<=p.danger.w/2;
+}
+function loop(){
+  if(over)return;
+  ctx.clearRect(0,0,W,H);
+  vy+=0.6;scroll+=vy;
+  // when ball would descend below BALLY we scroll world instead: ball fixed at BALLY, scroll = distance travelled
+  // collision: platform screen y = p.y - scroll ; ball at BALLY
+  for(const p of platforms){
+    const py=p.y-scroll;
+    if(vy>0 && py>=BALLY-4 && py<=BALLY+BR+6){
+      if(inGap(p,CX)){/* pass through */
+        if(!p.passed){p.passed=true;level++;}
+      } else if(inDanger(p,CX)){ end('💥 Landed on a red segment!'); return; }
+      else { vy=-12.5; scroll=p.y-BALLY-4; if(!p.passed){/* bounced, not passed */} break; }
+    }
+  }
+  // extend / trim
+  const maxY=Math.max(...platforms.map(p=>p.y));
+  if(maxY-scroll<H+300)platforms.push(makePlatform(maxY+130));
+  platforms=platforms.filter(p=>p.y-scroll>-80);
+  // draw pole
+  ctx.fillStyle='#1a2140';ctx.fillRect(CX-5,0,10,H);
+  // draw platforms
+  for(const p of platforms){
+    const py=p.y-scroll;if(py<-40||py>H+40)continue;
+    const gc=gapCenter(p);
+    ctx.fillStyle='#5a7cff';
+    // draw platform as full bar minus the gap (handle wrap by drawing two ranges)
+    drawBarWithGap(py,gc);
+    if(p.danger){const dc=wrap(p.danger.c+rot);ctx.fillStyle='#ff4d4d';
+      ctx.fillRect(dc-p.danger.w/2,py,p.danger.w,16);
+      if(dc-p.danger.w/2<0)ctx.fillRect(dc-p.danger.w/2+W,py,p.danger.w,16);
+      if(dc+p.danger.w/2>W)ctx.fillRect(dc-p.danger.w/2-W,py,p.danger.w,16);}
+  }
+  // ball
+  ctx.beginPath();ctx.arc(CX,BALLY,BR,0,7);ctx.fillStyle='#ffd93d';ctx.fill();
+  ctx.strokeStyle='#a8860a';ctx.lineWidth=2;ctx.stroke();
+  document.getElementById('lvl').textContent=level;
+  if(level>best){best=level;document.getElementById('best').textContent=best;}
+  // death if fallen far without any platform (shouldn't happen) — safety: if scroll huge & below all
+  requestAnimationFrame(loop);
+}
+function drawBarWithGap(py,gc){
+  const h=16;
+  // filled everywhere except [gc-GAP/2, gc+GAP/2] on the ring
+  const g0=gc-GAP/2,g1=gc+GAP/2;
+  // segments to fill: complement of gap on [0,W)
+  const fills=[];
+  const a=wrap(g1),b=wrap(g0);
+  // fill from g1 to g0 going forward (the non-gap arc)
+  let start=wrap(g1),end=wrap(g0);
+  if(start<=end){fills.push([start,end]);}
+  else{fills.push([start,W]);fills.push([0,end]);}
+  ctx.fillStyle='#5a7cff';
+  for(const [s,e] of fills){if(e>s)ctx.fillRect(s,py,e-s,h);}
+}
+function end(t){over=true;document.getElementById('mt').textContent=t+' Level: '+level;document.getElementById('msg').style.display='flex';}
+let dragging=false,lastX=0;
+function down(e){dragging=true;lastX=(e.touches?e.touches[0].clientX:e.clientX);e.preventDefault();}
+function move(e){if(!dragging)return;const x=(e.touches?e.touches[0].clientX:e.clientX);rot=wrap(rot+(x-lastX)*1.4);lastX=x;e.preventDefault();}
+function up(){dragging=false;}
+cv.addEventListener('mousedown',down);window.addEventListener('mousemove',move);window.addEventListener('mouseup',up);
+cv.addEventListener('touchstart',down,{passive:false});window.addEventListener('touchmove',move,{passive:false});window.addEventListener('touchend',up);
+window.addEventListener('keydown',e=>{if(e.key==='ArrowLeft')rot=wrap(rot-28);if(e.key==='ArrowRight')rot=wrap(rot+28);});
+document.getElementById('again').onclick=reset;
+reset();
+</script>
+</body>
+</html>

@@ -1,0 +1,9 @@
+{
+  "name": "Geo Dash",
+  "desc": "A rhythm-flavoured auto-runner. Your square hurtles forward at ever-increasing speed, so jump spikes, hop onto blocks, and keep your reflexes sharp. One collision ends the run and resets your distance. Simple to learn, brutal to master.",
+  "controls": "Tap, click, or press Space to jump",
+  "shelf": "Arcade & Action",
+  "tags": ["games", "html5", "arcade", "action", "runner"],
+  "badge": "New",
+  "creator": "Dragon Gaming Platforms"
+}

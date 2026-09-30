@@ -1,0 +1,9 @@
+{
+  "name": "Boxing",
+  "desc": "A reaction-based boxing duel. Read your opponent's wind-up, block the correct side or dodge to avoid the blow, then counter with a jab while they are open. Manage both health bars and outbox the computer to score a knockout.",
+  "controls": "Buttons or keys: Jab, Block Left, Block Right, Dodge",
+  "shelf": "Sports & Racing",
+  "tags": ["games", "html5", "sports", "action", "1player"],
+  "badge": "New",
+  "creator": "Dragon Gaming Platforms"
+}

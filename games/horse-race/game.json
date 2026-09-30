@@ -1,0 +1,9 @@
+{
+  "name": "Horse Race",
+  "desc": "Back a runner and watch the field thunder to the finish. Each of five horses carries its own odds, so weigh the risk, place your stake, and cheer your pick home. Winnings pay out at the posted odds, and your balance is saved on your device.",
+  "controls": "Tap a horse, choose your bet, then press Race",
+  "shelf": "Sports & Racing",
+  "tags": ["games", "html5", "sports", "betting", "1player"],
+  "badge": "New",
+  "creator": "Dragon Gaming Platforms"
+}

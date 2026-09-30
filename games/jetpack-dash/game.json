@@ -1,0 +1,9 @@
+{
+  "name": "Jetpack Dash",
+  "desc": "Strap in and blast through a hazard-filled corridor. Hold to fire your jetpack and rise, release to fall, and thread between the laser walls while scooping up coins. The further you fly the faster it gets. One hit and the run is over.",
+  "controls": "Hold mouse, touch, or Space to thrust, release to drop",
+  "shelf": "Arcade & Action",
+  "tags": ["games", "html5", "arcade", "action", "runner"],
+  "badge": "New",
+  "creator": "Dragon Gaming Platforms"
+}

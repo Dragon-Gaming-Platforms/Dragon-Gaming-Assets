@@ -1,0 +1,9 @@
+{
+  "name": "Mini Crossword",
+  "desc": "A bite-sized five-by-five crossword built on an interlocking word square. Read the across and down clues, type your answers, and check your work when the grid is full. A quick, satisfying vocabulary workout you can finish in a couple of minutes.",
+  "controls": "Tap a square or clue, then type letters on the keyboard",
+  "shelf": "Puzzle & Logic",
+  "tags": ["games", "html5", "words", "crossword", "brain"],
+  "badge": "New",
+  "creator": "Dragon Gaming Platforms"
+}

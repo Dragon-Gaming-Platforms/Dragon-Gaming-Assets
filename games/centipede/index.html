@@ -1,0 +1,114 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+<meta name="robots" content="noindex,nofollow">
+<title>Centipede</title>
+<style>
+  *{box-sizing:border-box}html,body{margin:0;height:100%}
+  body{background:#07100a;color:#fff;font-family:system-ui,Segoe UI,Roboto,Arial,sans-serif;
+    display:flex;flex-direction:column;align-items:center;gap:8px;padding:8px;user-select:none;-webkit-user-select:none;touch-action:none}
+  h1{margin:2px 0;font-size:clamp(16px,4vw,22px)}
+  #hud{display:flex;gap:18px;font-weight:800}
+  #score{color:#ffe08a}#lives{color:#ff6b6b}
+  canvas{background:#0b1a10;border-radius:12px;touch-action:none;max-width:100%}
+  #msg{position:fixed;inset:0;display:none;align-items:center;justify-content:center;flex-direction:column;gap:12px;background:#000a}
+  button{background:#ffcc33;color:#20150a;border:0;border-radius:9px;padding:10px 18px;font-weight:800;cursor:pointer}
+  .hint{font-size:12px;opacity:.75;text-align:center;max-width:420px}
+</style>
+</head>
+<body>
+<h1>Centipede</h1>
+<div id="hud"><span id="score">Score: 0</span><span id="lives">♥♥♥</span></div>
+<canvas id="cv" width="420" height="480"></canvas>
+<div class="hint">Move with the mouse / drag (or ← → ↑ ↓) inside the bottom zone. Shoot with Space or tap. Blast the centipede — each hit splits it and mushrooms grow where segments fall.</div>
+<div id="msg"><div id="mt" style="font-size:24px;font-weight:800"></div><button id="again">Play Again</button></div>
+<script>
+const cv=document.getElementById('cv'),ctx=cv.getContext('2d');
+const W=cv.width,H=cv.height,G=20,COLS=W/G,ROWS=H/G;
+let player,bullets,segments,mushrooms,score,lives,over,shootCd,wave;
+function reset(){
+  player={x:W/2,y:H-30};bullets=[];mushrooms={};score=0;lives=3;over=false;shootCd=0;wave=1;
+  // random mushrooms
+  for(let i=0;i<28;i++){const c=Math.floor(Math.random()*COLS),r=2+Math.floor(Math.random()*(ROWS-8));mushrooms[c+'_'+r]=4;}
+  spawnCentipede();
+  document.getElementById('msg').style.display='none';loop();
+}
+function spawnCentipede(){
+  segments=[];const len=8+wave;
+  for(let i=0;i<len;i++)segments.push({x:(len-i)*G,y:0,dir:1,head:i===0});
+}
+function shoot(){if(shootCd<=0&&!over){bullets.push({x:player.x,y:player.y-14});shootCd=8;}}
+function cellFree(c,r){return !mushrooms[c+'_'+r]&&c>=0&&c<COLS;}
+function loop(){
+  if(over)return;
+  ctx.clearRect(0,0,W,H);
+  if(shootCd>0)shootCd--;
+  // bullets
+  for(const b of bullets)b.y-=9;
+  for(const b of bullets){
+    const c=Math.floor(b.x/G),r=Math.floor(b.y/G);
+    const key=c+'_'+r;
+    if(mushrooms[key]){mushrooms[key]--;if(mushrooms[key]<=0)delete mushrooms[key];b.dead=true;score+=1;}
+  }
+  // move centipede
+  for(const s of segments){
+    s.x+=s.dir*2;
+    const c=Math.floor(s.x/G);
+    // hit wall or mushroom -> drop & reverse
+    const aheadC=Math.floor((s.x+s.dir*G)/G);
+    if(s.x<0||s.x>W-G||mushrooms[aheadC+'_'+Math.floor(s.y/G)]){
+      s.dir*=-1;s.y+=G;s.x=Math.max(0,Math.min(W-G,s.x));
+      if(s.y>H-G){s.y=H-G;} // reached bottom
+    }
+  }
+  // bullet-segment collisions
+  for(const b of bullets){
+    for(let i=0;i<segments.length;i++){const s=segments[i];
+      if(Math.abs(b.x-(s.x+G/2))<G/2&&Math.abs(b.y-(s.y+G/2))<G/2){
+        b.dead=true;score+=10;
+        const c=Math.floor(s.x/G),r=Math.floor(s.y/G);mushrooms[c+'_'+r]=4;
+        segments.splice(i,1);break;
+      }
+    }
+  }
+  bullets=bullets.filter(b=>!b.dead&&b.y>-10);
+  // segment reaches player row or touches player
+  for(const s of segments){
+    if(Math.abs(s.x+G/2-player.x)<G&&Math.abs(s.y+G/2-player.y)<G){loseLife();break;}
+    if(s.y>=H-G){loseLife();break;}
+  }
+  if(!segments.length){wave++;score+=50;spawnCentipede();}
+  // draw
+  for(const k in mushrooms){const [c,r]=k.split('_').map(Number);
+    ctx.fillStyle=`rgba(120,220,150,${mushrooms[k]/4})`;
+    ctx.beginPath();ctx.arc(c*G+G/2,r*G+G/2,G/2-2,0,7);ctx.fill();}
+  for(const s of segments){ctx.fillStyle=s.head?'#ffd93d':'#7cff8a';
+    ctx.beginPath();ctx.arc(s.x+G/2,s.y+G/2,G/2-1,0,7);ctx.fill();}
+  ctx.fillStyle='#4d96ff';for(const b of bullets)ctx.fillRect(b.x-2,b.y-8,4,10);
+  ctx.fillStyle='#ff6b6b';ctx.beginPath();ctx.moveTo(player.x,player.y-12);ctx.lineTo(player.x-11,player.y+10);ctx.lineTo(player.x+11,player.y+10);ctx.closePath();ctx.fill();
+  document.getElementById('score').textContent='Score: '+score;
+  document.getElementById('lives').textContent='♥'.repeat(Math.max(0,lives))||'—';
+  requestAnimationFrame(loop);
+}
+function loseLife(){lives--;if(lives<=0){end();return;}spawnCentipede();player.x=W/2;}
+function end(){over=true;document.getElementById('mt').textContent='💀 Game Over — Score: '+score;document.getElementById('msg').style.display='flex';}
+// controls
+function movePlayer(x,y){player.x=Math.max(12,Math.min(W-12,x));if(y!==undefined)player.y=Math.max(H*0.65,Math.min(H-16,y));}
+cv.addEventListener('mousemove',e=>{const r=cv.getBoundingClientRect();movePlayer((e.clientX-r.left)*W/r.width,(e.clientY-r.top)*H/r.height);});
+cv.addEventListener('mousedown',e=>{shoot();e.preventDefault();});
+cv.addEventListener('touchmove',e=>{const r=cv.getBoundingClientRect();const t=e.touches[0];movePlayer((t.clientX-r.left)*W/r.width,(t.clientY-r.top)*H/r.height);e.preventDefault();},{passive:false});
+cv.addEventListener('touchstart',e=>{shoot();e.preventDefault();},{passive:false});
+window.addEventListener('keydown',e=>{
+  if(e.code==='Space'){shoot();e.preventDefault();}
+  if(e.key==='ArrowLeft')movePlayer(player.x-16);
+  if(e.key==='ArrowRight')movePlayer(player.x+16);
+  if(e.key==='ArrowUp')movePlayer(player.x,player.y-16);
+  if(e.key==='ArrowDown')movePlayer(player.x,player.y+16);
+});
+document.getElementById('again').onclick=reset;
+reset();
+</script>
+</body>
+</html>

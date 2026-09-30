@@ -1,0 +1,9 @@
+{
+  "name": "HTML5 Pac-Man",
+  "desc": "An HTML5 canvas rendition of the arcade maze classic. Gobble every pellet while dodging the four ghosts, grab a power pill to turn the tables, and clear the board for a high score. A well-known open-source browser implementation.",
+  "controls": "Arrow keys to steer through the maze",
+  "shelf": "Arcade & Action",
+  "tags": ["games", "html5", "arcade", "maze", "classic"],
+  "badge": "New",
+  "creator": "Dale Harvey"
+}

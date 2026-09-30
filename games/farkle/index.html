@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+<meta name="robots" content="noindex,nofollow">
+<title>Farkle</title>
+<style>
+  *{box-sizing:border-box}body{margin:0;min-height:100vh;background:#12181f;color:#eef;
+    font-family:system-ui,Segoe UI,Roboto,Arial,sans-serif;display:flex;flex-direction:column;align-items:center;gap:12px;padding:16px;user-select:none;-webkit-user-select:none}
+  h1{margin:2px 0;font-size:clamp(18px,5vw,24px)}
+  #scores{display:flex;gap:28px;font-weight:800;font-size:17px}
+  #you{color:#7cff8a}#cpu{color:#ff8a8a}
+  #status{min-height:20px;font-weight:700;color:#ffe08a;text-align:center;max-width:440px}
+  #dice{display:flex;gap:10px;flex-wrap:wrap;justify-content:center;min-height:64px}
+  .die{width:56px;height:56px;border-radius:12px;background:#f4f4f4;color:#111;display:flex;align-items:center;justify-content:center;
+    font-size:30px;font-weight:800;cursor:pointer;box-shadow:0 3px 0 #0006}
+  .die.held{background:#ffd76a;transform:translateY(3px);box-shadow:none}
+  .die.locked{background:#8bd68b;cursor:default}
+  .die.dim{opacity:.4;cursor:not-allowed}
+  .row{display:flex;gap:10px;flex-wrap:wrap;justify-content:center}
+  button{background:#ffcc33;color:#20150a;border:0;border-radius:9px;padding:10px 16px;font-weight:800;cursor:pointer}
+  button:disabled{opacity:.4;cursor:default}
+  .turn{font-size:14px;color:#9ad}
+  .hint{font-size:12px;opacity:.72;text-align:center;max-width:460px}
+</style>
+</head>
+<body>
+<h1>Farkle</h1>
+<div id="scores"><span id="you">You: 0</span><span id="cpu">CPU: 0</span></div>
+<div class="turn">Turn score: <b id="turnpts">0</b></div>
+<div id="status">Roll the dice to begin. First to 4000 wins.</div>
+<div id="dice"></div>
+<div class="row">
+  <button id="roll">Roll</button>
+  <button id="bank">Bank</button>
+</div>
+<div class="hint">Click scoring dice to set them aside, then Roll again (press your luck) or Bank the points. Scoring: single 1 = 100, single 5 = 50, three of a kind = face×100 (three 1s = 1000), each extra of that face doubles it. Roll no scoring dice and you Farkle — losing the turn's points.</div>
+<script>
+const WIN=4000;
+let dice,held,locked,turnPts,youScore,cpuScore,rolling,turn;
+function newDie(){return 1+Math.floor(Math.random()*6);}
+function reset(){youScore=0;cpuScore=0;turn='you';startTurn();updateScores();}
+function startTurn(){dice=[];held=[];locked=[];turnPts=0;rolling=false;render();
+  setStatus(turn==='you'?'Your turn — press Roll.':'CPU is playing...');
+  document.getElementById('roll').disabled=turn!=='you';
+  document.getElementById('bank').disabled=true;
+  if(turn==='cpu')setTimeout(cpuTurn,700);
+}
+function setStatus(t){document.getElementById('status').textContent=t;}
+// score a multiset of dice values; returns {score, ok:usedAll?}
+function scoreSelection(vals){
+  const c=[0,0,0,0,0,0,0];vals.forEach(v=>c[v]++);
+  let score=0,used=0;
+  for(let f=1;f<=6;f++){
+    if(c[f]>=3){
+      let base=f===1?1000:f*100;
+      base*=Math.pow(2,c[f]-3);
+      score+=base;used+=c[f];c[f]=0;
+    }
+  }
+  score+=c[1]*100;used+=c[1];
+  score+=c[5]*50;used+=c[5];
+  const leftover=vals.length-used;
+  return {score,valid:leftover===0,leftover};
+}
+// does a roll contain any scoring dice?
+function hasScore(vals){
+  const c=[0,0,0,0,0,0,0];vals.forEach(v=>c[v]++);
+  if(c[1]||c[5])return true;
+  for(let f=1;f<=6;f++)if(c[f]>=3)return true;
+  return false;
+}
+function activeDice(){return dice.map((v,i)=>locked.includes(i)?null:v).filter(v=>v!==null);}
+function render(){
+  const d=document.getElementById('dice');d.innerHTML='';
+  const pips=['','⚀','⚁','⚂','⚃','⚄','⚅'];
+  dice.forEach((v,i)=>{
+    const el=document.createElement('div');
+    el.className='die'+(locked.includes(i)?' locked':held.includes(i)?' held':'');
+    el.textContent=pips[v];
+    if(!locked.includes(i)&&turn==='you')el.onclick=()=>toggle(i);
+    d.appendChild(el);
+  });
+  document.getElementById('turnpts').textContent=turnPts+scoreHeld();
+}
+function scoreHeld(){const vals=held.map(i=>dice[i]);return scoreSelection(vals).score;}
+function toggle(i){
+  if(rolling)return;
+  if(held.includes(i))held=held.filter(x=>x!==i);else held.push(i);
+  render();
+  const sel=scoreSelection(held.map(i=>dice[i]));
+  document.getElementById('bank').disabled=!(turnPts+sel.score>0&&sel.valid);
+  document.getElementById('roll').disabled=!(sel.valid&&sel.score>0);
+}
+document.getElementById('roll').onclick=()=>{
+  if(turn!=='you')return;
+  // lock currently held (must be a valid scoring selection)
+  if(held.length){
+    const sel=scoreSelection(held.map(i=>dice[i]));
+    if(!sel.valid||sel.score===0){setStatus('Selected dice must all score before rolling.');return;}
+    turnPts+=sel.score;held.forEach(i=>locked.push(i));held=[];
+  } else if(dice.length){setStatus('Set aside at least one scoring die first.');return;}
+  // if all six locked, free them (hot dice)
+  if(locked.length===6){locked=[];}
+  const n=6-locked.length;
+  const newRoll=dice.slice();
+  // build fresh dice array preserving locked positions
+  rollDice(n);
+};
+function rollDice(n){
+  // keep locked dice values, roll the rest
+  const kept=dice.map((v,i)=>locked.includes(i)?v:null);
+  const fresh=[];for(let k=0;k<n;k++)fresh.push(newDie());
+  let fi=0;const out=[];const newLocked=[];
+  for(let i=0;i<6;i++){
+    if(kept[i]!==null){out.push(kept[i]);newLocked.push(i);}
+    else out.push(fresh[fi++]);
+  }
+  dice=out;locked=newLocked;held=[];
+  render();
+  const act=activeDice();
+  if(!hasScore(act)){setStatus('💥 FARKLE! No scoring dice — turn lost.');turnPts=0;
+    document.getElementById('roll').disabled=true;document.getElementById('bank').disabled=true;
+    setTimeout(()=>{turn='cpu';startTurn();},1400);return;}
+  setStatus('Select scoring dice, then Roll or Bank.');
+  document.getElementById('bank').disabled=turnPts===0;
+  document.getElementById('roll').disabled=true;
+}
+document.getElementById('bank').onclick=()=>{
+  if(turn!=='you')return;
+  const sel=scoreSelection(held.map(i=>dice[i]));
+  const total=turnPts+(sel.valid?sel.score:0);
+  if(total<300&&youScore===0){/* many variants need 500 opener; keep simple: allow */}
+  youScore+=total;updateScores();
+  if(youScore>=WIN){setStatus('🏆 You reached '+youScore+' — you win!');lockAll();return;}
+  setStatus('Banked '+total+' points.');turn='cpu';setTimeout(startTurn,900);
+};
+function lockAll(){document.getElementById('roll').disabled=true;document.getElementById('bank').disabled=true;}
+function updateScores(){document.getElementById('you').textContent='You: '+youScore;document.getElementById('cpu').textContent='CPU: '+cpuScore;}
+// CPU logic
+function cpuTurn(){
+  dice=[];locked=[];held=[];turnPts=0;
+  function step(){
+    if(locked.length===6)locked=[];
+    const n=6-locked.length;
+    rollDiceCpu(n);
+    const act=activeDice();
+    if(!hasScore(act)){setStatus('CPU farkled!');turnPts=0;render();setTimeout(()=>{turn='you';startTurn();},1200);return;}
+    // greedily take best scoring dice
+    const take=bestTake(act);
+    turnPts+=take.score;
+    // lock the taken dice
+    let need=take.vals.slice();
+    for(let i=0;i<6;i++){if(locked.includes(i))continue;const idx=need.indexOf(dice[i]);if(idx>=0){locked.push(i);need.splice(idx,1);}}
+    render();document.getElementById('turnpts').textContent=turnPts;
+    // decide: bank if >=350 or would win
+    if(cpuScore+turnPts>=WIN){cpuScore+=turnPts;updateScores();setStatus('💀 CPU reached '+cpuScore+' — CPU wins.');lockAll();return;}
+    if(turnPts>=350||Math.random()<0.25){cpuScore+=turnPts;updateScores();setStatus('CPU banked '+turnPts+'.');setTimeout(()=>{turn='you';startTurn();},1100);}
+    else setTimeout(step,800);
+  }
+  step();
+}
+function rollDiceCpu(n){
+  const kept=dice.map((v,i)=>locked.includes(i)?v:null);
+  const fresh=[];for(let k=0;k<n;k++)fresh.push(newDie());
+  let fi=0;const out=[];const nl=[];
+  for(let i=0;i<6;i++){if(kept[i]!==null){out.push(kept[i]);nl.push(i);}else out.push(fresh[fi++]);}
+  dice=out;locked=nl;render();
+}
+function bestTake(vals){
+  // take all triples+, all 1s and 5s (greedy = simple valid maximum here)
+  const c=[0,0,0,0,0,0,0];vals.forEach(v=>c[v]++);
+  let score=0;const taken=[];
+  for(let f=1;f<=6;f++){if(c[f]>=3){let base=f===1?1000:f*100;base*=Math.pow(2,c[f]-3);score+=base;for(let k=0;k<c[f];k++)taken.push(f);c[f]=0;}}
+  for(let k=0;k<c[1];k++){score+=100;taken.push(1);}
+  for(let k=0;k<c[5];k++){score+=50;taken.push(5);}
+  return {score,vals:taken};
+}
+reset();
+</script>
+</body>
+</html>

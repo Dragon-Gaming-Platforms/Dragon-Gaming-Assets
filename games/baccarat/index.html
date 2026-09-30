@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+<meta name="robots" content="noindex,nofollow">
+<title>Baccarat</title>
+<style>
+  *{box-sizing:border-box}body{margin:0;min-height:100vh;background:#1a0d14;color:#eef;
+    font-family:system-ui,Segoe UI,Roboto,Arial,sans-serif;display:flex;flex-direction:column;align-items:center;gap:14px;padding:18px;user-select:none;-webkit-user-select:none}
+  h1{margin:2px 0;font-size:clamp(18px,5vw,24px)}
+  #bank{font-weight:800;color:#ffe08a;font-size:19px}
+  #status{min-height:22px;font-weight:700;color:#fff;text-align:center;max-width:460px;font-size:16px}
+  .table{display:flex;gap:40px;flex-wrap:wrap;justify-content:center}
+  .side{text-align:center}
+  .side h3{margin:4px 0;color:#9ad}
+  .cards{display:flex;gap:6px;min-height:80px;justify-content:center}
+  .card{width:52px;height:74px;background:#fff;color:#111;border-radius:7px;display:flex;align-items:center;justify-content:center;
+    font-size:20px;font-weight:800;box-shadow:0 3px 0 #0006}
+  .card.red{color:#d22}
+  .total{font-weight:800;font-size:18px;color:#ffd76a;margin-top:4px}
+  .betrow{display:flex;gap:10px;align-items:center;flex-wrap:wrap;justify-content:center}
+  .betrow button{border:1px solid #6a4a5a;background:#3a2430;color:#fff;border-radius:8px;padding:8px 14px;font-weight:700;cursor:pointer}
+  .betrow button.sel{background:#ffcc33;color:#20150a}
+  #deal{background:#ffcc33;color:#20150a;border:0;border-radius:10px;padding:12px 26px;font-weight:800;font-size:17px;cursor:pointer}
+  #deal:disabled{opacity:.4}
+  .hint{font-size:12px;opacity:.72;text-align:center;max-width:470px}
+</style>
+</head>
+<body>
+<h1>Baccarat</h1>
+<div id="bank">Bankroll: $1000</div>
+<div class="betrow">
+  <span>Chip:</span>
+  <button data-b="10">$10</button><button class="sel" data-b="25">$25</button><button data-b="50">$50</button><button data-b="100">$100</button>
+</div>
+<div class="betrow">
+  <span>Bet on:</span>
+  <button class="bet sel" data-w="Player">Player (1:1)</button>
+  <button class="bet" data-w="Banker">Banker (0.95:1)</button>
+  <button class="bet" data-w="Tie">Tie (8:1)</button>
+</div>
+<div style="font-size:14px;color:#9ad">Wager: $<span id="wager">25</span> on <span id="curw">Player</span></div>
+<div class="table">
+  <div class="side"><h3>Player</h3><div class="cards" id="pc"></div><div class="total" id="pt"></div></div>
+  <div class="side"><h3>Banker</h3><div class="cards" id="bc"></div><div class="total" id="bt"></div></div>
+</div>
+<div id="status">Place your bet and deal. Closest hand to 9 wins.</div>
+<button id="deal">Deal</button>
+<div class="hint">Cards 2–9 are face value, 10/J/Q/K = 0, Ace = 1. Only the last digit of the total counts. Standard third-card rules decide draws automatically. Banker wins pay 0.95:1 (5% commission).</div>
+<script>
+const SUITS=[['♠','b'],['♥','r'],['♦','r'],['♣','b']];
+const RANKS=['A','2','3','4','5','6','7','8','9','10','J','Q','K'];
+let bank=+(localStorage.getItem('bacc_bank')||1000);
+let chip=25,wager=25,pick='Player';
+function save(){localStorage.setItem('bacc_bank',bank);}
+function cardVal(r){if(r==='A')return 1;if(['10','J','Q','K'].includes(r))return 0;return +r;}
+function draw(){const r=RANKS[Math.floor(Math.random()*RANKS.length)];const s=SUITS[Math.floor(Math.random()*SUITS.length)];return{r,s:s[0],c:s[1]};}
+function total(cards){return cards.reduce((a,c)=>a+cardVal(c.r),0)%10;}
+function upd(){document.getElementById('bank').textContent='Bankroll: $'+bank;
+  document.getElementById('wager').textContent=wager;document.getElementById('curw').textContent=pick;}
+document.querySelectorAll('[data-b]').forEach(b=>b.onclick=()=>{chip=+b.dataset.b;wager=chip;
+  document.querySelectorAll('[data-b]').forEach(x=>x.classList.remove('sel'));b.classList.add('sel');upd();});
+document.querySelectorAll('.bet').forEach(b=>b.onclick=()=>{pick=b.dataset.w;
+  document.querySelectorAll('.bet').forEach(x=>x.classList.remove('sel'));b.classList.add('sel');upd();});
+function renderCards(el,cards){el.innerHTML='';cards.forEach(c=>{const d=document.createElement('div');
+  d.className='card'+(c.c==='r'?' red':'');d.textContent=c.r+c.s;el.appendChild(d);});}
+function setStatus(t){document.getElementById('status').textContent=t;}
+document.getElementById('deal').onclick=()=>{
+  if(wager>bank){setStatus('Not enough bankroll.');return;}
+  bank-=wager;save();
+  let P=[draw(),draw()],B=[draw(),draw()];
+  let pt=total(P),bt=total(B);
+  // naturals
+  if(pt<8&&bt<8){
+    // Player rule
+    let playerThird=null;
+    if(pt<=5){P.push(draw());playerThird=cardVal(P[2].r);pt=total(P);}
+    // Banker rule
+    const bTotal=bt;
+    let bankerDraws=false;
+    if(playerThird===null){ // player stood
+      if(bTotal<=5)bankerDraws=true;
+    } else {
+      const t=playerThird;
+      if(bTotal<=2)bankerDraws=true;
+      else if(bTotal===3)bankerDraws=(t!==8);
+      else if(bTotal===4)bankerDraws=(t>=2&&t<=7);
+      else if(bTotal===5)bankerDraws=(t>=4&&t<=7);
+      else if(bTotal===6)bankerDraws=(t===6||t===7);
+      else bankerDraws=false;
+    }
+    if(bankerDraws){B.push(draw());bt=total(B);}
+  }
+  renderCards(document.getElementById('pc'),P);renderCards(document.getElementById('bc'),B);
+  document.getElementById('pt').textContent=pt;document.getElementById('bt').textContent=bt;
+  // outcome
+  let result=pt>bt?'Player':bt>pt?'Banker':'Tie';
+  let payout=0,msg='';
+  if(result==='Tie'){
+    if(pick==='Tie'){payout=wager*9;msg='Tie — you bet Tie! +$'+(payout-wager);}
+    else{payout=wager;msg='Tie — Player/Banker bets push. Bet returned.';}
+  } else if(result===pick){
+    if(pick==='Banker'){payout=Math.floor(wager+wager*0.95);msg='Banker wins — you win! +$'+(payout-wager);}
+    else{payout=wager*2;msg=result+' wins — you win! +$'+(payout-wager);}
+  } else {
+    payout=0;msg=result+' wins — you lose $'+wager+'.';
+  }
+  bank+=payout;save();upd();
+  setStatus('Player '+pt+' · Banker '+bt+'. '+msg);
+  if(bank<=0){setStatus('Out of money — resetting to $1000.');bank=1000;save();upd();}
+};
+upd();
+</script>
+</body>
+</html>

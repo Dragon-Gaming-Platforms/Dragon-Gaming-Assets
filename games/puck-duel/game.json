@@ -1,0 +1,9 @@
+{
+  "name": "Puck Duel",
+  "desc": "Fast-paced air hockey against a scrappy computer opponent. Slide your paddle to smack the puck into the far net while defending your own. Physics-driven rebounds and paddle spin keep every rally unpredictable. First to seven goals takes the match.",
+  "controls": "Drag your paddle with mouse or finger",
+  "shelf": "Sports & Racing",
+  "tags": ["games", "html5", "sports", "arcade", "1player"],
+  "badge": "New",
+  "creator": "Dragon Gaming Platforms"
+}

@@ -107,3 +107,45 @@ never invent a license.
 | Long Jump | `games/long-jump/` | Original build (Dragon Gaming Platforms) | Original — first-party, no third-party assets | 2026-09-29 |
 | Hurdles | `games/hurdles/` | Original build (Dragon Gaming Platforms) | Original — first-party, no third-party assets | 2026-09-29 |
 | Ski Jump | `games/ski-jump/` | Original build (Dragon Gaming Platforms) | Original — first-party, no third-party assets | 2026-09-29 |
+| Binairo | `games/binairo/` | Original build (Dragon Gaming Platforms) | Original — first-party, no third-party assets | 2026-09-29 |
+| MathDoku | `games/mathdoku/` | Original build (Dragon Gaming Platforms) | Original — first-party, no third-party assets | 2026-09-29 |
+| Magic Square | `games/magic-square/` | Original build (Dragon Gaming Platforms) | Original — first-party, no third-party assets | 2026-09-29 |
+| Mini Crossword | `games/mini-crossword/` | Original build (Dragon Gaming Platforms) | Original — first-party, no third-party assets | 2026-09-29 |
+| Block Blast | `games/block-blast/` | Original build (Dragon Gaming Platforms) | Original — first-party, no third-party assets | 2026-09-29 |
+| Ninja Fruit | `games/ninja-fruit/` | Original build (Dragon Gaming Platforms) | Original — first-party, no third-party assets | 2026-09-29 |
+| Helix Jump | `games/helix-jump/` | Original build (Dragon Gaming Platforms) | Original — first-party, no third-party assets | 2026-09-29 |
+| Geo Dash | `games/geo-dash/` | Original build (Dragon Gaming Platforms) | Original — first-party, no third-party assets | 2026-09-29 |
+| Centipede | `games/centipede/` | Original build (Dragon Gaming Platforms) | Original — first-party, no third-party assets | 2026-09-29 |
+| Jetpack Dash | `games/jetpack-dash/` | Original build (Dragon Gaming Platforms) | Original — first-party, no third-party assets | 2026-09-29 |
+| Puck Duel | `games/puck-duel/` | Original build (Dragon Gaming Platforms) | Original — first-party, no third-party assets | 2026-09-29 |
+| Farkle | `games/farkle/` | Original build (Dragon Gaming Platforms) | Original — first-party, no third-party assets | 2026-09-29 |
+| Craps | `games/craps/` | Original build (Dragon Gaming Platforms) | Original — first-party, no third-party assets | 2026-09-29 |
+| Baccarat | `games/baccarat/` | Original build (Dragon Gaming Platforms) | Original — first-party, no third-party assets | 2026-09-29 |
+| Keno | `games/keno/` | Original build (Dragon Gaming Platforms) | Original — first-party, no third-party assets | 2026-09-29 |
+| Curling | `games/curling/` | Original build (Dragon Gaming Platforms) | Original — first-party, no third-party assets | 2026-09-29 |
+| Boxing | `games/boxing/` | Original build (Dragon Gaming Platforms) | Original — first-party, no third-party assets | 2026-09-29 |
+| High Jump | `games/high-jump/` | Original build (Dragon Gaming Platforms) | Original — first-party, no third-party assets | 2026-09-29 |
+| Horse Race | `games/horse-race/` | Original build (Dragon Gaming Platforms) | Original — first-party, no third-party assets | 2026-09-29 |
+| Cornhole | `games/cornhole/` | Original build (Dragon Gaming Platforms) | Original — first-party, no third-party assets | 2026-09-29 |
+| Canvas Tetris | `games/canvas-tetris/` | dionyziz/canvas-tetris (https://github.com/dionyziz/canvas-tetris) | MIT — vendored upstream web build, self-contained (no external requests) | 2026-09-29 |
+| Crappy Bird | `games/crappybird/` | varunpant/CrappyBird (https://github.com/varunpant/CrappyBird) | MIT — vendored upstream web build, self-contained | 2026-09-29 |
+| HTML5 Pac-Man | `games/html5-pacman/` | daleharvey/pacman (https://github.com/daleharvey/pacman) | WTFPL — vendored upstream web build; author link neutralized for self-hosting | 2026-09-29 |
+| Exolon | `games/exolon/` | newagebegins/exolon (https://github.com/newagebegins/exolon) | MIT — vendored upstream web build; entry renamed to index.html | 2026-09-29 |
+| Orbium | `games/orbium/` | bni/orbium (https://github.com/bni/orbium) | GPL-2.0 — vendored upstream web build, self-contained (source included) | 2026-09-29 |
+| www | `games/www/` | alexdantas/www (https://github.com/alexdantas/www) | GPL-3.0 — vendored upstream web build, self-contained (source included) | 2026-09-29 |
+| Heroine Dusk | `games/heroine-dusk/` | clintbellanger/heroine-dusk (https://github.com/clintbellanger/heroine-dusk) | GPL-3.0 — vendored upstream release build, self-contained | 2026-09-29 |
+| SkiFree.js | `games/skifreejs/` | basicallydan/skifree.js (https://github.com/basicallydan/skifree.js) | MIT — vendored upstream prebuilt dist; dead banner/icon refs removed | 2026-09-29 |
+| JezzBall | `games/jezzball/` | tassaron/jezzball-transgender (https://github.com/tassaron/jezzball-transgender) | MIT — vendored ES-module build; dead bundle/site-chrome refs removed | 2026-09-29 |
+| Pac-Man Canvas | `games/pacman-canvas/` | platzhersh/pacman-canvas (https://github.com/platzhersh/pacman-canvas) | CC-BY-SA-4.0 — vendored upstream build; AdSense removed, entry renamed to index.html | 2026-09-29 |
+| Runfield | `games/runfield/` | kig/runfield (https://github.com/kig/runfield) | GPL-3.0 — vendored upstream web build; external Google Fonts link removed | 2026-09-29 |
+| Fluid Table Tennis | `games/fluid-table-tennis/` | anirudhjoshi/fluid_table_tennis (https://github.com/anirudhjoshi/fluid_table_tennis) | MIT — rebuilt from source per upstream quick_build.sh; analytics/social/external images removed | 2026-09-29 |
+| Gift Grabber | `games/gift-grabber/` | ceva24/gift-grabber (https://github.com/ceva24/gift-grabber) | Apache-2.0 — vendored upstream web build; Google Analytics/Fonts and IE shim CDNs removed | 2026-09-29 |
+| Diablo JS | `games/diablo-js/` | mitallast/diablo-js (https://github.com/mitallast/diablo-js) | MIT — vendored upstream; dev tools (shadowmaker/dttool) dropped | 2026-09-29 |
+| Open Panzer | `games/open-panzer/` | nicupavel/openpanzer (https://github.com/nicupavel/openpanzer) | GPL-2.0-or-later — vendored client; multiplayer server (shaid) and dev tools dropped | 2026-09-29 |
+| Tower Defense 3D | `games/tower-defense/` | Casmo/tower-defense (https://github.com/Casmo/tower-defense) | MIT — vendored upstream; unused Bootstrap glyphicon @font-face removed | 2026-09-29 |
+| JavaScript E.T. | `games/javascript-et/` | FranciscoG/javascript-E.T. (https://github.com/FranciscoG/javascript-E.T.) | MIT — vendored upstream; all libraries local | 2026-09-29 |
+| Supaxl | `games/supaxl/` | eguneys/supaxl (https://github.com/eguneys/supaxl) | MIT — vendored upstream prebuilt dist | 2026-09-29 |
+| Roguish | `games/roguish/` | CamHenlin/Roguish (https://github.com/CamHenlin/Roguish) | BSD-3-Clause — vendored upstream prebuilt build; JSDoc docs (external IE shim) and dev/test files removed | 2026-09-29 |
+| Tower Building | `games/tower-building-game/` | iamkun/tower_game (https://github.com/iamkun/tower_game) | MIT — vendored upstream prebuilt dist; Google Analytics (gtag) removed | 2026-09-29 |
+| Hextris | `games/hextris/` | Hextris/Hextris (https://github.com/Hextris/Hextris) | GPL-3.0 — vendored upstream; Google Analytics/Fonts and AdSense removed | 2026-09-29 |
+| Enduro Tribute | `games/enduro-tribute/` | rafaelcastrocouto/enduro (https://github.com/rafaelcastrocouto/enduro) | MIT — vendored upstream; two cdnjs refs (normalize.css, prefixfree.js) removed | 2026-09-29 |

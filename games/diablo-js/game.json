@@ -1,0 +1,9 @@
+{
+  "name": "Diablo JS",
+  "desc": "An isometric action-RPG dungeon crawler built from scratch in JavaScript, inspired by the original Diablo. Hack through waves of monsters, pick up loot, and clear the shadowy depths one tile at a time.",
+  "controls": "Mouse to move and attack, click enemies to fight",
+  "shelf": "Arcade & Action",
+  "tags": ["games", "html5", "rpg", "dungeon", "action"],
+  "badge": "New",
+  "creator": "Alexey Korchevsky"
+}

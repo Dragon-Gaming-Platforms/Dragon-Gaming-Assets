@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+<meta name="robots" content="noindex,nofollow">
+<title>Puck Duel</title>
+<style>
+  *{box-sizing:border-box}html,body{margin:0;height:100%}
+  body{background:#081018;color:#fff;font-family:system-ui,Segoe UI,Roboto,Arial,sans-serif;
+    display:flex;flex-direction:column;align-items:center;gap:8px;padding:8px;user-select:none;-webkit-user-select:none;touch-action:none}
+  h1{margin:2px 0;font-size:clamp(16px,4vw,22px)}
+  #hud{font-weight:800;color:#ffe08a;font-size:20px}
+  canvas{background:#0c2030;border-radius:12px;touch-action:none;max-width:100%}
+  #msg{position:fixed;inset:0;display:none;align-items:center;justify-content:center;flex-direction:column;gap:12px;background:#000a}
+  button{background:#ffcc33;color:#20150a;border:0;border-radius:9px;padding:10px 18px;font-weight:800;cursor:pointer}
+  .hint{font-size:12px;opacity:.75;text-align:center;max-width:420px}
+</style>
+</head>
+<body>
+<h1>Puck Duel</h1>
+<div id="hud"><span id="cpu">CPU 0</span> — <span id="you">0 You</span></div>
+<canvas id="cv" width="340" height="520"></canvas>
+<div class="hint">Drag your paddle (bottom half) with mouse or finger to strike the puck. First to 7 goals wins. You defend the bottom net.</div>
+<div id="msg"><div id="mt" style="font-size:24px;font-weight:800"></div><button id="again">Play Again</button></div>
+<script>
+const cv=document.getElementById('cv'),ctx=cv.getContext('2d');
+const W=cv.width,H=cv.height;
+const PR=26,KR=15,GOALW=120;
+let puck,me,cpu,scoreYou,scoreCpu,over,mePrev;
+function reset(){
+  scoreYou=0;scoreCpu=0;over=false;
+  me={x:W/2,y:H-70};mePrev={x:W/2,y:H-70};cpu={x:W/2,y:70};
+  resetPuck(Math.random()<0.5?1:-1);
+  document.getElementById('msg').style.display='none';loop();
+}
+function resetPuck(dir){puck={x:W/2,y:H/2,vx:(Math.random()*2-1)*2,vy:dir*3};}
+function collide(p){
+  const dx=puck.x-p.x,dy=puck.y-p.y,d=Math.hypot(dx,dy);
+  if(d<PR+KR&&d>0){
+    const nx=dx/d,ny=dy/d;
+    const overlap=PR+KR-d;puck.x+=nx*overlap;puck.y+=ny*overlap;
+    const speed=Math.max(6,Math.hypot(puck.vx,puck.vy));
+    puck.vx=nx*speed;puck.vy=ny*speed;
+  }
+}
+function loop(){
+  if(over)return;
+  ctx.clearRect(0,0,W,H);
+  // CPU AI: chase puck when on its half, else return to center
+  const targetX=puck.y<H/2? puck.x : W/2;
+  const targetY=puck.y<H/2? Math.min(H/2-40, puck.y) : 70;
+  cpu.x+=(targetX-cpu.x)*0.09;cpu.y+=(targetY-cpu.y)*0.08;
+  cpu.x=Math.max(PR,Math.min(W-PR,cpu.x));cpu.y=Math.max(PR,Math.min(H/2-PR,cpu.y));
+  // puck physics
+  puck.x+=puck.vx;puck.y+=puck.vy;puck.vx*=0.995;puck.vy*=0.995;
+  if(puck.x<KR){puck.x=KR;puck.vx*=-1;}
+  if(puck.x>W-KR){puck.x=W-KR;puck.vx*=-1;}
+  // top/bottom: goals in center, walls elsewhere
+  if(puck.y<KR){
+    if(Math.abs(puck.x-W/2)<GOALW/2){scoreYou++;check();return;}
+    puck.y=KR;puck.vy*=-1;
+  }
+  if(puck.y>H-KR){
+    if(Math.abs(puck.x-W/2)<GOALW/2){scoreCpu++;check();return;}
+    puck.y=H-KR;puck.vy*=-1;
+  }
+  collide(cpu);collide(me);
+  // draw rink
+  ctx.strokeStyle='#2a5a7a';ctx.lineWidth=3;ctx.strokeRect(2,2,W-4,H-4);
+  ctx.beginPath();ctx.moveTo(0,H/2);ctx.lineTo(W,H/2);ctx.stroke();
+  ctx.beginPath();ctx.arc(W/2,H/2,44,0,7);ctx.stroke();
+  // goals
+  ctx.strokeStyle='#ffd93d';ctx.lineWidth=5;
+  ctx.beginPath();ctx.moveTo(W/2-GOALW/2,3);ctx.lineTo(W/2+GOALW/2,3);ctx.stroke();
+  ctx.beginPath();ctx.moveTo(W/2-GOALW/2,H-3);ctx.lineTo(W/2+GOALW/2,H-3);ctx.stroke();
+  // paddles & puck
+  paddle(cpu,'#ff6b6b');paddle(me,'#4d96ff');
+  ctx.beginPath();ctx.arc(puck.x,puck.y,KR,0,7);ctx.fillStyle='#fff';ctx.fill();
+  document.getElementById('cpu').textContent='CPU '+scoreCpu;
+  document.getElementById('you').textContent=scoreYou+' You';
+  requestAnimationFrame(loop);
+}
+function paddle(p,c){ctx.beginPath();ctx.arc(p.x,p.y,PR,0,7);ctx.fillStyle=c;ctx.fill();
+  ctx.beginPath();ctx.arc(p.x,p.y,PR*0.55,0,7);ctx.fillStyle='#0004';ctx.fill();}
+function check(){
+  if(scoreYou>=7){end('🏆 You win '+scoreYou+'–'+scoreCpu+'!');return;}
+  if(scoreCpu>=7){end('💀 CPU wins '+scoreCpu+'–'+scoreYou+'.');return;}
+  resetPuck(scoreYou>scoreCpu?-1:1);me.x=W/2;me.y=H-70;
+}
+function end(t){over=true;document.getElementById('mt').textContent=t;document.getElementById('msg').style.display='flex';}
+function setMe(x,y){
+  mePrev={x:me.x,y:me.y};
+  me.x=Math.max(PR,Math.min(W-PR,x));
+  me.y=Math.max(H/2+PR,Math.min(H-PR,y)); // bottom half only
+  // impart velocity if touching puck handled in collide via position; add push:
+  const dx=puck.x-me.x,dy=puck.y-me.y,d=Math.hypot(dx,dy);
+  if(d<PR+KR&&d>0){puck.vx+=(me.x-mePrev.x)*0.6;puck.vy+=(me.y-mePrev.y)*0.6;}
+}
+function pos(e){const r=cv.getBoundingClientRect();const t=e.touches?e.touches[0]:e;return{x:(t.clientX-r.left)*W/r.width,y:(t.clientY-r.top)*H/r.height};}
+let drag=false;
+cv.addEventListener('mousedown',e=>{drag=true;const p=pos(e);setMe(p.x,p.y);e.preventDefault();});
+window.addEventListener('mousemove',e=>{if(drag){const p=pos(e);setMe(p.x,p.y);}});
+window.addEventListener('mouseup',()=>drag=false);
+cv.addEventListener('touchstart',e=>{drag=true;const p=pos(e);setMe(p.x,p.y);e.preventDefault();},{passive:false});
+cv.addEventListener('touchmove',e=>{const p=pos(e);setMe(p.x,p.y);e.preventDefault();},{passive:false});
+window.addEventListener('touchend',()=>drag=false);
+document.getElementById('again').onclick=reset;
+reset();
+</script>
+</body>
+</html>

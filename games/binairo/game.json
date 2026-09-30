@@ -1,0 +1,9 @@
+{
+  "name": "Binairo",
+  "desc": "A binary logic puzzle, also known as Takuzu. Fill the grid with two colours so each row and column holds an equal number of both, never more than two of the same colour in a row, and no two lines are identical. Every board is freshly generated with a unique solution.",
+  "controls": "Tap a cell to cycle blank, blue, orange",
+  "shelf": "Puzzle & Logic",
+  "tags": ["games", "html5", "logic", "binary", "brain"],
+  "badge": "New",
+  "creator": "Dragon Gaming Platforms"
+}

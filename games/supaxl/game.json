@@ -1,0 +1,9 @@
+{
+  "name": "Supaxl",
+  "desc": "A snappy pixel-art action platformer. Dash, jump and duck through tight rooms packed with hazards, timing every move as you push toward the exit in this compact arcade challenge.",
+  "controls": "Arrow keys to move and jump",
+  "shelf": "Arcade & Action",
+  "tags": ["games", "html5", "platformer", "pixel", "action"],
+  "badge": "New",
+  "creator": "eguneys"
+}

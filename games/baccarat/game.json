@@ -1,0 +1,9 @@
+{
+  "name": "Baccarat",
+  "desc": "The elegant card game of Player versus Banker. Bet on either hand or a tie, then watch the deal play out under authentic third-card drawing rules, with the closest total to nine winning. Banker bets pay with the customary five percent commission. Bankroll saves locally.",
+  "controls": "Choose a chip and a bet, then press Deal",
+  "shelf": "Strategy & Idle",
+  "tags": ["games", "html5", "cards", "casino", "1player"],
+  "badge": "New",
+  "creator": "Dragon Gaming Platforms"
+}

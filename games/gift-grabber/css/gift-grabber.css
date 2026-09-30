@@ -1,0 +1,278 @@
+.glyphicon {
+    vertical-align: -10%;
+}
+
+body {
+    font-family: 'Raleway', sans-serif;
+    background-color: #f4fafd;
+}
+
+.container {
+    margin-top: 2%;
+    margin-bottom: 2%;
+}
+
+.header {
+    margin-bottom: 4%;
+}
+
+.header h1 {
+    font-family: 'Fontdiner Swanky', cursive;
+    font-size: 300%;
+    text-align: center;
+}
+
+@media(min-width: 768px) {
+    .header h1 {
+        font-size: 400%;
+    }
+}
+
+#about {
+    text-align: center;
+}
+
+#button-box {
+    display: table;
+    width: 295px;
+    max-width: 95%;
+    margin: auto;
+    margin-bottom: 4%;
+}
+
+@media(min-width: 480px) {
+    #button-box {
+        width: 384px;
+    }
+}
+
+@media(min-width: 768px) {
+    #button-box {
+        width: 628px;
+    }
+}
+
+@media(min-width: 992px) {
+    #button-box {
+        width: 718px;
+    }
+}
+
+#info-buttons {
+    display: table-cell;
+    width: 50%;
+}
+
+#game-buttons {
+    display: table-cell;
+    width: 50%;
+    text-align: right;
+}
+
+#button-box .btn {
+    font-size: x-small;
+    margin-left: 1%;
+    margin-right: 1%;
+}
+
+@media(min-width: 480px) {
+    #button-box .btn {
+        font-size: small;
+        margin-left: 3%;
+        margin-right: 3%;
+    }
+}
+
+@media(min-width: 768px) {
+    #button-box .btn {
+        font-size: 14px;
+        margin-left: 5%;
+        margin-right: 5%;
+    }
+}
+
+#rules {
+    text-align: center;
+}
+
+.rules-row {
+    margin-bottom: 25px;
+}
+
+.rules-text {
+    display: flex; 
+    justify-content: center;
+    flex-direction: column;
+    height: 46px;
+}
+
+@media(min-width: 1200px) {
+    #arrow-rules-text {
+        height: 197px;
+    }
+}
+
+@media(min-width: 1200px) {
+    #number-rules-text {
+        height: 246px;
+    }
+}
+
+#stats, #game {
+    font-family: 'Chewy', cursive;
+}
+
+.stats-panel {
+    text-align: center;
+    opacity: 0;
+}
+
+@media(min-width: 768px) {
+    .stats-panel {
+        padding-bottom: 4%;
+    }
+}
+
+.stats-row {
+    margin-bottom: 1%;
+}
+
+@media(min-width: 768px) {
+    .stats-row {
+        margin-bottom: 0;
+    }
+}
+
+.game-variable {
+    color: #337ab7;
+}
+
+.stats-tile-container {
+    margin-right: 2%;
+}
+
+.stats-tile {
+    display: inline-block;
+    position: relative;
+    background-color: #d9edf7;
+    height: 25px;
+    width: 25px;
+    padding: 5px;
+    border-radius: 4px;
+    margin-right: 2%;
+    text-align: center;
+    vertical-align: middle;
+    line-height: 1;
+    -webkit-font-smoothing: antialiased;
+}
+
+.grid {
+    display: table;
+    margin-left: auto;
+    margin-right: auto;
+    table-layout: fixed;
+    border-collapse: separate;
+    border-spacing: 3px;
+}
+
+@media(min-width: 768px) {
+    .grid {
+        border-spacing: 5px;
+    }
+}
+
+.grid-row {
+    display: table-row;
+}
+
+.grid-cell {
+    display: table-cell;
+    background-color: #d9edf7;
+    font-size: small;
+    text-align: center;
+    vertical-align: middle;
+    height: 30px;
+    width: 30px;
+    border-right: 1px solid #98a6ad;
+    border-bottom: 1px solid #98a6ad;
+    border-radius: 2px;
+}
+
+@media(min-width: 480px) {
+    .grid-cell {
+        height: 40px;
+        width: 40px;
+        font-size: medium;
+    }
+}
+
+@media(min-width: 768px) {
+    .grid-cell {
+        height: 65px;
+        width: 65px;
+        font-size: x-large;
+        border-radius: 4px;
+    }
+}
+
+@media(min-width: 992px) {
+    .grid-cell {
+        height: 75px;
+        width: 75px;
+        font-size: xx-large;
+    }
+}
+
+.grid-cell.revealed {
+    border-top: 1px solid #98a6ad;
+    border-left: 1px solid #98a6ad;
+    border-bottom: none;
+    border-right: none;
+}
+
+.grid-cell.dead {
+    background-color: #e2e2e2;
+}
+
+.revealed.bad {
+    color: #a94442;
+    background-color: #f2dede;
+}
+
+.revealed.neutral, .revealed.good {
+    background-color: #dff0d8;
+}
+
+.revealed.gift {
+    background-color: #ffeb99;
+}
+
+#end-dialog {
+    position: absolute;
+    width: 70%;
+    font-size: 300%;
+    text-align: center;
+    padding: 0;
+    left: 0;
+    right: 0;
+    margin: auto;
+    bottom: 31%;
+    z-index: 1000;
+    cursor: pointer;
+}
+
+@media(min-width: 480px) {
+    #end-dialog {
+        font-size: 400%;
+        width: 55%;
+        bottom: 32%;
+    }
+}
+
+@media(min-width: 768px) {
+    #end-dialog {
+        font-size: 600%;
+        width: 60%;
+        bottom: 37%;
+    }
+}

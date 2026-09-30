@@ -1,0 +1,9 @@
+{
+  "name": "High Jump",
+  "desc": "A track-and-field high jump challenge in two phases. First hammer the button to build run-up speed, then time your leap on a sweeping power meter to soar over the bar. Clear it and the bar rises higher; miss three times and the meet is over.",
+  "controls": "Tap or Space to build speed, then tap to time the jump",
+  "shelf": "Sports & Racing",
+  "tags": ["games", "html5", "sports", "arcade", "1player"],
+  "badge": "New",
+  "creator": "Dragon Gaming Platforms"
+}

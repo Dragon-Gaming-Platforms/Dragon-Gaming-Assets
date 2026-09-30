@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+<meta name="robots" content="noindex,nofollow">
+<title>Geo Dash</title>
+<style>
+  *{box-sizing:border-box}html,body{margin:0;height:100%}
+  body{background:#0a0f1e;color:#fff;font-family:system-ui,Segoe UI,Roboto,Arial,sans-serif;
+    display:flex;flex-direction:column;align-items:center;gap:8px;padding:8px;user-select:none;-webkit-user-select:none;touch-action:none}
+  h1{margin:2px 0;font-size:clamp(16px,4vw,22px)}
+  #hud{font-weight:800;color:#ffe08a}
+  canvas{background:linear-gradient(#101a3a,#1e2a5a);border-radius:12px;touch-action:none;max-width:100%;cursor:pointer}
+  #msg{position:fixed;inset:0;display:none;align-items:center;justify-content:center;flex-direction:column;gap:12px;background:#000a}
+  button{background:#ffcc33;color:#20150a;border:0;border-radius:9px;padding:10px 18px;font-weight:800;cursor:pointer}
+  .hint{font-size:12px;opacity:.75;text-align:center;max-width:420px}
+</style>
+</head>
+<body>
+<h1>Geo Dash</h1>
+<div id="hud">Distance: <span id="dist">0</span>m &nbsp; Best: <span id="best">0</span>m</div>
+<canvas id="cv" width="480" height="300"></canvas>
+<div class="hint">Tap / click / press Space to jump. Clear the spikes and hop onto blocks. One hit ends the run — the speed keeps climbing!</div>
+<div id="msg"><div id="mt" style="font-size:24px;font-weight:800"></div><button id="again">Play Again</button></div>
+<script>
+const cv=document.getElementById('cv'),ctx=cv.getContext('2d');
+const W=cv.width,H=cv.height,GROUND=H-40;
+let px,py,vy,onGround,speed,dist,obstacles,spawnX,over,best=0,rot;
+const PS=26;
+function reset(){
+  px=70;py=GROUND-PS;vy=0;onGround=true;speed=4;dist=0;obstacles=[];spawnX=W;over=false;rot=0;
+  document.getElementById('msg').style.display='none';loop();
+}
+function jump(){if(onGround&&!over){vy=-11;onGround=false;}}
+function spawnObstacle(){
+  const type=Math.random();
+  if(type<0.55){obstacles.push({t:'spike',x:spawnX,w:26,h:26});}
+  else if(type<0.8){obstacles.push({t:'spike',x:spawnX,w:52,h:26,dbl:true});}
+  else{const bh=40+Math.random()*40;obstacles.push({t:'block',x:spawnX,w:40,h:bh});}
+  spawnX+= 180 + Math.random()*120 - Math.min(80,speed*8);
+}
+function loop(){
+  if(over)return;
+  ctx.clearRect(0,0,W,H);
+  speed+=0.0015;dist+=speed/8;
+  // physics
+  vy+=0.6;py+=vy;
+  // ground / block landing
+  let footY=GROUND;
+  // scroll obstacles
+  spawnX-=speed;
+  for(const o of obstacles)o.x-=speed;
+  obstacles=obstacles.filter(o=>o.x+o.w>-10);
+  if(spawnX<W)spawnObstacle();
+  // collisions & landing on blocks
+  onGround=false;
+  // ground collision
+  if(py+PS>=GROUND){py=GROUND-PS;vy=0;onGround=true;}
+  for(const o of obstacles){
+    if(o.t==='block'){
+      const bx=o.x,by=GROUND-o.h;
+      const overlapX=px+PS>bx+4&&px<bx+o.w-4;
+      if(overlapX){
+        if(vy>=0&&py+PS>=by&&py+PS<=by+22){py=by-PS;vy=0;onGround=true;}
+        else if(py+PS>by+4&&py<GROUND){ // hit side
+          if(px+PS>bx && px<bx+o.w && py+PS>by+6){end();return;}
+        }
+      }
+    } else { // spike triangle base at ground
+      const sx=o.x,sy=GROUND;
+      if(px+PS>sx+4&&px<sx+o.w-4&&py+PS>sy-o.h+4){end();return;}
+    }
+  }
+  rot+=onGround?0:0.18;
+  // draw ground
+  ctx.fillStyle='#0c1330';ctx.fillRect(0,GROUND,W,H-GROUND);
+  ctx.strokeStyle='#3a4a8a';ctx.beginPath();ctx.moveTo(0,GROUND);ctx.lineTo(W,GROUND);ctx.stroke();
+  // draw obstacles
+  for(const o of obstacles){
+    if(o.t==='block'){ctx.fillStyle='#6bcB77';ctx.fillRect(o.x,GROUND-o.h,o.w,o.h);ctx.strokeStyle='#2f7a3a';ctx.strokeRect(o.x,GROUND-o.h,o.w,o.h);}
+    else{ctx.fillStyle='#ff5d5d';
+      const n=o.dbl?2:1;for(let k=0;k<n;k++){const bx=o.x+k*26;
+        ctx.beginPath();ctx.moveTo(bx,GROUND);ctx.lineTo(bx+13,GROUND-26);ctx.lineTo(bx+26,GROUND);ctx.closePath();ctx.fill();}}
+  }
+  // draw player (rotating square)
+  ctx.save();ctx.translate(px+PS/2,py+PS/2);ctx.rotate(onGround?0:rot);
+  ctx.fillStyle='#ffd93d';ctx.fillRect(-PS/2,-PS/2,PS,PS);
+  ctx.fillStyle='#20150a';ctx.fillRect(-6,-6,12,12);ctx.restore();
+  document.getElementById('dist').textContent=Math.floor(dist);
+  requestAnimationFrame(loop);
+}
+function end(){over=true;if(dist>best){best=Math.floor(dist);document.getElementById('best').textContent=best;}
+  document.getElementById('mt').textContent='💥 Crash! Distance: '+Math.floor(dist)+'m';document.getElementById('msg').style.display='flex';}
+cv.addEventListener('mousedown',e=>{jump();e.preventDefault();});
+cv.addEventListener('touchstart',e=>{jump();e.preventDefault();},{passive:false});
+window.addEventListener('keydown',e=>{if(e.code==='Space'||e.key===' '||e.key==='ArrowUp'){jump();e.preventDefault();}});
+document.getElementById('again').onclick=reset;
+reset();
+</script>
+</body>
+</html>

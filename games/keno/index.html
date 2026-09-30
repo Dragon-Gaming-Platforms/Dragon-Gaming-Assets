@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+<meta name="robots" content="noindex,nofollow">
+<title>Keno</title>
+<style>
+  *{box-sizing:border-box}body{margin:0;min-height:100vh;background:#0e1424;color:#eef;
+    font-family:system-ui,Segoe UI,Roboto,Arial,sans-serif;display:flex;flex-direction:column;align-items:center;gap:12px;padding:14px;user-select:none;-webkit-user-select:none}
+  h1{margin:2px 0;font-size:clamp(18px,5vw,24px)}
+  #bank{font-weight:800;color:#ffe08a;font-size:18px}
+  #status{min-height:20px;font-weight:700;color:#fff;text-align:center;max-width:460px}
+  #board{display:grid;grid-template-columns:repeat(10,1fr);gap:4px;max-width:460px;width:100%}
+  .n{aspect-ratio:1;border-radius:7px;background:#1b2540;display:flex;align-items:center;justify-content:center;
+    font-weight:800;font-size:15px;cursor:pointer;color:#cdd}
+  .n.pick{background:#4d96ff;color:#fff}
+  .n.hit{background:#7cff8a;color:#08210f;box-shadow:0 0 0 2px #fff8 inset}
+  .n.drawn{background:#ffcc33;color:#20150a}
+  .n.pick.drawn{background:#7cff8a}
+  .row{display:flex;gap:8px;align-items:center;flex-wrap:wrap;justify-content:center}
+  .row button{background:#ffcc33;color:#20150a;border:0;border-radius:9px;padding:9px 15px;font-weight:800;cursor:pointer}
+  .row button.ghost{background:#26324e;color:#eef}
+  .row button:disabled{opacity:.4}
+  .bet{font-size:14px;color:#9ad}
+  .hint{font-size:12px;opacity:.72;text-align:center;max-width:470px}
+</style>
+</head>
+<body>
+<h1>Keno</h1>
+<div id="bank">Credits: 1000</div>
+<div class="bet">Picks: <b id="npick">0</b>/10 &nbsp; Bet: <b id="betv">10</b></div>
+<div id="status">Pick up to 10 numbers, set your bet, then Draw.</div>
+<div id="board"></div>
+<div class="row">
+  <span>Bet:</span>
+  <button class="ghost" data-bet="5">5</button><button class="ghost" data-bet="10">10</button><button class="ghost" data-bet="25">25</button>
+  <button id="quick" class="ghost">Quick Pick</button>
+  <button id="clear" class="ghost">Clear</button>
+  <button id="draw">Draw</button>
+</div>
+<div class="hint">Match your picks against 20 drawn numbers. More matches on more picks pays more. Hit paytable scales with how many you chose (e.g. pick 10, hit 10 = 1000×).</div>
+<script>
+let bank=+(localStorage.getItem('keno_bank')||1000);
+let picks=new Set(),bet=10,drawing=false;
+// payout multipliers[picks][hits]
+const PAY={
+ 1:[0,3],
+ 2:[0,0,12],
+ 3:[0,0,2,42],
+ 4:[0,0,1,4,100],
+ 5:[0,0,0,2,15,250],
+ 6:[0,0,0,1,4,50,400],
+ 7:[0,0,0,0,2,20,100,600],
+ 8:[0,0,0,0,1,10,50,200,900],
+ 9:[0,0,0,0,0,4,30,120,400,1200],
+ 10:[0,0,0,0,0,2,10,50,150,500,1000]
+};
+function save(){localStorage.setItem('keno_bank',bank);}
+function build(){const b=document.getElementById('board');b.innerHTML='';
+  for(let i=1;i<=80;i++){const d=document.createElement('div');d.className='n';d.textContent=i;d.dataset.n=i;
+    d.onclick=()=>toggle(i);b.appendChild(d);}}
+function toggle(n){if(drawing)return;
+  if(picks.has(n))picks.delete(n);else{if(picks.size>=10){setStatus('Maximum 10 picks.');return;}picks.add(n);}
+  refresh();}
+function refresh(){
+  document.querySelectorAll('.n').forEach(el=>{const n=+el.dataset.n;el.className='n'+(picks.has(n)?' pick':'');});
+  document.getElementById('npick').textContent=picks.size;
+  document.getElementById('betv').textContent=bet;
+  document.getElementById('bank').textContent='Credits: '+bank;
+}
+function setStatus(t){document.getElementById('status').textContent=t;}
+document.querySelectorAll('[data-bet]').forEach(b=>b.onclick=()=>{if(drawing)return;bet=+b.dataset.bet;refresh();});
+document.getElementById('clear').onclick=()=>{if(drawing)return;picks.clear();refresh();setStatus('Picks cleared.');};
+document.getElementById('quick').onclick=()=>{if(drawing)return;picks.clear();
+  const count=1+Math.floor(Math.random()*10);const pool=[];for(let i=1;i<=80;i++)pool.push(i);
+  for(let k=0;k<count;k++){const idx=Math.floor(Math.random()*pool.length);picks.add(pool.splice(idx,1)[0]);}
+  refresh();setStatus('Quick picked '+count+' numbers.');};
+document.getElementById('draw').onclick=()=>{
+  if(drawing)return;
+  if(picks.size===0){setStatus('Pick at least one number.');return;}
+  if(bet>bank){setStatus('Not enough credits.');return;}
+  bank-=bet;save();drawing=true;
+  // draw 20 unique
+  const pool=[];for(let i=1;i<=80;i++)pool.push(i);const drawn=[];
+  for(let k=0;k<20;k++){const idx=Math.floor(Math.random()*pool.length);drawn.push(pool.splice(idx,1)[0]);}
+  const drawnSet=new Set(drawn);
+  // animate reveal
+  document.querySelectorAll('.n').forEach(el=>el.className='n'+(picks.has(+el.dataset.n)?' pick':''));
+  let i=0;
+  const timer=setInterval(()=>{
+    if(i>=drawn.length){clearInterval(timer);finish(drawnSet);return;}
+    const n=drawn[i++];const el=document.querySelector('.n[data-n="'+n+'"]');
+    if(picks.has(n))el.classList.add('hit');else el.classList.add('drawn');
+  },70);
+};
+function finish(drawnSet){
+  let hits=0;picks.forEach(n=>{if(drawnSet.has(n))hits++;});
+  const mult=(PAY[picks.size]&&PAY[picks.size][hits])||0;
+  const winAmt=bet*mult;
+  bank+=winAmt;save();
+  refresh();drawing=false;
+  setStatus(hits+'/'+picks.size+' matched — '+(winAmt>0?('WON '+winAmt+' credits! ('+mult+'×)'):'no win this time.'));
+  if(bank<=0){bank=1000;save();refresh();setStatus('Out of credits — reset to 1000.');}
+}
+build();refresh();
+</script>
+</body>
+</html>

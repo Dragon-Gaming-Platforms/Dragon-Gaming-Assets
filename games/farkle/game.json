@@ -1,0 +1,9 @@
+{
+  "name": "Farkle",
+  "desc": "The classic press-your-luck dice game against the computer. Roll six dice, set aside the ones that score, and decide whether to bank your points or risk it all on another roll. Roll no scoring dice and you farkle, losing the turn. First to four thousand wins.",
+  "controls": "Click scoring dice to set aside, then Roll or Bank",
+  "shelf": "Strategy & Idle",
+  "tags": ["games", "html5", "dice", "strategy", "1player"],
+  "badge": "New",
+  "creator": "Dragon Gaming Platforms"
+}

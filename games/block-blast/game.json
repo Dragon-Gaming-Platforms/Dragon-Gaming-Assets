@@ -1,0 +1,9 @@
+{
+  "name": "Block Blast",
+  "desc": "A grid-filling block puzzle in the 1010 tradition. Drop three offered shapes onto a ten-by-ten board and clear complete rows and columns to score. There is no gravity and no timer, only clever placement, until no piece fits and the game ends.",
+  "controls": "Tap a piece to select it, then tap the board to place it",
+  "shelf": "Puzzle & Logic",
+  "tags": ["games", "html5", "puzzle", "blocks", "casual"],
+  "badge": "New",
+  "creator": "Dragon Gaming Platforms"
+}

@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no">
+<meta name="robots" content="noindex,nofollow">
+<title>High Jump</title>
+<style>
+  *{box-sizing:border-box}html,body{margin:0;height:100%}
+  body{background:#0e1830;color:#fff;font-family:system-ui,Segoe UI,Roboto,Arial,sans-serif;
+    display:flex;flex-direction:column;align-items:center;gap:8px;padding:8px;user-select:none;-webkit-user-select:none;touch-action:manipulation}
+  h1{margin:2px 0;font-size:clamp(16px,4vw,22px)}
+  #hud{font-weight:800;color:#ffe08a}
+  canvas{background:linear-gradient(#1a2a55,#24356a);border-radius:12px;max-width:100%}
+  #status{min-height:20px;font-weight:800;color:#9ad;text-align:center;max-width:440px}
+  #act{background:#ffcc33;color:#20150a;border:0;border-radius:10px;padding:14px 34px;font-weight:800;font-size:17px;cursor:pointer}
+  .hint{font-size:12px;opacity:.75;text-align:center;max-width:460px}
+</style>
+</head>
+<body>
+<h1>High Jump</h1>
+<div id="hud">Bar: <span id="bar">100</span>cm &nbsp; Misses: <span id="miss">0</span>/3 &nbsp; Best: <span id="best">0</span>cm</div>
+<canvas id="cv" width="440" height="300"></canvas>
+<div id="status"></div>
+<button id="act">START</button>
+<div class="hint">Phase 1 (RUN): rapidly tap the button or Space to build speed before the timer runs out. Phase 2 (JUMP): a marker sweeps a power bar — tap once to leap, aiming for the green zone. Clear the bar to raise it; 3 misses ends the meet.</div>
+<script>
+const cv=document.getElementById('cv'),ctx=cv.getContext('2d');
+const W=cv.width,H=cv.height,GROUND=H-40;
+const barX=W*0.60;
+let phase,speed,barHeight,misses,best,jumpMeter,meterDir,jumper,runTimer;
+function reset(){barHeight=100;misses=0;best=0;phase='ready';setStatus('Press START to approach.');
+  document.getElementById('act').textContent='START';draw();}
+function setStatus(t){document.getElementById('status').textContent=t;}
+function hud(){document.getElementById('bar').textContent=barHeight;document.getElementById('miss').textContent=misses;
+  document.getElementById('best').textContent=best;}
+function barY(){return GROUND-40-(barHeight-100)*2.0;}
+function startAttempt(){
+  phase='runup';speed=0;runTimer=150; // ~2.5s at 60fps
+  jumper={x:40,y:GROUND,vy:0,vx:0,cleared:false};
+  document.getElementById('act').textContent='RUN! (tap fast)';
+  setStatus('Tap fast to build speed!');loop();
+}
+function beginMeter(){phase='meter';jumpMeter=0;meterDir=1;document.getElementById('act').textContent='JUMP!';setStatus('Tap in the green to jump!');}
+function doJump(){
+  if(phase!=='meter')return;
+  phase='jump';const power=jumpMeter;
+  let quality=1-Math.abs(85-power)/85;quality=Math.max(0.1,quality);
+  const rf=speed/100;
+  jumper.vy=-(8+rf*7+quality*9);jumper.vx=3.5+rf*2.5;
+  document.getElementById('act').textContent='—';setStatus('Up you go!');
+}
+function tapAct(){
+  if(phase==='ready'||phase==='done')return;
+  if(phase==='runup')speed=Math.min(100,speed+7);
+  else if(phase==='meter')doJump();
+}
+function loop(){
+  if(phase==='ready'){draw();return;}
+  if(phase==='runup'){speed=Math.max(0,speed-0.8);runTimer--;if(runTimer<=0)beginMeter();}
+  if(phase==='meter'){jumpMeter+=meterDir*2.6;if(jumpMeter>=100){jumpMeter=100;meterDir=-1;}if(jumpMeter<=0){jumpMeter=0;meterDir=1;}}
+  if(phase==='jump'){
+    jumper.vy+=0.5;jumper.y+=jumper.vy;jumper.x+=jumper.vx;
+    if(!jumper.cleared&&jumper.x>=barX){
+      if(jumper.y-16<barY())jumper.cleared=true; else {landFail();return;}
+    }
+    if(jumper.y>=GROUND){jumper.y=GROUND;finishJump();return;}
+  }
+  draw();requestAnimationFrame(loop);
+}
+function draw(){
+  ctx.clearRect(0,0,W,H);
+  ctx.fillStyle='#132248';ctx.fillRect(0,GROUND,W,H-GROUND);
+  const by=barY();
+  ctx.strokeStyle='#ccd';ctx.lineWidth=4;
+  ctx.beginPath();ctx.moveTo(barX,GROUND);ctx.lineTo(barX,by);ctx.stroke();
+  ctx.beginPath();ctx.moveTo(barX+80,GROUND);ctx.lineTo(barX+80,by);ctx.stroke();
+  ctx.strokeStyle='#ffcc33';ctx.beginPath();ctx.moveTo(barX,by);ctx.lineTo(barX+80,by);ctx.stroke();
+  // mat
+  ctx.fillStyle='#3a4a8a';ctx.fillRect(barX+2,GROUND-8,80,8);
+  // speed meter
+  ctx.fillStyle='#0006';ctx.fillRect(20,18,150,14);ctx.fillStyle='#7cff8a';ctx.fillRect(20,18,150*(speed||0)/100,14);
+  ctx.fillStyle='#fff';ctx.font='12px sans-serif';ctx.textAlign='left';ctx.fillText('Speed',20,46);
+  if(phase==='runup'){ctx.fillStyle='#ff9f45';ctx.fillRect(20,52,150*runTimer/150,6);}
+  if(phase==='meter'){
+    const mx=W/2-90,mw=180;
+    ctx.fillStyle='#0006';ctx.fillRect(mx,60,mw,18);
+    ctx.fillStyle='#2f7a3a';ctx.fillRect(mx+mw*0.68,60,mw*0.22,18);
+    ctx.fillStyle='#ffcc33';ctx.fillRect(mx+mw*jumpMeter/100-2,56,4,26);
+  }
+  if(jumper){ctx.fillStyle=jumper.cleared?'#7cff8a':'#4d96ff';
+    ctx.beginPath();ctx.arc(jumper.x,jumper.y-26,9,0,7);ctx.fill();
+    ctx.fillRect(jumper.x-4,jumper.y-24,8,20);}
+  hud();
+}
+function finishJump(){
+  phase='done';
+  if(jumper.cleared){best=Math.max(best,barHeight);setStatus('✅ Cleared '+barHeight+'cm!');barHeight+=5;hud();
+    document.getElementById('act').textContent='NEXT';}
+  else fail();
+}
+function landFail(){phase='done';fail();draw();}
+function fail(){misses++;hud();
+  if(misses>=3){setStatus('💀 Out! Best clear: '+best+'cm.');document.getElementById('act').textContent='RESTART';phase='over';}
+  else{setStatus('❌ Knocked the bar. '+(3-misses)+' left.');document.getElementById('act').textContent='RETRY';}
+}
+document.getElementById('act').addEventListener('pointerdown',e=>{
+  e.preventDefault();
+  if(phase==='ready'){startAttempt();return;}
+  if(phase==='done'){startAttempt();return;}
+  if(phase==='over'){reset();return;}
+  tapAct();
+});
+window.addEventListener('keydown',e=>{if(e.code==='Space'){e.preventDefault();
+  if(phase==='ready'||phase==='done'){startAttempt();}else if(phase==='over'){reset();}else tapAct();}});
+reset();
+</script>
+</body>
+</html>

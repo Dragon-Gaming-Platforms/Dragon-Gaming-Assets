@@ -1,0 +1,9 @@
+{
+  "name": "Magic Square",
+  "desc": "The classic three-by-three number puzzle. Place the digits one through nine so every row, column, and diagonal adds up to fifteen. A few numbers are given to start; live line totals turn green when they are correct. Each puzzle is a randomly rotated and mirrored magic square.",
+  "controls": "Tap a cell to cycle through the remaining digits",
+  "shelf": "Puzzle & Logic",
+  "tags": ["games", "html5", "logic", "numbers", "math"],
+  "badge": "New",
+  "creator": "Dragon Gaming Platforms"
+}
