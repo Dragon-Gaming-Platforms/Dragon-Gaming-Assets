@@ -1,0 +1,14 @@
+{
+  "name": "Bearing",
+  "desc": "A daily direction-finding puzzle. Rotate a compass heading and listen: hidden sound sources pull left or right like a real ear would hear. Two listens from different headings triangulate the truth - mark every source's bearing in as few listens as par allows.",
+  "controls": "Left / Right Arrows or A / D: Rotate heading / Space: Listen / Click a compass point: Mark or unmark / K: Check",
+  "shelf": "Puzzle & Logic",
+  "tags": [
+    "games",
+    "puzzle",
+    "logic",
+    "daily"
+  ],
+  "badge": "New",
+  "creator": "arkai"
+}

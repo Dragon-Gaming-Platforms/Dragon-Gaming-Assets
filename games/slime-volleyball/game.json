@@ -1,0 +1,9 @@
+{
+  "name": "Slime Volleyball",
+  "desc": "The classic two-player slime volleyball showdown, revived for HTML5 canvas. Bounce the ball over the net with your gelatinous half-circle - first to out-rally their rival wins.",
+  "controls": "Left Player: A / W / D / Right Player: Arrow Keys",
+  "shelf": "Sports & Racing",
+  "tags": ["games", "sports", "volleyball", "two-player", "retro"],
+  "badge": "New",
+  "creator": "patwey"
+}

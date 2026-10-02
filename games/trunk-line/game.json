@@ -1,0 +1,14 @@
+{
+  "name": "Trunk Line",
+  "desc": "A daily network puzzle. Ping the hidden telephone network and use the response times to trace every line between the jacks. Map the whole switchboard before you run out of probes.",
+  "controls": "Mouse / Touch: Probe the network / Keyboard also supported",
+  "shelf": "Puzzle & Logic",
+  "tags": [
+    "games",
+    "puzzle",
+    "logic",
+    "daily"
+  ],
+  "badge": "New",
+  "creator": "arkai"
+}

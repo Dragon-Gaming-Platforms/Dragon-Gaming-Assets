@@ -1,0 +1,15 @@
+{
+  "name": "Rubik's Cube",
+  "desc": "A WebGL Rubik's Cube - drag faces to twist, scramble and solve the classic 3D puzzle from any angle.",
+  "controls": "Mouse Drag: Rotate the cube / Drag across a face: Twist that layer / Scramble button: Shuffle",
+  "shelf": "Puzzle & Logic",
+  "tags": [
+    "games",
+    "puzzle",
+    "3d",
+    "webgl",
+    "cube"
+  ],
+  "badge": "New",
+  "creator": "Tiffany Wang"
+}

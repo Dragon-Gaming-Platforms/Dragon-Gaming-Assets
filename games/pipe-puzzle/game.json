@@ -1,0 +1,9 @@
+{
+  "name": "Pipe Puzzle",
+  "desc": "A web-playable clone of the classic Pipe Dream. Lay pipes fast before the water starts flowing, then watch your network carry the stream - build the longest pipeline you can.",
+  "controls": "Mouse: Click to place the next pipe piece",
+  "shelf": "Puzzle & Logic",
+  "tags": ["games", "puzzle", "pipes", "retro"],
+  "badge": "New",
+  "creator": "tassaron"
+}
