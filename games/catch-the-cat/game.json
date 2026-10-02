@@ -1,0 +1,9 @@
+{
+  "name": "Catch The Cat",
+  "desc": "Trap the crafty cat before it escapes to the edge! Click tiles to block its path in this Phaser 3 remake of the classic Circle the Cat puzzle. Every move counts - the cat finds the shortest way out.",
+  "controls": "Mouse / Touch: Click a tile to block it",
+  "shelf": "Puzzle & Logic",
+  "tags": ["games", "puzzle", "logic", "strategy"],
+  "badge": "New",
+  "creator": "Ganlv"
+}

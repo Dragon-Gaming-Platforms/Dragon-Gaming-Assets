@@ -1,0 +1,9 @@
+{
+  "name": "Rot Magus",
+  "desc": "A classic 8-bit roguelike RPG about a hero descending into the realm of the Dark One. Infinite procedurally generated lands, 17 monsters, 90 items, melee and ranged combat. An extended browser remake of Ronny Wester's Magus built with rot.js and Phaser.",
+  "controls": "Mouse: Click terrain to move, click monsters to attack, click your hero to rest, click inventory slots to equip items",
+  "shelf": "Strategy & Idle",
+  "tags": ["games", "roguelike", "rpg", "turn-based"],
+  "badge": "New",
+  "creator": "kosinaz"
+}

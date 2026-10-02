@@ -1,0 +1,9 @@
+{
+  "name": "mk.js",
+  "desc": "A canvas implementation of a Mortal Kombat-style fighting game by Minko Gechev. Spar as Sub-Zero against Kano in the throne room - move, block, punch and kick your way to a flawless victory.",
+  "controls": "Arrows: Move / Jump / Crouch / Shift: Block / A: High Punch / S: Low Punch / D: Low Kick / F: High Kick / Space: Restart",
+  "shelf": "Arcade & Action",
+  "tags": ["games", "fighting", "arcade", "retro"],
+  "badge": "New",
+  "creator": "Minko Gechev"
+}

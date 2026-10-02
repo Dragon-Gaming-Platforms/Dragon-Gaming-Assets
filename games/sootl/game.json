@@ -1,0 +1,9 @@
+{
+  "name": "Sootl",
+  "desc": "Stay out of the light! An Elm-built arcade dodger where you navigate dark corridors while avoiding deadly light beams. Simple premise, relentless difficulty.",
+  "controls": "Arrow Keys / WASD: Move",
+  "shelf": "Puzzle & Logic",
+  "tags": ["games", "arcade", "retro", "dodge"],
+  "badge": "New",
+  "creator": "Andy Balaam"
+}

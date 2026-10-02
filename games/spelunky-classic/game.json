@@ -1,0 +1,9 @@
+{
+  "name": "Spelunky Classic HD",
+  "desc": "The legendary 2009 roguelike platformer by Derek Yu, remastered in HD and compiled to WebAssembly. Explore procedurally generated caves full of traps, treasure, snakes and shops - every run is different, death is permanent.",
+  "controls": "Arrow Keys: Move / Climb / Enter doors / Z: Jump / X: Whip / Throw / C: Switch held item",
+  "shelf": "Arcade & Action",
+  "tags": ["games", "platformer", "roguelike", "retro"],
+  "badge": "New",
+  "creator": "yancharkin / Derek Yu"
+}
