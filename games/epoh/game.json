@@ -1,0 +1,9 @@
+{
+  "name": "EPOH",
+  "desc": "A turn-based hex strategy game of space colonization: at the end of the 21st century, settle a hostile earth-like planet. Ungarrison workers from your base, capture sectors, harvest resources and build a rover army in this open-source single-player demo.",
+  "controls": "Mouse: Select units, choose actions, move one tile per turn · End Turn button to resolve orders",
+  "shelf": "Strategy & Idle",
+  "tags": ["games", "strategy", "turn-based", "hex", "sci-fi", "singleplayer"],
+  "badge": "New",
+  "creator": "tautvilas"
+}

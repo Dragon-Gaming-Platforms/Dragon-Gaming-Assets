@@ -1,0 +1,9 @@
+{
+  "name": "Invincible Man",
+  "desc": "A one-button arena auto-battler from Kenta Cho's crisp-game-lib collection: you cannot be hurt, so fearlessly weave through swarms of enemies, touching them to build attack chains and rack up the score.",
+  "controls": "Tap / Click: Turn · Hold: Walk outward",
+  "shelf": "Arcade & Action",
+  "tags": ["games", "action", "one-button", "arcade", "score-attack"],
+  "badge": "New",
+  "creator": "abagames"
+}

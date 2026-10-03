@@ -1,0 +1,9 @@
+{
+  "name": "Consomaton",
+  "desc": "A cellular automaton programming puzzle from prolific shmup developer Kenta Cho: place evolution rules on a grid of cells and make the automaton consume target patterns across 20 built-in quizzes, then build your own in the editor.",
+  "controls": "Mouse: Place cells and rules · Menu buttons to run, pause and step the automaton",
+  "shelf": "Puzzle & Logic",
+  "tags": ["games", "puzzle", "cellular-automaton", "programming", "logic", "simulation"],
+  "badge": "New",
+  "creator": "abagames"
+}
