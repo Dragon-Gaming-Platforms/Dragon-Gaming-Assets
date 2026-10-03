@@ -1,0 +1,9 @@
+{
+  "name": "TIS-100",
+  "desc": "An open-source web port of the assembly programming puzzle game: rewrite corrupted segments of a mysterious 1980s computer by programming its nodes in a simplified assembly language. Solve signal routing and arithmetic puzzles across four segments.",
+  "controls": "Click node: Edit code · Type: Assembly instructions · Esc: Leave node · Run/Stop: Execute program",
+  "shelf": "Puzzle & Logic",
+  "tags": ["games", "puzzle", "programming", "assembly", "logic", "education", "zachlike"],
+  "badge": "New",
+  "creator": "phungj"
+}
