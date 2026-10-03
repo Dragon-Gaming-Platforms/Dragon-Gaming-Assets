@@ -1,0 +1,9 @@
+{
+  "name": "SURVIVOR",
+  "desc": "Scott Schiller's faithful browser remake of the 1983 Commodore 64 space arcade game Survivor: rotate your ship, shoot down the endless swarm of enemies and pick up energy pods to survive each wave.",
+  "controls": "Mouse / Arrow Keys: Rotate · Space / Click: Thrust & fire",
+  "shelf": "Arcade & Action",
+  "tags": ["games", "arcade", "remake", "c64", "retro", "shooter", "space"],
+  "badge": "New",
+  "creator": "Scott Schiller"
+}

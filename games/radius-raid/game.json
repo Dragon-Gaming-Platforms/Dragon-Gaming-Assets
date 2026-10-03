@@ -1,0 +1,9 @@
+{
+  "name": "Radius Raid",
+  "desc": "A space-themed shoot 'em up from js13k 2013: blast away unrelenting enemies with 13 enemy types, 5 powerups, parallax starfields, procedurally generated retro sound effects and locally stored stats.",
+  "controls": "Arrows / WASD: Move & aim · Space: Shoot · P: Pause",
+  "shelf": "Arcade & Action",
+  "tags": ["games", "arcade", "shooter", "space", "js13k", "retro"],
+  "badge": "New",
+  "creator": "Jack Rugile"
+}

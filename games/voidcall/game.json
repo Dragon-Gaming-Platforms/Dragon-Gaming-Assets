@@ -1,0 +1,9 @@
+{
+  "name": "Voidcall",
+  "desc": "A Real-Time Strategic Card Dueler: summon creatures in lane-based auto-battles, weigh every card's attack and health against its mana cost, and out-trade your rival across a dark fantasy void. js13k 2022 winner.",
+  "controls": "Mouse: Summon cards to lanes, drag units to rearrange",
+  "shelf": "Strategy & Idle",
+  "tags": ["games", "strategy", "cards", "auto-battler", "fantasy", "js13k"],
+  "badge": "New",
+  "creator": "phoboslab"
+}

@@ -1,0 +1,9 @@
+{
+  "name": "Server Survival",
+  "desc": "A 3D strategy game where you play as a cloud architect: build load balancers, caches, auto-scaling compute fleets and multi-region failover to survive escalating traffic, DDoS attacks and random outages. 25 campaign levels, survival and sandbox modes, 11 languages.",
+  "controls": "Mouse: Place and connect services, drag the camera · Click nodes to configure",
+  "shelf": "Strategy & Idle",
+  "tags": ["games", "strategy", "simulation", "tower-defense", "cloud", "education", "3d"],
+  "badge": "New",
+  "creator": "pshenok"
+}

@@ -1,0 +1,14 @@
+{
+  "name": "One Step Late",
+  "desc": "A daily puzzle with a twist: your shadow copies every move you make, one turn behind. Reach the goals while dodging your own delayed echo - and think several steps ahead.",
+  "controls": "Arrow Keys or WASD: Move / Mouse and touch also supported",
+  "shelf": "Puzzle & Logic",
+  "tags": [
+    "games",
+    "puzzle",
+    "logic",
+    "daily"
+  ],
+  "badge": "New",
+  "creator": "arkai"
+}

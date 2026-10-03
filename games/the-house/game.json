@@ -1,0 +1,9 @@
+{
+  "name": "The House",
+  "desc": "A eerie point-and-click escape adventure. Explore the rooms of a strange house, collect items, solve puzzles and find your way out. Atmospheric audio and hand-crafted pixel art rooms.",
+  "controls": "Mouse: Click to look around, interact and pick up items",
+  "shelf": "Puzzle & Logic",
+  "tags": ["games", "adventure", "escape", "point-and-click"],
+  "badge": "New",
+  "creator": "Artur Kot"
+}

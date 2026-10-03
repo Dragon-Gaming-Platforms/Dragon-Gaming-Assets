@@ -1,0 +1,9 @@
+{
+  "name": "A Dark Room",
+  "desc": "A minimalist text adventure that starts with stoking a fire in a dark room and slowly unfolds into a survival, settlement-building odyssey. The cult classic incremental game by Doublespeak Games.",
+  "controls": "Mouse: Click buttons and links / Some keyboard shortcuts in later stages",
+  "shelf": "Strategy & Idle",
+  "tags": ["games", "idle", "incremental", "text", "adventure"],
+  "badge": "New",
+  "creator": "Doublespeak Games"
+}

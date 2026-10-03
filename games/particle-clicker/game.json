@@ -1,0 +1,9 @@
+{
+  "name": "Particle Clicker",
+  "desc": "The CERN-made particle physics idle game. Click to collide particles, run experiments, hire researchers and staff, and upgrade your detector to unlock real discoveries from the history of high-energy physics.",
+  "controls": "Mouse: Click particles, buttons and upgrades",
+  "shelf": "Strategy & Idle",
+  "tags": ["games", "idle", "incremental", "science", "educational"],
+  "badge": "New",
+  "creator": "CERN Webfest"
+}

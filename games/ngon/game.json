@@ -1,0 +1,9 @@
+{
+  "name": "n-gon",
+  "desc": "A single-player arena shooter roguelite with realistic physics. Fight waves of mobs, collect tech and gun upgrades, and build wild synergistic combos - every run is different. Made with matter.js physics.",
+  "controls": "A / D: Move / W: Jump / Mouse: Aim / Left Click: Shoot / Right Click: Use tech / Q / E: Cycle weapons",
+  "shelf": "Arcade & Action",
+  "tags": ["games", "shooter", "roguelite", "physics", "arena"],
+  "badge": "New",
+  "creator": "landgreen"
+}

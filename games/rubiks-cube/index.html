@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html class="no-js">
+    <head>
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <title>Rubik's Cube</title>
+        <meta name="description" content="">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <link rel="stylesheet" href="bootstrap.min.css">
+        <link rel="stylesheet" href="static/main.css">
+        <script type="text/javascript" src="jquery-3.5.1.min.js"></script>
+        <script src="js/libs/ShaderLoader.min.js"></script>
+        <script type="module" src="js/index.js"></script>
+        <script data-src="js/shaders/fragment.js" data-name="shader" type='x-shader/x-fragment'></script>
+        <script data-src="js/shaders/vertex.js" data-name="shader" type='x-shader/x-vertex'></script>
+    </head>
+    <body class='container'>
+        <div class='row fill'>
+            <div class='col-md-5 fill'>
+                <h3>Rubik's Cube</h3>
+                <h5 class='text-muted'>A WebGL Rubik's Cube</h5>
+                <a href="https://github.com/tinnywang/rubiks-cube"><img src='static/GitHub-Mark-64px.png'></a>
+                <div class='controls'>
+                    <div>Click and drag with <span class='control'>left mouse</span> to rotate a layer</div>
+                    <div>Click and drag with <span class='control'>right mouse</span> to rotate the Rubik's Cube</div>
+                    <div><span class='control'>Space</span> for perspective view</div>
+                    <div><span class='control'>W</span> for front view</div>
+                    <div><span class='control'>A</span> for left view</div>
+                    <div><span class='control'>S</span> for back view</div>
+                    <div><span class='control'>D</span> for right view</div>
+                    <div><span class='control'>E</span> for top view</div>
+                    <div><span class='control'>Q</span> for bottom view</div>
+                </div>
+                <button id='scramble' type='button' class='btn btn-primary btn-lg'>Scramble</button>
+            </div>
+            <div class='col-md-7 fill'>
+                <canvas id='glcanvas'>
+            </div>
+        </div>
+    </body>
+</html>

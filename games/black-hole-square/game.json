@@ -1,0 +1,9 @@
+{
+  "name": "Black Hole Square",
+  "desc": "A minimal space-themed puzzle game from js13k 2021: on a 6x6 grid, tap squares to shunt them into your black hole. Arrows push, X-squares swap and neutron stars transform - clean the entire universe in as few moves as you can.",
+  "controls": "Mouse / Touch: Tap a square · Swipe left/right (or wheel): next / previous puzzle",
+  "shelf": "Puzzle & Logic",
+  "tags": ["games", "puzzle", "grid", "js13k", "space", "minimal"],
+  "badge": "New",
+  "creator": "Quinten"
+}

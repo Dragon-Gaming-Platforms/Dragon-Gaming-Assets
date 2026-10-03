@@ -1,0 +1,14 @@
+{
+  "name": "Echo Sounding",
+  "desc": "A daily sonar puzzle. Ping a hidden grid and study the echoes that come back - each ping reveals clues about the shapes below. Deduce the full hidden layout in as few pings as you can.",
+  "controls": "Mouse / Touch: Place pings / Keyboard also supported",
+  "shelf": "Puzzle & Logic",
+  "tags": [
+    "games",
+    "puzzle",
+    "logic",
+    "daily"
+  ],
+  "badge": "New",
+  "creator": "arkai"
+}

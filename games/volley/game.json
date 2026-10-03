@@ -1,0 +1,9 @@
+{
+  "name": "Volley",
+  "desc": "A two-player beach volleyball duel on one keyboard: jump, spike and outplay your friend across the net. Simple physics, instant fun - made with Phaser.",
+  "controls": "Left player: A/D move, W jump · Right player: Arrow keys",
+  "shelf": "Sports & Racing",
+  "tags": ["games", "sports", "volleyball", "two-player", "hotseat", "phaser"],
+  "badge": "New",
+  "creator": "Mohamad Mohebifar"
+}

@@ -1,0 +1,9 @@
+{
+  "name": "Racer",
+  "desc": "An OutRun-style pseudo-3D racing game: drive as fast as you can along a challenging road with curves, hills and rival traffic, complete laps against the clock and enjoy the retro synth soundtrack.",
+  "controls": "Arrows / WASD: Steer, accelerate & brake · M: Mute music",
+  "shelf": "Sports & Racing",
+  "tags": ["games", "sports", "racing", "retro", "pseudo-3d", "canvas"],
+  "badge": "New",
+  "creator": "Jake Gordon"
+}

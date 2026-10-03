@@ -1,0 +1,9 @@
+{
+  "name": "Bombergirl",
+  "desc": "A polished HTML5 remake of the classic Bomberman formula. Blow up walls, grab power-ups and out-blast AI bots - solo or with a friend on the same keyboard.",
+  "controls": "Player 1: W A S D to move, Space to place bomb / Player 2: Arrow keys to move, Enter to place bomb",
+  "shelf": "Arcade & Action",
+  "tags": ["games", "bomberman", "arcade", "retro", "two-player"],
+  "badge": "New",
+  "creator": "Matous Skala"
+}

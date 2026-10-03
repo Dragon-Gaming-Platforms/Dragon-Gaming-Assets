@@ -1,0 +1,9 @@
+{
+  "name": "Rapid Dominance",
+  "desc": "A fast turn-based strategy game built with Phaser 3. Capture territories, outmaneuver the AI and dominate the map before your opponents do.",
+  "controls": "Mouse: Click to select and move units / R: Restart",
+  "shelf": "Strategy & Idle",
+  "tags": ["games", "strategy", "turn-based", "tiles"],
+  "badge": "New",
+  "creator": "wenta"
+}

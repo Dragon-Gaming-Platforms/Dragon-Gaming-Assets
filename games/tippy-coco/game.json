@@ -1,0 +1,9 @@
+{
+  "name": "Tippy Coco",
+  "desc": "A frantic slime-volleyball showdown for one or two players: dive, jump, grow and shrink your blob to keep the ball off your sand. Features bundled AI opponents, gamepad support and head-to-head play on one keyboard.",
+  "controls": "Player 1: A/D move, W jump, Q/E grow/shrink · Player 2: Arrows + O/P · Space: Launch · Gamepads supported",
+  "shelf": "Sports & Racing",
+  "tags": ["games", "sports", "volleyball", "two-player", "hotseat", "slime", "gamepad"],
+  "badge": "New",
+  "creator": "Chris Coyne"
+}
