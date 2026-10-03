@@ -1,0 +1,9 @@
+{
+  "name": "Arcomage HD",
+  "desc": "A free, open-source remaster of Arcomage, the classic card game from Might & Magic VII: build your tower, tear down your rival's, or hoard resources to win. Play vs AI in 16 languages - offline-capable PWA build.",
+  "controls": "Mouse: Play cards, end turn",
+  "shelf": "Strategy & Idle",
+  "tags": ["games", "strategy", "cards", "remake", "fantasy", "pwa"],
+  "badge": "New",
+  "creator": "arcomage"
+}

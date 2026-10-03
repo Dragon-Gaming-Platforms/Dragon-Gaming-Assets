@@ -1,0 +1,9 @@
+{
+  "name": "Datacenter Survival",
+  "desc": "The physical-layer sister game to Server Survival: design and run a whole datacenter - power chains, UPS units, heat, airflow, cooling and PUE. Keep the racks humming through heat waves, power cuts and equipment failures.",
+  "controls": "Mouse: Place and connect equipment, drag the camera · Click machines to inspect",
+  "shelf": "Strategy & Idle",
+  "tags": ["games", "strategy", "simulation", "datacenter", "education", "3d"],
+  "badge": "New",
+  "creator": "pshenok"
+}

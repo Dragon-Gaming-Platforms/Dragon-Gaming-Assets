@@ -1,0 +1,9 @@
+{
+  "name": "Svelte Space",
+  "desc": "A tower-defense clicker built entirely with Svelte 5 - no canvas. Defend your throne from waves of enemies: click for loot, place and upgrade towers, and watch SVG projectiles fly. 4th place in SvelteHack 2024's Wizzbangery Wizard category.",
+  "controls": "Mouse: Click enemies for loot, place & upgrade towers",
+  "shelf": "Strategy & Idle",
+  "tags": ["games", "strategy", "tower-defense", "clicker", "svelte", "svg"],
+  "badge": "New",
+  "creator": "baterson"
+}

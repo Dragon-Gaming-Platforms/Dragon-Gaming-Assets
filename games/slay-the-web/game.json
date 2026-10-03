@@ -1,0 +1,9 @@
+{
+  "name": "Slay the Web",
+  "desc": "A single-player deck-building roguelike card crawl for the web, inspired by Slay the Spire: fight through a dungeon map, build your deck from weird and wonderful cards, and slay the web itself.",
+  "controls": "Mouse: Play cards, pick map routes, manage your deck",
+  "shelf": "Strategy & Idle",
+  "tags": ["games", "strategy", "cards", "deckbuilder", "roguelike", "dungeon"],
+  "badge": "New",
+  "creator": "oskarrough"
+}
