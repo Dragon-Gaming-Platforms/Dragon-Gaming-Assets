@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <link rel="icon" type="image/x-icon" href="images/site/favicon.ico">
+    <link href="bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" type="text/css" href="index.css">
+    <title>Tippy Coco</title>
+  </head>
+  <body>
+    <nav class="navbar navbar-expand-sm">
+      <div class="container-fluid">
+        <a class="navbar-brand" href="#">
+          <img src="images/site/nav-branding.png" alt="Tippy Coco" width="160" height="36" class="d-inline-block align-text-top">
+        </a>
+        <ul class="navbar-nav">
+          <li class="nav-item"><a class="nav-link active" aria-current="page" href="#">Play</a></li>
+          <li class="nav-item"><a class="nav-link" href="#instructions">Controls</a></li>
+        </ul>
+      </div>
+    </nav>
+
+    <div class="world-container">
+      <div id="game-canvas-wrapper"></div>
+    </div>
+
+    <div class="container" id="page-container">
+      <div class="row">
+        <div class="col-12">
+
+          <div id="game-load-wrapper">
+            <div style="display:none;" class="phone-warning">
+              &#9888;<br>
+              <b>Tippy Coco</b> is for computers, not phones or tablets. An <b>iPad</b> works with one of
+              those folding keyboards, but that's it. It will not play on phones.
+            </div>
+
+            <div class="intro-note">
+              <div style="text-align:center">
+                <img src="images/site/cover.png" class="img-fluid">
+                <div id="load-stats" style="text-align:center;font-size:0.9em;margin-top:10px;">
+                  Waking the beasts...
+                </div>
+                <div id="launch-instructions" style="text-align:center;font-size:1.1em;height:20px;margin-top:20px;">
+                  Game is ready. Press <b>[spacebar]</b> to launch.
+                </div>
+              </div>
+            </div>
+
+            <div id="instructions" style="margin-top:40px;">
+              <h4>Keyboard</h4>
+              <p>
+                Basic moves are left, right, and jump. You can also grow or shrink your character with the keys alongside
+                your jump key. For example, Q and E below.
+              </p>
+              <div style="max-width:800px;">
+                <img src="images/site/keyboard-layout.png" class="img-fluid">
+              </div>
+              <p>
+                If you're playing solo, you can use either side of the keyboard, or your arrow keys.
+              </p>
+              <h4>Gamepad support</h4>
+              <p>
+                Playstation and Xbox controllers both work! This is 1000x better for head-to-head, so you can sit back and not cram over a keyboard.
+              </p>
+              <p>
+                <a href="#no" id="btn-erase-storage" class="btn btn-secondary btn-sm">erase your local stats</a>
+              </p>
+              <p>
+                Tippy Coco is a free, open-source game by
+                <a href="https://chriscoyne.com">Chris Coyne</a> &mdash;
+                <a href="https://github.com/malgorithms/tippycoco">source code</a>.
+                Inspired by <b>Slime Volleyball</b>, a 1999 Java applet by Daniel Wedge &amp; Quin Pendragon.
+                Music by Christian Rudder of <a href="https://en.wikipedia.org/wiki/Bishop_Allen">Bishop Allen</a>.
+              </p>
+            </div>
+
+        </div>
+      </div>
+    </div>
+  </div>
+
+    <script src="bundle.js"></script>
+  </body>
+</html>
