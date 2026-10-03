@@ -1,0 +1,9 @@
+{
+  "name": "ReQbert",
+  "desc": "A faithful modern remake of the 1982 arcade classic Q*bert: hop on cubes to flip their color, dodge Coily and friends, and grab floating discs for a ride back to the top.",
+  "controls": "Mouse / Touch: Click a square to hop",
+  "shelf": "Arcade & Action",
+  "tags": ["games", "arcade", "remake", "qbert", "retro", "isometric"],
+  "badge": "New",
+  "creator": "leonicolas"
+}

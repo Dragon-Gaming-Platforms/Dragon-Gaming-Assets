@@ -1,0 +1,9 @@
+{
+  "name": "Bobby",
+  "desc": "A grid-based puzzle game in French: collect all the coins and reach the exit. Rocks block you, conveyor belts push you, turnstiles rotate, buttons wear out and ice makes you slide. 40 hand-made levels with keyboard, mouse and touch controls.",
+  "controls": "Arrows / WASD (ZQSD): Move · Mouse / touch: on-screen joystick · R: Retry level",
+  "shelf": "Puzzle & Logic",
+  "tags": ["games", "puzzle", "grid", "levels", "sokoban-like", "french"],
+  "badge": "New",
+  "creator": "yannicka"
+}
