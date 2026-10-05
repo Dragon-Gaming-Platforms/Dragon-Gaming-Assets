@@ -198,3 +198,5 @@ never invent a license.
 | Invincible Man | `games/invincible-man/` | abagames ([github.com/abagames/crisp-game-lib-11-games](https://github.com/abagames/crisp-game-lib-11-games)) | MIT; game main.js + harness vendored with crisp-game-lib@1.1.1 bundle and sounds-some-sounds@1.0.4 audio library (both MIT, abagames) | 2026-10-03 |
 | Magnet Blocks | `games/magnet-blocks/` | abagames ([github.com/abagames/crisp-game-lib-11-games](https://github.com/abagames/crisp-game-lib-11-games)) | MIT; game main.js + harness vendored with crisp-game-lib@1.1.1 bundle and sounds-some-sounds@1.0.4 audio library (both MIT, abagames) | 2026-10-03 |
 | RB Drive | `games/rb-drive/` | abagames ([github.com/abagames/crisp-game-lib-11-games](https://github.com/abagames/crisp-game-lib-11-games)) | MIT; game main.js + harness vendored with crisp-game-lib@1.1.1 bundle and sounds-some-sounds@1.0.4 audio library (both MIT, abagames) | 2026-10-03 |
+| Echoed Path | `games/Echoed-Path/` | | Free web game 
+| 2026 |
