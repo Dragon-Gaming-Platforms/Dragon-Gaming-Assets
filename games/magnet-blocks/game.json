@@ -1,0 +1,9 @@
+{
+  "name": "Magnet Blocks",
+  "desc": "A minimalist physics puzzler from Kenta Cho's crisp-game-lib collection: drag to place magnets and pull the drifting blocks onto their goal markers using attraction, repulsion and momentum.",
+  "controls": "Mouse / Touch: Drag to place magnets",
+  "shelf": "Puzzle & Logic",
+  "tags": ["games", "puzzle", "physics", "magnets", "logic", "minimalist"],
+  "badge": "New",
+  "creator": "abagames"
+}

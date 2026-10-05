@@ -1,0 +1,9 @@
+{
+  "name": "RB Drive",
+  "desc": "A snappy one-button lane-changing racer from Kenta Cho's crisp-game-lib collection: tap to switch lanes, thread your roadster through endless traffic and push your distance record higher.",
+  "controls": "Tap / Click: Change lane",
+  "shelf": "Sports & Racing",
+  "tags": ["games", "racing", "driving", "one-button", "arcade", "endless"],
+  "badge": "New",
+  "creator": "abagames"
+}
