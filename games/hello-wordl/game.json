@@ -1,0 +1,9 @@
+{
+  "name": "hello wordl",
+  "desc": "A slick open-source Wordle variant with a twist: choose your word length from 4 to 11 letters and play unlimited puzzles. The definitive word-guessing sandbox, fully offline.",
+  "controls": "Keyboard: Type letters · Enter: Submit guess",
+  "shelf": "Puzzle & Logic",
+  "tags": ["games", "puzzle", "words", "wordle", "daily", "vocabulary"],
+  "badge": "New",
+  "creator": "lynn"
+}
