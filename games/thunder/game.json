@@ -1,0 +1,9 @@
+{
+  "name": "Thunder",
+  "desc": "A one-button arena shooter from Kenta Cho: your ship fires automatically - tap to turn as enemies stream in from every side and chain kills for score in this crisp retro blaster.",
+  "controls": "Tap / Click / any key: Turn",
+  "shelf": "Arcade Classics",
+  "tags": ["games", "shooter", "one-button", "arcade", "retro"],
+  "badge": "New",
+  "creator": "abagames"
+}
