@@ -1,0 +1,9 @@
+{
+  "name": "Bomb Snake",
+  "desc": "The flagship game for PEEKPOKE, Kenta Cho's tiny retro fantasy console with only two commands: peek and poke. Steer your snake, drop bombs to clear your own trail, and outgrow the buzzer.",
+  "controls": "Arrows: Steer · X: Drop bomb",
+  "shelf": "Arcade Classics",
+  "tags": ["games", "arcade", "snake", "bombs", "retro", "fantasy-console"],
+  "badge": "New",
+  "creator": "abagames"
+}

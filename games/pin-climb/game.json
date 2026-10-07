@@ -1,0 +1,9 @@
+{
+  "name": "Pin Climb",
+  "desc": "A rope-physics climbing game from Kenta Cho: hold to stretch your cord to the next pin, release to latch on, and rack up altitude bonuses without swinging into oblivion.",
+  "controls": "Hold: Stretch cord · Release: Latch",
+  "shelf": "Arcade & Action",
+  "tags": ["games", "action", "physics", "climbing", "one-button"],
+  "badge": "New",
+  "creator": "abagames"
+}
