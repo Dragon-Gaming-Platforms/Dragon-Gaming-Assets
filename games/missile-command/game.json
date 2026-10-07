@@ -1,0 +1,9 @@
+{
+  "name": "Missile Command",
+  "desc": "An open-source HTML5 recreation of Atari's 1980 classic: defend your cities from waves of incoming missiles with a limited stock of interceptors, chaining explosions and rationing ammo between waves.",
+  "controls": "Mouse: Aim · Click: Fire interceptor",
+  "shelf": "Arcade Classics",
+  "tags": ["games", "arcade", "shooter", "retro", "remake", "classic"],
+  "badge": "New",
+  "creator": "andymason"
+}
