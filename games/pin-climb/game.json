@@ -4,13 +4,7 @@
   "controls": "Hold: Stretch cord · Release: Latch",
   "image": "screenshots/1.gif",
   "shelf": "Arcade & Action",
-  "tags": [
-    "games",
-    "action",
-    "physics",
-    "climbing",
-    "one-button"
-  ],
+  "tags": ["games", "action", "physics", "climbing", "one-button"],
   "badge": "New",
   "creator": "abagames"
 }

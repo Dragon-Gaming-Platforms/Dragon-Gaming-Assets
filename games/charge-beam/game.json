@@ -4,13 +4,7 @@
   "controls": "Tap: Quick shot · Hold: Charge · Release: Fire beam",
   "image": "screenshots/1.gif",
   "shelf": "Arcade & Action",
-  "tags": [
-    "games",
-    "shooter",
-    "action",
-    "one-button",
-    "pixel"
-  ],
+  "tags": ["games", "shooter", "action", "one-button", "pixel"],
   "badge": "New",
   "creator": "abagames"
 }

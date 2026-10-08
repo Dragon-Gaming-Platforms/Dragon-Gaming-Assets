@@ -4,14 +4,7 @@
   "controls": "Arrows: Move racket · X: Dash",
   "image": "screenshots/1.gif",
   "shelf": "Sports & Racing",
-  "tags": [
-    "games",
-    "sports",
-    "arcade",
-    "pong",
-    "racket",
-    "retro"
-  ],
+  "tags": ["games", "sports", "arcade", "pong", "racket", "retro"],
   "badge": "New",
   "creator": "abagames"
 }

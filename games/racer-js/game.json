@@ -3,12 +3,8 @@
   "desc": "A top-down racing tribute to the Lotus series on Amiga. Each race is randomly generated - accelerate, brake and steer through the track as fast as you can. Built for the 10K Apart contest.",
   "controls": "Arrow Up: Accelerate / Arrow Down: Brake / Arrow Left & Right: Steer",
   "shelf": "Sports & Racing",
-  "tags": [
-    "games",
-    "racing",
-    "retro",
-    "arcade"
-  ],
+  "tags": ["games", "racing", "retro", "arcade"],
   "badge": "New",
-  "creator": "Selim Arsever"
+  "creator": "Selim Arsever",
+  "image": "screenshots/1.jpg"
 }

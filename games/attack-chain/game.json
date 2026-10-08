@@ -4,13 +4,7 @@
   "controls": "Tap / Click: Select card",
   "image": "screenshots/1.gif",
   "shelf": "Strategy & Idle",
-  "tags": [
-    "games",
-    "strategy",
-    "cards",
-    "tactics",
-    "one-button"
-  ],
+  "tags": ["games", "strategy", "cards", "tactics", "one-button"],
   "badge": "New",
   "creator": "abagames"
 }

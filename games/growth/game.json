@@ -4,13 +4,7 @@
   "controls": "Hold: Grow · Release: Stop",
   "image": "screenshots/1.gif",
   "shelf": "Puzzle & Logic",
-  "tags": [
-    "games",
-    "puzzle",
-    "one-button",
-    "pixel",
-    "plants"
-  ],
+  "tags": ["games", "puzzle", "one-button", "pixel", "plants"],
   "badge": "New",
   "creator": "abagames"
 }

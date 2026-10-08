@@ -3,15 +3,8 @@
   "desc": "The legendary Zatacka curve duel: every player steers an ever-moving line that never stops turning. Cut off your friends, survive the gaps and the walls, and be the last line standing - up to six players on one keyboard.",
   "controls": "Each player picks two turning keys in the setup screen",
   "shelf": "Arcade & Action",
-  "tags": [
-    "games",
-    "arcade",
-    "multiplayer",
-    "local",
-    "party",
-    "retro",
-    "curve"
-  ],
+  "tags": ["games", "arcade", "multiplayer", "local", "party", "retro", "curve"],
   "badge": "New",
-  "creator": "stravid"
+  "creator": "stravid",
+  "image": "screenshots/1.jpg"
 }

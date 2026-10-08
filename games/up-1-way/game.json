@@ -4,13 +4,7 @@
   "controls": "Tap / Click / any key: Go up",
   "image": "screenshots/1.gif",
   "shelf": "Arcade & Action",
-  "tags": [
-    "games",
-    "action",
-    "climber",
-    "one-button",
-    "arcade"
-  ],
+  "tags": ["games", "action", "climber", "one-button", "arcade"],
   "badge": "New",
   "creator": "abagames"
 }

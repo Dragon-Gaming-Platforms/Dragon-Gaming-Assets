@@ -4,13 +4,7 @@
   "controls": "Hold: Speed up",
   "image": "screenshots/1.gif",
   "shelf": "Puzzle & Logic",
-  "tags": [
-    "games",
-    "puzzle",
-    "arcade",
-    "one-button",
-    "retro"
-  ],
+  "tags": ["games", "puzzle", "arcade", "one-button", "retro"],
   "badge": "New",
   "creator": "abagames"
 }

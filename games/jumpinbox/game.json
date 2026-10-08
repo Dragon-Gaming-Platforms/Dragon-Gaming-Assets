@@ -4,13 +4,7 @@
   "controls": "Tap / Click / any key: Jump",
   "image": "screenshots/1.gif",
   "shelf": "Arcade & Action",
-  "tags": [
-    "games",
-    "platformer",
-    "action",
-    "one-button",
-    "physics"
-  ],
+  "tags": ["games", "platformer", "action", "one-button", "physics"],
   "badge": "New",
   "creator": "abagames"
 }

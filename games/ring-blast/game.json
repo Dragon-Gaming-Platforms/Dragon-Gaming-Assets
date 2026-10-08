@@ -4,13 +4,7 @@
   "controls": "Slide / drag: Change angle and speed",
   "image": "screenshots/1.gif",
   "shelf": "Arcade & Action",
-  "tags": [
-    "games",
-    "action",
-    "arcade",
-    "artillery",
-    "one-button"
-  ],
+  "tags": ["games", "action", "arcade", "artillery", "one-button"],
   "badge": "New",
   "creator": "abagames"
 }

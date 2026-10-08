@@ -3,12 +3,8 @@
   "desc": "A daily rolling-cube puzzle. Roll the cube across the paper so its inked face prints marks only where they belong - every tilt leaves a print, so plan the path and the orientation together.",
   "controls": "Arrow Keys or WASD: Roll the cube / Mouse and touch also supported",
   "shelf": "Puzzle & Logic",
-  "tags": [
-    "games",
-    "puzzle",
-    "logic",
-    "daily"
-  ],
+  "tags": ["games", "puzzle", "logic", "daily"],
   "badge": "New",
-  "creator": "arkai"
+  "creator": "arkai",
+  "image": "screenshots/1.jpg"
 }

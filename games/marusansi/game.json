@@ -4,13 +4,7 @@
   "controls": "Tap / Click / arrows + X: Mark blocks; hold to chain",
   "image": "screenshots/1.gif",
   "shelf": "Puzzle & Logic",
-  "tags": [
-    "games",
-    "puzzle",
-    "match-3",
-    "arcade",
-    "blocks"
-  ],
+  "tags": ["games", "puzzle", "match-3", "arcade", "blocks"],
   "badge": "New",
   "creator": "abagames"
 }

@@ -4,14 +4,7 @@
   "controls": "Tap / Click / any key: Move",
   "image": "screenshots/1.gif",
   "shelf": "Arcade & Action",
-  "tags": [
-    "games",
-    "shooter",
-    "arcade",
-    "one-button",
-    "space",
-    "retro"
-  ],
+  "tags": ["games", "shooter", "arcade", "one-button", "space", "retro"],
   "badge": "New",
   "creator": "abagames"
 }

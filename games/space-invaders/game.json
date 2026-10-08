@@ -3,14 +3,8 @@
   "desc": "The 1978 arcade archetype in clean open-source JavaScript: march your laser cannon beneath the descending alien grid, pick off the invaders rank by rank, and dodge their ever-faster bombs wave after wave.",
   "controls": "Arrows: Move · Space: Fire",
   "shelf": "Arcade & Action",
-  "tags": [
-    "games",
-    "arcade",
-    "shooter",
-    "retro",
-    "classic",
-    "fixed-shooter"
-  ],
+  "tags": ["games", "arcade", "shooter", "retro", "classic", "fixed-shooter"],
   "badge": "New",
-  "creator": "tomwallace"
+  "creator": "tomwallace",
+  "image": "screenshots/1.jpg"
 }

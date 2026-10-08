@@ -4,13 +4,7 @@
   "controls": "Tap / Click / any key: Stretch the stick",
   "image": "screenshots/1.gif",
   "shelf": "Arcade & Action",
-  "tags": [
-    "games",
-    "action",
-    "arcade",
-    "one-button",
-    "food"
-  ],
+  "tags": ["games", "action", "arcade", "one-button", "food"],
   "badge": "New",
   "creator": "abagames"
 }

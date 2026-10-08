@@ -4,13 +4,7 @@
   "controls": "Tap / Drag: Move the keeper",
   "image": "screenshots/1.gif",
   "shelf": "Puzzle & Logic",
-  "tags": [
-    "games",
-    "action",
-    "puzzle",
-    "arcade",
-    "survival"
-  ],
+  "tags": ["games", "action", "puzzle", "arcade", "survival"],
   "badge": "New",
   "creator": "abagames"
 }

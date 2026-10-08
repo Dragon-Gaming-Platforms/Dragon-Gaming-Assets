@@ -4,13 +4,7 @@
   "controls": "Tap / Click / any key: Turn",
   "image": "screenshots/1.gif",
   "shelf": "Arcade & Action",
-  "tags": [
-    "games",
-    "action",
-    "runner",
-    "one-button",
-    "arcade"
-  ],
+  "tags": ["games", "action", "runner", "one-button", "arcade"],
   "badge": "New",
   "creator": "abagames"
 }

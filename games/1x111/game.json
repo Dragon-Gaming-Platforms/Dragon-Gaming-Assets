@@ -4,14 +4,7 @@
   "controls": "Any key / click / touch: The one button (hold and release sometimes matter)",
   "image": "screenshots/1.gif",
   "shelf": "Arcade & Action",
-  "tags": [
-    "games",
-    "action",
-    "minigames",
-    "one-button",
-    "wario-ware",
-    "arcade"
-  ],
+  "tags": ["games", "action", "minigames", "one-button", "wario-ware", "arcade"],
   "badge": "New",
   "creator": "abagames"
 }

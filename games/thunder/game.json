@@ -4,13 +4,7 @@
   "controls": "Tap / Click / any key: Turn",
   "image": "screenshots/1.gif",
   "shelf": "Arcade & Action",
-  "tags": [
-    "games",
-    "shooter",
-    "one-button",
-    "arcade",
-    "retro"
-  ],
+  "tags": ["games", "shooter", "one-button", "arcade", "retro"],
   "badge": "New",
   "creator": "abagames"
 }

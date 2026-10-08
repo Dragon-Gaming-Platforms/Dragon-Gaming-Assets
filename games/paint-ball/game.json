@@ -4,13 +4,7 @@
   "controls": "Tap / Click / any key: Throw",
   "image": "screenshots/1.gif",
   "shelf": "Arcade & Action",
-  "tags": [
-    "games",
-    "action",
-    "arcade",
-    "one-button",
-    "paint"
-  ],
+  "tags": ["games", "action", "arcade", "one-button", "paint"],
   "badge": "New",
   "creator": "abagames"
 }

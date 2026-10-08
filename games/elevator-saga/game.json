@@ -5,5 +5,6 @@
   "shelf": "Puzzle & Logic",
   "tags": ["games", "programming", "puzzle", "simulation", "educational"],
   "badge": "New",
-  "creator": "Magnus Wolffelt"
+  "creator": "Magnus Wolffelt",
+  "image": "screenshots/1.png"
 }

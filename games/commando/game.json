@@ -3,15 +3,8 @@
   "desc": "A nostalgic HTML5 canvas remake of the Commodore 64 classic Commando: run and gun through enemy territory, mow down troopers, snipers and bikers, rescue prisoners of war and blast your way to the exit. Built with CoffeeScript on melonJS.",
   "controls": "Arrows: Move · Space: Shoot · C: Throw grenade · Enter: Start / Confirm",
   "shelf": "Arcade & Action",
-  "tags": [
-    "games",
-    "shooter",
-    "run-and-gun",
-    "retro",
-    "arcade",
-    "remake",
-    "canvas"
-  ],
+  "tags": ["games", "shooter", "run-and-gun", "retro", "arcade", "remake", "canvas"],
   "badge": "New",
-  "creator": "CommandoJS contributors"
+  "creator": "CommandoJS contributors",
+  "image": "screenshots/1.jpg"
 }

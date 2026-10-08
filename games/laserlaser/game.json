@@ -4,14 +4,7 @@
   "controls": "Arrows: Aim · X: Rotate mirror",
   "image": "screenshots/1.gif",
   "shelf": "Puzzle & Logic",
-  "tags": [
-    "games",
-    "puzzle",
-    "lasers",
-    "mirrors",
-    "retro",
-    "fantasy-console"
-  ],
+  "tags": ["games", "puzzle", "lasers", "mirrors", "retro", "fantasy-console"],
   "badge": "New",
   "creator": "abagames"
 }

@@ -4,13 +4,7 @@
   "controls": "Hold: Stretch the snake",
   "image": "screenshots/1.gif",
   "shelf": "Arcade & Action",
-  "tags": [
-    "games",
-    "action",
-    "arcade",
-    "snake",
-    "pixel-art"
-  ],
+  "tags": ["games", "action", "arcade", "snake", "pixel-art"],
   "badge": "New",
   "creator": "abagames"
 }

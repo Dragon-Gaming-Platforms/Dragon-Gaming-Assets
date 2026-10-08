@@ -4,13 +4,7 @@
   "controls": "Tap / Click / any key: Cut a log",
   "image": "screenshots/1.gif",
   "shelf": "Arcade & Action",
-  "tags": [
-    "games",
-    "action",
-    "arcade",
-    "timing",
-    "lumberjack"
-  ],
+  "tags": ["games", "action", "arcade", "timing", "lumberjack"],
   "badge": "New",
   "creator": "abagames"
 }

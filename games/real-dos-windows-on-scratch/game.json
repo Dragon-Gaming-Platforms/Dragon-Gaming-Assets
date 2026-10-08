@@ -3,7 +3,7 @@
   "desc": "A mostly functional 8086 emulator running in scratch, compiled by turbowarp",
   "controls": "Run windows by going to the C drive (C: + enter), then cd windows, then win.",
   "shelf": "Emulators",
-  "tags": ["emulator","os","system", "scratch"],
+  "tags": ["emulator", "os", "system", "scratch"],
   "badge": "OS",
   "creator": "bilman66"
 }

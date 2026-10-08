@@ -4,13 +4,7 @@
   "controls": "Hold: Turn rainy (drop rain on people)",
   "image": "screenshots/1.gif",
   "shelf": "Arcade & Action",
-  "tags": [
-    "games",
-    "action",
-    "arcade",
-    "weather",
-    "casual"
-  ],
+  "tags": ["games", "action", "arcade", "weather", "casual"],
   "badge": "New",
   "creator": "abagames"
 }

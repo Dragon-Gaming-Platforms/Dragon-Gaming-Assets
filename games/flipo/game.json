@@ -4,13 +4,7 @@
   "controls": "Tap / Click / any key: Flip gravity",
   "image": "screenshots/1.gif",
   "shelf": "Arcade & Action",
-  "tags": [
-    "games",
-    "platformer",
-    "action",
-    "one-button",
-    "gravity"
-  ],
+  "tags": ["games", "platformer", "action", "one-button", "gravity"],
   "badge": "New",
   "creator": "abagames"
 }

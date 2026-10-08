@@ -4,13 +4,7 @@
   "controls": "Arrows: Steer the bee",
   "image": "screenshots/1.gif",
   "shelf": "Arcade & Action",
-  "tags": [
-    "games",
-    "arcade",
-    "retro",
-    "fantasy-console",
-    "dodge"
-  ],
+  "tags": ["games", "arcade", "retro", "fantasy-console", "dodge"],
   "badge": "New",
   "creator": "abagames"
 }

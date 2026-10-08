@@ -4,13 +4,7 @@
   "controls": "Tap / Click: Pull out a card",
   "image": "screenshots/1.gif",
   "shelf": "Strategy & Idle",
-  "tags": [
-    "games",
-    "cards",
-    "puzzle",
-    "strategy",
-    "one-button"
-  ],
+  "tags": ["games", "cards", "puzzle", "strategy", "one-button"],
   "badge": "New",
   "creator": "abagames"
 }
