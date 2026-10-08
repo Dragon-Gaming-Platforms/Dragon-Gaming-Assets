@@ -2,8 +2,15 @@
   "name": "Clock Turret",
   "desc": "A one-button turret defense from Kenta Cho: hold to stop the rotating cannon and shoot, release to keep spinning - time your stops to snipe the incoming swarm.",
   "controls": "Hold: Stop and shoot · Release: Rotate",
+  "image": "screenshots/1.gif",
   "shelf": "Arcade & Action",
-  "tags": ["games", "action", "shooter", "one-button", "arcade"],
+  "tags": [
+    "games",
+    "action",
+    "shooter",
+    "one-button",
+    "arcade"
+  ],
   "badge": "New",
   "creator": "abagames"
 }

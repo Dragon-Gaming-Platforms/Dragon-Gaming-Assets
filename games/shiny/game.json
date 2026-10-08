@@ -1,0 +1,16 @@
+{
+  "name": "Shiny",
+  "desc": "A weather-wielding arcade toy from Kenta Cho: drift your cloud between rainy and shiny moods and drop soft or heavy rain on the humans scurrying below.",
+  "controls": "Hold: Turn rainy (drop rain on people)",
+  "image": "screenshots/1.gif",
+  "shelf": "Arcade & Action",
+  "tags": [
+    "games",
+    "action",
+    "arcade",
+    "weather",
+    "casual"
+  ],
+  "badge": "New",
+  "creator": "abagames"
+}

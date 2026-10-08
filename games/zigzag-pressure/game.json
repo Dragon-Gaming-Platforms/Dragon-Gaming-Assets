@@ -2,8 +2,15 @@
   "name": "Zig-Zag Pressure",
   "desc": "A hypnotic one-button zigzag runner from Kenta Cho: tap to turn, trace the winding path without overshooting, and keep your nerve as the speed mounts.",
   "controls": "Tap / Click / any key: Turn",
+  "image": "screenshots/1.gif",
   "shelf": "Arcade & Action",
-  "tags": ["games", "action", "runner", "one-button", "arcade"],
+  "tags": [
+    "games",
+    "action",
+    "runner",
+    "one-button",
+    "arcade"
+  ],
   "badge": "New",
   "creator": "abagames"
 }

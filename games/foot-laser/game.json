@@ -2,8 +2,15 @@
   "name": "Foot Laser",
   "desc": "A laser-footed vertical climber from Kenta Cho: jump, double jump and descend between platforms while your feet blast everything beneath you.",
   "controls": "Tap / Click / any key: Jump · Double tap: Double jump · Hold: Descend",
+  "image": "screenshots/1.gif",
   "shelf": "Arcade & Action",
-  "tags": ["games", "platformer", "action", "shooter", "one-button"],
+  "tags": [
+    "games",
+    "platformer",
+    "action",
+    "shooter",
+    "one-button"
+  ],
   "badge": "New",
   "creator": "abagames"
 }

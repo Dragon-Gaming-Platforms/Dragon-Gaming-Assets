@@ -1,0 +1,16 @@
+{
+  "name": "Banebox",
+  "desc": "A tiny PEEKPOKE console game by Kenta Cho: leap across descending floors, shoot the boxes in your way and climb as far as you can.",
+  "controls": "Arrows / buttons: Move + jump; Z / A: Shoot",
+  "image": "screenshots/1.gif",
+  "shelf": "Arcade & Action",
+  "tags": [
+    "games",
+    "action",
+    "arcade",
+    "platformer",
+    "8-bit"
+  ],
+  "badge": "New",
+  "creator": "abagames"
+}

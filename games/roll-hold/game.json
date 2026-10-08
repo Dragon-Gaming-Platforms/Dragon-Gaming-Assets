@@ -2,8 +2,15 @@
   "name": "Roll Hold",
   "desc": "A precision one-button roller from Kenta Cho: hold to lock your rolling angle, release to roll, and climb the ledges without overshooting into the void.",
   "controls": "Hold: Hold an angle · Release: Roll",
+  "image": "screenshots/1.gif",
   "shelf": "Arcade & Action",
-  "tags": ["games", "action", "arcade", "one-button", "precision"],
+  "tags": [
+    "games",
+    "action",
+    "arcade",
+    "one-button",
+    "precision"
+  ],
   "badge": "New",
   "creator": "abagames"
 }

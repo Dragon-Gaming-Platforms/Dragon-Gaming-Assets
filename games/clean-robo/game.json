@@ -2,8 +2,15 @@
   "name": "Clean Robo",
   "desc": "A one-button robot janitor arcade game from Kenta Cho: hold to speed up and sweep every tile of the floor clean while hazards roam - momentum is your only steering.",
   "controls": "Hold: Speed up",
+  "image": "screenshots/1.gif",
   "shelf": "Puzzle & Logic",
-  "tags": ["games", "puzzle", "arcade", "one-button", "retro"],
+  "tags": [
+    "games",
+    "puzzle",
+    "arcade",
+    "one-button",
+    "retro"
+  ],
   "badge": "New",
   "creator": "abagames"
 }

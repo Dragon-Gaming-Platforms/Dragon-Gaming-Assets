@@ -1,0 +1,16 @@
+{
+  "name": "Marusansi",
+  "desc": "A falling-block match puzzle from Kenta Cho: rows of colored blocks press up from below - mark horizontal and vertical runs of three or more to clear them before the stack reaches the top.",
+  "controls": "Tap / Click / arrows + X: Mark blocks; hold to chain",
+  "image": "screenshots/1.gif",
+  "shelf": "Puzzle & Logic",
+  "tags": [
+    "games",
+    "puzzle",
+    "match-3",
+    "arcade",
+    "blocks"
+  ],
+  "badge": "New",
+  "creator": "abagames"
+}
