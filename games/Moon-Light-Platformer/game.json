@@ -1,0 +1,9 @@
+{
+  "name": "Moon Light Platformer",
+  "desc": "A pixelated platformer game",
+  "controls": "WASD",
+  "shelf": "Arcade & Action",
+  "tags": ["games", "platformer"],
+  "badge": "New",
+  "creator": "Hollow_Song"
+}
