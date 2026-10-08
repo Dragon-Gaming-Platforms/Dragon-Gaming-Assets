@@ -1,17 +1,9 @@
 {
   "name": "Submersible",
   "desc": "A pixelated underwater adventure game",
-  "controls": "[W][A][S][D] - movement
-[mouse] - aim/use tool
-[E] - view inventory
-[L] - toggle light
-[P] - add waypoint
-[I] - toggle waypoint visibility
-[M] - map
-[X] - delete (for hovered objects)
-",
+  "controls": "WASD - movement mouse - aim/use tool E - view inventory L - toggle light P - add waypoint I - toggle waypoint visibility  M - map X - delete",
   "shelf": "Arcade & Action",
   "tags": ["games", "adventure"],
   "badge": "New",
-  "creator": "Hollow_Song"
+  "creator": ""
 }
