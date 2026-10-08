@@ -2,8 +2,17 @@
   "name": "Q1K3",
   "desc": "A micro Quake in 13KB of JavaScript: full 3D first-person shooting with five weapons, six enemy types, physics, particles and two sprawling levels. Second place and Community Choice winner of js13k 2021.",
   "controls": "WASD: Move · Mouse: Look · Click: Shoot · Space: Jump · 1-5: Weapons",
-  "shelf": "Arcade Classics",
-  "tags": ["games", "fps", "shooter", "3d", "retro", "quake", "js13k", "webgl"],
+  "shelf": "Arcade & Action",
+  "tags": [
+    "games",
+    "fps",
+    "shooter",
+    "3d",
+    "retro",
+    "quake",
+    "js13k",
+    "webgl"
+  ],
   "badge": "New",
   "creator": "phoboslab"
 }

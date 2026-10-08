@@ -2,8 +2,15 @@
   "name": "E.T. Demake",
   "desc": "A faithful HTML5 recreation of the infamous 1982 Atari 2600 classic E.T.: guide the stranded alien through pits and forests, collect the three phone parts, dodge the scientist and FBI agent, and phone home before your energy runs out.",
   "controls": "Arrows / WASD: Move · Space: Action",
-  "shelf": "Arcade Classics",
-  "tags": ["games", "retro", "atari", "arcade", "remake", "classic"],
+  "shelf": "Arcade & Action",
+  "tags": [
+    "games",
+    "retro",
+    "atari",
+    "arcade",
+    "remake",
+    "classic"
+  ],
   "badge": "New",
   "creator": "FranciscoG"
 }
