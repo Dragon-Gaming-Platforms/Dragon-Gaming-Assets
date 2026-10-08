@@ -1,0 +1,9 @@
+{
+  "name": "GUARDIANS OF THE HOLLOW",
+  "desc": "A stickman adventure game",
+  "controls": "WASD to move, 1 to swap to stickman and 2 to swap to spider",
+  "shelf": "Arcade & Action",
+  "tags": ["games", "adventure"],
+  "badge": "New",
+  "creator": "Hollow_Song"
+}
