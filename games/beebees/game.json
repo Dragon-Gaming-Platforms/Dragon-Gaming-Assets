@@ -1,0 +1,9 @@
+{
+  "name": "Bee Bees",
+  "desc": "A nectar-gathering arcade game from Kenta Cho's PEEKPOKE fantasy console: guide your bee between flowers, dodge the hornets and keep the hive stocked.",
+  "controls": "Arrows: Steer the bee",
+  "shelf": "Arcade Classics",
+  "tags": ["games", "arcade", "retro", "fantasy-console", "dodge"],
+  "badge": "New",
+  "creator": "abagames"
+}

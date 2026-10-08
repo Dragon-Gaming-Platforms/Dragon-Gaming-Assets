@@ -1,0 +1,9 @@
+{
+  "name": "Laser Laser",
+  "desc": "A mirror-bending laser puzzler from Kenta Cho's PEEKPOKE fantasy console: rotate the reflectors and route the twin beams to their targets before the clock runs out.",
+  "controls": "Arrows: Aim · X: Rotate mirror",
+  "shelf": "Puzzle & Logic",
+  "tags": ["games", "puzzle", "lasers", "mirrors", "retro", "fantasy-console"],
+  "badge": "New",
+  "creator": "abagames"
+}
