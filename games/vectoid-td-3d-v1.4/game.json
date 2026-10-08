@@ -1,0 +1,9 @@
+{
+  "name": "Vectoid TD 3D v1.4",
+  "desc": "Build and upgrade towers , prevent enemies from reaching the goal. Beat all waves to win.",
+  "controls": "0-9 - Buy tower hotkey. Space - Start wave / Fast forward hotkey",
+  "shelf": "Strategy & Idle",
+  "tags": ["games","strategy","tower-defense"],
+  "badge": "TD",
+  "creator": "ggenije"
+}
