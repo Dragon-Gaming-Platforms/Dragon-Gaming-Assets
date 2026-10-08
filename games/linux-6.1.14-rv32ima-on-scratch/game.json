@@ -1,0 +1,9 @@
+{
+  "name": "Linux 6.1.14-rv32ima on scratch",
+  "desc": "A real build of the Linux 6.1.14 kernel running in pure scratch code compiled by turbowarp into javascript",
+  "controls": "Run "cat readme.txt" for info using keyboard",
+  "shelf": "Emulators",
+  "tags": ["emulator","os","linux"],
+  "badge": "OS",
+  "creator": "bilman66alt"
+}
