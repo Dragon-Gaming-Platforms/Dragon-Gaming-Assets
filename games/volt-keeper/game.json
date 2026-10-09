@@ -2,6 +2,7 @@
   "name": "Volt Keeper",
   "desc": "A capacitor economy action-puzzle from Kenta Cho: your charge drains constantly and the only refill is standing in the path of sparks while grounded. Arrows and bumpers reshape the harvest terrain - read the field, ride the income, survive the waves.",
   "controls": "Tap / Drag: Move the keeper",
+  "image": "screenshots/1.gif",
   "shelf": "Puzzle & Logic",
   "tags": ["games", "action", "puzzle", "arcade", "survival"],
   "badge": "New",

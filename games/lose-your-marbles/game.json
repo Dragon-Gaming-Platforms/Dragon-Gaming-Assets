@@ -3,12 +3,8 @@
   "desc": "A web remake of the 1995 Sega puzzle hit. Line up falling marbles into rows of three or more before the stack overwhelms you - playable with mouse or touch.",
   "controls": "Mouse / Touch: Swipe to move marble columns",
   "shelf": "Puzzle & Logic",
-  "tags": [
-    "games",
-    "puzzle",
-    "match-3",
-    "retro"
-  ],
+  "tags": ["games", "puzzle", "match-3", "retro"],
   "badge": "New",
-  "creator": "eguneys"
+  "creator": "eguneys",
+  "image": "screenshots/1.jpg"
 }

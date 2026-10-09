@@ -2,6 +2,7 @@
   "name": "Card Q",
   "desc": "A one-button card puzzler from Kenta Cho: pull cards from the queue and slot them into the right lanes to clear hands and chain combos before the deck runs dry.",
   "controls": "Tap / Click: Pull out a card",
+  "image": "screenshots/1.gif",
   "shelf": "Strategy & Idle",
   "tags": ["games", "cards", "puzzle", "strategy", "one-button"],
   "badge": "New",

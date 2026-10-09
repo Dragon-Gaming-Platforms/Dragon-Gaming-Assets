@@ -1,0 +1,10 @@
+{
+  "name": "Ragdoll Hit",
+  "desc": "A physics brawler: swing, punch and kick your floppy ragdoll fighter through a gauntlet of opponents and environments.",
+  "controls": "Arrows / WASD: Move; Z / X / mouse: Attack",
+  "image": "screenshots/1.jpg",
+  "shelf": "Arcade & Action",
+  "tags": ["games", "action", "fighting", "physics", "unity"],
+  "badge": "New",
+  "creator": "Mark Janus"
+}

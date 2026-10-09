@@ -2,6 +2,7 @@
   "name": "Jumpinbox",
   "desc": "A one-button box-hopping platformer from Kenta Cho's crisp-game-lib collection, rendered in a sharp shape theme: tap to jump between stacked crates and ride them to the top.",
   "controls": "Tap / Click / any key: Jump",
+  "image": "screenshots/1.gif",
   "shelf": "Arcade & Action",
   "tags": ["games", "platformer", "action", "one-button", "physics"],
   "badge": "New",

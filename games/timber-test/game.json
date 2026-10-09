@@ -1,0 +1,10 @@
+{
+  "name": "Timber Test",
+  "desc": "A lumberjack timing game from Kenta Cho: tap to saw each log at just the right spot, stack up piece scores and finish every turn in profit.",
+  "controls": "Tap / Click / any key: Cut a log",
+  "image": "screenshots/1.gif",
+  "shelf": "Arcade & Action",
+  "tags": ["games", "action", "arcade", "timing", "lumberjack"],
+  "badge": "New",
+  "creator": "abagames"
+}

@@ -1,0 +1,10 @@
+{
+  "name": "Growth",
+  "desc": "A patient one-button growth puzzler from Kenta Cho in a chunky pixel theme: hold to grow your vine upward, release to stop, and reach the goal without brushing the hazards.",
+  "controls": "Hold: Grow · Release: Stop",
+  "image": "screenshots/1.gif",
+  "shelf": "Puzzle & Logic",
+  "tags": ["games", "puzzle", "one-button", "pixel", "plants"],
+  "badge": "New",
+  "creator": "abagames"
+}

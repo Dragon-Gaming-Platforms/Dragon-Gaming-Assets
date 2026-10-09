@@ -1,0 +1,10 @@
+{
+  "name": "Flip O",
+  "desc": "A gravity-flipping one-button platformer from Kenta Cho rendered in a sharp shape theme: tap to flip between floor and ceiling and thread the hazards.",
+  "controls": "Tap / Click / any key: Flip gravity",
+  "image": "screenshots/1.gif",
+  "shelf": "Arcade & Action",
+  "tags": ["games", "platformer", "action", "one-button", "gravity"],
+  "badge": "New",
+  "creator": "abagames"
+}

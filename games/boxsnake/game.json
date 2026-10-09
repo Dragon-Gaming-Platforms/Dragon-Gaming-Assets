@@ -1,0 +1,10 @@
+{
+  "name": "Box Snake",
+  "desc": "A stretchy pixel snake from Kenta Cho: hold to extend your boxy body across the grid, dodge the turret's fire and survive as long as you can.",
+  "controls": "Hold: Stretch the snake",
+  "image": "screenshots/1.gif",
+  "shelf": "Arcade & Action",
+  "tags": ["games", "action", "arcade", "snake", "pixel-art"],
+  "badge": "New",
+  "creator": "abagames"
+}

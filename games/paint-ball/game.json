@@ -1,0 +1,10 @@
+{
+  "name": "Paint Ball",
+  "desc": "A splash-happy one-button arcade game from Kenta Cho: throw paint balls to color the field and tag targets while dodging return fire.",
+  "controls": "Tap / Click / any key: Throw",
+  "image": "screenshots/1.gif",
+  "shelf": "Arcade & Action",
+  "tags": ["games", "action", "arcade", "one-button", "paint"],
+  "badge": "New",
+  "creator": "abagames"
+}

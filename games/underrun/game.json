@@ -2,8 +2,9 @@
   "name": "Underrun",
   "desc": "A twin-stick shooter in neon-lit, procedurally generated corporate office mazes. Hack your way through security drones and turrets, manage power and shields, and descend ever deeper. Winner of the js13k 2018 competition.",
   "controls": "WASD: Move · Mouse: Aim · Click: Shoot · E: Hack · Shift: Dash",
-  "shelf": "Arcade Classics",
+  "shelf": "Arcade & Action",
   "tags": ["games", "shooter", "twin-stick", "roguelike", "sci-fi", "cyberpunk", "js13k"],
   "badge": "New",
-  "creator": "phoboslab"
+  "creator": "phoboslab",
+  "image": "screenshots/1.jpg"
 }

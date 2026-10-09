@@ -2,6 +2,7 @@
   "name": "Attack Chain",
   "desc": "A one-button tactical card skirmish from Kenta Cho: tap to select cards and string attacks into chains, trading tempo and resources against a rival deck.",
   "controls": "Tap / Click: Select card",
+  "image": "screenshots/1.gif",
   "shelf": "Strategy & Idle",
   "tags": ["games", "strategy", "cards", "tactics", "one-button"],
   "badge": "New",

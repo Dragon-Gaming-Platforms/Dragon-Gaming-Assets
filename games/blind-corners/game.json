@@ -3,12 +3,8 @@
   "desc": "A daily optics puzzle. Fire laser beams into a dark box and watch where they exit - then deduce where the hidden mirrors are. Work out the whole layout from the beam paths alone.",
   "controls": "Mouse / Touch: Aim and fire beams / Keyboard also supported",
   "shelf": "Puzzle & Logic",
-  "tags": [
-    "games",
-    "puzzle",
-    "logic",
-    "daily"
-  ],
+  "tags": ["games", "puzzle", "logic", "daily"],
   "badge": "New",
-  "creator": "arkai"
+  "creator": "arkai",
+  "image": "screenshots/1.jpg"
 }

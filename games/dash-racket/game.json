@@ -2,6 +2,7 @@
   "name": "Dash Racket",
   "desc": "A pocket racket rally from Kenta Cho's PEEKPOKE fantasy console: dash your paddle to smash incoming balls, keep the rally alive and clear each wave before your buzzer sounds.",
   "controls": "Arrows: Move racket · X: Dash",
+  "image": "screenshots/1.gif",
   "shelf": "Sports & Racing",
   "tags": ["games", "sports", "arcade", "pong", "racket", "retro"],
   "badge": "New",

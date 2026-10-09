@@ -2,6 +2,7 @@
   "name": "Charge Beam",
   "desc": "A charge-and-release blaster from Kenta Cho rendered in a chunky pixel theme: tap to pepper shots, hold to charge a piercing beam, release to sweep the field.",
   "controls": "Tap: Quick shot · Hold: Charge · Release: Fire beam",
+  "image": "screenshots/1.gif",
   "shelf": "Arcade & Action",
   "tags": ["games", "shooter", "action", "one-button", "pixel"],
   "badge": "New",

@@ -1,0 +1,10 @@
+{
+  "name": "Dango",
+  "desc": "A one-button dango-skewering arcade game from Kenta Cho: stretch the stick to spear falling sweets and stack them into perfect skewers without dropping a treat.",
+  "controls": "Tap / Click / any key: Stretch the stick",
+  "image": "screenshots/1.gif",
+  "shelf": "Arcade & Action",
+  "tags": ["games", "action", "arcade", "one-button", "food"],
+  "badge": "New",
+  "creator": "abagames"
+}

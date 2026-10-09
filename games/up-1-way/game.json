@@ -2,6 +2,7 @@
   "name": "Up 1 Way",
   "desc": "A snappy one-button vertical climber from Kenta Cho: tap to hop upward, thread the ever-narrowing gaps and outrun the rising pressure.",
   "controls": "Tap / Click / any key: Go up",
+  "image": "screenshots/1.gif",
   "shelf": "Arcade & Action",
   "tags": ["games", "action", "climber", "one-button", "arcade"],
   "badge": "New",
