@@ -1,0 +1,10 @@
+{
+  "name": "Pair Flip",
+  "desc": "An Arkai memory game: flip two cards at a time and match every pair across three board sizes, from a gentle 4x3 warm-up to a twenty-four card test of nerve.",
+  "controls": "Tap / click / arrows + Enter: Flip cards",
+  "shelf": "Puzzle & Logic",
+  "tags": ["games", "puzzle", "memory", "cards", "family"],
+  "image": "screenshots/1.jpg",
+  "badge": "New",
+  "creator": "646826 (Arkai)"
+}

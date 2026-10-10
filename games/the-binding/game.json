@@ -1,0 +1,10 @@
+{
+  "name": "The Binding",
+  "desc": "A code-drawn homage to The Binding of Isaac by liyupi: a top-down roguelike dungeon crawl with twelve floors, thirteen bosses and fifty-five items - every graphic drawn by canvas, zero external assets.",
+  "controls": "WASD: Move; Arrows: Shoot tears",
+  "shelf": "Arcade & Action",
+  "tags": ["games", "action", "roguelike", "dungeon-crawler", "canvas"],
+  "image": "screenshots/1.png",
+  "badge": "New",
+  "creator": "liyupi"
+}

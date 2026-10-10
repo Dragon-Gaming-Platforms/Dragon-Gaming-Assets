@@ -1,0 +1,10 @@
+{
+  "name": "KickPunch",
+  "desc": "Team Kickpunch's Game Boy-styled beat 'em up: fight down Shaker St. through three levels of thugs to rescue Gloria and Dido from your old rival Arkian Joel.",
+  "controls": "Arrows: Move; Z / X: Kick and punch; Space / Enter: Confirm",
+  "shelf": "Arcade & Action",
+  "tags": ["games", "action", "beat-em-up", "retro", "game-boy"],
+  "image": "screenshots/1.jpg",
+  "badge": "New",
+  "creator": "kenamick (Team Kickpunch)"
+}

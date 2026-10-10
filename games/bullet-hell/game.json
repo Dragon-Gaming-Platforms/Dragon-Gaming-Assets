@@ -1,0 +1,10 @@
+{
+  "name": "Bullet Hell",
+  "desc": "A p5.js bullet hell by Amelia Clarke: thread your ship through dense bullet patterns, fire back, slow down time and bomb the screen clear when it all gets too close.",
+  "controls": "Arrows / WASD: Move; Z: Fire; X: Slow time; C: Bomb; P: Pause",
+  "shelf": "Arcade & Action",
+  "tags": ["games", "action", "shmup", "bullet-hell", "arcade"],
+  "image": "screenshots/1.jpg",
+  "badge": "New",
+  "creator": "selenebun (Amelia Clarke)"
+}
