@@ -1,0 +1,10 @@
+{
+  "name": "Pillars 3D",
+  "desc": "A pseudo-3D obstacle run from Kenta Cho: slide left and right to weave between oncoming pillars at ever-increasing speed.",
+  "controls": "Slide / drag: Move",
+  "shelf": "Arcade & Action",
+  "tags": ["games", "action", "arcade", "runner", "3d"],
+  "image": "screenshots/1.gif",
+  "badge": "New",
+  "creator": "abagames"
+}

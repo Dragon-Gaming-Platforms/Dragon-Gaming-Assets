@@ -1,0 +1,10 @@
+{
+  "name": "Chain Drift",
+  "desc": "A fixed-screen cabinet game from Kenta Cho: shove inert drift mines around an 8-way arena - but every mine you arm becomes the only thing that can kill you.",
+  "controls": "Arrows / WASD: Move; Z / X: Shove",
+  "shelf": "Arcade & Action",
+  "tags": ["games", "arcade", "retro", "single-screen", "one-button"],
+  "image": "screenshots/1.gif",
+  "badge": "New",
+  "creator": "abagames"
+}

@@ -1,0 +1,10 @@
+{
+  "name": "Thrust Strafe",
+  "desc": "A gravity-bound strafing shooter from Kenta Cho: hold to thrust upward, dodge the terrain and blast threats in your strafing path.",
+  "controls": "Hold: Thrust up",
+  "shelf": "Arcade & Action",
+  "tags": ["games", "action", "arcade", "shooter", "thrust"],
+  "image": "screenshots/1.gif",
+  "badge": "New",
+  "creator": "abagames"
+}

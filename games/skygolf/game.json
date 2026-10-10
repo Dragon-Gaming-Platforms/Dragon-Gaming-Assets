@@ -1,0 +1,10 @@
+{
+  "name": "Sky Golf",
+  "desc": "A minimalist golf puzzler from Kenta Cho: hold to charge your swing and putt the ball across floating platforms to reach each hole.",
+  "controls": "Hold: Adjust power; release to shoot",
+  "shelf": "Sports & Racing",
+  "tags": ["games", "sports", "golf", "physics", "one-button"],
+  "image": "screenshots/1.gif",
+  "badge": "New",
+  "creator": "abagames"
+}

@@ -1,0 +1,10 @@
+{
+  "name": "Juggling Chain",
+  "desc": "A chain-juggling arcade toy from Kenta Cho: tap to change direction and keep the linked balls swinging without dropping the chain.",
+  "controls": "Tap / Click / any key: Change direction",
+  "shelf": "Arcade & Action",
+  "tags": ["games", "action", "arcade", "physics", "one-button"],
+  "image": "screenshots/1.gif",
+  "badge": "New",
+  "creator": "abagames"
+}
