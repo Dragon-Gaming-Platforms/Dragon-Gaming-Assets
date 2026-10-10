@@ -1,0 +1,10 @@
+{
+  "name": "Comet Slash",
+  "desc": "A 1980-style fixed-screen arcade game from Kenta Cho: slash the comets' tails with timed sword swings while dodging their heads.",
+  "controls": "Arrows / WASD: Move; Space / Z / X: Slash",
+  "shelf": "Arcade & Action",
+  "tags": ["games", "arcade", "retro", "shooter", "action"],
+  "image": "screenshots/1.gif",
+  "badge": "New",
+  "creator": "abagames"
+}
