@@ -1,0 +1,17 @@
+{
+  "name": "Gorillas",
+  "desc": "A near pixel-perfect browser recreation of the classic QBasic game Gorillas: two giant apes stand on skyscrapers, players take turns setting the angle and velocity of explosive bananas, and the city skyline does the rest. Hot-seat local multiplayer (plus optional online play) and mobile support.",
+  "controls": "Keyboard: follow on-screen prompts to set angle and velocity for each throw (on-screen keyboard on touch devices)",
+  "image": "1.jpg",
+  "shelf": "Arcade & Action",
+  "tags": [
+    "games",
+    "artillery",
+    "multiplayer",
+    "retro",
+    "qbasic",
+    "classic"
+  ],
+  "badge": "New",
+  "creator": "oskar2517"
+}

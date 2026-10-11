@@ -1,0 +1,17 @@
+{
+  "name": "Frogr",
+  "desc": "A Frogger-inspired arcade game originally built for KaiOS devices: hop your frog across lanes of traffic and a river of logs and turtles to reach the lily pads, all rendered in a chunky retro pixel style. Works with keyboard on desktop too.",
+  "controls": "Arrow keys / WASD: hop one tile - Reach all lily pads to clear the level",
+  "image": "1.jpg",
+  "shelf": "Arcade & Action",
+  "tags": [
+    "games",
+    "frogger",
+    "arcade",
+    "retro",
+    "crossing",
+    "kaios"
+  ],
+  "badge": "New",
+  "creator": "Tombarr"
+}

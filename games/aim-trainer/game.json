@@ -1,0 +1,17 @@
+{
+  "name": "Aim Trainer",
+  "desc": "A web-based aim trainer with four difficulty levels and 60-second timed rounds. Track your score, misses and live accuracy percentage as you click targets - a quick daily warm-up for FPS players, rendered in 3D with three.js.",
+  "controls": "Mouse: aim - Click: shoot targets - Start with a difficulty button",
+  "image": "1.jpg",
+  "shelf": "Tools & Utilities",
+  "tags": [
+    "games",
+    "aim",
+    "trainer",
+    "fps",
+    "threejs",
+    "practice"
+  ],
+  "badge": "New",
+  "creator": "aditya-sahasrabuddhe"
+}

@@ -1,0 +1,17 @@
+{
+  "name": "Star Battle",
+  "desc": "A space shooter built on a custom canvas engine: pilot your ship with WASD, blast enemy craft with Space, and keep one eye on the fuel gauge - it drains every second, and only the fuel bottles raining down can top you back up. Menus and instructions are in Chinese.",
+  "controls": "W/A/S/D: move ship - Space: fire - Catch falling fuel bottles to survive",
+  "image": "1.jpg",
+  "shelf": "Arcade & Action",
+  "tags": [
+    "games",
+    "space",
+    "shooter",
+    "arcade",
+    "canvas",
+    "fuel"
+  ],
+  "badge": "New",
+  "creator": "gd4Ark"
+}

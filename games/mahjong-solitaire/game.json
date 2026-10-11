@@ -1,0 +1,17 @@
+{
+  "name": "Mahjong Solitaire",
+  "desc": "Classic mahjong solitaire with a full 144-tile set drawn as crisp SVG: pick from six boards including Turtle, Terraces, Butterfly and Fortress, and match free tile pairs to clear the layout. Every generated deal is guaranteed to be solvable, with hints and shuffle available when you get stuck.",
+  "controls": "Mouse: click two matching free tiles to remove them - Menu: choose board layout, hint and shuffle",
+  "image": "1.jpg",
+  "shelf": "Puzzle & Logic",
+  "tags": [
+    "games",
+    "mahjong",
+    "solitaire",
+    "tiles",
+    "puzzle",
+    "svg"
+  ],
+  "badge": "New",
+  "creator": "ctbot000"
+}

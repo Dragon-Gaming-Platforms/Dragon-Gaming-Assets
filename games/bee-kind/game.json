@@ -1,0 +1,17 @@
+{
+  "name": "Bee Kind",
+  "desc": "js13k 2022 entry: play as BeeKeeper Bunny defending a bee colony from the zombie ZomBee menace. Grow flowers, protect the hives, clear toadstools before grubs turn evil, and grab the honey gun to blast enemies - all in under 13KB of code.",
+  "controls": "WASD / arrows: move - Space / Enter / Shift: fire honey gun - Gamepad supported",
+  "image": "1.jpg",
+  "shelf": "Arcade & Action",
+  "tags": [
+    "games",
+    "js13k",
+    "bees",
+    "arcade",
+    "shooter",
+    "defense"
+  ],
+  "badge": "New",
+  "creator": "picosonic"
+}

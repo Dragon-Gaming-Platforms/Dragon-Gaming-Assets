@@ -1,0 +1,17 @@
+{
+  "name": "PixelCraft",
+  "desc": "A full-featured pixel art editor that runs entirely in the browser: draw with brush, eraser and fill, add shapes, mirror and transform, pick from a palette or eyedropper, and export your art as PNG or even animated GIF. Supports grids, undo/redo and multiple canvas sizes.",
+  "controls": "Mouse: draw / use tools - Toolbar buttons: brush, eraser, fill, shapes, transformation, GIF export - Ctrl+Z: undo",
+  "image": "1.jpg",
+  "shelf": "Tools & Utilities",
+  "tags": [
+    "games",
+    "pixel-art",
+    "editor",
+    "drawing",
+    "tools",
+    "gif"
+  ],
+  "badge": "New",
+  "creator": "rgab1508"
+}
