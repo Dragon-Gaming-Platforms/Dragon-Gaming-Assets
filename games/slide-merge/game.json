@@ -1,0 +1,10 @@
+{
+  "name": "Slide Merge",
+  "desc": "An Arkai number-slider: slide every tile at once and merge equal numbers into their sum as the board heats up - reach 2048 and keep chasing the biggest tile you can.",
+  "controls": "Arrows / WASD / swipe: Slide tiles",
+  "shelf": "Puzzle & Logic",
+  "tags": ["games", "puzzle", "2048", "numbers", "sliding"],
+  "image": "screenshots/1.jpg",
+  "badge": "New",
+  "creator": "646826 (Arkai)"
+}

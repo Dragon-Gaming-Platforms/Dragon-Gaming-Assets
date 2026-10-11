@@ -1,0 +1,10 @@
+{
+  "name": "Sudoku Sixes",
+  "desc": "An Arkai coffee-break sudoku: a six-by-six grid with two-by-three boxes, every puzzle generated fresh and guaranteed to have exactly one solution, in three difficulties.",
+  "controls": "Tap / click / arrows: Select and place digits",
+  "shelf": "Puzzle & Logic",
+  "tags": ["games", "puzzle", "sudoku", "logic", "numbers"],
+  "image": "screenshots/1.jpg",
+  "badge": "New",
+  "creator": "646826 (Arkai)"
+}

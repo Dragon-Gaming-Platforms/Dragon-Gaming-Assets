@@ -1,0 +1,10 @@
+{
+  "name": "Mole Rush",
+  "desc": "An Arkai whack-a-mole sprint: moles pop from nine burrows in a sixty-second run - bonk them back to back for a climbing multiplier, gold moles pay big, and bomb moles steal three seconds.",
+  "controls": "Tap a burrow / keys 1-9 (numpad layout): Bonk; arrows + Space: Aim and swing",
+  "shelf": "Arcade & Action",
+  "tags": ["games", "arcade", "reflex", "whack-a-mole", "family"],
+  "image": "screenshots/1.jpg",
+  "badge": "New",
+  "creator": "646826 (Arkai)"
+}

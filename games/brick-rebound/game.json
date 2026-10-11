@@ -1,0 +1,10 @@
+{
+  "name": "Brick Rebound",
+  "desc": "An Arkai breakout: bounce the ball, smash every brick and grab power-ups - wide paddle, multi-ball and slow motion - across six levels that loop faster and tougher each time.",
+  "controls": "Mouse / arrows: Move paddle; tap / click / Space: Launch",
+  "shelf": "Arcade & Action",
+  "tags": ["games", "arcade", "breakout", "bricks", "power-ups"],
+  "image": "screenshots/1.jpg",
+  "badge": "New",
+  "creator": "646826 (Arkai)"
+}
