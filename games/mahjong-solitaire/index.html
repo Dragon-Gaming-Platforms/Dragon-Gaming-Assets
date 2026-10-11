@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Mahjong Solitaire</title>
+<meta name="description" content="Mahjong solitaire in the browser. Six boards, every deal guaranteed solvable, no downloads and no tracking.">
+<meta name="color-scheme" content="dark light">
+<meta name="theme-color" content="#14211c">
+<meta property="og:title" content="Mahjong Solitaire">
+<meta property="og:description" content="Six boards, every deal guaranteed solvable. Plays in any browser.">
+<meta property="og:type" content="website">
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+<a class="skip-link" href="#board">Skip to the board</a>
+
+<header class="topbar">
+  <div class="brand">
+    <svg class="brand-mark" viewBox="0 0 32 40" aria-hidden="true" focusable="false">
+      <rect x="1" y="1" width="26" height="34" rx="4" fill="currentColor" opacity="0.25"/>
+      <rect x="5" y="5" width="26" height="34" rx="4" fill="currentColor"/>
+      <circle cx="18" cy="16" r="5" fill="#14211c"/>
+      <circle cx="18" cy="28" r="3" fill="#14211c"/>
+    </svg>
+    <h1>Mahjong <span>Solitaire</span></h1>
+  </div>
+
+  <div class="controls">
+    <label class="field">
+      <span class="field-label">Board</span>
+      <select id="layout-select"></select>
+    </label>
+
+    <div class="btn-row">
+      <button id="btn-new" class="btn btn-primary" type="button">New game</button>
+      <button id="btn-undo" class="btn" type="button" title="Undo the last match (Z)">
+        <span aria-hidden="true">↺</span> Undo
+      </button>
+      <button id="btn-hint" class="btn" type="button" title="Show a pair you can take (H)">
+        <span aria-hidden="true">✦</span> Hint
+      </button>
+      <button id="btn-shuffle" class="btn" type="button" title="Redeal the tiles still on the board (S)">
+        <span aria-hidden="true">⇄</span> Shuffle
+      </button>
+    </div>
+
+    <div class="btn-row btn-row-icons">
+      <button id="btn-sound" class="btn btn-icon" type="button" aria-pressed="true" title="Sound on or off">
+        <span class="icon-on" aria-hidden="true">🔊</span><span class="icon-off" aria-hidden="true">🔇</span>
+        <span class="sr-only">Sound</span>
+      </button>
+      <button id="btn-theme" class="btn btn-icon" type="button" title="Light or dark table">
+        <span class="icon-on" aria-hidden="true">☾</span><span class="icon-off" aria-hidden="true">☀</span>
+        <span class="sr-only">Theme</span>
+      </button>
+      <button id="btn-help" class="btn btn-icon" type="button" title="How to play (?)">
+        <span aria-hidden="true">?</span><span class="sr-only">How to play</span>
+      </button>
+    </div>
+  </div>
+</header>
+
+<section class="statusbar" aria-label="Game status">
+  <div class="stat"><span class="stat-value" id="stat-tiles">144</span><span class="stat-label">tiles left</span></div>
+  <div class="stat"><span class="stat-value" id="stat-pairs">0</span><span class="stat-label">pairs open</span></div>
+  <div class="stat"><span class="stat-value" id="stat-moves">0</span><span class="stat-label">moves</span></div>
+  <div class="stat"><span class="stat-value" id="stat-time">0:00</span><span class="stat-label">time</span></div>
+  <div class="stat"><span class="stat-value" id="stat-score">0</span><span class="stat-label">score</span></div>
+  <div class="stat stat-wide">
+    <span class="stat-value" id="stat-best">—</span><span class="stat-label">best on this board</span>
+  </div>
+  <div class="stat stat-wide">
+    <span class="stat-value seed" id="stat-seed">——</span><span class="stat-label">deal &middot; click to copy</span>
+  </div>
+</section>
+
+<main id="board" class="board" tabindex="-1">
+  <div id="board-inner" class="board-inner"></div>
+  <p id="board-hint" class="board-note"></p>
+</main>
+
+<p class="live sr-only" id="live" role="status" aria-live="polite"></p>
+
+<footer class="footer">
+  <span>Every deal is built backwards from a finished board, so it always has a solution.</span>
+  <a href="https://github.com/ctbot000/mahjong-game">Source on GitHub</a>
+</footer>
+
+<!-- ------------------------------------------------------------- dialogs -->
+
+<dialog id="dlg-end" class="dlg">
+  <h2 id="end-title">Board cleared</h2>
+  <p id="end-body"></p>
+  <dl class="end-stats" id="end-stats"></dl>
+  <div class="dlg-actions" id="end-actions"></div>
+</dialog>
+
+<dialog id="dlg-help" class="dlg dlg-wide">
+  <h2>How to play</h2>
+  <div class="help-body">
+    <p>
+      Clear the board by taking <strong>matching pairs</strong> of tiles. A tile can only be
+      taken when it is <strong>free</strong>: nothing lying on top of it, and its left or right
+      edge clear. Blocked tiles are dimmed.
+    </p>
+    <p>
+      Tiles match when their faces are the same, with one exception that comes from the real
+      game: <strong>any flower matches any other flower</strong>, and <strong>any season matches
+      any other season</strong>. Flowers are marked <strong>F</strong> in the top-right corner and
+      seasons <strong>S</strong>.
+    </p>
+    <p>
+      Every deal is generated by taking a finished board apart pair by pair and then replaying
+      that in reverse, so <strong>a solution always exists</strong>. It is still easy to lose one:
+      the order you take pairs in decides whether you get stuck. <em>Shuffle</em> redeals the tiles
+      still on the board into a fresh solvable arrangement.
+    </p>
+    <h3>Keyboard</h3>
+    <ul class="keys">
+      <li><kbd>Tab</kbd> into the board, then <kbd>↑</kbd><kbd>↓</kbd><kbd>←</kbd><kbd>→</kbd> to move between tiles</li>
+      <li><kbd>Enter</kbd> or <kbd>Space</kbd> to pick a tile up and to match it</li>
+      <li><kbd>Esc</kbd> to put it back down</li>
+      <li><kbd>H</kbd> hint &middot; <kbd>Z</kbd> undo &middot; <kbd>S</kbd> shuffle &middot; <kbd>N</kbd> new game</li>
+    </ul>
+    <h3>The set</h3>
+    <div class="tile-gallery" id="tile-gallery"></div>
+  </div>
+  <form method="dialog" class="dlg-actions">
+    <button class="btn btn-primary" value="close" type="submit">Got it</button>
+  </form>
+</dialog>
+
+<script type="module" src="js/main.js"></script>
+</body>
+</html>

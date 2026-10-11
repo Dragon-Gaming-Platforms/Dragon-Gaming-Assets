@@ -1,0 +1,17 @@
+{
+  "name": "Hel's Trial",
+  "desc": "A turn-based js13k 2022 tactics game built on the LittleJS engine: a warrior's soul must clear Hel's trial to escape Niflheim and reach Valhalla. Fight across tile-based levels, switch between attacks, and end your turn wisely - the dead do not fight fair.",
+  "controls": "Mouse: select tiles and buttons - 1 / 2 / 3: switch attacks - E: end turn - Esc: pause",
+  "image": "1.jpg",
+  "shelf": "Strategy & Idle",
+  "tags": [
+    "games",
+    "js13k",
+    "turn-based",
+    "tactics",
+    "strategy",
+    "norse"
+  ],
+  "badge": "New",
+  "creator": "sebadorn"
+}

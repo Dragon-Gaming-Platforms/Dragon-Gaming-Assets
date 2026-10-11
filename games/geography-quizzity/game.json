@@ -1,0 +1,17 @@
+{
+  "name": "Quizzity",
+  "desc": "A fast-paced geography quiz by sharkdp (author of bat and fd): six cities, one world map - click where you think each city is and score points by proximity. Zoom in for precision and chain bonus points for near-perfect guesses. The full world map ships with the game, so it plays completely offline.",
+  "controls": "Mouse: click the map to guess each city's location - Scroll / +- buttons: zoom - Typeahead search box to pick a new game city",
+  "image": "1.jpg",
+  "shelf": "Puzzle & Logic",
+  "tags": [
+    "games",
+    "geography",
+    "quiz",
+    "maps",
+    "education",
+    "leaflet"
+  ],
+  "badge": "New",
+  "creator": "sharkdp (David Peter)"
+}

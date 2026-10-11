@@ -1,0 +1,16 @@
+{
+  "name": "SlotJS",
+  "desc": "A circular slot machine mobile-first SPA by GMZcodes: 12 figures spin around a ring of 9 reels - drop a coin to spin, tap to stop each reel, and match 3+ consecutive figures to win a share of the jackpot. Includes a pay table, sound and vibration toggles, all rendered with emojis and CSS variables.",
+  "controls": "Click / tap anywhere: insert a coin and spin - Click / tap again: stop one reel at a time - Footer buttons: pay table, instructions, sound, vibration",
+  "image": "1.jpg",
+  "shelf": "Arcade & Action",
+  "tags": [
+    "games",
+    "slot-machine",
+    "casino",
+    "arcade",
+    "emoji"
+  ],
+  "badge": "New",
+  "creator": "Danziger (Dani G\u00e1mez Franco)"
+}

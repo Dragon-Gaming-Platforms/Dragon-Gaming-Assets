@@ -1,0 +1,17 @@
+{
+  "name": "Typing Speed Test",
+  "desc": "A clean typing speed trainer: pick 30 or 60 second tests in beginner or pro word modes, then type the stream of words as fast as you can. Live counters track your WPM, accuracy and characters as you go.",
+  "controls": "Keyboard: type the highlighted words - Buttons: choose 30s / 60s and beginner / pro difficulty",
+  "image": "1.jpg",
+  "shelf": "Tools & Utilities",
+  "tags": [
+    "games",
+    "typing",
+    "test",
+    "wpm",
+    "practice",
+    "tools"
+  ],
+  "badge": "New",
+  "creator": "shreyagarwal13"
+}
