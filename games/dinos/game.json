@@ -1,0 +1,10 @@
+{
+  "name": "Dino's Desert Dash",
+  "desc": "A desert dash from Kenta Cho: tap to jump and double-tap to crush cacti as your dino sprints through an endless scorching wasteland.",
+  "controls": "Tap: Jump; Double tap: Crush cactus",
+  "shelf": "Arcade & Action",
+  "tags": ["games", "action", "runner", "dinosaur", "pixel-art"],
+  "image": "screenshots/1.gif",
+  "badge": "New",
+  "creator": "abagames"
+}

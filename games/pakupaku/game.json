@@ -1,0 +1,10 @@
+{
+  "name": "Paku Paku",
+  "desc": "A single-screen dot-muncher from Kenta Cho: tap to turn through the maze, gobble every dot and slip past the roaming ghosts.",
+  "controls": "Tap / Click / any key: Turn",
+  "shelf": "Arcade & Action",
+  "tags": ["games", "arcade", "retro", "maze", "one-button"],
+  "image": "screenshots/1.gif",
+  "badge": "New",
+  "creator": "abagames"
+}
