@@ -1,0 +1,17 @@
+{
+  "name": "Classic Pool",
+  "desc": "Classic 8-ball pool on a HTML5 canvas with proper collision physics, an AI opponent or hot-seat two-player mode, and a smooth bossa-nova jazz soundtrack while you line up your shots.",
+  "controls": "Mouse: aim and set shot power - Buttons: 1-player (vs AI) or 2-player",
+  "image": "1.jpg",
+  "shelf": "Sports & Racing",
+  "tags": [
+    "games",
+    "pool",
+    "billiards",
+    "8-ball",
+    "physics",
+    "sports"
+  ],
+  "badge": "New",
+  "creator": "Chen Shmilovich (henshmi)"
+}

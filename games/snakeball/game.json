@@ -1,0 +1,17 @@
+{
+  "name": "Snakeball",
+  "desc": "A casual reflex game where you steer a snake made of balls with your mouse. Its body resets at random intervals, changing your speed and turning lag while waves of bullet-balls flood the screen - bump the right ones, dodge the rest, and ride the leaderboard.",
+  "controls": "Mouse / touch: steer the ball-snake - Bump good balls for points, avoid the rest",
+  "image": "1.jpg",
+  "shelf": "Arcade & Action",
+  "tags": [
+    "games",
+    "snake",
+    "arcade",
+    "reflex",
+    "casual",
+    "matter-js"
+  ],
+  "badge": "New",
+  "creator": "JIEJOE"
+}

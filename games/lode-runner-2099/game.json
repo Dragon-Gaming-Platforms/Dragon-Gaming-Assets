@@ -1,0 +1,18 @@
+{
+  "name": "Lode Runner 2099",
+  "desc": "A cyberpunk reimagining of Lode Runner: dig through platforms, collect the gold, outrun the pursuit droids. Every level is procedurally generated from a seed, with speed adjustment, retro CRT effects, multiple themes and generated chiptune music.",
+  "controls": "Arrows: move - Z: dig left - X: dig right - +/-: speed - P: pause - T: theme - C: CRT - M: mute - R: restart level",
+  "image": "1.jpg",
+  "shelf": "Arcade & Action",
+  "tags": [
+    "games",
+    "platformer",
+    "puzzle",
+    "procedural",
+    "retro",
+    "cyberpunk",
+    "phaser"
+  ],
+  "badge": "New",
+  "creator": "jgbrwn"
+}
