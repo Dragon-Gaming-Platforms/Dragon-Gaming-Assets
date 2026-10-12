@@ -1,0 +1,10 @@
+{
+  "name": "Anti-Pac-Man",
+  "desc": "A reverse maze arcade game: control the ghosts, collect the pellets and catch Pac-Man before he clears the board.",
+  "controls": "Arrow keys: move the ghost - Touch controls are available on mobile - Start: begin a round",
+  "image": "1.jpg",
+  "shelf": "Arcade & Action",
+  "tags": ["arcade", "maze", "pac-man", "touch"],
+  "badge": "New",
+  "creator": "vmikhav"
+}

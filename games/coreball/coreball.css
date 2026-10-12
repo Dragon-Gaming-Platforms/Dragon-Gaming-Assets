@@ -1,0 +1,94 @@
+ body{
+  padding:0;
+  margin:0;
+  height:100%;
+  background-color: black;
+  overflow: hidden;
+  -webkit-transition: all 1s;
+ }
+ #pan{
+  width:80px;
+  height:80px;
+  border-radius:50%;
+  background-color: white;
+  padding:0;
+  list-style-type:none;
+  margin: 220px auto;
+  position: relative;
+ }
+ #pan > li{
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  line-height: 40px;
+  text-align: center;
+  background-color: white;
+  display: block;
+  position: absolute;
+  margin-top: 20px;
+  margin-left: 200px;
+  -webkit-transform-origin: -160px 20px;
+ }
+
+ #pan > li:nth-child(1){
+  -webkit-transform: rotate(0deg);
+ }
+ #pan > li:nth-child(2){
+  -webkit-transform: rotate(90deg);
+ } 
+ #pan > li:nth-child(3){
+  -webkit-transform: rotate(180deg);
+ } 
+ #pan > li:nth-child(4){
+  -webkit-transform: rotate(270deg);
+ }   
+
+#pan>li::before {
+  content: "";
+  display: block;
+  width: 120px;
+  height: 1px;
+  position: absolute;
+  background-color: white;
+  margin: 20px 0 0 -120px;
+}
+@-webkit-keyframes roll {
+  0%{-webkit-transform: rotate(0deg)}
+  100%{-webkit-transform: rotate(360deg)}
+}
+.roller{
+  -webkit-animation:roll 4s linear infinite;
+}
+
+#ball{
+  width:40px;
+  padding:0;
+  list-style-type:none;
+  margin: 220px auto;
+}
+
+#ball > li{
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  line-height: 40px;
+  text-align: center;
+  background-color: white;
+  margin-top:5px;
+  cursor: pointer;
+ }
+/* 游戏停止的样式 */
+.stop{
+  -webkit-animation-play-state:paused;
+}
+.run{
+  -webkit-animation-play-state:running;
+}
+/* 游戏失败的样式 */
+.fail{
+  background-color: red;
+}
+/* 游戏成功的样式 */
+.success{
+  background-color: green;
+}

@@ -1,0 +1,14 @@
+{
+  "name": "Farm Sim",
+  "desc": "A small farming simulator: till soil, plant crops, water them and harvest a growing field.",
+  "controls": "Mouse: interact with soil, crops and tools",
+  "image": "1.jpg",
+  "shelf": "Strategy & Idle",
+  "tags": [
+    "simulation",
+    "farming",
+    "casual"
+  ],
+  "badge": "New",
+  "creator": "msakuta"
+}

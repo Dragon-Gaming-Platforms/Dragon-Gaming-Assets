@@ -1,0 +1,14 @@
+{
+  "name": "CoreBall",
+  "desc": "A precise timing game: fire pins into the rotating core without touching the pins already embedded.",
+  "controls": "Mouse or Space: launch a pin",
+  "image": "1.jpg",
+  "shelf": "Arcade & Action",
+  "tags": [
+    "arcade",
+    "timing",
+    "reflex"
+  ],
+  "badge": "New",
+  "creator": "yangjunjun"
+}

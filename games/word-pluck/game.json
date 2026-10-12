@@ -1,0 +1,10 @@
+{
+  "name": "Word Pluck",
+  "desc": "A fast browser typing game where words rain down the screen. Type them before they hit the bottom and track your speed, accuracy and streak.",
+  "controls": "Keyboard: type the falling words - Space: pause or resume - Mouse: toggle tips and sound",
+  "image": "1.jpg",
+  "shelf": "Puzzle & Logic",
+  "tags": ["typing", "words", "speed", "education"],
+  "badge": "New",
+  "creator": "knadh"
+}

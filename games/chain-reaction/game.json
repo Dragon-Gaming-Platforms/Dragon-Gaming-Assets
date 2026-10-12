@@ -1,0 +1,14 @@
+{
+  "name": "Chain Reaction",
+  "desc": "Click a starting point and create a cascade of expanding circles to clear each level.",
+  "controls": "Mouse: click the playfield to start a chain",
+  "image": "1.jpg",
+  "shelf": "Puzzle & Logic",
+  "tags": [
+    "puzzle",
+    "reaction",
+    "casual"
+  ],
+  "badge": "New",
+  "creator": "aolde"
+}

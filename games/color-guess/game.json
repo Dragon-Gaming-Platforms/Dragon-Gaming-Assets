@@ -1,0 +1,14 @@
+{
+  "name": "Color Guess",
+  "desc": "Test your color perception by identifying the swatch that matches the target RGB color.",
+  "controls": "Mouse: choose the matching color",
+  "image": "1.jpg",
+  "shelf": "Puzzle & Logic",
+  "tags": [
+    "puzzle",
+    "color",
+    "casual"
+  ],
+  "badge": "New",
+  "creator": "NikhilNamal17"
+}

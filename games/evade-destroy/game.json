@@ -1,0 +1,14 @@
+{
+  "name": "Evade and Destroy",
+  "desc": "A top-down action game combining enemy evasion, pickups and precise shooting across procedural arenas.",
+  "controls": "Keyboard: move and aim - Mouse: fire",
+  "image": "1.jpg",
+  "shelf": "Arcade & Action",
+  "tags": [
+    "arcade",
+    "shooter",
+    "action"
+  ],
+  "badge": "New",
+  "creator": "mikkun"
+}

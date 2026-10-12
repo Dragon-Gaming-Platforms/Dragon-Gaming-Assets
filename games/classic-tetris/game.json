@@ -1,0 +1,14 @@
+{
+  "name": "Classic Tetris",
+  "desc": "A compact falling-block puzzle with rotating tetrominoes, line clears and increasing speed.",
+  "controls": "Arrow keys: move and rotate - Space: drop",
+  "image": "1.jpg",
+  "shelf": "Puzzle & Logic",
+  "tags": [
+    "puzzle",
+    "blocks",
+    "tetris"
+  ],
+  "badge": "New",
+  "creator": "llop"
+}

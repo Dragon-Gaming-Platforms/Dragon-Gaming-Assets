@@ -1,0 +1,14 @@
+{
+  "name": "Flapcopy",
+  "desc": "A lightweight one-button flying game inspired by classic obstacle-dodging arcade games.",
+  "controls": "Mouse or Space: flap",
+  "image": "1.jpg",
+  "shelf": "Arcade & Action",
+  "tags": [
+    "arcade",
+    "flappy",
+    "reflex"
+  ],
+  "badge": "New",
+  "creator": "dduan"
+}
