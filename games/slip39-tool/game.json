@@ -1,0 +1,15 @@
+{
+  "name": "SLIP-39 Tool",
+  "desc": "Create and recover Shamir Secret Sharing mnemonic sets using SLIP-39 entirely in the browser. Keep sensitive secrets local.",
+  "controls": "Mouse and keyboard: enter shares and configure thresholds - Never share secrets with a third party",
+  "image": "1.jpg",
+  "shelf": "Tools & Utilities",
+  "tags": [
+    "tools",
+    "security",
+    "cryptography",
+    "mnemonics"
+  ],
+  "badge": "New",
+  "creator": "iancoleman"
+}

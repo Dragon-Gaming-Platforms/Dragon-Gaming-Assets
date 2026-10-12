@@ -1,0 +1,15 @@
+{
+  "name": "CoffeeScript Playground",
+  "desc": "Compile and experiment with CoffeeScript directly in a local browser playground using an included compiler and editor.",
+  "controls": "Keyboard: edit CoffeeScript - Mouse: run or inspect the generated JavaScript",
+  "image": "1.jpg",
+  "shelf": "Tools & Utilities",
+  "tags": [
+    "tools",
+    "CoffeeScript",
+    "programming",
+    "editor"
+  ],
+  "badge": "New",
+  "creator": "BarkingMouseStudio"
+}

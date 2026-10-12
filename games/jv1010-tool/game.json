@@ -1,0 +1,15 @@
+{
+  "name": "JV-1010 Tool",
+  "desc": "Inspect, edit and exchange Roland JV-1010 synthesizer patches through a browser MIDI and SysEx utility.",
+  "controls": "MIDI device: connect a JV-1010 - Mouse: edit patches and save SysEx files",
+  "image": "1.jpg",
+  "shelf": "Tools & Utilities",
+  "tags": [
+    "tools",
+    "MIDI",
+    "synthesizer",
+    "SysEx"
+  ],
+  "badge": "New",
+  "creator": "Ahlzen"
+}

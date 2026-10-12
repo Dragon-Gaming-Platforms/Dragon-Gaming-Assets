@@ -1,0 +1,15 @@
+{
+  "name": "Morse Tool",
+  "desc": "Convert text to Morse code and play or inspect the corresponding audio signal with a fully local browser tool.",
+  "controls": "Keyboard: enter text - Mouse: convert and play Morse audio",
+  "image": "1.jpg",
+  "shelf": "Tools & Utilities",
+  "tags": [
+    "tools",
+    "Morse",
+    "audio",
+    "encoding"
+  ],
+  "badge": "New",
+  "creator": "cduck"
+}

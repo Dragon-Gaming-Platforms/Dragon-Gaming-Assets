@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8" />
+        <title>SLIP39 - Mnemonic Shares</title>
+        <link rel="stylesheet" href="css/bootstrap-3.3.7.css">
+        <link rel="stylesheet" href="css/app.css">
+        <meta content="Split Share mnemonic codes for SLIP39" name="description"/>
+        <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+        <meta content="SLIP39 mnemonic converter" name="description" />
+        <meta content="Ian Coleman" name="author" />
+        <link type="image/x-icon" rel="icon" href="data:image/x-icon;base64,iVBORw0KGgoAAAANSUhEUgAAABAAAAAQEAYAAABPYyMiAAAABmJLR0T///////8JWPfcAAAACXBIWXMAAABIAAAASABGyWs+AAAAF0lEQVRIx2NgGAWjYBSMglEwCkbBSAcACBAAAeaR9cIAAAAASUVORK5CYII=" />
+    </head>
+    <body>
+        <div class="container">
+            <h1 class="prototype">EXPERIMENTAL PROTOTYPE</h1>
+            <h1>SLIP39 Mnemonic Shares</h1>
+            <p class="version">v0.0.3</p>
+            <hr>
+            <div id="create" class="row">
+                <div class="col-md-12">
+                    <h2>Create</h2>
+                    <p>
+                        Split an existing secret into several mnemonic shares.
+                    </p>
+                    <p>
+                        <a href="#combine">
+                        See the 'Combine' section below to combine existing shares.
+                        </a>
+                    </p>
+                    <form class="form-horizontal" role="form">
+                        <div class="form-group">
+                            <div class="col-sm-2"></div>
+                            <div class="col-sm-10">
+                                <h3>Secret</h3>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <div class="col-sm-2"></div>
+                            <div class="col-sm-10">
+                                <p>
+                                    Securely generate random master secret with strength of:
+                                </p>
+                                <p>
+                                    <a id="strength-128" class="btn btn-default generate" data-strength="128">128 bits</a>
+                                    <a id="strength-160" class="btn btn-default generate" data-strength="160">160 bits</a>
+                                    <a id="strength-192" class="btn btn-default generate" data-strength="192">192 bits</a>
+                                    <a id="strength-224" class="btn btn-default generate" data-strength="224">224 bits</a>
+                                    <a id="strength-256" class="btn btn-default generate" data-strength="256">256 bits</a>
+                                </p>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="master-secret-hex" class="col-sm-2 control-label">
+                                Master Secret
+                            </label>
+                            <div class="col-sm-10">
+                                <input id="master-secret-hex" type="text" class="form-control" placeholder="hex string eg 0123456789abcdef0123456789ABCDEF">
+                                <p class="text-danger" id="master-secret-error">&nbsp;</p>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="passphrase" class="col-sm-2 control-label">
+                                <a href="https://github.com/satoshilabs/slips/blob/master/slip-0039.md#passphrase">
+                                    Passphrase (optional)
+                                </a>
+                            </label>
+                            <div class="col-sm-10">
+                                <input id="passphrase" type="text" class="form-control" placeholder="eg MySecretPasshprase">
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <div class="col-sm-2"></div>
+                            <div class="col-sm-10">
+                                <h3>Groups and Members</h3>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="total-shares" class="col-sm-2 control-label">
+                                Total Shares
+                            </label>
+                            <div class="col-sm-10">
+                                <input id="total-shares" type="number" class="form-control" value="3">
+                                <p id="total-shares-error" class="hidden text-danger"></p>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="threshold" class="col-sm-2 control-label">
+                                Threshold
+                            </label>
+                            <div class="col-sm-10">
+                                <input id="threshold" type="number" class="form-control" value="2">
+                                <p id="threshold-error" class="hidden text-danger"></p>
+                                <p class="help-block">
+                                The number of shares needed to reconstruct the master secret.
+                                </p>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <div class="col-sm-2"></div>
+                            <div class="col-sm-10">
+                                <h3>Shares</h3>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <div class="col-sm-2"></div>
+                            <div class="col-sm-10">
+                                <textarea id="new-shares" class="form-control" rows="10" placeholder="Shares will be shown here"></textarea>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+            <hr>
+            <div id="combine" class="row">
+                <div class="col-md-12">
+                    <h2>Combine</h2>
+                    <p>Recover a master secret from a set of mnemonics.</p>
+                    <form class="form-horizontal" role="form">
+                        <div class="form-group">
+                            <label for="existing-shares" class="col-sm-2 control-label">
+                                Shares
+                            </label>
+                            <div class="col-sm-10">
+                                <textarea id="existing-shares" class="form-control" rows=10 placeholder="Enter your mnemonic shares here, one per line"></textarea>
+                                <p class="text-danger" id="reconstructed-error">&nbsp;</p>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="decrypter" class="col-sm-2 control-label">
+                                Passphrase
+                            </label>
+                            <div class="col-sm-10">
+                                <input id="decrypter" type="text" class="form-control">
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label for="reconstructed-hex" class="col-sm-2 control-label">
+                                Master Secret
+                            </label>
+                            <div class="col-sm-10">
+                                <input id="reconstructed-hex" type="text" class="form-control" readonly="readonly">
+                                <p id="reconstructed-error" class="text-danger">
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <hr>
+
+            <div class="row">
+                <div class="col-md-12">
+
+                    <h2>This project is 100% open-source code</h2>
+
+                    <p>
+                        <span>Get the source code from the repository</span>
+                        -
+                        <a href="https://github.com/iancoleman/slip39" target="_blank">
+                            https://github.com/iancoleman/slip39
+                        </a>
+                    </p>
+
+                    <h3>Libraries</h3>
+
+                    <p>
+                        <span>slip39-js - </span>
+                        <a href="https://github.com/ilap/slip39-js" target="_blank">
+                            https://github.com/ilap/slip39-js
+                        </a>
+                    </p>
+
+                    <p>
+                        <span>jQuery - </span>
+                        <a href="https://jquery.com/" target="_blank">
+                            https://jquery.com/
+                        </a>
+                    </p>
+
+                    <p>
+                        <span>Twitter Bootstrap - </span>
+                        <a href="http://getbootstrap.com/" target="_blank">
+                            http://getbootstrap.com/
+                        </a>
+                    </p>
+
+                </div>
+            </div>
+        </div>
+        <script src="js/jquery-3.2.1.js"></script>
+        <script src="js/slip39-libs.js"></script>
+        <script src="js/index.js"></script>
+    </body>
+</html>

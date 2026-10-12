@@ -1,0 +1,15 @@
+{
+  "name": "SDF Maker",
+  "desc": "Generate and combine 2D signed distance field shapes, tune their parameters and export a texture-ready result in the browser.",
+  "controls": "Mouse: choose shapes and adjust parameters - Keyboard: use the editor controls",
+  "image": "1.jpg",
+  "shelf": "Tools & Utilities",
+  "tags": [
+    "tools",
+    "graphics",
+    "SDF",
+    "textures"
+  ],
+  "badge": "New",
+  "creator": "jobtalle"
+}

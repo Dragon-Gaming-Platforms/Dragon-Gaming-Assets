@@ -1,0 +1,144 @@
+:root {
+    --dark: #27292c;
+    --bright: #eeeeee;
+    --link: #de5840;
+    --background: #3d4549;
+    --size: 500px;
+    --padding: 8px;
+}
+
+body {
+    background-color: var(--dark);
+    font-family: monospace;
+    color: var(--bright);
+    display: flex;
+    justify-content: center;
+    margin: 0;
+    overflow-x: hidden;
+}
+
+body a {
+    color: var(--bright);
+}
+
+body a:hover {
+    color: var(--link);
+}
+
+body p {
+    font-size: 12pt;
+    font-family: Arial, sans-serif;
+    margin: 6px;
+}
+
+button {
+    width: 100%;
+}
+
+#wrapper {
+    display: flex;
+    flex-direction: column;
+    max-width: 100%;
+}
+
+#wrapper h1 {
+    text-align: center;
+}
+
+#wrapper h2 {
+    font-size: 14pt;
+}
+
+#wrapper p {
+    text-align: center;
+}
+
+#columns {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+.column > .panel {
+    border: 1px solid var(--bright);
+    padding: var(--padding);
+    margin: var(--padding);
+    max-width: calc(100vw - 4 * var(--padding));
+}
+
+#input {
+    display: flex;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 16px;
+}
+
+#input-left {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    width: var(--size);
+    max-width: calc(100% - 4 * var(--padding));
+}
+
+#input-right {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+#input-message {
+    position: absolute;
+    padding: 16px;
+    user-select: none;
+}
+
+#preview-canvas {
+    position: absolute;
+    pointer-events: none;
+    width: var(--size);
+    max-width: 100%;
+}
+
+#input-target {
+    transition: .1s;
+    background-color: var(--background);
+}
+
+#input-target.hover {
+    background-color: var(--bright);
+}
+
+#input-target h2 {
+    user-select: none;
+}
+
+#settings input {
+    width: 64px;
+}
+
+#output {
+    display: flex;
+    flex-direction: column;
+    width: var(--size);
+}
+
+
+#output button {
+    margin-top: 4px;
+}
+
+#output-container {
+    width: 100%;
+    overflow: auto;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+#output-container img {
+    background: 
+    repeating-conic-gradient(#808080 0% 25%, transparent 0% 50%) 
+      50% / 20px 20px;
+    width: 100%;
+    image-rendering: pixelated;
+}
