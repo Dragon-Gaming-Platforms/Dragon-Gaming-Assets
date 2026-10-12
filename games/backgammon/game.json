@@ -1,0 +1,17 @@
+{
+  "name": "Backgammon",
+  "desc": "The classic racing board game, playable against a simple AI opponent: roll the dice, drag your fifteen white checkers home past the black army, and bear off first to win. Built on binarymax's backgammon.js engine with a jQuery drag-and-drop board.",
+  "controls": "Mouse: drag your white checkers to the highlighted points after each roll - First to bear all checkers off wins",
+  "image": "1.jpg",
+  "shelf": "Puzzle & Logic",
+  "tags": [
+    "games",
+    "backgammon",
+    "board",
+    "dice",
+    "classic",
+    "ai"
+  ],
+  "badge": "New",
+  "creator": "Max Irwin (binarymax)"
+}

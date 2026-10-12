@@ -1,0 +1,39 @@
+<!doctype html>
+<html>
+<head>
+	<title>Backgammon</title>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+	<meta name="description" content="Classic backgammon against a simple AI, powered by backgammon.js">
+	<meta name="author" content="Max Irwin">
+	<link rel="stylesheet" href="backgammon.css" scalable="1222">
+	<style type="text/css">
+		body { background: #2b2b2b; color: #eee; font-family: sans-serif; margin: 0; padding: 0 0 24px 0; }
+		h1 { font-size: 20px; margin: 14px 10px 4px 10px; }
+		#hint { color: #aaa; font-size: 13px; margin: 0 10px 10px 10px; }
+		#footer { clear: left; padding: 12px 10px; font-weight: bold; font-size: 12px; color: #ccc; }
+		#footer a { color: #8cf; }
+	</style>
+</head>
+<body>
+<h1>Backgammon</h1>
+<div id="hint">You play the white checkers &mdash; roll, then drag your checkers to the highlighted points. First to bear all fifteen off wins.</div>
+<div id="boards"></div>
+<div id="footer">Powered by <a href="https://github.com/binarymax/backgammon.js">backgammon.js</a> (MIT Licence, copyright 2013 Max Irwin). Made with love by <a href="http://binarymax.com">Max Irwin</a>.</div>
+<script type="text/javascript" src="jquery-1.10.2.min.js"></script>
+<script type="text/javascript" src="backgammon.min.js"></script>
+<script type="text/javascript">
+	//One board, human (white) vs AI (black).
+	//Note: upstream new1PGame() has a bug (references a closure-local nextid),
+	//so we wire the same public API calls it was meant to make.
+	(function() {
+		var id = backgammon.sequence("board")();
+		var width = parseInt(window.innerWidth - 10);
+		var blackai = backgammon.brain({ color: 'black', level: 1 });
+		var boardui = $("<div id='" + id + "' style='float:left;'><div>");
+		$("#boards").append(boardui);
+		backgammon.board(id, width, { delay: 505, black: blackai });
+	})();
+</script>
+</body>
+</html>
