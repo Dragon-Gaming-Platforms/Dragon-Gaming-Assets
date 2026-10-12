@@ -1,0 +1,14 @@
+{
+  "name": "Asteroids",
+  "desc": "A lightweight canvas space shooter with rotating movement, thrust and classic asteroid destruction.",
+  "controls": "Arrow keys: rotate and thrust - Space: fire",
+  "image": "1.jpg",
+  "shelf": "Arcade & Action",
+  "tags": [
+    "arcade",
+    "shooter",
+    "space"
+  ],
+  "badge": "New",
+  "creator": "Squishy123"
+}

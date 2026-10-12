@@ -307,3 +307,13 @@ never invent a license.
 | Chain Reaction | `games/chain-reaction/` | aolde/chain-reaction ([github.com/aolde/chain-reaction](https://github.com/aolde/chain-reaction)) | MIT — standalone local cascade puzzle | 2026-10-12 |
 | Evade and Destroy | `games/evade-destroy/` | mikkun/evade-and-destroy ([github.com/mikkun/evade-and-destroy](https://github.com/mikkun/evade-and-destroy)) | MIT — standalone local action game; service worker removed | 2026-10-12 |
 | HTML5 Maze | `games/html5-maze/` | goshdarngames/HTML5-Maze ([github.com/goshdarngames/HTML5-Maze](https://github.com/goshdarngames/HTML5-Maze)) | MIT — responsive standalone canvas maze game | 2026-10-12 |
+| Genius | `games/genius/` | victorqribeiro/genius ([github.com/victorqribeiro/genius](https://github.com/victorqribeiro/genius)) | MIT — local memory/reflex game; service-worker-only packaging removed | 2026-10-12 |
+| Void Runner | `games/void-runner/` | kamalesh404/void-runner ([github.com/kamalesh404/void-runner](https://github.com/kamalesh404/void-runner)) | MIT — standalone local canvas runner | 2026-10-12 |
+| Xonix | `games/xonix/` | michelebucelli/xonix-js ([github.com/michelebucelli/xonix-js](https://github.com/michelebucelli/xonix-js)) | MIT — standalone local arcade game | 2026-10-12 |
+| Skyhop | `games/skyhop/` | evreniel/skyhop ([github.com/evreniel/skyhop](https://github.com/evreniel/skyhop)) | MIT — standalone local platform game | 2026-10-12 |
+| Asteroids | `games/asteroids/` | Squishy123/asteroids ([github.com/Squishy123/asteroids](https://github.com/Squishy123/asteroids)) | MIT — standalone local canvas shooter | 2026-10-12 |
+| Battle Tank | `games/battle-tank/` | d4vucat/Battle-Tank ([github.com/d4vucat/Battle-Tank](https://github.com/d4vucat/Battle-Tank)) | MIT — local canvas tank game with local audio | 2026-10-12 |
+| JavaScript Fighting Game | `games/fighting-game/` | leogama09/JavaScript-Fighting-Game ([github.com/leogama09/JavaScript-Fighting-Game](https://github.com/leogama09/JavaScript-Fighting-Game)) | MIT — local canvas fighting game | 2026-10-12 |
+| Fling | `games/fling/` | mirreal/fling-canvas ([github.com/mirreal/fling-canvas](https://github.com/mirreal/fling-canvas)) | MIT — standalone local physics puzzle | 2026-10-12 |
+| Dungeon Game | `games/dungeon-game/` | stephenom1/dungeon-game ([github.com/stephenom1/dungeon-game](https://github.com/stephenom1/dungeon-game)) | MIT — local canvas dungeon game | 2026-10-12 |
+| Piano Tiles | `games/piano-tiles/` | AJLoveChina/Piano-Tiles ([github.com/AJLoveChina/Piano-Tiles](https://github.com/AJLoveChina/Piano-Tiles)) | MIT — standalone local canvas reflex game with vendored jQuery | 2026-10-12 |

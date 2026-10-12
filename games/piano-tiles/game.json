@@ -1,0 +1,14 @@
+{
+  "name": "Piano Tiles",
+  "desc": "Tap the moving black tiles and avoid the white ones in this fast reflex game rendered with HTML5 canvas.",
+  "controls": "Mouse or touch: tap black tiles",
+  "image": "1.jpg",
+  "shelf": "Arcade & Action",
+  "tags": [
+    "arcade",
+    "music",
+    "reflex"
+  ],
+  "badge": "New",
+  "creator": "AJLoveChina"
+}

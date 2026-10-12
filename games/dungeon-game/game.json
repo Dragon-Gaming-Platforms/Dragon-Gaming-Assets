@@ -1,0 +1,14 @@
+{
+  "name": "Dungeon Game",
+  "desc": "Explore a small canvas dungeon, fight enemies and navigate an interactive top-down adventure.",
+  "controls": "Arrow keys: move - Keyboard: use the game actions",
+  "image": "1.jpg",
+  "shelf": "Arcade & Action",
+  "tags": [
+    "dungeon",
+    "adventure",
+    "action"
+  ],
+  "badge": "New",
+  "creator": "stephenom1"
+}
