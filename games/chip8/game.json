@@ -1,10 +1,15 @@
 {
   "name": "Chip8.js",
-  "desc": "A tiny in-browser CHIP-8 emulator with a pixel display and a selection of bundled classic ROMs, including Pong, Invaders, Tetris and Lunar Landing.",
-  "controls": "Choose a ROM from the menu - CHIP-8 keypad: 1-4, Q-R, A-F, Z-V - See the instruction panel for game controls",
+  "desc": "A tiny in-browser CHIP-8 emulator with a pixel display. Load a CHIP-8 ROM from your own device to play it; no ROM files are distributed.",
+  "controls": "Choose a local .ch8, .rom or .bin file - CHIP-8 keypad: 1-4, Q-R, A-F, Z-V",
   "image": "1.jpg",
   "shelf": "Emulators",
-  "tags": ["emulator", "chip-8", "retro", "roms"],
+  "tags": [
+    "emulator",
+    "chip-8",
+    "retro",
+    "roms"
+  ],
   "badge": "New",
   "creator": "taniarascia"
 }

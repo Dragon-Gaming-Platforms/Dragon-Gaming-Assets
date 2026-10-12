@@ -15,22 +15,21 @@ function cycle() {
   setTimeout(cycle, 3)
 }
 
-// Load a new ROM every time a new game is selected
-async function loadRom() {
-  const rom = event.target.value
-  const response = await fetch(`./roms/${rom}`)
-  const arrayBuffer = await response.arrayBuffer()
-  const uint8View = new Uint8Array(arrayBuffer)
-  const romBuffer = new RomBuffer(uint8View)
+// Load a local ROM selected by the user. No ROMs are distributed with this emulator.
+async function loadRom(event) {
+  const file = event.target.files[0]
+  if (!file) return
+  const arrayBuffer = await file.arrayBuffer()
+  const romBuffer = new RomBuffer(new Uint8Array(arrayBuffer))
 
   cpu.interface.clearDisplay()
   cpu.interface.disableSound()
   cpu.load(romBuffer)
-  displayInstructions(rom)
+  displayInstructions(file.name)
 }
 
 function displayInstructions(rom) {
-  let instructions
+  let instructions = `Use the CHIP-8 keypad shown above to play this ROM.`
 
   switch (rom) {
     case 'CONNECT4':
@@ -71,6 +70,6 @@ E = go right`
   instructionsDisplay.textContent = instructions
 }
 
-document.querySelector('select').addEventListener('change', loadRom)
+document.querySelector('#rom-file').addEventListener('change', loadRom)
 
 cycle()

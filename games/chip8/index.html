@@ -26,19 +26,8 @@
           <canvas></canvas>
         </div>
         <aside>
-          <select>
-            <option disabled selected>Load ROM...</option>
-            <option value="CONNECT4">Connect4</option>
-            <option value="PONG">Pong</option>
-            <option value="INVADERS">Invaders</option>
-            <option value="TETRIS">Tetris</option>
-            <option value="WALL">Wall</option>
-            <option value="LANDING">Lunar Landing</option>
-            <option value="BLINKY">Blinky</option>
-            <option value="MAZE">Maze</option>
-            <option value="TANK">Tank</option>
-            <option value="TRON">Tron</option>
-          </select>
+          <label for="rom-file">Load a CHIP-8 ROM</label>
+          <input id="rom-file" type="file" accept=".ch8,.rom,.bin,application/octet-stream" />
           <div>
             <h2>Instructions</h2>
             <pre class="instructions">

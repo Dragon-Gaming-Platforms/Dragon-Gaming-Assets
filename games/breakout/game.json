@@ -1,0 +1,10 @@
+{
+  "name": "Breakout",
+  "desc": "A colorful canvas brick breaker with power-ups, multiple brick types, a paddle cannon and local sound effects.",
+  "controls": "Mouse or arrow keys: move the paddle - Space: launch and fire - P: pause",
+  "image": "1.jpg",
+  "shelf": "Arcade & Action",
+  "tags": ["arcade", "brick breaker", "power-ups", "canvas"],
+  "badge": "New",
+  "creator": "igameproject"
+}
