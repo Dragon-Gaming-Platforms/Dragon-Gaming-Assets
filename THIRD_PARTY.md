@@ -297,3 +297,13 @@ never invent a license.
 | Node Gameboy | `games/node-gameboy/` | gb-archive/node-gameboy ([github.com/gb-archive/node-gameboy](https://github.com/gb-archive/node-gameboy)) | MIT — browser bundle built locally and external unpkg dependency replaced with local bundle; no cartridges included | 2026-10-12 |
 | SNES.js | `games/snesjs/` | angelo-wf/SnesJs ([github.com/angelo-wf/SnesJs](https://github.com/angelo-wf/SnesJs)) | MIT — local-upload SNES emulator vendored with no game ROMs | 2026-10-12 |
 | NES.js Classic | `games/nesjs-alt/` | angelo-wf/NesJs ([github.com/angelo-wf/NesJs](https://github.com/angelo-wf/NesJs)) | MIT — local-upload NES emulator vendored with no game ROMs | 2026-10-12 |
+| Coil | `games/coil/` | leereilly/Coil ([github.com/leereilly/Coil](https://github.com/leereilly/Coil)) | MIT — local canvas game; Google Fonts and social widgets removed | 2026-10-12 |
+| CoreBall | `games/coreball/` | yangjunjun/CoreBall ([github.com/yangjunjun/CoreBall](https://github.com/yangjunjun/CoreBall)) | MIT — standalone local canvas game | 2026-10-12 |
+| FactorishJS | `games/factorish/` | msakuta/FactorishJS ([github.com/msakuta/FactorishJS](https://github.com/msakuta/FactorishJS)) | MIT — standalone local factory simulation | 2026-10-12 |
+| Flapcopy | `games/flapcopy/` | dduan/Flapcopy ([github.com/dduan/Flapcopy](https://github.com/dduan/Flapcopy)) | MIT — standalone local canvas game | 2026-10-12 |
+| Go Game | `games/go-game/` | ismyrnow/Go ([github.com/ismyrnow/Go](https://github.com/ismyrnow/Go)) | MIT — local two-player Go board; Google-hosted jQuery replaced with vendored copy | 2026-10-12 |
+| Classic Tetris | `games/classic-tetris/` | llop/classic-tetris-js ([github.com/llop/classic-tetris-js](https://github.com/llop/classic-tetris-js)) | MIT — standalone local falling-block game | 2026-10-12 |
+| Color Guess | `games/color-guess/` | NikhilNamal17/color-guess-game ([github.com/NikhilNamal17/color-guess-game](https://github.com/NikhilNamal17/color-guess-game)) | MIT — standalone local color game | 2026-10-12 |
+| Farm Sim | `games/farm-sim/` | msakuta/farmsim ([github.com/msakuta/farmsim](https://github.com/msakuta/farmsim)) | MIT — standalone local farming simulation | 2026-10-12 |
+| Chain Reaction | `games/chain-reaction/` | aolde/chain-reaction ([github.com/aolde/chain-reaction](https://github.com/aolde/chain-reaction)) | MIT — standalone local cascade puzzle | 2026-10-12 |
+| Evade and Destroy | `games/evade-destroy/` | mikkun/evade-and-destroy ([github.com/mikkun/evade-and-destroy](https://github.com/mikkun/evade-and-destroy)) | MIT — standalone local action game; service worker removed | 2026-10-12 |

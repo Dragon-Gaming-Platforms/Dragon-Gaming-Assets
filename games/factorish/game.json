@@ -1,0 +1,14 @@
+{
+  "name": "FactorishJS",
+  "desc": "A compact factory-building sandbox: mine resources, place machines and automate production on an island.",
+  "controls": "Mouse: pan, zoom and place buildings",
+  "image": "1.jpg",
+  "shelf": "Strategy & Idle",
+  "tags": [
+    "strategy",
+    "factory",
+    "simulation"
+  ],
+  "badge": "New",
+  "creator": "msakuta"
+}

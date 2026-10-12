@@ -1,0 +1,14 @@
+{
+  "name": "Coil",
+  "desc": "A reflex arcade game where you wrap your trail around enemies without colliding with your own path.",
+  "controls": "Arrow keys or mouse: steer the trail",
+  "image": "1.jpg",
+  "shelf": "Arcade & Action",
+  "tags": [
+    "arcade",
+    "action",
+    "canvas"
+  ],
+  "badge": "New",
+  "creator": "leereilly"
+}

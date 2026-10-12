@@ -1,0 +1,14 @@
+{
+  "name": "Go Game",
+  "desc": "A browser implementation of the ancient board game Go with local two-player play.",
+  "controls": "Mouse: click an intersection to place a stone",
+  "image": "1.jpg",
+  "shelf": "Strategy & Idle",
+  "tags": [
+    "strategy",
+    "board",
+    "go"
+  ],
+  "badge": "New",
+  "creator": "ismyrnow"
+}
