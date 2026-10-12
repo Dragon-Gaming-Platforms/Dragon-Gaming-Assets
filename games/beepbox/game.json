@@ -1,0 +1,17 @@
+{
+  "name": "BeepBox",
+  "desc": "An online tool for sketching chiptune melodies by John Nesky: paint notes on a pattern grid across multiple instrument channels, tweak the synth engine, and hear your song immediately. Songs save as shareable URLs, export to WAV or MP3, and everything runs locally in the browser.",
+  "controls": "Mouse: paint notes on the pattern grid - Bottom panel: instrument and synth settings - Top bar: play, loop and export",
+  "image": "1.jpg",
+  "shelf": "Tools & Utilities",
+  "tags": [
+    "tools",
+    "music",
+    "chiptune",
+    "tracker",
+    "synth",
+    "editor"
+  ],
+  "badge": "New",
+  "creator": "John Nesky"
+}

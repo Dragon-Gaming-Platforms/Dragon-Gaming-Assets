@@ -37,6 +37,12 @@ jobs:
       # Keep this list in sync with the removal step in sync-assets-catalog.yml.
       - name: Remove non-site files from the deploy tree
         run: rm -rf scripts .github games-to-add.md AGENTS.md README.md .gitignore .git
+      # Catalog metadata is needed by the asset sync tooling, but must not be
+      # published with the game files. Delete it only in this temporary runner
+      # checkout; nothing is committed back to the repository.
+      - name: Remove catalog metadata from the deploy tree
+        run: |
+          find . -type f \( -name 'game.json' -o -iname '*.md' \) -delete
       - name: Upload artifact
         uses: actions/upload-pages-artifact@v3
         with:

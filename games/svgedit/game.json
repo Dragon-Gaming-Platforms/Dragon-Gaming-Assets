@@ -1,0 +1,17 @@
+{
+  "name": "SVG-Edit",
+  "desc": "A full-featured SVG vector graphics editor that runs entirely in the browser: draw shapes, paths and text, edit nodes with the path tool, apply gradients, group and align elements, and import or hand-edit SVG source - then save standards-compliant SVG files.",
+  "controls": "Mouse: select and draw with the left toolbar tools - Right panel: fill/stroke, layers, alignment - Menu: source editor, import/export",
+  "image": "1.jpg",
+  "shelf": "Tools & Utilities",
+  "tags": [
+    "tools",
+    "svg",
+    "vector",
+    "editor",
+    "drawing",
+    "graphics"
+  ],
+  "badge": "New",
+  "creator": "SVG-Edit contributors"
+}

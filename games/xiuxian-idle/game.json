@@ -1,0 +1,17 @@
+{
+  "name": "Xiuxian Idle",
+  "desc": "My Idle Immortal Journey (Wo De Fang Zhi Xian Tu): a Chinese-language idle cultivation game - meditate to grow cultivation, refine pills, explore secret realms, draw prizes and ascend through realms from Qi Refining onward. Saves locally in your browser.",
+  "controls": "Mouse: navigate the cultivation, inventory, lottery, alchemy and exploration menus - All in Chinese",
+  "image": "1.jpg",
+  "shelf": "Strategy & Idle",
+  "tags": [
+    "games",
+    "idle",
+    "xiuxian",
+    "cultivation",
+    "incremental",
+    "chinese"
+  ],
+  "badge": "New",
+  "creator": "setube"
+}

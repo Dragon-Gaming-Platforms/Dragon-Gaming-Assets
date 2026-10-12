@@ -1,0 +1,17 @@
+{
+  "name": "Yet Another Idle RPG",
+  "desc": "A text-based idle RPG inspired by Proto23 with a heavy focus on progression through skill leveling: combat, gathering, crafting and a dozen interlocking skills that keep training while you're away. Known as Nya-iRPG or yair.",
+  "controls": "Mouse: click PLAY and navigate the skill / action menus - Progress continues offline between sessions",
+  "image": "1.jpg",
+  "shelf": "Strategy & Idle",
+  "tags": [
+    "games",
+    "idle",
+    "rpg",
+    "incremental",
+    "skills",
+    "text"
+  ],
+  "badge": "New",
+  "creator": "Miktaew"
+}

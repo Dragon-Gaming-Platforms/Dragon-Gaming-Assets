@@ -1,0 +1,17 @@
+{
+  "name": "Puyo Puyo",
+  "desc": "A JavaScript implementation of the Puyo Puyo falling-blob puzzler: rotate colored pairs as they drop, chain same-color groups of four or more to pop them, and send garbage to your CPU opponent. Fast, colorful versus puzzle action.",
+  "controls": "Arrows: move and rotate the falling pair - Groups of 4+ same-color puyos pop",
+  "image": "1.jpg",
+  "shelf": "Puzzle & Logic",
+  "tags": [
+    "games",
+    "puyo",
+    "puzzle",
+    "match",
+    "versus",
+    "falling"
+  ],
+  "badge": "New",
+  "creator": "sergiss"
+}

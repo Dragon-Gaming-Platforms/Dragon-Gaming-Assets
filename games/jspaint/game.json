@@ -1,0 +1,17 @@
+{
+  "name": "JSPaint",
+  "desc": "A pixel-perfect remake of MS Paint in the browser by 1j01: every classic tool (pencil, brush, airbrush, fill, text, curves, cloning) plus modern extras - themes from Windows 95 to Vista, transparency, layered GIF support, unlimited history, and even pressure-sensitive tablets. Opens and saves PNG, JPEG, GIF, BMP, WEBP, SVG and more.",
+  "controls": "Mouse: draw and use tools - Menus (File/Edit/Image/Colors/Extras): everything else - Right-click canvas: tool options",
+  "image": "1.jpg",
+  "shelf": "Tools & Utilities",
+  "tags": [
+    "tools",
+    "paint",
+    "drawing",
+    "ms-paint",
+    "retro",
+    "editor"
+  ],
+  "badge": "New",
+  "creator": "1j01 (Isaiah Odhner)"
+}
