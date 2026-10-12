@@ -1,0 +1,10 @@
+{
+  "name": "8086.js",
+  "desc": "A browser-based Intel 8086 emulator and assembly playground. Write or load 8086 assembly, assemble it and step through registers, memory and output without distributing any ROMs.",
+  "controls": "Mouse: use the editor and run controls - Keyboard: type assembly in the editor - Use the register and memory panels to inspect execution",
+  "image": "1.jpg",
+  "shelf": "Emulators",
+  "tags": ["emulator", "8086", "assembly", "education"],
+  "badge": "New",
+  "creator": "roerohan"
+}
