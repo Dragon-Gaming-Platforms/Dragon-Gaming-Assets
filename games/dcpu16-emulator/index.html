@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+	<head>
+		<title>DCPU-16 IDE</title>
+		<meta name="Description" content="An open-source assembler, debugger and emulator for 0x10c">
+		<link type="text/css" href="stylesheets/black-theme/jquery-ui-1.8.20.custom.css" rel="stylesheet" />
+		<link type="text/css" href="stylesheets/styles.css" rel="stylesheet" />
+		<script type="text/javascript" src="javascript/jquery-1.7.2.min.js"></script>
+		<script type="text/javascript" src="javascript/jquery-ui-1.8.20.custom.min.js"></script>
+		<script type="text/javascript" src="javascript/emulator.js"></script>
+		<script type="text/javascript" src="javascript/assembler.js"></script>
+		<script type="text/javascript" src="javascript/lem1820.js"></script>
+		<script type="text/javascript" src="javascript/hmd2043.js"></script>
+		<script type="text/javascript" src="javascript/keyboard.js"></script>
+		<script type="text/javascript" src="javascript/clock.js"></script>
+		<script type="text/javascript" src="javascript/gl-matrix-min.js"></script>
+		<script type="text/javascript" src="javascript/webgl-utils.js"></script>
+		<script type="text/javascript" src="javascript/sped3.js"></script>
+		<script type="text/javascript" src="javascript/ace/ace.js" charset="utf-8"></script>
+		<script type="text/javascript" src="javascript/ace/theme-monokai.js" charset="utf-8"></script>
+		<script type="text/javascript" src="javascript/ace/mode-dcpu16.js" charset="utf-8"></script>
+		<script type="text/javascript" src="javascript/ide.js"></script>
+		<script type="text/javascript">
+		  var _gaq = _gaq || [];
+		  _gaq.push(['_setAccount', 'UA-32543076-1']);
+		  _gaq.push(['_trackPageview']);
+
+		  (function() {
+			var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+			ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+			var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+		  })();
+		</script>
+		<script type="text/javascript">
+		  var uvOptions = {};
+		  (function() {
+			var uv = document.createElement('script'); uv.type = 'text/javascript'; uv.async = true;
+			uv.src = ('https:' == document.location.protocol ? 'https://' : 'http://') + 'widget.uservoice.com/6ExFBRfaBV9aGiIHJQb4NQ.js';
+			var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(uv, s);
+		  })();
+		</script>
+		 
+	<body>
+		<div id="toolbar" class="ui-widget-header ui-corner-all">
+			<button id="run_button" onclick="run()" title="Runs the program">Run</button>
+			<button id="step_button" onclick="step()" title="Steps over a single operation">Step</button>
+			<button id="stop_button" onclick="stopDebugger()" title="Stops the debugger and returns to the editor">Stop</button>
+			<button id="pause_button" onclick="pauseDebugger()" title="Pauses the emulator">Pause</button>
+			<button id="reset_button" onclick="reset()" title="Resets the emulator and starts the program from the beginning">Reset</button>
+			<button id="clone_button" onclick="clone()" title="Clones this project so that it is editable" style="display:none">Clone</button>
+			
+			<button id="debug_button" onclick="startDebugger()" title="Starts the debugger">Debug</button>
+			<div style="margin-left: 12px; width: 1px; display: inline-block;"></div>
+			<button id="save_button" onclick="save()" title="Saves this program">Save</button>
+			<button id="open_button" onclick="_open()" title="Displays the Open dialog to open a previously saved file">Open</button>
+			<button id="new_button" onclick="_new()" title="Creates a new file">New</button>
+			<button id="post_button" onclick="post()" title="Posts this file to allow you to share it with others">Post</button>
+			
+			<button id="about_button" class="right" onclick="about()" title="Opens the About dialog">About</button>
+			<button id="settings_button" class="right" onclick="openSettings()" title="Opens the Settings dialog">Settings</button>
+		</div>
+		
+		<div>
+		
+			<div class="ui-dialog ui-widget ui-widget-content ui-corner-all" style="right:0px; height:279px; top: 45px;">
+				<div class="ui-dialog-titlebar ui-widget-header ui-corner-all ui-helper-clearfix">
+					<span class="ui-dialog-title">Emulator</span>
+					<div class="right" id="cycles" style="margin-top: 2px"></div>
+				</div>
+				<div style="height: auto; width: auto;" class="ui-dialog-content ui-widget-content">
+					<div id="monitor"></div>
+					<div class="left" id="media-drive" title="HDM2043 Harold Media Drive"></div>
+					<div id="toggle_media_button" class="left mini-button" title="Inserts or ejects media from the HMD2043 drive.">Insert Media</div>
+					<div class="clear"></div>
+				</div>
+			</div>
+			
+			
+			<div id="editing_windows">
+				<div id="source-dialog" class="ui-dialog ui-widget ui-widget-content ui-corner-all" style="right: 310px; left: 0px; bottom: 190px; top: 45px; width: auto;">
+					<div class="ui-dialog-titlebar ui-widget-header ui-corner-all ui-helper-clearfix">
+						<span id="editor_file_name" class="ui-dialog-title">Source</span>
+						
+						<div id="help_button" class="left titlebar-icon" style="margin: 0" title="Display the help dialog."><div class="ui-icon ui-icon-info"></div></div>
+					</div>
+					<div id="editor" class="ui-dialog-content ui-widget-content"></div>
+				</div>
+				
+				<div id="assembly-dialog" class="ui-dialog ui-widget ui-widget-content ui-corner-all" style="left: 0px; bottom: 0px; height: 180px; right: 310px; width: auto;">
+					<div class="ui-dialog-titlebar ui-widget-header ui-corner-all ui-helper-clearfix">
+					  <span class="ui-dialog-title">Assembly Result</span>
+					</div>
+					<div id="assembly" class="dialog_contents ui-dialog-content ui-widget-content scrolling_contents"></div>
+				</div>
+				
+				<div id="ouput-dialog" class="ui-dialog ui-widget ui-widget-content ui-corner-all" style="right:0px; width: 300px; bottom: 0px; top: 334px;">
+					<div class="ui-dialog-titlebar ui-widget-header ui-corner-all ui-helper-clearfix">
+					  <span class="ui-dialog-title">Output</span>
+					</div>
+					<div id="output" class="ui-dialog-content ui-widget-content dialog_contents scrolling_contents"></div>
+				</div>
+			
+			</div>
+			
+			<div id="debugging_windows" style="display: none">
+				<div id="listing-dialog" class="ui-dialog ui-widget ui-widget-content ui-corner-all" style="right: 310px; left: 0px; bottom: 220px; top: 45px; width: auto;">
+					<div class="ui-dialog-titlebar ui-widget-header ui-corner-all ui-helper-clearfix">
+						<span class="ui-dialog-title">Listing</span>
+					</div>
+					<div id="listing"  
+						class="ui-dialog-content ui-widget-content dialog_contents scrolling_contents"></div>
+						
+					<div id="debugger_line"></div>
+				</div>
+				
+				<div id="memory-dialog" class="ui-dialog ui-widget ui-widget-content ui-corner-all" style="left: 0px; bottom: 0px; height: 210px; right: 310px; width: auto;">
+					<div class="ui-dialog-titlebar ui-widget-header ui-corner-all ui-helper-clearfix">
+					  <span class="ui-dialog-title" title="Displays the value of the emulator's RAM.">Memory</span>
+					  
+						<div id="memory_goto_button" class="right titlebar-icon" title="Jump the memory window to the location of RAM entered in the text box."><div class="ui-icon ui-icon-circle-arrow-s"></div></div>
+						<input id="memory_goto_input" type="text" class="right" />
+						
+						<div class="right" style="margin-top: 2px; margin-right: 20px;">
+							Collapse zeros
+						</div>
+						<div class="right" style="margin-top: 4px; margin-right: 3px;">
+							<input type="checkbox" id="collapse_empty_checkbox" style="margin: 0" /> 
+						</div>
+					  
+					</div>
+					<div id="memory_container" class="dialog_contents ui-dialog-content ui-widget-content scrolling_contents">
+						<div id="memory_sizer"></div>
+						<div id="memory"></div>
+					</div>
+				</div>
+				
+				<div id="registers-dialog" class="ui-dialog ui-widget ui-widget-content ui-corner-all" style="right:0px; width: 300px; height: 242px; top: 334px;">
+					<div class="ui-dialog-titlebar ui-widget-header ui-corner-all ui-helper-clearfix">
+					  <span class="ui-dialog-title" title="The registers window shows the current value of all registers, as well as the value at the RAM locaiton of the register's value.">Registers</span>
+					</div>
+					<div id="registers" class="ui-dialog-content ui-widget-content dialog_contents scrolling_contents">
+						<div id="register-A">
+							<div class="register-name">A:</div>
+							<div class="left">
+								<span class="register-value">0x0000</span>
+								[<span class="register-memory-value">0x0000</span>]
+							</div>
+							<div class="clear"></div>
+						</div>
+						<div id="register-B">
+							<div class="register-name">B:</div>
+							<div class="left">
+								<span class="register-value">0x0000</span>
+								[<span class="register-memory-value">0x0000</span>]
+							</div>
+							<div class="clear"></div>
+						</div>
+						<div id="register-C">
+							<div class="register-name">C:</div>
+							<div class="left">
+								<span class="register-value">0x0000</span>
+								[<span class="register-memory-value">0x0000</span>]
+							</div>
+							<div class="clear"></div>
+						</div>
+						<div id="register-X">
+							<div class="register-name">X:</div>
+							<div class="left">
+								<span class="register-value">0x0000</span>
+								[<span class="register-memory-value">0x0000</span>]
+							</div>
+							<div class="clear"></div>
+						</div>
+						<div id="register-Y">
+							<div class="register-name">Y:</div>
+							<div class="left">
+								<span class="register-value">0x0000</span>
+								[<span class="register-memory-value">0x0000</span>]
+							</div>
+							<div class="clear"></div>
+						</div>
+						<div id="register-Z">
+							<div class="register-name">Z:</div>
+							<div class="left">
+								<span class="register-value">0x0000</span>
+								[<span class="register-memory-value">0x0000</span>]
+							</div>
+							<div class="clear"></div>
+						</div>
+						<div id="register-I">
+							<div class="register-name">I:</div>
+							<div class="left">
+								<span class="register-value">0x0000</span>
+								[<span class="register-memory-value">0x0000</span>]
+							</div>
+							<div class="clear"></div>
+						</div>
+						<div id="register-J">
+							<div class="register-name">J:</div>
+							<div class="left">
+								<span class="register-value">0x0000</span>
+								[<span class="register-memory-value">0x0000</span>]
+							</div>
+							<div class="clear"></div>
+						</div>
+						<div id="register-SP">
+							<div class="register-name"><span class="SP">SP</span>:</div>
+							<div class="left">
+								<span class="register-value">0x0000</span>
+								[<span class="register-memory-value">0x0000</span>]
+							</div>
+							<div class="clear"></div>
+						</div>
+						<div id="register-PC">
+							<div class="register-name"><span class="PC">PC</span>:</div>
+							<div class="left">
+								<span class="register-value">0x0000</span>
+								[<span class="register-memory-value">0x0000</span>]
+							</div>
+							<div class="clear"></div>
+						</div>
+						<div id="register-EX">
+							<div class="register-name">EX:</div>
+							<div class="left">
+								<span class="register-value">0x0000</span>
+								[<span class="register-memory-value">0x0000</span>]
+							</div>
+							<div class="clear"></div>
+						</div>
+						<div id="register-IA">
+							<div class="register-name">IA:</div>
+							<div class="left">
+								<span class="register-value">0x0000</span>
+								[<span class="register-memory-value">0x0000</span>]
+							</div>
+							<div class="clear"></div>
+						</div>
+					</div>
+				</div>
+			
+				<div id="watches-dialog" class="ui-dialog ui-widget ui-widget-content ui-corner-all" style="right:0px; width: 300px; bottom: 0px; top: 586px;">
+					<div class="ui-dialog-titlebar ui-widget-header ui-corner-all ui-helper-clearfix">
+					  <span class="ui-dialog-title" title="Watches allow you to see the value of a word in RAM while debugging.  To add a watch click the + button and enter a label or a numeric location in RAM.">Watches</span>
+					  <div id="watches_remove_button" class="right titlebar-icon" title="Remove the selected watch"><div class="ui-icon ui-icon-minusthick"></div></div>
+					  <div id="watches_add_button" class="right titlebar-icon" title="Add a watch.  Enter a label or memory location and the value in RAM will be displayed during debugging."><div class="ui-icon ui-icon-plusthick"></div></div>
+					</div>
+					<div id="watches">
+						<ol id="watches_list"></ol>
+						<li id="watch_template" style="display: none"><div class="watch_key"></div><div class="watch_value"></div><div class="clear"></div></li>
+						<li id="watch_edit_template" style="display: none"><input type="text"></input></li>
+					</div>
+				</div>
+			</div>
+		</div>
+		
+		<div id="about_dialog" title="About DCPU-16 IDE">
+			<p><img src="images/logo.png" /></p>
+			<p>
+				DCPU-16 IDE version 0.9b<br/>
+				&copy; 2012 <a href="http://twitter.com/#!/dangermccann" target="_tab">John McCann</a>
+			</p>
+			<p>DCPU-16 IDE is an assembler, debugger and emulator for <a href="http://0x10c.com" target="_tab">0x10c</a>.</p>
+			<p><a href="https://github.com/dangermccann/dcpu16-ide" target="_tab">Source code and documentation</a></p>
+			<p><a href="javascript:UserVoice.showPopupWidget();" title="Open feedback & support dialog (powered by UserVoice)">Feedback &amp; Support</a></p>
+		</div>
+
+		
+		<div id="save_dialog" title="Save File">
+			<p>
+				Enter a file name: <br/>
+				<input type="text" id="file_name" />
+			</p>
+		</div>
+		
+		<div id="open_dialog" title="Open File">
+			<p>
+				<ol id="selectable_file_list">
+				</ol>
+			</p>
+		</div>
+		
+		<div id="settings_dialog" title="Settings">
+			<div style="margin: 24px 0 12px 0;">
+				<div class="settings_label">CPU Speed:</div>
+				<div id="cpu_speed_values" class="settings_value">
+					<span>100 kHz</span>
+					<span>10 kHz</span>
+					<span>1 kHz</span>
+					<span>100 Hz</span>
+					<span>10 Hz</span>
+				</div>
+				<div class="clear"></div>
+				
+				<div class="hr"></div>
+				<p class="heading">Project Hardware Settings</p>
+				
+				<div id="hardware_settings"></div>
+			</div>
+		</div>
+		
+		<div id="help_dialog" title="Help with DCPU-16 IDE" style="font-size: 0.9em">
+			<p><img src="images/logo.png" /></p>
+			<p>
+				This assembler is fully compliant with version 1.7 of the 
+				<a href="https://raw.github.com/gatesphere/demi-16/master/docs/dcpu-specs/dcpu-1-7.txt" target="_blank">DCPU-16 specification</a>.
+				It also has built-in support for these devices: <br/>
+				<a href="http://0x10cwiki.com/wiki/Generic_keyboard" target="_blank">Generic Keyboard</a>,
+				<a href="http://0x10cwiki.com/wiki/Generic_Clock" target="_blank">Generic Clock</a>,
+				<a href="http://0x10cwiki.com/wiki/LEM1802_Display" target="_blank">LEM1802 Display</a>,
+				<a href="https://raw.github.com/0x10cStandardsCommittee/0x10c-Specifications/master/COMMUNITY/HIT_HMD2043.txt" target="_blank">HMD2043 Media Drive</a>,
+				<a href="http://dcpu.com/3d-vector-display/" target="_blank">SPED-3 Display</a>
+				<br/>
+			</p>
+			<p>Use the Settings dialog to manage the connected hardware in each of your programs.</p>
+			<p>
+				The assembler includes a preprocessor that supports a subset of the preprocessor directives mentioned in the
+				<a href="https://raw.github.com/0x10cStandardsCommittee/0x10c-Standards/master/ASM/Spec_0xSCA.txt" target="_blank">0xSCA specification</a>
+				maintained by the <a href="https://github.com/0x10cStandardsCommittee" target="_blank">0x10c Standards Committee</a>.  
+			</p>
+			<p>
+				The following preprocessor directives work:	<br/>
+				org, define, def, eq, undef, ifdef, ifndef, if, else elseif, elif, end, echo, error, dw, dp, fill, include
+			</p>
+			<p>
+				These preprocessor directives will be supported soon:<br/>
+				macro, ascii, rep, align, incbin
+			</p>
+			<p>
+				Please provide feedback and report bugs <a href="javascript:UserVoice.showPopupWidget();" title="Open feedback & support dialog (powered by UserVoice)">here</a>.
+			</p>
+		</div>
+		
+		<!-- Shaders for SPED3 -->
+		<script id="shader-vs" type="x-shader/x-vertex">
+			attribute vec3 aVertexPosition;
+			attribute vec4 aVertexColor;
+
+			uniform mat4 uMVMatrix;
+			uniform mat4 uPMatrix;
+			
+			varying vec4 vColor;
+			
+			
+			void main(void) {
+				gl_Position = uPMatrix * uMVMatrix * vec4(aVertexPosition, 1.0);
+				vColor = aVertexColor;
+			}
+		</script>
+		<script id="shader-fs" type="x-shader/x-fragment">
+			precision mediump float;
+			
+			varying vec4 vColor;
+
+			void main(void) {
+				gl_FragColor = vColor;
+			}
+		</script>
+
+
+	</body>
+</html>
