@@ -1,0 +1,10 @@
+{
+  "name": "Andromeda Invaders",
+  "desc": "A tiny arcade shooter inspired by classic space invaders, with a pixel-art canvas, escalating waves and Web Audio effects.",
+  "controls": "Arrow keys or A/D: move - Space: fire - P: pause",
+  "image": "1.jpg",
+  "shelf": "Arcade & Action",
+  "tags": ["arcade", "shooter", "space", "canvas"],
+  "badge": "New",
+  "creator": "susam"
+}

@@ -1,0 +1,10 @@
+{
+  "name": "Web JJY",
+  "desc": "A browser-based standard-wave simulator that generates Japan's JJY time signal through Web Audio for experimenting with radio-controlled clocks.",
+  "controls": "Mouse: click Start - Checkbox: enable summer time - Connect an earphone near a radio-controlled clock",
+  "image": "1.jpg",
+  "shelf": "Tools & Utilities",
+  "tags": ["audio", "radio", "signal", "simulator"],
+  "badge": "New",
+  "creator": "shogo82148"
+}

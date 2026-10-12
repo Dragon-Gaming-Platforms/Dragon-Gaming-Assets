@@ -1,0 +1,10 @@
+{
+  "name": "Match 3",
+  "desc": "A compact canvas match-three puzzle: swap neighboring gems to make rows and columns of three or more, then watch the board cascade.",
+  "controls": "Mouse: click or drag neighboring gems to swap them",
+  "image": "1.jpg",
+  "shelf": "Puzzle & Logic",
+  "tags": ["puzzle", "match-3", "canvas", "casual"],
+  "badge": "New",
+  "creator": "rembound"
+}
