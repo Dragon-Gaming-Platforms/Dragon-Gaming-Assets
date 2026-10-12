@@ -1,0 +1,17 @@
+{
+  "name": "jsfxr",
+  "desc": "The classic retro sound effect generator ported to the browser: click a preset (pickup, laser, explosion, power-up, jump, blip), randomize and mutate it, then tune the waveform, envelope, slide and filter sliders until it sounds right - and export as a WAV for your game.",
+  "controls": "Mouse: click presets and drag the parameter sliders - Buttons: randomize, mutate, play, export WAV",
+  "image": "1.jpg",
+  "shelf": "Tools & Utilities",
+  "tags": [
+    "tools",
+    "sound",
+    "sfx",
+    "generator",
+    "retro",
+    "chiptune"
+  ],
+  "badge": "New",
+  "creator": "grumdrig"
+}

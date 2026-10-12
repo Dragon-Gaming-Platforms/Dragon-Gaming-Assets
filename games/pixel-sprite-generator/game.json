@@ -1,0 +1,16 @@
+{
+  "name": "Pixel Sprite Generator",
+  "desc": "ZFedoran's procedural pixel sprite generator: generates randomized ships, creatures and other sprites from template data with adjustable colors, saturation, and variation - click through thousands of unique designs, resize them, and copy the results for your games.",
+  "controls": "Mouse: click the canvas to generate a new random sprite - Links: switch template sets (ships, low saturation, many colors)",
+  "image": "1.jpg",
+  "shelf": "Tools & Utilities",
+  "tags": [
+    "tools",
+    "pixel-art",
+    "sprites",
+    "procedural",
+    "generator"
+  ],
+  "badge": "New",
+  "creator": "zfedoran"
+}
