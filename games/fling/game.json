@@ -1,0 +1,14 @@
+{
+  "name": "Fling",
+  "desc": "Aim and fling a ball through physics puzzles, using momentum and careful timing to reach each target.",
+  "controls": "Mouse: aim and click to fling",
+  "image": "1.jpg",
+  "shelf": "Puzzle & Logic",
+  "tags": [
+    "physics",
+    "puzzle",
+    "aim"
+  ],
+  "badge": "New",
+  "creator": "mirreal"
+}

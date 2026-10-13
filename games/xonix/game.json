@@ -1,0 +1,14 @@
+{
+  "name": "Xonix",
+  "desc": "Claim territory by drawing lines through the open field while avoiding roaming enemies in this classic arcade puzzle.",
+  "controls": "Arrow keys: draw paths and capture territory",
+  "image": "1.jpg",
+  "shelf": "Arcade & Action",
+  "tags": [
+    "arcade",
+    "territory",
+    "puzzle"
+  ],
+  "badge": "New",
+  "creator": "michelebucelli"
+}

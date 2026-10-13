@@ -1,0 +1,14 @@
+{
+  "name": "Void Runner",
+  "desc": "A fast endless runner through a neon void with obstacles, score chasing and responsive keyboard controls.",
+  "controls": "Arrow keys or A/D: steer and dodge",
+  "image": "1.jpg",
+  "shelf": "Arcade & Action",
+  "tags": [
+    "runner",
+    "arcade",
+    "reflex"
+  ],
+  "badge": "New",
+  "creator": "kamalesh404"
+}

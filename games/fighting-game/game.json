@@ -1,0 +1,14 @@
+{
+  "name": "JavaScript Fighting Game",
+  "desc": "A canvas fighting game with a playable arena, sprite animations and local keyboard controls.",
+  "controls": "Keyboard: use the on-screen player controls",
+  "image": "1.jpg",
+  "shelf": "Arcade & Action",
+  "tags": [
+    "fighting",
+    "arcade",
+    "canvas"
+  ],
+  "badge": "New",
+  "creator": "leogama09"
+}

@@ -1,0 +1,15 @@
+{
+  "name": "Spectrum",
+  "desc": "Load an audio file and explore its frequency spectrum with an interactive browser visualization.",
+  "controls": "Mouse: choose a local audio file and adjust the display",
+  "image": "1.jpg",
+  "shelf": "Tools & Utilities",
+  "tags": [
+    "tools",
+    "audio",
+    "visualizer",
+    "spectrum"
+  ],
+  "badge": "New",
+  "creator": "mattdesl"
+}

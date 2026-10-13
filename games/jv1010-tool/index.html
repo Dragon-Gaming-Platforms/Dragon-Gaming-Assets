@@ -1,0 +1,131 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+	<meta charset="UTF-8">
+	<title>JV-1010 Tool</title>
+
+	<link rel="stylesheet" type="text/css" href="style.css">
+
+	<script src="js/3rdParty/jQuery-2.1.4.min.js"></script>
+	<script src="js/3rdParty/jquery-ui-1.11.1.min.js"></script>
+	<script src="js/3rdParty/underscore-1.8.3.min.js"></script>
+	<script src="js/3rdParty/WebMIDIAPI.js"></script>
+	<script src="js/3rdParty/filedrop-min.js"></script>
+	<script src="js/3rdParty/FileSaver.min.js"></script>
+
+	<script type="text/javascript">
+		var jvtool = {};
+	</script>
+	<script src="js/util.js"></script>
+	<script src="js/midiUtil.js"></script>
+	<script src="js/midi.js"></script>
+	<script src="js/sysexData.js"></script>
+	<script src="js/sysexParser.js"></script>
+	<script src="js/sysexHandler.js"></script>	
+	<script src="js/patchList.js"></script>
+	<script src="js/jv1010tool.js"></script>
+	<script type="text/javascript">
+		$(document).ready(jvtool.app.initialize);
+	</script>
+</head>
+
+<body>
+
+<div id="toolbar" class="panel">
+    <label for="midiIn">JV-1010 In:</label>
+    <select name="midiIn" id="midiIn">
+    </select>
+
+   &nbsp;&nbsp;&nbsp;
+
+    <label for="midiOut">JV-1010 Out:</label>
+    <select name="midiOut" id="midiOut">
+    </select>
+
+    &nbsp;&nbsp;&nbsp;
+
+    <label for="controllerIn">Controller In:</label>
+    <select name="controllerIn" id="controllerIn">
+    </select>
+
+</div>
+
+<div id="patchPanel" class="panel">
+
+	<div id="patchList">
+		<h3>User</h3>
+		<div><ul id="patchListUser"></ul></div>
+	
+		<h3>Preset A</h3>
+		<div><ul id="patchListA"></ul></div>
+	
+		<h3>Preset B</h3>
+		<div><ul id="patchListB"></ul></div>
+
+		<h3>Preset C</h3>
+		<div><ul id="patchListC"></ul></div>
+
+		<h3>Preset D (GM)</h3>
+		<div><ul id="patchListD"></ul></div>
+
+		<h3>Preset E</h3>
+		<div><ul id="patchListE"></ul></div>
+
+		<h3>Session</h3>
+		<div><ul id="patchListSession"></ul></div>
+	</div>
+
+</div>
+
+<div id="main" class="panel">
+
+<div id="errors">
+</div>
+
+<fieldset id="getData">
+	<legend>Get Data</legend>
+	<button type="button" onclick="jvtool.app.onSendUserPatchRequest();">Get User Patch</button>
+	#<input id="patchNumber" type="number" value="1"></input>
+	<br>
+	<button type="button" onclick="jvtool.app.onSendAllUserPatchRequest();">Get All User Patches</button>
+</fieldset>
+
+<fieldset id="sendData">
+	<legend>Send Data</legend>
+	<div id="fileDropZone" style="border: 1px solid;">
+	  <p>Drop .syx file here or click to browse</p>
+	</div>
+	<pre id="fileContents">
+	</pre>
+</fieldset>
+
+<fieldset id="miscSysex">
+	<legend>Misc SysEx</legend>
+	<button type="button" onclick="jvtool.app.onSendIdentityRequest();">Identity Request</button>
+</fieldset>
+
+</div>
+
+<div class="dialogBackdrop" id="sendPatchDialog" style="display: none;">
+	<div class="dialogBox">
+		<div class="closeButton"><a href="#" onClick="$('#sendPatchDialog').hide();">X</a></div>
+		<h2>Send Patch "<span id="sendPatchName">PatchName</span>"</h2>
+		<input type="hidden" id="sendPatchIndex"/>
+		<p>
+			<button type="button" onClick="jvtool.app.onSendLoadedPatchToTemporary(parseInt($('#sendPatchIndex')));$('#sendPatchDialog').hide();">
+				Upload to Temporary Patch
+			</button>
+		</p>
+		<p>
+			<button type="button" onClick="jvtool.app.onSendLoadedPatchToUser(parseInt($('#sendPatchIndex').val()), parseInt($('#sendPatchNumber').val())-1);
+			$('#sendPatchDialog').hide();">
+				Upload to User Patch
+			</button>
+			# <input id="sendPatchNumber" type="number" style="width: 50px;"></input>
+		</p>
+	</div>
+</div>
+
+</body>
+</html>

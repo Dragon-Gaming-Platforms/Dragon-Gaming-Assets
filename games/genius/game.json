@@ -1,0 +1,14 @@
+{
+  "name": "Genius",
+  "desc": "A colorful memory game using a radial control: repeat the growing sequence of lights and sounds for as long as you can.",
+  "controls": "Mouse or touch: repeat the illuminated sequence",
+  "image": "1.jpg",
+  "shelf": "Puzzle & Logic",
+  "tags": [
+    "memory",
+    "music",
+    "reflex"
+  ],
+  "badge": "New",
+  "creator": "victorqribeiro"
+}

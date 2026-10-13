@@ -1,0 +1,14 @@
+{
+  "name": "Battle Tank",
+  "desc": "A browser tank battle with destructible obstacles, projectiles, power-ups and local sound effects.",
+  "controls": "Arrow keys or WASD: move - Mouse or Space: fire",
+  "image": "1.jpg",
+  "shelf": "Arcade & Action",
+  "tags": [
+    "arcade",
+    "tank",
+    "shooter"
+  ],
+  "badge": "New",
+  "creator": "d4vucat"
+}

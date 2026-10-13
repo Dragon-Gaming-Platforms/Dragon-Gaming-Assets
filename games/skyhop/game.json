@@ -1,0 +1,14 @@
+{
+  "name": "Skyhop",
+  "desc": "A side-scrolling aerial platform game where you hop between ledges and survive the scrolling level.",
+  "controls": "Arrow keys: move and jump",
+  "image": "1.jpg",
+  "shelf": "Arcade & Action",
+  "tags": [
+    "platformer",
+    "arcade",
+    "action"
+  ],
+  "badge": "New",
+  "creator": "evreniel"
+}

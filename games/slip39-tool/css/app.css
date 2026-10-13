@@ -1,0 +1,20 @@
+body {
+    padding-bottom: 32px;
+}
+.form-control[readonly] {
+    cursor: text;
+}
+.version {
+    position: absolute;
+    top: 5px;
+    right: 5px;
+}
+.generate {
+    cursor: pointer;
+}
+.prototype {
+    color: #FF0000;
+    font-weight: bold;
+    text-align: center;
+    padding: 2em;
+}

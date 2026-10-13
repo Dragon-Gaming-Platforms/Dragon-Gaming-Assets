@@ -1,0 +1,1 @@
+{"name":"Tennis","desc":"A simple browser tennis game with canvas physics, a player paddle and a computer opponent. Keep the ball in play and score points.","controls":"Arrow keys: move your player - Space: serve","image":"1.jpg","shelf":"Sports & Racing","tags":["sports","tennis","arcade","canvas"],"badge":"New","creator":"svrbasky"}
