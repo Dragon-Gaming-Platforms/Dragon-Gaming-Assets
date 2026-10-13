@@ -17,7 +17,9 @@ Both are served from the **same origin** (`dragon-gaming-platforms.github.io`), 
 
 ## Hard rules
 
-1. **NEVER open a pull request.** All work lands as direct commits to `main`. No feature branches, no PRs, no drafts. Non-negotiable.
+1. **NEVER open a pull request.** All work must land on `main` as a direct commit — no PRs, no drafts. Non-negotiable.
+   - Working on a platform-assigned working branch (e.g. an `arena/...` branch) is fine, as long as the commit is fast-forward merged into `main` before the work is considered done.
+   - If your session cannot push to `main`, push the working branch and ask the user to fast-forward merge it — never leave game work stranded on a branch.
 2. **Never rewrite or force-push `main`.**
 3. **Never use Git LFS.** GitHub Pages does not serve LFS objects — every file must be a regular Git blob.
 4. **Never delete or rename an existing `games/<slug>/` folder** unless the user explicitly asks. The main-repo catalog links to these URLs and its sync is add-only — deletions and renames orphan catalog entries (details below).
@@ -46,7 +48,7 @@ AGENTS.md              ← this file
 2. **Place the game**: a working `index.html` plus any assets it needs. Prefer fully self-contained builds — the whole point of hosting here is durability, so avoid builds that depend on external CDNs. If external resources are unavoidable, note them in `THIRD_PARTY.md`. Test that it runs standalone before pushing.
 3. **Write `game.json`** (recommended) — see the reference below.
 4. **Add a `THIRD_PARTY.md` row in the same commit** — see the attribution section below. A game never ships without its row.
-5. **Commit and push directly to `main`.** Clear message, e.g. `Add My New Game (my-new-game)`.
+5. **Commit and push to `main`.** Clear message, e.g. `Add My New Game (my-new-game)`. If the session is working on a working branch (e.g. `arena/...`), push that branch and fast-forward merge it into `main` (or ask the user to), so the commit lands on `main`.
 6. **Verify it's live.** Pushes to `main` deploy to GitHub Pages automatically (allow a minute or two). Check `https://dragon-gaming-platforms.github.io/Dragon-Gaming-Assets/games/<slug>/`. If `curl` can't reach `*.github.io` from your sandbox, verify with a web-page fetch tool instead — curl failing there is a sandbox egress limitation, not evidence the site is down.
 7. **Tell the user to run the catalog sync.** You cannot trigger it — it lives in the main repo. The user goes to the **main repo → Actions tab → "Sync Assets-Repo Games to Catalog" → Run workflow** (a dry-run checkbox is available). Until that runs, the game is hosted but not listed in the catalog.
 8. Remind the user that the **main repo's** `THIRD_PARTY.md` may also need a matching row — the sync workflow prints this reminder too.
