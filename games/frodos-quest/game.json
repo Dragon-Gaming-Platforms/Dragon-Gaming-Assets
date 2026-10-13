@@ -1,0 +1,15 @@
+{
+  "name": "Frodo's Quest",
+  "desc": "A Hobbit's adventure in 1980s Sierra On-Line style: a pre-rendered point-and-click world of puzzles, inventory and collectibles, compiled entirely to JavaScript.",
+  "controls": "Mouse only: click hotspots to move, talk, grab and use items",
+  "shelf": "RPG & Adventure",
+  "tags": [
+    "games",
+    "point-and-click",
+    "adventure",
+    "classic"
+  ],
+  "badge": "New",
+  "creator": "olsen232",
+  "image": "1.png"
+}

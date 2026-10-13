@@ -1,0 +1,15 @@
+{
+  "name": "Ludo",
+  "desc": "Full Ludo rules on a canvas 15x15 board: 2-4 players, each human or bot, safe squares, captures, finishing lanes and the extra turn on a six.",
+  "controls": "Pick 2-4 players (human or bot) on the setup screen, then roll the dice and click a token to move it",
+  "shelf": "Strategy & Idle",
+  "tags": [
+    "games",
+    "ludo",
+    "board-game",
+    "local-multiplayer"
+  ],
+  "badge": "New",
+  "creator": "bocaletto-luca",
+  "image": "1.png"
+}

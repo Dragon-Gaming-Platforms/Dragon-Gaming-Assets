@@ -1,0 +1,15 @@
+{
+  "name": "AI Prison Break",
+  "desc": "A top-down stealth escape: reach the exit while guards hunt you with real finite-state-machine brains that switch between DFS, BFS and A* pathfinding - three difficulty levels.",
+  "controls": "WASD or arrow keys to move; dodge guard vision cones and reach the EXIT tile",
+  "shelf": "RPG & Adventure",
+  "tags": [
+    "games",
+    "stealth",
+    "ai",
+    "top-down"
+  ],
+  "badge": "New",
+  "creator": "vedant131",
+  "image": "1.png"
+}

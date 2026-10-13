@@ -1,0 +1,15 @@
+{
+  "name": "Bingo 90",
+  "desc": "Italian 90-ball tombola for 1-8 players at one screen: draw numbers 1-90, cards mark themselves, and race for Ambo, Terno, Quaterna, Cinquina and the full Tombola.",
+  "controls": "Choose players, then click the draw button for each number - winning is detected automatically",
+  "shelf": "Strategy & Idle",
+  "tags": [
+    "games",
+    "bingo",
+    "board-game",
+    "local-multiplayer"
+  ],
+  "badge": "New",
+  "creator": "bocaletto-luca",
+  "image": "1.png"
+}

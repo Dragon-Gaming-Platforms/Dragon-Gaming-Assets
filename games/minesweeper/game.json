@@ -1,0 +1,15 @@
+{
+  "name": "Minesweeper 2.0",
+  "desc": "Classic minesweeper with a modern twist: three difficulties, flood-fill reveals, flagging, a timer and per-difficulty best times kept in the browser.",
+  "controls": "Left-click to reveal, right-click (or long-press on touch) to flag",
+  "shelf": "Puzzle & Logic",
+  "tags": [
+    "games",
+    "minesweeper",
+    "puzzle",
+    "classic"
+  ],
+  "badge": "New",
+  "creator": "bocaletto-luca",
+  "image": "1.png"
+}

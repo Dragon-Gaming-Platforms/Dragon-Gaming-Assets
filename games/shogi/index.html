@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html> 
+<head>
+<script src="lib/jquery.js"></script>
+<script src="lib/bootstrap.js"></script>
+<script src="lib/alasql.js"></script>
+<script src="lib/db.js"></script>
+<script src="lib/string.js"></script>
+<link href="css/bootstrap.css" rel="stylesheet" />
+<link href="css/style.css" rel="stylesheet" />
+<meta charset="utf-8">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Cache-Control" content="no-cache">
+<meta name="viewport" content="width=device-width">
+<title>SHOGI</title>
+</head>
+<body>
+	<div class="flexbox">
+		<table id="tbody-box1" class="table container box1 box">
+			<tr>
+				<td></td>
+				<td></td>
+				<td></td>
+				<td></td>
+				<td></td>
+			</tr>
+			<tr>
+				<td></td>
+				<td></td>
+				<td></td>
+				<td></td>
+				<td></td>
+			</tr>
+			<tr>
+				<td></td>
+				<td></td>
+				<td></td>
+				<td></td>
+				<td></td>
+			</tr>
+			<tr>
+				<td></td>
+				<td></td>
+				<td></td>
+				<td></td>
+				<td></td>
+			</tr>
+		</table>
+	
+		
+		<table id="turnbox" class="table container turnbox" >
+			<tr style="height: 40px;">
+				<td class="title" style="color:rgb(153, 217, 234)" id="1">後手↑</td>
+				<td class="title" style="color:rgb(237, 28, 36)" id="0">先手↓</td>
+			</tr>
+		</table>
+		
+		<table id="tbody-box0" class="table container box0 box">
+			<tr>
+				<td></td>
+				<td></td>
+				<td></td>
+				<td></td>
+				<td></td>
+			</tr>
+			<tr>
+				<td></td>
+				<td></td>
+				<td></td>
+				<td></td>
+				<td></td>
+			</tr>
+			<tr>
+				<td></td>
+				<td></td>
+				<td></td>
+				<td></td>
+				<td></td>
+			</tr>
+			<tr>
+				<td></td>
+				<td></td>
+				<td></td>
+				<td></td>
+				<td></td>
+			</tr>
+		</table>
+	</div>
+
+	
+	 	<table id="tbody-board" class="table container shogiboard">
+	 		<tr>
+	 			<td></td>
+	 			<td></td>
+	 			<td></td>
+	 			<td></td>
+	 			<td></td>
+	 			<td></td>
+	 			<td></td>
+	 			<td></td>
+	 			<td></td>
+	 		</tr>
+	 		<tr>
+	 			<td></td>
+	 			<td></td>
+	 			<td></td>
+	 			<td></td>
+	 			<td></td>
+	 			<td></td>
+	 			<td></td>
+	 			<td></td>
+	 			<td></td>
+	 		</tr>
+	 		<tr>
+	 			<td></td>
+	 			<td></td>
+	 			<td></td>
+	 			<td></td>
+	 			<td></td>
+	 			<td></td>
+	 			<td></td>
+	 			<td></td>
+	 			<td></td>
+	 		</tr>
+	 		<tr>
+	 			<td></td>
+	 			<td></td>
+	 			<td></td>
+	 			<td></td>
+	 			<td></td>
+	 			<td></td>
+	 			<td></td>
+	 			<td></td>
+	 			<td></td>
+	 		</tr>
+	 		<tr>
+	 			<td></td>
+	 			<td></td>
+	 			<td></td>
+	 			<td></td>
+	 			<td></td>
+	 			<td></td>
+	 			<td></td>
+	 			<td></td>
+	 			<td></td>
+	 		</tr>
+	 		<tr>
+	 			<td></td>
+	 			<td></td>
+	 			<td></td>
+	 			<td></td>
+	 			<td></td>
+	 			<td></td>
+	 			<td></td>
+	 			<td></td>
+	 			<td></td>
+	 		</tr>
+	 		<tr>
+	 			<td></td>
+	 			<td></td>
+	 			<td></td>
+	 			<td></td>
+	 			<td></td>
+	 			<td></td>
+	 			<td></td>
+	 			<td></td>
+	 			<td></td>
+	 		</tr>
+	 		<tr>
+	 			<td></td>
+	 			<td></td>
+	 			<td></td>
+	 			<td></td>
+	 			<td></td>
+	 			<td></td>
+	 			<td></td>
+	 			<td></td>
+	 			<td></td>
+	 		</tr>
+	 		<tr>
+	 			<td></td>
+	 			<td></td>
+	 			<td></td>
+	 			<td></td>
+	 			<td></td>
+	 			<td></td>
+	 			<td></td>
+	 			<td></td>
+	 			<td></td>
+	 		</tr> 		
+	 	</table>
+
+		<div class="flexbox" style="margin-top:20px; margin-left: 20px;">
+			<span class="shogi" style="color: RGB(185,122,87)">今の手数: <input type="number" id="count" class="shogi" style="border: 0px" readonly></span>
+				<button id="before" onclick="before();" class="btn shogi">一手前</button>
+			  <button id="after" onclick="after();" class="btn shogi">一手後</button>
+			  <button onclick="DB.init();" class="btn shogi">リセット</button>
+			  <button onclick="edit();" class="btn shogi">詰将棋編集モード</button>
+			  <table id="tbody-editbox" class="table editbox" hidden=true>
+			  	<tr>
+		 			<td><img title="kyousha1a" src="img\kyousha1a.png"></td>
+		 			<td><img title="kyousha1b" src="img\kyousha1b.png"></td>
+		 			<td><img title="keima1a" src="img\keima1a.png"></td>
+		 			<td><img title="keima1b" src="img\keima1b.png"></td>
+		 			<td><img title="hu1a" src="img\hu1a.png"></td>
+		 		</tr>
+			  	<tr>
+		 			<td><img title="gin1a" src="img\gin1a.png"></td>
+		 			<td><img title="gin1b" src="img\gin1b.png"></td>
+		 			<td><img title="hisha1a" src="img\hisha1a.png"></td>
+		 			<td><img title="hisha1b" src="img\hisha1b.png"></td>
+		 			<td><img title="hu1b" src="img\hu1b.png"></td>
+		 		</tr>
+		 		<tr>
+		 			<td><img title="kaku1a" src="img\kaku1a.png"></td>
+		 			<td><img title="kaku1b" src="img\kaku1b.png"></td>
+		 			<td><img title="kin1" src="img\kin1.png"></td>
+		 			<td><img title="ou10" src="img\ou1.png"></td>
+		 			<td><a onclick="deleteedit();" style="color:RGB(185,122,87);">マスをクリア</a></td>
+		 		</tr>
+		 		<tr>
+		 			<td><img title="kyousha0a" src="img\kyousha0a.png"></td>
+		 			<td><img title="kyousha0b" src="img\kyousha0b.png"></td>
+		 			<td><img title="keima0a" src="img\keima0a.png"></td>
+		 			<td><img title="keima0b" src="img\keima0b.png"></td>
+		 			<td><img title="hu0a" src="img\hu0a.png"></td>
+		 		</tr>
+			  	<tr>
+		 			<td><img title="gin0a" src="img\gin0a.png"></td>
+		 			<td><img title="gin0b" src="img\gin0b.png"></td>
+		 			<td><img title="hisha0a" src="img\hisha0a.png"></td>
+		 			<td><img title="hisha0b" src="img\hisha0b.png"></td>
+		 			<td><img title="hu0b" src="img\hu0b.png"></td>
+		 		</tr>
+		 		<tr>
+		 			<td><img title="kaku0a" src="img\kaku0a.png"></td>
+		 			<td><img title="kaku0b" src="img\kaku0b.png"></td>
+		 			<td><img title="kin0" src="img\kin0.png"></td>
+		 			<td><img title="ou00" src="img\ou0.png"></td>
+		 			<td><a onclick="alldelete();" style="color:RGB(185,122,87);">すべてクリア</a></td>
+		 		</tr>
+			  </table>
+		</div>
+		
+		<script src="js/piecesInitPosition.js"></script>		
+		<script src="js/shogi.js"></script>
+</body>
+</html>

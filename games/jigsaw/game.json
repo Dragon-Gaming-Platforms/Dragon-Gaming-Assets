@@ -1,0 +1,15 @@
+{
+  "name": "Jigsaw",
+  "desc": "Canvas jigsaw puzzler with irregular piece cuts, piece snapping, a timer, confetti and synthesized sound - three built-in themes or drop in your own picture.",
+  "controls": "Drag pieces onto the board; use the controls to change theme, difficulty and piece count",
+  "shelf": "Puzzle & Logic",
+  "tags": [
+    "games",
+    "jigsaw",
+    "puzzle",
+    "canvas"
+  ],
+  "badge": "New",
+  "creator": "playjigsaw",
+  "image": "1.png"
+}

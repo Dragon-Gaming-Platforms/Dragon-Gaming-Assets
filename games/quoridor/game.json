@@ -1,0 +1,15 @@
+{
+  "name": "Quoridor",
+  "desc": "The wall-building board game: race across a 9x9 grid and lay walls in the way of up to three friends - or beat a built-in artificial intelligence alone.",
+  "controls": "Click a square to move, then click an edge to place a wall; auto-rematch on win",
+  "shelf": "Strategy & Idle",
+  "tags": [
+    "games",
+    "quoridor",
+    "board-game",
+    "strategy"
+  ],
+  "badge": "New",
+  "creator": "LoicE5",
+  "image": "1.png"
+}

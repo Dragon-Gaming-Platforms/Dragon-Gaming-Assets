@@ -1,0 +1,20 @@
+*
+{
+    margin: 0;
+    padding: 0;
+}
+html, body
+{
+    height: 100vh;
+}
+body
+{
+    align-items: center;
+    background-color: #DD0426;
+    display: flex;
+    justify-content: center;
+}
+#canvas
+{
+    box-shadow: 0 0 30px #00000050;
+}
