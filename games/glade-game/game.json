@@ -1,0 +1,9 @@
+{
+  "name": "Glade",
+  "desc": "A Zelda-inspired tiny third-person 3D adventure: explore a minimalist overworld, swing your sword against six monster types, and defeat the Lake Guardian.",
+  "controls": "WASD/Arrows to move, Space sword, B arrow, F dragon fire, Shift flap (×6 to reach the Sky), U upgrade, 1-6 tunic, drag to orbit",
+  "shelf": "RPG & Adventure",
+  "tags": ["games", "html5", "3d", "adventure"],
+  "badge": "New",
+  "creator": "JaxonHyer"
+}
