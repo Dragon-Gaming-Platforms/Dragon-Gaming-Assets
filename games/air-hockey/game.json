@@ -1,0 +1,15 @@
+{
+  "name": "Air Hockey",
+  "desc": "Modern, dependency-free air hockey in vanilla JavaScript: drive the puck and score against an AI opponent.",
+  "controls": "Mouse or touch to move your paddle",
+  "shelf": "Sports & Racing",
+  "tags": [
+    "games",
+    "html5",
+    "sports",
+    "arcade"
+  ],
+  "badge": "New",
+  "creator": "gamelabz",
+  "image": "1.png"
+}

@@ -1,0 +1,15 @@
+{
+  "name": "2048",
+  "desc": "The classic 2048: slide the grid and merge matching tiles as you chase the elusive 2048 tile.",
+  "controls": "Arrow keys (or swipes) to slide tiles",
+  "shelf": "Puzzle & Logic",
+  "tags": [
+    "games",
+    "html5",
+    "puzzle",
+    "classic"
+  ],
+  "badge": "New",
+  "creator": "Gabriele Cirulli",
+  "image": "1.png"
+}

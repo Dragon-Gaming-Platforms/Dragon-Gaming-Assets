@@ -1,0 +1,16 @@
+{
+  "name": "Moonlander",
+  "desc": "A 3D lunar-lander inspired arcade game: rotate the ship, manage fuel and land safely on the marked pads.",
+  "controls": "Left/Right arrows to rotate, Up arrow to thrust, P to pause",
+  "shelf": "Arcade & Action",
+  "tags": [
+    "games",
+    "html5",
+    "arcade",
+    "3d",
+    "space"
+  ],
+  "badge": "New",
+  "creator": "tblazevic",
+  "image": "1.jpg"
+}

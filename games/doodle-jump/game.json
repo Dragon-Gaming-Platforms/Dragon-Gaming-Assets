@@ -1,0 +1,15 @@
+{
+  "name": "Doodle Jump",
+  "desc": "A JavaScript take on Doodle Jump: bounce up the platforms, dodge monsters and grab power-ups.",
+  "controls": "Left/Right arrows to steer the doodler",
+  "shelf": "Arcade & Action",
+  "tags": [
+    "games",
+    "html5",
+    "arcade",
+    "platformer"
+  ],
+  "badge": "New",
+  "creator": "omackenzie",
+  "image": "1.png"
+}

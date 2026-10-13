@@ -1,0 +1,15 @@
+{
+  "name": "Connect Four",
+  "desc": "Connect Four in JS + Canvas: play against an artificial intelligence or a friend, side by side or online.",
+  "controls": "Click or tap a column to drop your piece",
+  "shelf": "Strategy & Idle",
+  "tags": [
+    "games",
+    "html5",
+    "board-game",
+    "strategy"
+  ],
+  "badge": "New",
+  "creator": "Kenrick",
+  "image": "logo.svg"
+}

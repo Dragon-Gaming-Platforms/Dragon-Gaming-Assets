@@ -1,0 +1,15 @@
+{
+  "name": "Asteroids",
+  "desc": "Pure-JavaScript Asteroids: vector graphics, spinning rocks, warp drive and sound effects.",
+  "controls": "Arrow keys/WASD to rotate and thrust, Space to shoot, Shift to warp",
+  "shelf": "Arcade & Action",
+  "tags": [
+    "games",
+    "html5",
+    "arcade",
+    "space"
+  ],
+  "badge": "New",
+  "creator": "David McInnes",
+  "image": "1.png"
+}

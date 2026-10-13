@@ -1,0 +1,15 @@
+{
+  "name": "Aim & Shoot",
+  "desc": "A neuroevolution experiment: aim and shoot while enemy turret brains evolve, round after round.",
+  "controls": "Mouse to aim, click to shoot, M to mute",
+  "shelf": "Interactive Stories & Experiments",
+  "tags": [
+    "games",
+    "html5",
+    "experiment",
+    "neuroevolution"
+  ],
+  "badge": "New",
+  "creator": "Victor Ribeiro",
+  "image": "1.png"
+}

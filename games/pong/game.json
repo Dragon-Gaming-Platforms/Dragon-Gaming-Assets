@@ -1,0 +1,15 @@
+{
+  "name": "Pong",
+  "desc": "The classic 1972 arcade game Pong, rebuilt in plain JavaScript — paddle, ball, first to 11.",
+  "controls": "Press 1 for single player or 2 for two players; player 1 Q/A, player 2 P/L, Esc to quit",
+  "shelf": "Arcade & Action",
+  "tags": [
+    "games",
+    "html5",
+    "arcade",
+    "classic"
+  ],
+  "badge": "New",
+  "creator": "Jake Gordon",
+  "image": "1.png"
+}

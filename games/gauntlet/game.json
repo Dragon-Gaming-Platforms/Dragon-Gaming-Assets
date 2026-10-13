@@ -1,0 +1,16 @@
+{
+  "name": "Gauntlet",
+  "desc": "An HTML5 Gauntlet-style dungeon crawler (single player): battle waves of demons, grab treasures and keys, and find the way out.",
+  "controls": "Arrow keys to move, Space to attack",
+  "shelf": "RPG & Adventure",
+  "tags": [
+    "games",
+    "html5",
+    "roguelike",
+    "action",
+    "arcade"
+  ],
+  "badge": "New",
+  "creator": "Jake Gordon",
+  "image": "1.png"
+}

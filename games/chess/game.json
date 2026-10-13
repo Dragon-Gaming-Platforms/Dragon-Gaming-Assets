@@ -1,0 +1,15 @@
+{
+  "name": "Chess",
+  "desc": "Full-rules chess with a computer opponent: every move type, including en passant, castling and promotion.",
+  "controls": "Drag pieces on the board, or click the move links in the right panel",
+  "shelf": "Strategy & Idle",
+  "tags": [
+    "games",
+    "board-game",
+    "chess",
+    "strategy"
+  ],
+  "badge": "New",
+  "creator": "kbjorklu",
+  "image": "1.png"
+}
