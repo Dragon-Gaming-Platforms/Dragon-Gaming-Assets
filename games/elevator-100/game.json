@@ -1,0 +1,16 @@
+{
+  "name": "Elevator 100",
+  "desc": "The lower shaft has collapsed and something is ascending: ride the emergency elevator toward floor 100, respond to the passengers, and survive the jumpscares on the way up.",
+  "controls": "Click or tap to advance the story and react when the entity closes in",
+  "shelf": "Interactive Stories & Experiments",
+  "tags": [
+    "games",
+    "horror",
+    "story",
+    "one-button",
+    "single-player"
+  ],
+  "badge": "New",
+  "creator": "Vimal9RAM-NAP",
+  "image": "1.png"
+}

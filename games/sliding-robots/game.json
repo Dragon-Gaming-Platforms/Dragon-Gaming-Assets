@@ -1,0 +1,16 @@
+{
+  "name": "Sliding Robots",
+  "desc": "A Ricochet Robots-style sliding puzzle: tap a robot to send it racing across the board, bouncing off the walls, until all four reach their targets in as few moves as possible.",
+  "controls": "Click or tap a robot to send it sliding - bounce off the walls to reach the targets",
+  "shelf": "Puzzle & Logic",
+  "tags": [
+    "games",
+    "puzzle",
+    "ricochet-robots",
+    "sliding",
+    "single-player"
+  ],
+  "badge": "New",
+  "creator": "simondiep",
+  "image": "1.png"
+}

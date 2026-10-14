@@ -1,0 +1,16 @@
+{
+  "name": "Hybrid Royale",
+  "desc": "Dodge the red balls and collect the hidden letters in order to spell the secret word before you fall - particular or random letter order.",
+  "controls": "Arrow keys or WASD to move - dodge the red balls and collect the letters in order",
+  "shelf": "Arcade & Action",
+  "tags": [
+    "games",
+    "dodge",
+    "word",
+    "arcade",
+    "single-player"
+  ],
+  "badge": "New",
+  "creator": "ashiishme",
+  "image": "1.png"
+}

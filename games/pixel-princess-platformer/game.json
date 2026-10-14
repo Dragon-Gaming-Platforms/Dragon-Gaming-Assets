@@ -1,0 +1,16 @@
+{
+  "name": "Pixel Princess Platformer",
+  "desc": "Pick a heroine and race across six themed worlds - forest, coral abyss, oriental rooftops, snowy peaks, twilight garden and the royal castle - past a multi-phase stone guardian to the Sala da Ballo finale.",
+  "controls": "Arrow keys or WASD to run and jump (touch controls on mobile)",
+  "shelf": "RPG & Adventure",
+  "tags": [
+    "games",
+    "platformer",
+    "arcade",
+    "levels",
+    "mobile"
+  ],
+  "badge": "New",
+  "creator": "VTvito",
+  "image": "1.png"
+}
