@@ -1,0 +1,16 @@
+{
+  "name": "90s Games",
+  "desc": "A hub of 114 single-file HTML5 arcade games - asteroids, tetris, snake and a hundred more - each one a complete canvas game with zero dependencies.",
+  "controls": "Pick any game from the hub, then follow that game's on-screen instructions",
+  "shelf": "Arcade & Action",
+  "tags": [
+    "games",
+    "arcade",
+    "collection",
+    "retro",
+    "multi-game"
+  ],
+  "badge": "New",
+  "creator": "prateek121",
+  "image": "1.png"
+}

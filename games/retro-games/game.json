@@ -1,0 +1,16 @@
+{
+  "name": "Retro Arcade",
+  "desc": "Four retro arcade classics in one cabinet: Asteroids, Lunar Lander, Snake and Space Invaders — all plain JavaScript.",
+  "controls": "Pick a game, then mouse + keyboard (each game shows its controls)",
+  "shelf": "Arcade & Action",
+  "tags": [
+    "games",
+    "html5",
+    "arcade",
+    "retro",
+    "compilation"
+  ],
+  "badge": "New",
+  "creator": "Mary Rose Cook",
+  "image": "1.jpg"
+}

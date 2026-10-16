@@ -1,0 +1,73 @@
+
+
+.title {
+	font-weight: bold;
+	color: rgb(153, 217, 234);
+	font-size: 20px;
+}
+
+.shogiboard {
+	float: left;
+	width : 585px;
+	table-layout:fixed;
+	background : RGB(239,228,176);
+	margin-top: 5px;
+	margin-left: 50px;
+	margin-bottom: 5px;
+}
+
+.editbox {
+	float: left;
+	width : 325px;
+	table-layout:fixed;
+	background : RGB(239,228,176);
+}
+
+.flexbox {
+	display:flex;
+	flex-flow:column;
+	float: left;
+	width: 325px;
+}
+
+.box {
+	float: left;
+	width : 325px;
+	table-layout: fixed;
+	background : RGB(239,228,176);
+}
+
+.turnbox {
+	float: left;
+	margin-top:5px;
+	margin-left: 20px;
+	width: 325px;
+	background : RGB(239,228,176);
+}
+
+.box0 {
+	margin-top: 5px;
+	margin-left: 20px;
+	margin-bottom: 5px;
+}
+
+.box1 {
+	margin-top: 5px;
+	margin-left: 20px;
+}
+
+tr {
+	height : 65px;
+	border :3px solid RGB(185,122,87);
+}
+
+td {
+	border :3px solid RGB(185,122,87);
+	padding :0px 0px 0px 0px;
+}
+
+.shogi {
+	background : RGB(239,228,176);
+	border :3px solid RGB(185,122,87);
+	color:RGB(185,122,87);
+}

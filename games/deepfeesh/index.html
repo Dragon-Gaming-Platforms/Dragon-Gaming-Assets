@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DeepFeesh Fishing - Pathfinding Game</title>
+    <link rel="stylesheet" href="styles/styles.css">
+</head>
+<body>
+
+    <div class="game-panel">
+        <h1>DEEPFEESH</h1>
+
+        <div class="dashboard">
+            <div class="timer">Time: <span id="timeDisplay">0.00</span>s</div>
+            <div>
+                <button id="btnNew">New Drop</button>
+                <button id="btnSolve">Auto-Jig (Solve)</button>
+            </div>
+        </div>
+
+        <div class="canvas-container">
+            <canvas id="gameCanvas" width="700" height="700"></canvas>
+            
+            <div class="overlay" id="winScreen">
+                <h2>CATCH SUCCESSFUL! 🎣</h2>
+                <img id="winFishImg" src="" alt="Caught Fish">
+                <p id="catchMessage">You caught a Yellowfin Tuna!</p>
+                <p class="fish-weight" id="weightMessage">Weight: 150.00 kg</p>
+                <p id="timeMessage">Time: 12.50 seconds</p>
+                <button id="btnPlayAgain">Drop Again</button>
+            </div>
+        </div>
+
+     
+    </div>
+
+    <script src="js/script.js"></script>
+</body>
+
+</html>
+
+

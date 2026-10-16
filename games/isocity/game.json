@@ -1,0 +1,16 @@
+{
+  "name": "IsoCity",
+  "desc": "An isometric city builder with no budget and no goals: lay roads, raise buildings and plant trees on a little world, then share the result - the city is saved right in the URL.",
+  "controls": "Click the grid to place roads, buildings and trees - the city state is saved in the page URL",
+  "shelf": "Interactive Stories & Experiments",
+  "tags": [
+    "games",
+    "city-builder",
+    "sandbox",
+    "isometric",
+    "creative"
+  ],
+  "badge": "New",
+  "creator": "victorqribeiro",
+  "image": "1.png"
+}

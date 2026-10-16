@@ -1,0 +1,16 @@
+{
+  "name": "Mine Cart Carnage",
+  "desc": "A pixel-art endless mine-cart runner in the spirit of the SNES classic: switch lanes, mine bananas, and dodge monkeys, barrels and rival carts.",
+  "controls": "Tap, click or use the arrow keys to steer the cart and mine bananas",
+  "shelf": "Sports & Racing",
+  "tags": [
+    "games",
+    "runner",
+    "endless",
+    "arcade",
+    "mobile"
+  ],
+  "badge": "New",
+  "creator": "kabronero",
+  "image": "1.png"
+}

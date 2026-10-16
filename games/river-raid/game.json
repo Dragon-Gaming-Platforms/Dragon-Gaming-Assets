@@ -1,0 +1,15 @@
+{
+  "name": "River Raid 2K",
+  "desc": "An intuitive remake of the 1982 classic: fly your jet down an endless procedural river, blast planes, helicopters and fuel depots - and refuel mid-flight without touching the water.",
+  "controls": "Arrow keys to fly, Space to fire",
+  "shelf": "Arcade & Action",
+  "tags": [
+    "games",
+    "river-raid",
+    "arcade",
+    "shooter"
+  ],
+  "badge": "New",
+  "creator": "joaoneto",
+  "image": "1.png"
+}

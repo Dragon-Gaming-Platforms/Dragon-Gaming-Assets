@@ -1,0 +1,15 @@
+{
+  "name": "Dodge The Log",
+  "desc": "A stick-hero style timing game: hold to grow your bridge stick, release to lay it, and land it across the gap before the platforms scroll on and reset your run.",
+  "controls": "Hold the mouse button to extend the stick, release to drop it across the next platform",
+  "shelf": "Arcade & Action",
+  "tags": [
+    "games",
+    "bridge-builder",
+    "timing",
+    "arcade"
+  ],
+  "badge": "New",
+  "creator": "NichkeCoder",
+  "image": "1.png"
+}

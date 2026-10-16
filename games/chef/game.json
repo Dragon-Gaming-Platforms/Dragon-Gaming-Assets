@@ -1,0 +1,15 @@
+{
+  "name": "Chef",
+  "desc": "A one-file cooking arcade: catch flying ingredients in your pan, cook each to the golden point - raw scores nothing, burnt costs a life - and serve through the right window for combos.",
+  "controls": "Arrow keys or mouse to slide the pan, Space to start, P to pause",
+  "shelf": "Arcade & Action",
+  "tags": [
+    "games",
+    "cooking",
+    "arcade",
+    "reflexes"
+  ],
+  "badge": "New",
+  "creator": "gavilanbe",
+  "image": "screenshot.png"
+}

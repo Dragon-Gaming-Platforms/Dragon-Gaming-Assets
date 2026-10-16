@@ -1,0 +1,15 @@
+{
+  "name": "Kaboom",
+  "desc": "A cruel-but-fair Minesweeper: mines are only created as you play, so guesses are punished — unless you are forced to guess, in which case it is safe.",
+  "controls": "Click to reveal a cell, right-click to flag it",
+  "shelf": "Puzzle & Logic",
+  "tags": [
+    "games",
+    "html5",
+    "puzzle",
+    "minesweeper"
+  ],
+  "badge": "New",
+  "creator": "pwmarcz",
+  "image": "1.png"
+}

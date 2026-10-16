@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="version" content="0.29.0">
+    <meta name="description" content="Violencetown — a browser-based 2D RPG with tick-based combat, an Omnitrix-style radial menu, and hand-authored zones. Zero dependencies, no build step, just open and play.">
+    <meta name="theme-color" content="#0a0a0a">
+    <meta name="color-scheme" content="dark">
+
+    <!-- Open Graph / link previews -->
+    <meta property="og:type" content="website">
+    <meta property="og:title" content="Violencetown">
+    <meta property="og:description" content="A browser-based 2D RPG of small violences. Tick-based combat, radial menu, vanilla JS.">
+    <meta property="og:url" content="https://violencetown.russelldangerr.com/">
+    <meta property="og:image" content="https://violencetown.russelldangerr.com/og-card.png">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
+
+    <!-- Twitter card -->
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Violencetown">
+    <meta name="twitter:description" content="A browser-based 2D RPG of small violences.">
+    <meta name="twitter:image" content="https://violencetown.russelldangerr.com/og-card.png">
+
+    <link rel="icon" type="image/svg+xml" href="favicon.svg">
+    <link rel="apple-touch-icon" href="apple-touch-icon.png">
+
+    <!-- PWA: installable, standalone (no browser chrome), offline-capable. -->
+    <link rel="manifest" href="manifest.webmanifest">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="Violencetown">
+
+    <title>Violencetown</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <!-- Splash — rendered on its own canvas for pixel art consistency -->
+    <div id="splash">
+        <canvas id="splash-canvas"></canvas>
+        <div id="splash-buttons">
+            <button id="splash-go">GAME START</button>
+            <button id="splash-continue" class="hidden">CONTINUE</button>
+        </div>
+        <div id="splash-hint">press Space <span class="help-touch">or tap START</span></div>
+    </div>
+
+    <div id="game-wrapper" class="hidden">
+        <div id="game-layout">
+            <canvas id="game-canvas"></canvas>
+        </div>
+        <button id="menu-btn" aria-label="open menu">☰</button>
+        <button id="remoticon-btn" class="tc-btn" aria-label="open remoticon (device)" title="Remoticon — your device (Tab)">▤</button>
+        <!-- (pointer model) one-time onboarding line, shown on the first run and
+             dismissed by the first tap/keypress (see main._maybeShowFirstRunHint). -->
+        <div id="first-run-hint" class="hidden" aria-hidden="true">Tap to move · tap a target to act · long-press for options · WASD + Space · Space next to someone shows everything you can do to them · Tab for your device · ? for help</div>
+
+        <!-- Action sheet — opened by the MENU button. Wait / Cancel / Help /
+             Restart replace the previous standalone WAIT + NEW buttons.
+             Hidden by default; toggled via .open class from main.js. -->
+        <div id="menu-sheet" class="hidden" role="dialog" aria-label="game menu" aria-modal="true">
+            <div id="menu-sheet-backdrop"></div>
+            <div id="menu-sheet-panel">
+                <button class="menu-item" data-action="wait">WAIT</button>
+                <button class="menu-item" data-action="cancel">CANCEL</button>
+                <button class="menu-item" data-action="options">OPTIONS</button>
+                <button class="menu-item" data-action="help">HELP (?)</button>
+                <button class="menu-item menu-item-danger" data-action="restart">RESTART</button>
+                <button class="menu-item menu-item-close" data-action="close">CLOSE</button>
+                <div id="version-badge" aria-label="game version"></div>
+            </div>
+        </div>
+
+        <!-- In-game controls reference modal. Triggered by `?` on desktop, by
+             the Help menu item on touch. Dismissed by Escape, backdrop tap,
+             or the close button. Content mirrors README so the source of
+             truth for controls is one place. -->
+        <div id="help-modal" class="hidden" role="dialog" aria-label="how to play" aria-modal="true">
+            <div id="help-modal-backdrop"></div>
+            <div id="help-modal-panel">
+                <h2>HOW TO PLAY</h2>
+                <p class="help-lede">You deliver burgers on foot for Borgir — ever since rat-people tore the cataclysmic converter out of your car (or so the boss says). You dream of a Yellow Card: a licence to drive a real Violencetown taxi. First, get the car running.</p>
+
+                <h3>Move &amp; interact</h3>
+                <ul>
+                    <li><kbd>W</kbd> <kbd>A</kbd> <kbd>S</kbd> <kbd>D</kbd> or arrows — press toward a new direction to <em>turn</em>, press again (or hold) to <em>walk</em>. Hold two for diagonals.</li>
+                    <li><span class="help-touch">Tap / click the ground</span> to walk there (paths around buildings)</li>
+                    <li><span class="help-touch">Tap / click a target</span> → walk over &amp; do the obvious thing (Take / Talk / Attack); <span class="help-touch">long-press or right-click</span> for all options · <kbd>F</kbd> opens that list for who you face</li>
+                </ul>
+
+                <h3>Combat &amp; actions</h3>
+                <ul>
+                    <li><kbd>Space</kbd> opens the action wheel anywhere — it pre-aims at the nearest enemy. Double-tap <kbd>Space</kbd> to instantly repeat your last action.</li>
+                    <li>The wheel is a menu you walk into: <kbd>←</kbd> <kbd>→</kbd> spin the ring · <kbd>↑</kbd> (or <kbd>Space</kbd>) go deeper — <em>firing is just going deeper into an action</em> · <kbd>↓</kbd> (or <kbd>Esc</kbd>) back out, closing at the top</li>
+                    <li>While aiming, arrows nudge the reticle. If an action would catch a friendly, the wheel asks first — <kbd>↑</kbd> confirms, <kbd>↓</kbd> cancels.</li>
+                    <li><span class="help-touch">On touch:</span> tap <strong>✦</strong> to open the wheel. The wheel reads as a compass: tap <strong>above</strong> the hub to go deeper (fire), <strong>left/right</strong> to spin, <strong>below</strong> or on the <strong>hub itself</strong> to back out.</li>
+                </ul>
+
+                <h3>Inventory</h3>
+                <ul>
+                    <li>The bar along the bottom is always live: <kbd>Shift</kbd>+<kbd>←</kbd> <kbd>→</kbd> changes category, <kbd>Shift</kbd>+<kbd>↑</kbd> <kbd>↓</kbd> steps through items, <kbd>Enter</kbd> uses what's showing</li>
+                    <li><kbd>1</kbd>–<kbd>9</kbd> select a slot · <kbd>Space</kbd> opens its use overlay · pick Use / Eat / Drink, or Smash when something hostile is next to you (throwing is on the action wheel; giving is in Trade)</li>
+                    <li><span class="help-touch">On touch:</span> tap a category chip to switch, <strong>▲ ▼</strong> to step items, and the item cell to use it. Everything else lives in the Remoticon's ITEMS tab.</li>
+                </ul>
+
+                <h3>Other</h3>
+                <ul>
+                    <li><kbd>T</kbd> wait one turn · <kbd>P</kbd> pause · <kbd>Esc</kbd> cancel any menu · <kbd>?</kbd> open this help</li>
+                    <li><kbd>L</kbd> open the log history · <span class="help-touch">On touch:</span> tap the log strip</li>
+                    <li><kbd>E</kbd> acts on whoever you're FACING — trades with a shopkeeper, talks to anyone else, else examines it. Walking into them does the same thing</li>
+                    <li><kbd>Tab</kbd> opens the Remoticon (ITEMS · GEAR · QUESTS · MAP · RINGS) and pockets it again · <span class="help-touch">or tap</span> <strong>▤</strong>. Inside: <kbd>[</kbd> <kbd>]</kbd> switch tabs, <kbd>R</kbd> jumps to RINGS. From the world, <kbd>C</kbd> <kbd>J</kbd> <kbd>M</kbd> open it straight on GEAR / QUESTS / MAP.</li>
+                    <li>Items, gear and rings are handled by tapping them inside the Remoticon — <span class="help-touch">tap a slot, then an action</span></li>
+                    <li><strong>☰</strong> opens the menu (Wait / Cancel / Options / Help / Restart)</li>
+                </ul>
+
+                <p class="help-foot">Autosaves locally — CONTINUE on the splash resumes your run. Code at
+                    <a href="https://github.com/RussellDangerr/violencetown" target="_blank" rel="noopener">github.com/RussellDangerr/violencetown</a>.
+                </p>
+
+                <button id="help-close" class="menu-item menu-item-close">CLOSE</button>
+            </div>
+        </div>
+
+        <!-- Options / accessibility modal. Reuses the menu-sheet / help-modal
+             chrome (backdrop + ornate panel). Opened from the OPTIONS menu
+             item; dismissed by Escape, backdrop tap, or DONE. Controls are
+             wired in main.js (_bindOptionsModal) against game/settings.js,
+             which persists to its own localStorage key, independent of saves. -->
+        <div id="options-modal" class="hidden" role="dialog" aria-label="options" aria-modal="true">
+            <div id="options-modal-backdrop"></div>
+            <div id="options-modal-panel">
+                <h2>OPTIONS</h2>
+
+                <div class="opt-row">
+                    <label for="opt-music">MUSIC</label>
+                    <input type="range" id="opt-music" class="opt-slider"
+                           min="0" max="100" step="1" value="70"
+                           aria-label="music volume">
+                    <span class="opt-val" id="opt-music-val">70</span>
+                </div>
+
+                <div class="opt-row">
+                    <label for="opt-sfx">SFX</label>
+                    <input type="range" id="opt-sfx" class="opt-slider"
+                           min="0" max="100" step="1" value="80"
+                           aria-label="sound effects volume">
+                    <span class="opt-val" id="opt-sfx-val">80</span>
+                </div>
+
+                <div class="opt-row opt-row-toggle">
+                    <label for="opt-muted">MUTE ALL</label>
+                    <button type="button" id="opt-muted" class="opt-toggle"
+                            role="switch" aria-checked="false">OFF</button>
+                </div>
+
+                <div class="opt-row opt-row-toggle">
+                    <label for="opt-reduce-motion">REDUCE MOTION</label>
+                    <button type="button" id="opt-reduce-motion" class="opt-toggle"
+                            role="switch" aria-checked="false">OFF</button>
+                </div>
+
+                <div class="opt-row opt-row-toggle">
+                    <label for="opt-fullscreen">FULLSCREEN</label>
+                    <button type="button" id="opt-fullscreen" class="opt-toggle"
+                            role="switch" aria-checked="false">OFF</button>
+                </div>
+
+                <div class="opt-row opt-row-toggle">
+                    <label for="opt-wheel-open">WHEEL OPEN</label>
+                    <button type="button" id="opt-wheel-open" class="opt-toggle"
+                            role="switch" aria-checked="false">TAP</button>
+                </div>
+
+                <p class="opt-note">Reduce motion dampens screenshake and screen flash. WHEEL OPEN: TAP toggles the action wheel; HOLD keeps it open only while pressed.</p>
+
+                <button id="options-close" class="menu-item menu-item-close">DONE</button>
+            </div>
+        </div>
+
+        <!-- Pause overlay. Turn-based pause: a full-screen scrim that blocks
+             all game input (main.js gates _bindInput on the paused flag) until
+             RESUME. Deliberately minimal — no timer to freeze in a turn-based
+             game, just a clean "stop the world" affordance. -->
+        <div id="pause-overlay" class="hidden" role="dialog" aria-label="paused" aria-modal="true">
+            <div id="pause-overlay-backdrop"></div>
+            <div id="pause-overlay-panel">
+                <h2>PAUSED</h2>
+                <p class="pause-hint">The town holds its breath.</p>
+                <button id="pause-resume" class="menu-item">RESUME</button>
+                <button id="pause-options" class="menu-item menu-item-close">OPTIONS</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- The autoplay's hook (plans/quest1-autoplay.md). Does nothing without
+         ?autoplay; with it, it must run before main.js starts the clock. -->
+    <script type="module" src="autoplay/boot.js"></script>
+    <script type="module" src="main.js"></script>
+
+    <!-- PWA offline shell. Network-first (see sw.js), so it never serves stale
+         code while online — it only takes over when there's no network. -->
+    <script>
+        if ('serviceWorker' in navigator && !new URLSearchParams(location.search).has('autoplay')) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('sw.js').catch((err) => {
+                    console.warn('[pwa] service worker registration failed:', err);
+                });
+            });
+        }
+    </script>
+</body>
+</html>

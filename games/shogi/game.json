@@ -1,0 +1,15 @@
+{
+  "name": "Shogi",
+  "desc": "Japanese chess for two at one board: full rules with captured-piece drops, plus undo/redo via an in-browser database and a tsumego editing mode.",
+  "controls": "Click a piece then a destination square; dropped pieces re-enter from your tray (Japanese interface)",
+  "shelf": "Strategy & Idle",
+  "tags": [
+    "games",
+    "shogi",
+    "board-game",
+    "strategy"
+  ],
+  "badge": "New",
+  "creator": "Zhiguangyu8895",
+  "image": "1.png"
+}

@@ -1,0 +1,16 @@
+{
+  "name": "Canvas Survivor",
+  "desc": "A Vampire-Survivors-style bullet heaven written in zero-dependency JavaScript: survive the waves, level up, and stack weapon upgrades in a canvas roguelite.",
+  "controls": "Move with WASD or the arrow keys and attack automatically - pick an upgrade at every level-up",
+  "shelf": "RPG & Adventure",
+  "tags": [
+    "games",
+    "roguelite",
+    "bullet-heaven",
+    "survival",
+    "canvas"
+  ],
+  "badge": "New",
+  "creator": "ricardo-foundry",
+  "image": "1.png"
+}

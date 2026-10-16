@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lunar Lander</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+    <div id="container"> 
+        <div id="telemetry-panel">
+            <div id="speed-panel">Speed: null</div>
+            <div id="fuel-panel">Fuel 100%</div>
+            <div id="status-panel">Status: Paused</div>
+            <div id="level-panel">Level: 0</div>
+            <div id="score-panel">Score: 0000</div>
+        </div>
+
+        <div id="game-screen">
+            
+            <div id="terrain"></div>
+            
+            <div id="character"></div>
+            
+            <div id="menu">
+                <div id="title">Lunar Lander</div>
+                <div id="buttons"> 
+                    <button onclick="startGame()" style="padding: 20px; font-family: Good Old; font-size: 20px;">Play</button>
+                    <button onclick="showHowToPlay(true)" style="padding: 20px; font-family: Good Old; font-size: 20px;">How to play?</button>
+                </div>
+            </div>
+            
+            <div id="game-over-menu">
+                <div id="game-over-message">Game Over</div>
+            </div>
+
+            <div id="out-of-fuel-message">
+                Out of Fuel
+            </div>
+            
+            <div id="container-how-to-play">
+                <div id="how-to-play-menu">
+                    <div id="how-to-title">How to play?</div>
+                    <div id="game-context">
+                        You're the lunar module pilot and your job is to land on the green landing zones. But be aware about your fuel level and speed (Need to be < 1.5)
+                    </div>
+                    <div id="controls">
+                        <p style="margin:0px" id="controls-title">Controls</p>
+                        <p style="margin:0px; padding-left: 10px; padding-right: 10px;">Up: Fire the engine</p>
+                        <p style="margin:0px; padding-left: 10px; padding-right: 10px; padding-bottom: 5px;">Left and Right: Control the spacecraft</p>
+                    </div>
+                </div>
+                <button onclick="showHowToPlay(false)" style="padding: 20px; font-family: Good Old; font-size: 15px;">Return to menu</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+
+</html>

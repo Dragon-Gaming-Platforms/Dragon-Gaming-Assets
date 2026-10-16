@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Deep Blue — a 3D fishing game</title>
+<meta name="description" content="Cast into the deep, fight what bites, and fill the Fishdex. A small 3D browser fishing game, hand-written WebGL, no dependencies.">
+<meta name="theme-color" content="#07101f">
+<meta property="og:title" content="Deep Blue — a 3D fishing game">
+<meta property="og:description" content="Cast into the deep, fight what bites, and fill the Fishdex.">
+<meta property="og:type" content="website">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'><rect width='64' height='64' rx='14' fill='%230d2b45'/><path d='M44 32c0 6-7 11-14 11s-14-5-14-11 7-11 14-11 14 5 14 11z' fill='%2358c7e8'/><path d='M44 32l12-9v18z' fill='%2358c7e8'/><circle cx='24' cy='29' r='2.6' fill='%23081726'/></svg>">
+<link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+<div id="app">
+  <div id="stage">
+    <canvas id="scene" aria-label="Fishing game"></canvas>
+    <canvas id="hudLayer" aria-hidden="true"></canvas>
+
+    <div id="hud">
+      <div class="hud-row">
+        <div class="stat" id="statCoins"><span class="ico">🪙</span><span class="val" id="coinVal">0</span></div>
+        <div class="stat" id="statClock"><span class="ico" id="clockIco">☀️</span><span class="val" id="clockVal">Day</span></div>
+        <div class="stat" id="statCaught"><span class="ico">🐟</span><span class="val" id="caughtVal">0</span></div>
+      </div>
+      <div class="hud-row right">
+        <button class="chip" id="btnShop" type="button">Shop</button>
+        <button class="chip" id="btnDex" type="button">Fishdex</button>
+        <button class="chip icon" id="btnSound" type="button" aria-label="Toggle sound">🔊</button>
+        <button class="chip icon" id="btnHelp" type="button" aria-label="How to play">?</button>
+      </div>
+    </div>
+
+    <p id="hint" aria-live="polite"></p>
+
+    <div id="catchCard" class="card" hidden>
+      <div class="card-inner">
+        <p class="card-kicker" id="catchKicker">Landed!</p>
+        <h2 class="card-name" id="catchName">Sea Bass</h2>
+        <div class="card-tier" id="catchTier">Common</div>
+        <dl class="card-facts" id="catchFacts"></dl>
+        <p class="card-foot">Press <kbd>Space</kbd> or tap to keep fishing</p>
+      </div>
+    </div>
+
+    <div id="rotate">
+      <div>
+        <span class="rot-ico">📱</span>
+        <p>Turn your phone sideways</p>
+        <small>Deep Blue is a landscape game — there is more sea that way.</small>
+      </div>
+    </div>
+
+    <div id="touchPad" hidden>
+      <button class="tbtn" id="tLeft" type="button" aria-label="Steer left">◀</button>
+      <button class="tbtn" id="tRight" type="button" aria-label="Steer right">▶</button>
+    </div>
+  </div>
+
+  <!-- Title -->
+  <div class="modal" id="mTitle">
+    <div class="sheet title-sheet">
+      <h1 class="logo"><span class="logo-deep">DEEP</span><span class="logo-blue">BLUE</span></h1>
+      <p class="tagline">Cast into the dark. Land what bites. Fill the Fishdex.</p>
+      <button class="primary" id="btnStart" type="button">Start fishing</button>
+      <ul class="quick">
+        <li><kbd>Space</kbd> / tap — charge &amp; cast, strike, reel</li>
+        <li><kbd>←</kbd> <kbd>→</kbd> / drag — steer the hook</li>
+        <li>22 species live down there, 84 metres of water above them.</li>
+      </ul>
+      <p class="storage-warn" id="storageWarn" hidden>Progress can't be saved in this browser — it will reset when you leave.</p>
+    </div>
+  </div>
+
+  <!-- No WebGL2 -->
+  <div class="modal" id="noWebgl" hidden>
+    <div class="sheet title-sheet">
+      <h1 class="logo"><span class="logo-deep">DEEP</span><span class="logo-blue">BLUE</span></h1>
+      <p class="tagline">This one needs WebGL 2, and this browser did not hand it over.</p>
+      <p class="quick" style="display:block">Try a current Chrome, Firefox, Edge or Safari, and check that
+      hardware acceleration is switched on. If you are on a remote or virtual desktop, the GPU is often
+      not passed through.</p>
+      <p class="storage-warn" id="noWebglDetail" style="display:block"></p>
+    </div>
+  </div>
+
+  <!-- Shop -->
+  <div class="modal" id="mShop" hidden>
+    <div class="sheet">
+      <header class="sheet-head">
+        <h2>Tackle Shop</h2>
+        <div class="purse"><span class="ico">🪙</span><span id="shopCoins">0</span></div>
+        <button class="close" data-close="mShop" type="button" aria-label="Close">✕</button>
+      </header>
+      <div class="upgrades" id="upgradeList"></div>
+    </div>
+  </div>
+
+  <!-- Fishdex -->
+  <div class="modal" id="mDex" hidden>
+    <div class="sheet">
+      <header class="sheet-head">
+        <h2>Fishdex</h2>
+        <div class="purse" id="dexCount">0 / 22</div>
+        <button class="close" data-close="mDex" type="button" aria-label="Close">✕</button>
+      </header>
+      <div class="dex-grid" id="dexList"></div>
+      <footer class="sheet-foot" id="dexStats"></footer>
+    </div>
+  </div>
+
+  <!-- Help -->
+  <div class="modal" id="mHelp" hidden>
+    <div class="sheet">
+      <header class="sheet-head">
+        <h2>How to fish</h2>
+        <button class="close" data-close="mHelp" type="button" aria-label="Close">✕</button>
+      </header>
+      <ol class="howto">
+        <li><b>Cast.</b> Hold <kbd>Space</kbd> (or press and hold the water) to swing the power meter, and release. A stronger cast lands further out, where the seabed drops away.</li>
+        <li><b>Sink.</b> The hook falls on its own. Hold to reel it back up, steer with <kbd>←</kbd> <kbd>→</kbd> or by dragging. Fish only bite inside their own depth band, so where you stop decides what you catch.</li>
+        <li><b>Strike.</b> When <b>!</b> appears you have about a second to press. Miss it and the fish takes the bait.</li>
+        <li><b>Fight.</b> Hold to lift the green bar, release to let it fall. Keep the fish inside the bar to gain line. It fights harder the closer it gets — and the longer the fight runs.</li>
+        <li><b>Sell &amp; upgrade.</b> Every catch is sold on the spot. Longer line reaches rarer depths; better bait tempts rarer fish.</li>
+        <li><b>Junk is snagged, not tempted.</b> Boots, cans and sunken chests sit on the seabed — put the hook on the bottom and drag it around.</li>
+      </ol>
+      <div class="danger-row">
+        <button class="danger" id="btnReset" type="button">Erase progress</button>
+        <span class="danger-note">Coins, upgrades and the Fishdex, all of it.</span>
+      </div>
+    </div>
+  </div>
+</div>
+<script type="module" src="js/main.js"></script>
+</body>
+</html>

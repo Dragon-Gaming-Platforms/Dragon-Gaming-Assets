@@ -1,0 +1,15 @@
+{
+  "name": "Plinko",
+  "desc": "Drop chips down a glowing peg pyramid with real physics: every bounce is random, edge slots pay best, and your best run is saved in the browser.",
+  "controls": "Click or tap anywhere on the board to drop a chip",
+  "shelf": "Arcade & Action",
+  "tags": [
+    "games",
+    "plinko",
+    "arcade",
+    "physics"
+  ],
+  "badge": "New",
+  "creator": "gamelabz",
+  "image": "screenshot.png"
+}

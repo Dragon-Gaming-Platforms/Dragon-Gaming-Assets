@@ -1,0 +1,16 @@
+{
+  "name": "Xiangqi",
+  "desc": "Chinese chess for two players on one screen: play locally, battle the built-in computer AI, or take on a friend online. Full piece rules including the general, advisors, cannons and horses.",
+  "controls": "Click a piece then a highlighted destination square - choose local 2-player, computer AI or online",
+  "shelf": "Strategy & Idle",
+  "tags": [
+    "games",
+    "xiangqi",
+    "chinese-chess",
+    "board-game",
+    "ai"
+  ],
+  "badge": "New",
+  "creator": "MeldrumJon",
+  "image": "1.png"
+}

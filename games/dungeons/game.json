@@ -1,0 +1,15 @@
+{
+  "name": "Dungeons",
+  "desc": "A classic canvas roguelike: procedurally generated dungeons, monsters, gold, magic and music - in the spirit of the old ASCII crawlers, fully in the browser.",
+  "controls": "Arrow keys to move, Shift to turn in place, Enter to pass the turn, i for inventory",
+  "shelf": "RPG & Adventure",
+  "tags": [
+    "games",
+    "roguelike",
+    "dungeon-crawler",
+    "rpg"
+  ],
+  "badge": "New",
+  "creator": "aleksejspopovs",
+  "image": "1.png"
+}

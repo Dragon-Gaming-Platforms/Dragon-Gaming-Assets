@@ -1,0 +1,15 @@
+{
+  "name": "Crayon Contraptions",
+  "desc": "Draw Rube Goldberg machines in crayon: sketch your contraption with limited ink, then press GO and watch the real Box2D physics carry it through 100 levels - including boss machines.",
+  "controls": "Pick a crayon and draw on the canvas (Undo, Clear and Hint buttons), then GO to run the simulation",
+  "shelf": "Puzzle & Logic",
+  "tags": [
+    "games",
+    "rube-goldberg",
+    "physics",
+    "drawing"
+  ],
+  "badge": "New",
+  "creator": "winchxyz",
+  "image": "1.png"
+}

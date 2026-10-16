@@ -1,0 +1,16 @@
+{
+  "name": "Drop7",
+  "desc": "The Drop7 disc puzzle: drop discs into a 7-by-7 grid, match runs of numbered discs to explode them, and crack the solids hiding numbers underneath - Classic, Blitz and Sequence modes.",
+  "controls": "Click a column to drop the next disc - numbered discs explode in matching runs and crack nearby solids",
+  "shelf": "Puzzle & Logic",
+  "tags": [
+    "games",
+    "puzzle",
+    "disc",
+    "arcade",
+    "single-player"
+  ],
+  "badge": "New",
+  "creator": "oddlord",
+  "image": "1.png"
+}

@@ -1,0 +1,16 @@
+{
+  "name": "Lode Runner",
+  "desc": "The 1983 classic: dig through gold-bearing ground, collect the lodes in your sack, and race back before the goblins catch you - fall in the moat and you lose a life. Classic rules plus a built-in level editor.",
+  "controls": "Arrow keys or WASD to move, Z/Q to dig left, X/E to dig right, R to restart - dodge the goblins",
+  "shelf": "Arcade & Action",
+  "tags": [
+    "games",
+    "lode-runner",
+    "classic",
+    "arcade",
+    "dig"
+  ],
+  "badge": "New",
+  "creator": "tmikov",
+  "image": "1.png"
+}

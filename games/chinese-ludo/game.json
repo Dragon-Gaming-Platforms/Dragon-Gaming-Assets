@@ -1,0 +1,15 @@
+{
+  "name": "Chinese Ludo",
+  "desc": "\u98de\u884c\u68cb (Flight Chess) for 2-4 players on one screen: roll the dice, take off your planes, trigger the flight shortcuts, bounce opponents back, and land all four planes first - bilingual UI.",
+  "controls": "Roll the dice, then click a plane to move it - trigger the flight shortcuts to race home",
+  "shelf": "Strategy & Idle",
+  "tags": [
+    "games",
+    "board-game",
+    "ludo",
+    "local-multiplayer"
+  ],
+  "badge": "New",
+  "creator": "netmanfisher",
+  "image": "1.png"
+}

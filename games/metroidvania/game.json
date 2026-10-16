@@ -1,0 +1,16 @@
+{
+  "name": "Metroidvania",
+  "desc": "A simple metroidvania in JavaScript and Kaboom.js: explore connected rooms, defeat enemies and collect the keys you need to go further.",
+  "controls": "A/D or arrows to move, W/Up to jump, J/X to shoot",
+  "shelf": "RPG & Adventure",
+  "tags": [
+    "games",
+    "html5",
+    "rpg",
+    "platformer",
+    "metroidvania"
+  ],
+  "badge": "New",
+  "creator": "JSLegend",
+  "image": "1.png"
+}

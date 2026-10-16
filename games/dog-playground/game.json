@@ -1,0 +1,16 @@
+{
+  "name": "Dog Playground",
+  "desc": "A pocket physics petting zoo: a big pan-and-zoom lawn full of dogs who chase whatever you throw - balls, frisbees and bones. Pure HTML5 canvas, no engine, no dependencies.",
+  "controls": "Drag to pan, scroll to zoom, and drag-throw toys at the dogs to watch them chase",
+  "shelf": "Interactive Stories & Experiments",
+  "tags": [
+    "games",
+    "physics",
+    "sandbox",
+    "dogs",
+    "toys"
+  ],
+  "badge": "New",
+  "creator": "brianruggieri",
+  "image": "1.png"
+}

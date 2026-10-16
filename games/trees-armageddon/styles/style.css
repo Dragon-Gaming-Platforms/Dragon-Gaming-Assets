@@ -1,0 +1,39 @@
+* {
+  box-sizing: border-box;
+}
+
+body {
+  display: flex;
+  font-family: sans-serif;
+  background-color: green;
+  justify-content: center;
+  margin: 0;
+}
+
+section {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-direction: column;
+}
+h1 {
+  margin: 0px;
+  font-size: 3em;
+  color: white;
+  font-weight: lighter;
+}
+
+button {
+  width: 150px;
+  height: 75px;
+  font-size: 2.2em;
+  position: fixed;
+  left: 50%;
+  margin-left: -75px; /*half the width of the button*/
+  margin-top: 30px;
+  border: 5px solid black;
+}
+
+canvas {
+  border: 3px solid darkgreen;
+}

@@ -1,0 +1,15 @@
+{
+  "name": "DeepFeesh",
+  "desc": "Drop your lure into a procedurally generated 25x25 underwater maze, steer it to the target fish, or let the built-in BFS auto-jig solve the shortest route for you.",
+  "controls": "Arrow keys or WASD to swim the lure; Auto-Jig button to watch the solver finish it",
+  "shelf": "Puzzle & Logic",
+  "tags": [
+    "games",
+    "fishing",
+    "maze",
+    "pathfinding"
+  ],
+  "badge": "New",
+  "creator": "renekrmacGit",
+  "image": "1.png"
+}

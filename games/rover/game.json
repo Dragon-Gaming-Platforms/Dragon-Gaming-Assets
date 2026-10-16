@@ -1,0 +1,16 @@
+{
+  "name": "Rover",
+  "desc": "A sokoban-style puzzle on canvas: guide the rover and push blocks, lasers, mirrors and sliders onto their homes across 24 handcrafted levels - or design your own in the built-in editor.",
+  "controls": "Arrow keys to move the rover and push blocks - the menus offer undo, restart and the level editor",
+  "shelf": "Puzzle & Logic",
+  "tags": [
+    "games",
+    "sokoban",
+    "puzzle",
+    "levels",
+    "editor"
+  ],
+  "badge": "New",
+  "creator": "carlnewton",
+  "image": "1.png"
+}
