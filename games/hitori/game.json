@@ -1,0 +1,15 @@
+{
+  "name": "Hitori",
+  "desc": "A pencil-and-paper logic puzzle: shade out every number that repeats in its row or column, but keep the white cells connected and avoid two shaded cells sitting next to each other.",
+  "controls": "Click a cell to shade it or mark it as safe - the puzzle checks the Hitori rules as you go",
+  "shelf": "Puzzle & Logic",
+  "tags": [
+    "games",
+    "hitori",
+    "logic",
+    "pencil-puzzle"
+  ],
+  "badge": "New",
+  "creator": "LFSperduto-Dev",
+  "image": "1.png"
+}

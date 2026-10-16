@@ -1,0 +1,337 @@
+html,
+body {
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    font-family: Montserrat;
+    font-size: 12pt;
+    animation: changeBackgroundColor 2s infinite alternate;
+
+}
+/*
+@keyframes changeBackgroundColor {
+    0% {
+        background-color: #363744;
+        /* Initial background color */
+/*    }
+
+    100% {
+        background-color: #bab3b3;
+        /* Color you want to change to */
+/*    }
+}
+*/
+
+h1 {
+    font-family: Montserrat;
+    font-size: clamp(2rem, 5vw, 4rem);
+    text-align: center;
+}
+
+.outer-container {
+    display: flex;
+    flex-direction: column;
+    flex-wrap: wrap;
+    align-content: center;
+    text-align: center;
+
+}
+
+.table-block {
+    max-width: 350px;
+    border-top: 0.1rem solid;
+    border-right: 0.2rem solid;
+    border-bottom: 0.2rem solid;
+    border-left: 0.05rem solid;
+    border-radius: 12px;
+    background-color: rgba(238, 106, 18, 0.6);
+    height: fit-content;
+}
+
+.inner-container {
+    display: flex;
+    justify-content: center;
+    gap: 2rem;
+    width: 100vh;
+    margin-bottom: 20px;
+    padding: 0.5rem;
+}
+
+.action-buttons {
+    display: flex;
+    flex-direction: row;
+    text-align: center;
+    vertical-align: middle;
+    justify-content: space-between;
+}
+
+.answer-btn {
+
+    font-size: 2rem;
+    background-color: whitesmoke;
+    border-top: 0.1rem solid;
+    border-right: 0.2rem solid;
+    border-bottom: 0.2rem solid;
+    border-left: 0.05rem solid;
+    padding: 0.5rem;
+    margin: 0.5rem;
+    border-radius: 0.5rem;
+    text-decoration: none;
+    height: 3rem;
+    width: 3rem;
+    text-align: center;
+    vertical-align: middle;
+}
+
+.answer-btn:hover {
+    cursor: pointer;
+    box-shadow: 0 0.4rem 1.4rem rgba(86, 185, 235, 0.5);
+    transform: translateY(-0.1rem);
+    transition: transform 150ms;
+}
+
+.btn:hover {
+    cursor: pointer;
+    box-shadow: 0 0.4rem 1.4rem rgba(86, 185, 235, 0.5);
+    transform: translateY(-0.1rem);
+    transition: transform 150ms;
+}
+
+.submit-btn {
+
+    border: 0.1rem solid rgba(127, 255, 212, 0.5);
+    margin: 0.5rem;
+    border-radius: 0.2rem;
+    text-decoration: none;
+    background-color: rgba(127, 255, 212, 0.5);
+    height: 3rem;
+    /* width: 50%; */
+    text-align: center;
+    vertical-align: middle;
+    overflow: auto;
+}
+
+.clear-btn,
+.quit-btn {
+    border: 0.1rem solid rgb(247, 95, 90, 0.5);
+    margin: 0.5rem;
+    cursor: pointer;
+    border-radius: 0.2rem;
+    text-decoration: none;
+    background-color: rgb(247, 95, 90, 0.5);
+    height: 3rem;
+    /* width: 50%; */
+    text-align: center;
+    vertical-align: middle;
+    overflow: auto;
+}
+
+.submit-btn:hover {
+    cursor: pointer;
+    box-shadow: 0 0.4rem 1.4rem rgba(86, 185, 235, 0.5);
+    transform: translateY(-0.1rem);
+    transition: transform 150ms;
+}
+
+.clear-btn:hover {
+    cursor: pointer;
+    box-shadow: 0 0.4rem 1.4rem rgb(247, 95, 90, 0.5);
+    transform: translateY(-0.1rem);
+    transition: transform 150ms;
+}
+
+.answer-btn-selected {
+    font-size: 2rem;
+    border: 0.1rem solid;
+    padding: 0.5rem;
+    margin: 0.5rem;
+    border-radius: 0.2rem;
+    text-decoration: none;
+    height: 3rem;
+    width: 3rem;
+    text-align: center;
+    vertical-align: middle;
+    cursor: not-allowed;
+    box-shadow: none;
+    transform: none;
+    background-color: rgb(185, 233, 185);
+}
+
+.selected-already {
+    background-color: rgb(255, 112, 112);
+}
+
+.current-answer {
+    font-size: 2.5rem;
+}
+
+.submitted-answers {
+    border: 0.1rem solid;
+    padding: 0.5rem;
+    margin: 0.5rem;
+    border-radius: 0.2rem;
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+}
+
+.answers {
+    font-size: 1.25rem;
+    padding: 0.5rem;
+    margin: 0.5rem;
+    border-radius: 0.2rem;
+}
+
+.wrong-answer {
+    color: rgb(255, 112, 112);
+}
+
+.right-answer {
+    color: green;
+}
+
+.same-answer {
+    color: orange;
+}
+
+.page-header {
+
+    display: flex;
+    justify-content: space-between;
+    font-size: 1rem;
+    padding: 0.5rem;
+    margin: 0.5rem;
+    height: 10rem;
+    text-align: center;
+    /* keep position fixed */
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 1;
+    background-color: white;
+
+
+}
+
+.countdown-timer {
+    text-align: center;
+}
+
+.timer-header,
+.score-header {
+    font-weight: bold;
+    font-size: clamp(1rem, 0.9063rem + 0.5vw, 1.5rem);
+}
+
+.timer,
+.score-view {
+    width: clamp(1.5rem, 3vw, 2.5rem);
+    height: clamp(1.5rem, 3vw, 2.5rem);
+    font-size: clamp(1rem, 0.9063rem + 0.5vw, 1.5rem);
+    border: 0.1rem solid;
+    padding: 0.5rem;
+    border-radius: 50%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.input-name {
+    font-size: 1.5rem;
+    border: 0.1rem solid;
+    border-radius: 0.2rem;
+    height: 3rem;
+    vertical-align: middle;
+}
+
+#action-buttons {
+    display: flex;
+    flex-direction: column;
+    text-align: center;
+    vertical-align: middle;
+    justify-content: space-between;
+    height: fit-content;
+
+}
+
+.card {
+    background-color: rgb(225, 251, 175);
+    border-radius: 25px;
+    height: 56px;
+    margin: 1em 0 4em;
+}
+
+#card {
+    width: fit-content;
+    margin-left: 43%;
+    margin-top: 15%;
+
+    background-color: rgba(186, 204, 155, 0.562);
+    border-radius: 0%;
+}
+
+.submitted-answers {
+
+    justify-content: space-between;
+    border: 0;
+    font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
+    font-size: large;
+
+
+}
+
+#answer-definition {
+    font-size: 1.25rem;
+    padding: 0.5rem;
+    margin: 0.5rem;
+    border-radius: solid 0.5rem #000;
+    background-color: whitesmoke;
+    border-radius: 0.5rem;
+
+}
+
+.disabled {
+    font-size: 2rem;
+    border: 0.1rem solid;
+    padding: 0.5rem;
+    margin: 0.5rem;
+    border-radius: 0.2rem;
+    text-decoration: none;
+    height: 3rem;
+    width: 3rem;
+    text-align: center;
+    vertical-align: middle;
+    cursor: not-allowed;
+    box-shadow: none;
+    transform: none;
+    background-color: rgb(255, 207, 207);
+}
+
+.answer-rundown {
+    color: black;
+    font-size: 1.5rem;
+    font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
+    list-style-type: none;
+    max-width: 200pt;
+
+}
+
+.quit-yes-no {
+    background-color: whitesmoke;
+    padding: 0.5rem;
+    margin: 0.5rem;
+    border-radius: 0.5rem;
+
+}
+
+#quit-modal {
+    background-color: rgba(238, 106, 18, 0.6);
+    height: 50%;
+    padding: 10px;
+    border-top: 0.1rem solid;
+    border-right: 0.2rem solid;
+    border-bottom: 0.2rem solid;
+    border-left: 0.05rem solid;
+    border-radius: 12px;
+}

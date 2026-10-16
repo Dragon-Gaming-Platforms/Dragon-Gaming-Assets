@@ -1,0 +1,15 @@
+{
+  "name": "Trees Armageddon",
+  "desc": "Turn-based artillery for two teams of tree characters: set your angle and power, factor in the wind, and watch the shot arc over the branches. Three hits knocks an opponent out - last team standing wins.",
+  "controls": "Aim with angle and power, account for the wind, then fire - teams alternate turns",
+  "shelf": "Arcade & Action",
+  "tags": [
+    "games",
+    "artillery",
+    "turn-based",
+    "worms-style"
+  ],
+  "badge": "New",
+  "creator": "am-santos",
+  "image": "1.png"
+}

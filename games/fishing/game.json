@@ -1,0 +1,16 @@
+{
+  "name": "Deep Blue",
+  "desc": "A 3D fishing sim in your browser tab: charge a cast, follow the hook down through eighty metres of water, strike when something bites, fight it to the boat, sell the catch and buy better tackle.",
+  "controls": "Hold to charge your cast, follow the hook down, and strike when it bites - then work the reel to land the fish",
+  "shelf": "Sports & Racing",
+  "tags": [
+    "games",
+    "fishing",
+    "3d",
+    "cozy",
+    "progression"
+  ],
+  "badge": "New",
+  "creator": "ctbot000",
+  "image": "1.png"
+}

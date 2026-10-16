@@ -1,0 +1,16 @@
+{
+  "name": "Boggle",
+  "desc": "The classic word hunt: a 4x4 cube of letters, three minutes on the clock, and a dictionary that knows whether your squiggly path is a real word. Find as many as you can.",
+  "controls": "Click and drag across touching letters to trace a word, then submit it before time runs out",
+  "shelf": "Puzzle & Logic",
+  "tags": [
+    "games",
+    "boggle",
+    "word",
+    "puzzle",
+    "timed"
+  ],
+  "badge": "New",
+  "creator": "jpk3lly",
+  "image": "1.png"
+}

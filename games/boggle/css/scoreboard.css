@@ -1,0 +1,82 @@
+
+html,
+body,
+.top-score-table {
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+    flex-wrap: wrap;
+    font-family: Montserrat;
+    font-size: 12pt;
+}
+
+.btn{
+    max-width:300px;
+    display: flex;
+    flex-direction:column;
+    text-align: center;
+    font-size: 2rem;
+    color: #000;
+    border: 0.1rem solid;
+    margin: 0.5rem;
+    border-radius: 0.2rem;
+    text-decoration: none;
+    background-color: whitesmoke;
+    height:3rem;
+    width: 150px;
+    text-align: center;
+    vertical-align: middle;
+}
+
+.btn:hover{
+    cursor: pointer;
+    box-shadow: 0 0.4rem 1.4rem rgba(86, 185, 235, 0.5);
+    transform: translateY(-0.1rem);
+    transition: transform 150ms;
+}
+
+.high-score{
+    font-size: 1.75rem;
+    color: #000;
+    list-style: none;
+    border-radius: 0.2rem;
+    height:3rem;
+    flex-wrap: wrap;
+}
+
+.individual-score{
+    text-align: center;
+    vertical-align: middle;
+    text-align: center;
+    border: 0.1rem solid;
+    border-radius: 0.5rem;
+    margin: 0.5rem;
+    width: 30%;
+}
+
+.score-header{
+    font-size: 3rem;
+    font-weight: bold;
+    text-align: center;
+    vertical-align: middle;
+}
+
+.scoreboard-titles{
+    font-size: 1.5rem;
+    text-align: center;
+    background-color: #000;
+    color: #fff;
+}
+#topTenScoresList {
+    list-style-type: none;
+    padding-left: 0;
+}
+
+.top-score-list{
+    text-align: center;
+}
+
+.top-score-list h2{
+    font-size: 3rem;
+
+}

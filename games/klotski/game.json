@@ -1,0 +1,16 @@
+{
+  "name": "Klotski",
+  "desc": "The classic sliding-block puzzle (Hua Gu Shan): manoeuvre the General and his guard out through the bottom gap with as few moves as possible - a solver is built in if you get stuck.",
+  "controls": "Drag the blocks around the 5x4 board to free the General - use the built-in solver if you are stuck",
+  "shelf": "Puzzle & Logic",
+  "tags": [
+    "games",
+    "klotski",
+    "sliding",
+    "puzzle",
+    "classic"
+  ],
+  "badge": "New",
+  "creator": "jeantimex",
+  "image": "1.png"
+}

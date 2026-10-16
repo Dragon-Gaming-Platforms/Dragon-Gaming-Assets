@@ -1,0 +1,15 @@
+{
+  "name": "Super Pixel Bros",
+  "desc": "A tiny original Mario-style platformer: every sprite is drawn with code, every sound is synthesized, and the goal is simple - run, jump, collect the coins and reach the flag.",
+  "controls": "Arrow keys or A/D to move, Space or W to jump, Enter to start or restart",
+  "shelf": "Arcade & Action",
+  "tags": [
+    "games",
+    "platformer",
+    "retro",
+    "arcade"
+  ],
+  "badge": "New",
+  "creator": "ca4219248-blip",
+  "image": "1.png"
+}

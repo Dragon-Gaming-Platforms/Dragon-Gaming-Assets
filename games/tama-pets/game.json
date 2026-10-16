@@ -1,0 +1,15 @@
+{
+  "name": "Tama-Pets",
+  "desc": "Raise a virtual pet: feed it, play with it, bathe it and put it to sleep, keep an eye on the status bars, and see how many days you can keep it alive. Progress saves in your browser.",
+  "controls": "Use the action buttons to feed, play, clean and rest your pet - keep the status bars up",
+  "shelf": "Interactive Stories & Experiments",
+  "tags": [
+    "games",
+    "tamagotchi",
+    "virtual-pet",
+    "raising"
+  ],
+  "badge": "New",
+  "creator": "bocaletto-luca",
+  "image": "1.png"
+}

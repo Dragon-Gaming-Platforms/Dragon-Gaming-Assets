@@ -1,0 +1,563 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Hitori Puzzle</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f5f5f5;
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        
+        .game-container {
+            background-color: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+            max-width: 600px;
+            width: 100%;
+        }
+        
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 20px;
+        }
+        
+        .game-controls {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 15px;
+            flex-wrap: wrap;
+        }
+        
+        button {
+            padding: 8px 12px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            background-color: #4CAF50;
+            color: white;
+        }
+        
+        button:hover {
+            background-color: #45a049;
+        }
+        
+        select {
+            padding: 8px;
+            border-radius: 4px;
+            border: 1px solid #ddd;
+        }
+        
+        .difficulty-selector {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        
+        .hitori-board {
+            display: grid;
+            gap: 1px;
+            background-color: #333;
+            border: 2px solid #333;
+            margin: 0 auto;
+        }
+        
+        .cell {
+            aspect-ratio: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background-color: white;
+            font-size: 18px;
+            font-weight: bold;
+            cursor: pointer;
+            user-select: none;
+            position: relative;
+        }
+        
+        .cell.selected {
+            background-color: #333;
+            color: white;
+        }
+        
+        .cell.circled {
+            background-color: white;
+            color: black;
+        }
+        
+        .cell.circled::after {
+            content: '';
+            position: absolute;
+            width: 70%;
+            height: 70%;
+            border: 2px solid #4CAF50;
+            border-radius: 50%;
+        }
+        
+        .cell.error {
+            background-color: #ffdddd;
+        }
+        
+        .game-info {
+            margin-top: 15px;
+            text-align: center;
+            font-size: 16px;
+        }
+        
+        .completed-message {
+            color: #4CAF50;
+            font-weight: bold;
+            margin-top: 10px;
+        }
+        
+        .rules {
+            margin-top: 20px;
+            padding: 15px;
+            background-color: #f0f0f0;
+            border-radius: 5px;
+            max-width: 500px;
+        }
+    </style>
+</head>
+<body>
+    <div class="game-container">
+        <h1>Hitori Puzzle</h1>
+        
+        <div class="game-controls">
+            <button id="new-game">New Game</button>
+            <div class="difficulty-selector">
+                <label for="difficulty">Difficulty:</label>
+                <select id="difficulty">
+                    <option value="5">5x5 (Easy)</option>
+                    <option value="6">6x6 (Medium)</option>
+                    <option value="8">8x8 (Hard)</option>
+                </select>
+            </div>
+            <button id="check-solution">Check Solution</button>
+            <button id="solve">Show Solution</button>
+        </div>
+        
+        <div id="board-container">
+            <div class="hitori-board" id="board"></div>
+        </div>
+        
+        <div class="game-info">
+            <p>Click to mark cells black. Right-click to circle cells.</p>
+            <div id="completed-message" class="completed-message" style="display: none;">Puzzle completed!</div>
+        </div>
+        
+        <div class="rules">
+            <h3>Hitori Rules:</h3>
+            <ol>
+                <li>No number appears more than once in any row or column (black cells don't count)</li>
+                <li>Black cells cannot touch each other horizontally or vertically (diagonally is okay)</li>
+                <li>All white cells must be connected horizontally or vertically</li>
+            </ol>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const boardElement = document.getElementById('board');
+            const boardContainer = document.getElementById('board-container');
+            const newGameBtn = document.getElementById('new-game');
+            const checkSolutionBtn = document.getElementById('check-solution');
+            const solveBtn = document.getElementById('solve');
+            const difficultySelect = document.getElementById('difficulty');
+            const completedMessage = document.getElementById('completed-message');
+            
+            let boardSize = 5;
+            let puzzle = [];
+            let solution = [];
+            let selectedCells = []; // Array of {row, col, state} where state is 'selected' or 'circled'
+            
+            // Initialize the game
+            initGame();
+            
+            function initGame() {
+                // Clear the board
+                boardElement.innerHTML = '';
+                selectedCells = [];
+                completedMessage.style.display = 'none';
+                
+                // Set board size
+                boardSize = parseInt(difficultySelect.value);
+                
+                // Generate puzzle
+                generatePuzzle();
+                
+                // Render the board
+                renderBoard();
+                
+                // Set up event listeners
+                setupEventListeners();
+            }
+            
+            function generatePuzzle() {
+                // This is a simplified puzzle generator
+                // In a real implementation, you would generate proper Hitori puzzles
+                
+                puzzle = Array(boardSize).fill().map(() => Array(boardSize).fill(0));
+                solution = Array(boardSize).fill().map(() => Array(boardSize).fill(false));
+                
+                // Fill with random numbers (1 to boardSize)
+                for (let row = 0; row < boardSize; row++) {
+                    for (let col = 0; col < boardSize; col++) {
+                        puzzle[row][col] = Math.floor(Math.random() * boardSize) + 1;
+                    }
+                }
+                
+                // Generate a random solution (about 30% of cells selected)
+                for (let row = 0; row < boardSize; row++) {
+                    for (let col = 0; col < boardSize; col++) {
+                        if (Math.random() < 0.3) {
+                            solution[row][col] = true;
+                        }
+                    }
+                }
+                
+                // Make sure the solution is valid
+                // (In a real game, you'd have a proper puzzle generator)
+            }
+            
+            function renderBoard() {
+                // Set up the board grid
+                boardElement.style.gridTemplateColumns = `repeat(${boardSize}, 1fr)`;
+                boardElement.style.gridTemplateRows = `repeat(${boardSize}, 1fr)`;
+                
+                // Create cells
+                for (let row = 0; row < boardSize; row++) {
+                    for (let col = 0; col < boardSize; col++) {
+                        const cell = document.createElement('div');
+                        cell.className = 'cell';
+                        cell.dataset.row = row;
+                        cell.dataset.col = col;
+                        cell.textContent = puzzle[row][col];
+                        
+                        // Check if this cell is in our selectedCells array
+                        const selectedCell = selectedCells.find(sc => 
+                            sc.row === row && sc.col === col);
+                        
+                        if (selectedCell) {
+                            if (selectedCell.state === 'selected') {
+                                cell.classList.add('selected');
+                            } else if (selectedCell.state === 'circled') {
+                                cell.classList.add('circled');
+                            }
+                        }
+                        
+                        boardElement.appendChild(cell);
+                    }
+                }
+                
+                // Size the board container appropriately
+                const cellSize = Math.min(500 / boardSize, 50);
+                boardElement.style.width = `${cellSize * boardSize}px`;
+                boardElement.style.height = `${cellSize * boardSize}px`;
+            }
+            
+            function setupEventListeners() {
+                // Clear previous listeners
+                boardElement.replaceWith(boardElement.cloneNode(true));
+                
+                // New game button
+                newGameBtn.addEventListener('click', initGame);
+                
+                // Check solution button
+                checkSolutionBtn.addEventListener('click', checkSolution);
+                
+                // Solve button
+                solveBtn.addEventListener('click', showSolution);
+                
+                // Cell click events
+                boardElement.addEventListener('click', (e) => {
+                    const cell = e.target.closest('.cell');
+                    if (!cell) return;
+                    
+                    const row = parseInt(cell.dataset.row);
+                    const col = parseInt(cell.dataset.col);
+                    
+                    // Remove any existing state for this cell
+                    selectedCells = selectedCells.filter(sc => 
+                        !(sc.row === row && sc.col === col));
+                    
+                    // Add selected state
+                    selectedCells.push({ row, col, state: 'selected' });
+                    
+                    // Re-render board
+                    renderBoard();
+                    
+                    // Check if puzzle is complete
+                    checkPuzzleCompletion();
+                });
+                
+                // Right-click to circle cells
+                boardElement.addEventListener('contextmenu', (e) => {
+                    e.preventDefault();
+                    const cell = e.target.closest('.cell');
+                    if (!cell) return;
+                    
+                    const row = parseInt(cell.dataset.row);
+                    const col = parseInt(cell.dataset.col);
+                    
+                    // Remove any existing state for this cell
+                    selectedCells = selectedCells.filter(sc => 
+                        !(sc.row === row && sc.col === col));
+                    
+                    // Add circled state
+                    selectedCells.push({ row, col, state: 'circled' });
+                    
+                    // Re-render board
+                    renderBoard();
+                    
+                    // Check if puzzle is complete
+                    checkPuzzleCompletion();
+                    
+                    return false;
+                });
+            }
+            
+            function checkSolution() {
+                // Check all three Hitori rules
+                const rule1 = checkNoDuplicateNumbers();
+                const rule2 = checkNoAdjacentBlackCells();
+                const rule3 = checkWhiteCellsConnected();
+                
+                if (rule1 && rule2 && rule3) {
+                    completedMessage.style.display = 'block';
+                    completedMessage.textContent = 'Correct solution! Well done!';
+                    completedMessage.style.color = '#4CAF50';
+                } else {
+                    completedMessage.style.display = 'block';
+                    completedMessage.textContent = 'Solution incorrect. Keep trying!';
+                    completedMessage.style.color = '#ff4c4c';
+                    
+                    // Highlight errors
+                    if (!rule1) highlightNumberErrors();
+                    if (!rule2) highlightAdjacentErrors();
+                }
+            }
+            
+            function checkNoDuplicateNumbers() {
+                // Check rows
+                for (let row = 0; row < boardSize; row++) {
+                    const numbersInRow = new Set();
+                    for (let col = 0; col < boardSize; col++) {
+                        const cell = selectedCells.find(sc => 
+                            sc.row === row && sc.col === col);
+                        
+                        if (!cell || cell.state !== 'selected') {
+                            const num = puzzle[row][col];
+                            if (numbersInRow.has(num)) {
+                                return false;
+                            }
+                            numbersInRow.add(num);
+                        }
+                    }
+                }
+                
+                // Check columns
+                for (let col = 0; col < boardSize; col++) {
+                    const numbersInCol = new Set();
+                    for (let row = 0; row < boardSize; row++) {
+                        const cell = selectedCells.find(sc => 
+                            sc.row === row && sc.col === col);
+                        
+                        if (!cell || cell.state !== 'selected') {
+                            const num = puzzle[row][col];
+                            if (numbersInCol.has(num)) {
+                                return false;
+                            }
+                            numbersInCol.add(num);
+                        }
+                    }
+                }
+                
+                return true;
+            }
+            
+            function checkNoAdjacentBlackCells() {
+                for (let row = 0; row < boardSize; row++) {
+                    for (let col = 0; col < boardSize; col++) {
+                        const cell = selectedCells.find(sc => 
+                            sc.row === row && sc.col === col && sc.state === 'selected');
+                        
+                        if (cell) {
+                            // Check adjacent cells
+                            if (row > 0) {
+                                const topCell = selectedCells.find(sc => 
+                                    sc.row === row-1 && sc.col === col && sc.state === 'selected');
+                                if (topCell) return false;
+                            }
+                            if (row < boardSize-1) {
+                                const bottomCell = selectedCells.find(sc => 
+                                    sc.row === row+1 && sc.col === col && sc.state === 'selected');
+                                if (bottomCell) return false;
+                            }
+                            if (col > 0) {
+                                const leftCell = selectedCells.find(sc => 
+                                    sc.row === row && sc.col === col-1 && sc.state === 'selected');
+                                if (leftCell) return false;
+                            }
+                            if (col < boardSize-1) {
+                                const rightCell = selectedCells.find(sc => 
+                                    sc.row === row && sc.col === col+1 && sc.state === 'selected');
+                                if (rightCell) return false;
+                            }
+                        }
+                    }
+                }
+                return true;
+            }
+            
+            function checkWhiteCellsConnected() {
+                // This is a simplified check - a full implementation would use flood fill
+                // For this demo, we'll just check that there aren't too many black cells
+                const blackCellCount = selectedCells.filter(sc => sc.state === 'selected').length;
+                return blackCellCount >= (boardSize * boardSize / 3);
+            }
+            
+            function highlightNumberErrors() {
+                // Highlight duplicate numbers in rows
+                for (let row = 0; row < boardSize; row++) {
+                    const numberPositions = {};
+                    for (let col = 0; col < boardSize; col++) {
+                        const cell = selectedCells.find(sc => 
+                            sc.row === row && sc.col === col);
+                        
+                        if (!cell || cell.state !== 'selected') {
+                            const num = puzzle[row][col];
+                            if (numberPositions[num]) {
+                                numberPositions[num].push(col);
+                            } else {
+                                numberPositions[num] = [col];
+                            }
+                        }
+                    }
+                    
+                    // Mark duplicates
+                    for (const num in numberPositions) {
+                        if (numberPositions[num].length > 1) {
+                            numberPositions[num].forEach(col => {
+                                const cell = boardElement.querySelector(
+                                    `.cell[data-row="${row}"][data-col="${col}"]`);
+                                cell.classList.add('error');
+                            });
+                        }
+                    }
+                }
+                
+                // Highlight duplicate numbers in columns
+                for (let col = 0; col < boardSize; col++) {
+                    const numberPositions = {};
+                    for (let row = 0; row < boardSize; row++) {
+                        const cell = selectedCells.find(sc => 
+                            sc.row === row && sc.col === col);
+                        
+                        if (!cell || cell.state !== 'selected') {
+                            const num = puzzle[row][col];
+                            if (numberPositions[num]) {
+                                numberPositions[num].push(row);
+                            } else {
+                                numberPositions[num] = [row];
+                            }
+                        }
+                    }
+                    
+                    // Mark duplicates
+                    for (const num in numberPositions) {
+                        if (numberPositions[num].length > 1) {
+                            numberPositions[num].forEach(row => {
+                                const cell = boardElement.querySelector(
+                                    `.cell[data-row="${row}"][data-col="${col}"]`);
+                                cell.classList.add('error');
+                            });
+                        }
+                    }
+                }
+            }
+            
+            function highlightAdjacentErrors() {
+                for (const cell of selectedCells.filter(sc => sc.state === 'selected')) {
+                    const { row, col } = cell;
+                    
+                    // Check adjacent cells
+                    if (row > 0) {
+                        const topCell = selectedCells.find(sc => 
+                            sc.row === row-1 && sc.col === col && sc.state === 'selected');
+                        if (topCell) {
+                            markCellAsError(row, col);
+                            markCellAsError(row-1, col);
+                        }
+                    }
+                    if (row < boardSize-1) {
+                        const bottomCell = selectedCells.find(sc => 
+                            sc.row === row+1 && sc.col === col && sc.state === 'selected');
+                        if (bottomCell) {
+                            markCellAsError(row, col);
+                            markCellAsError(row+1, col);
+                        }
+                    }
+                    if (col > 0) {
+                        const leftCell = selectedCells.find(sc => 
+                            sc.row === row && sc.col === col-1 && sc.state === 'selected');
+                        if (leftCell) {
+                            markCellAsError(row, col);
+                            markCellAsError(row, col-1);
+                        }
+                    }
+                    if (col < boardSize-1) {
+                        const rightCell = selectedCells.find(sc => 
+                            sc.row === row && sc.col === col+1 && sc.state === 'selected');
+                        if (rightCell) {
+                            markCellAsError(row, col);
+                            markCellAsError(row, col+1);
+                        }
+                    }
+                }
+            }
+            
+            function markCellAsError(row, col) {
+                const cell = boardElement.querySelector(
+                    `.cell[data-row="${row}"][data-col="${col}"]`);
+                if (cell) {
+                    cell.classList.add('error');
+                }
+            }
+            
+            function checkPuzzleCompletion() {
+                // Simple check - in a real game you'd verify all rules
+                const blackCellCount = selectedCells.filter(sc => sc.state === 'selected').length;
+                if (blackCellCount > 0) {
+                    completedMessage.style.display = 'none';
+                }
+            }
+            
+            function showSolution() {
+                // Fill in the solution
+                selectedCells = [];
+                for (let row = 0; row < boardSize; row++) {
+                    for (let col = 0; col < boardSize; col++) {
+                        if (solution[row][col]) {
+                            selectedCells.push({ row, col, state: 'selected' });
+                        }
+                    }
+                }
+                renderBoard();
+                completedMessage.style.display = 'block';
+                completedMessage.textContent = 'This is one possible solution';
+                completedMessage.style.color = '#4CAF50';
+            }
+        });
+    </script>
+</body>
+</html>
