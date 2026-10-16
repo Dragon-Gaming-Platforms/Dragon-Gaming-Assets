@@ -1,0 +1,16 @@
+{
+  "name": "Cheese Toast",
+  "desc": "Jim Bumgardner's teapot-in-space arcade game - from the Mac in 1993, CT II in 1995 and CT III in 2003-04 - ported to JavaScript and canvas. Steer your trusty teapot, fire, and endure: single-player by default, with optional peer-to-peer multiplayer for duels and melees.",
+  "controls": "Left/right arrows to turn, Z or X to thrust, Space to fire (hold to autofire) - touch controls on mobile",
+  "shelf": "Arcade & Action",
+  "tags": [
+    "games",
+    "arcade",
+    "teapot",
+    "shooter",
+    "retro"
+  ],
+  "badge": "New",
+  "creator": "jbum",
+  "image": "1.png"
+}

@@ -1,0 +1,16 @@
+{
+  "name": "Halma",
+  "desc": "The classic jumping board game: two players race to get all of their pieces to the opposite home corner, and any piece in the way can be hopped over - chain jumps to fly across the board. Hot-seat play on one screen.",
+  "controls": "Click one of your pieces, then a legal square - a jump lets you fly and keep moving",
+  "shelf": "Strategy & Idle",
+  "tags": [
+    "games",
+    "halma",
+    "board-game",
+    "jump",
+    "two-player"
+  ],
+  "badge": "New",
+  "creator": "jussiks",
+  "image": "1.png"
+}

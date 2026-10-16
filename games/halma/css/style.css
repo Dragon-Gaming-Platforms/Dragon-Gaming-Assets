@@ -1,0 +1,121 @@
+body {
+    margin: 0px 10px;
+    box-sizing: border-box;
+    min-width: 400px;
+}
+
+h1 {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 10px 0px;
+}
+
+p {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 10px 0px;
+}
+
+svg {
+    width: 90%;
+    height: 90%;
+    vertical-align: middle;
+}
+
+table {
+    border: 1px solid black;
+    border-spacing: 0;
+    border-collapse: collapse;
+    box-sizing: border-box;
+}
+
+td {
+    margin: 0;
+    padding: 0;
+    background: #E2DDDC;
+    text-align: center;
+}
+
+tr:nth-child(odd) td:nth-child(odd) {
+    background: #A59E9B;
+}
+
+tr:nth-child(even) td:nth-child(even) {
+    background: #A59E9B;
+}
+
+td[class="camp"] {
+    background: #9EE05C;
+}
+
+tr:nth-child(odd) td[class="camp"]:nth-child(odd) {
+    background: #4E8417;
+}
+
+tr:nth-child(even) td[class="camp"]:nth-child(even) {
+    background: #4E8417;
+}
+
+fieldset {
+    padding: 5px 0px;
+    margin-bottom: 5px;
+}
+
+div {
+    margin-right: 10px;
+}
+
+label {
+    margin-right: 10px;
+    display: block;
+}
+
+form {
+    max-width: 800px;
+    min-height: 182px;
+    padding: 5px 0px;
+    box-sizing: border-box;
+    border: #171616 2px;
+}
+
+input {
+    margin-right: 10px;
+}
+
+input[type=number] {
+    margin-left: 10px;
+    width: 50px;
+}
+
+.left {
+    float: left;
+}
+
+.block {
+    display: block;
+}
+
+.bold {
+    font-weight: bold;
+}
+
+.container {
+    display: grid;
+    grid-template-columns: 150px 150px 150px;
+}
+
+.item-a {
+    grid-column: 1;
+}
+
+.item-b {
+    grid-column: 2;
+}
+
+.item-c {
+    grid-column: 3;
+}
+
+.item-abc {
+    grid-column: 1 / span 3;
+}
