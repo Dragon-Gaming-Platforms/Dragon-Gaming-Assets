@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lode Runner</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <div id="game-container">
+        <!-- Main Menu -->
+        <div id="menu-overlay">
+            <div id="menu-content">
+                <h1 id="menu-title">LODE RUNNER</h1>
+                <div id="level-select">
+                    <span id="level-select-label">LEVEL:</span>
+                    <span id="level-select-number">1</span>
+                    <span id="level-select-hint">(Type 1-150)</span>
+                </div>
+                <div id="menu-buttons">
+                    <button id="btn-play">Play Game</button>
+                    <button id="btn-editor">Level Editor</button>
+                </div>
+            </div>
+        </div>
+
+        <div id="game-area">
+            <!-- Controls Panel -->
+            <div id="controls-panel">
+                <h3>CONTROLS</h3>
+                <div class="control-group">
+                    <div class="control-row"><span class="key">ARROWS</span> Move</div>
+                    <div class="control-row"><span class="key">WASD</span> Move</div>
+                </div>
+                <div class="control-group">
+                    <div class="control-row"><span class="key">Z / Q</span> Dig Left</div>
+                    <div class="control-row"><span class="key">X / E</span> Dig Right</div>
+                </div>
+                <div class="control-group">
+                    <div class="control-row"><span class="key">P / ESC</span> Pause</div>
+                    <div class="control-row"><span class="key">R</span> Restart</div>
+                </div>
+            </div>
+
+            <canvas id="game-canvas"></canvas>
+        </div>
+        <div id="ui-overlay">
+            <div id="level-display">LEVEL: <span id="level">1</span></div>
+            <div id="score-display">SCORE: <span id="score">0</span></div>
+            <div id="gold-display">GOLD: <span id="gold">0</span>/<span id="gold-total">0</span></div>
+            <div id="lives-display">LIVES: <span id="lives">3</span></div>
+        </div>
+        <div id="message-overlay" class="hidden">
+            <div id="message-text"></div>
+        </div>
+
+        <!-- Editor UI -->
+        <div id="editor-ui" class="hidden">
+            <!-- Toolbar -->
+            <div id="editor-toolbar">
+                <div class="toolbar-group">
+                    <button id="btn-new" title="New Level">New</button>
+                    <button id="btn-save" title="Save Level (Ctrl+S)">Save</button>
+                    <button id="btn-load" title="Load Level">Load</button>
+                    <button id="btn-builtin" title="Load Built-in Level">Built-in</button>
+                    <span class="toolbar-separator"></span>
+                    <button id="btn-undo" title="Undo (Ctrl+Z)">Undo</button>
+                    <button id="btn-redo" title="Redo (Ctrl+Y)">Redo</button>
+                    <span class="toolbar-separator"></span>
+                    <button id="btn-export" title="Export to File">Export</button>
+                    <button id="btn-import" title="Import from File">Import</button>
+                    <input type="file" id="import-file-input" accept=".json" style="display: none;">
+                </div>
+                <div class="toolbar-group toolbar-center">
+                    <span id="editor-title">Untitled Level</span>
+                </div>
+                <div class="toolbar-group">
+                    <button id="btn-test" title="Playtest Level">Test</button>
+                    <button id="btn-exit" title="Exit Editor">Exit</button>
+                </div>
+            </div>
+
+            <!-- Sidebar and Canvas Container -->
+            <div id="editor-main">
+                <!-- Left Sidebar -->
+                <div id="editor-sidebar">
+                    <div class="sidebar-section">
+                        <h3>Tools</h3>
+                        <div class="tool-buttons">
+                            <button data-tool="draw" class="active" title="Draw Tool">Draw</button>
+                            <button data-tool="erase" title="Erase Tool">Erase</button>
+                            <button data-tool="fill" title="Flood Fill Tool">Fill</button>
+                            <button data-tool="rectangle" title="Rectangle Tool">Rect</button>
+                        </div>
+                    </div>
+
+                    <div class="sidebar-section">
+                        <h3>Tiles</h3>
+                        <div id="tile-palette"></div>
+                    </div>
+
+                    <div class="sidebar-section">
+                        <h3>Spawns</h3>
+                        <div class="spawn-buttons">
+                            <button id="btn-player-spawn" title="Place Player Start">Player</button>
+                            <button id="btn-enemy-spawn" title="Toggle Enemy Spawn">Enemy</button>
+                        </div>
+                    </div>
+
+                    <div class="sidebar-section">
+                        <h3>View</h3>
+                        <div class="view-buttons">
+                            <button id="btn-grid" class="active" title="Toggle Grid (G)">Grid</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Canvas area - empty, canvas shows through -->
+                <div id="editor-canvas-area"></div>
+            </div>
+
+            <!-- Status Bar -->
+            <div id="editor-status">
+                <span id="status-tool">Tool: Draw</span>
+                <span id="status-tile">Tile: Brick</span>
+                <span id="status-warning" class="status-warning"></span>
+            </div>
+        </div>
+
+        <!-- Save Modal -->
+        <div id="save-modal" class="modal hidden">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2>Save Level</h2>
+                    <button class="modal-close">&times;</button>
+                </div>
+                <form id="save-form">
+                    <label for="level-name-input">Level Name:</label>
+                    <input type="text" id="level-name-input" placeholder="Enter level name" required>
+                    <div class="modal-buttons">
+                        <button type="submit" class="btn-primary">Save</button>
+                        <button type="button" class="modal-cancel">Cancel</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Load Modal -->
+        <div id="load-modal" class="modal hidden">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2>Load Level</h2>
+                    <button class="modal-close">&times;</button>
+                </div>
+                <div id="level-list" class="level-list">
+                    <!-- Level items will be inserted here -->
+                </div>
+                <div class="modal-buttons">
+                    <button type="button" class="modal-cancel">Cancel</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Built-in Levels Modal -->
+        <div id="builtin-modal" class="modal hidden">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2>Load Built-in Level</h2>
+                    <button class="modal-close">&times;</button>
+                </div>
+                <div id="builtin-list" class="level-list">
+                    <!-- Built-in level items will be inserted here -->
+                </div>
+                <div class="modal-buttons">
+                    <button type="button" class="modal-cancel">Cancel</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="vendor/kontra.min.js"></script>
+    <script type="module" src="js/main.js"></script>
+</body>
+</html>

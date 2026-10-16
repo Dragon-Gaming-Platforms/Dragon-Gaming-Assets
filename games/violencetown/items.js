@@ -1,0 +1,936 @@
+// items.js — Item definitions and use-phase resolution (equip / use / throw).
+//
+// All items are equippable. Each has an equipSlot and an optional duration.
+// When equipped with a duration, the item occupies the slot for N turns,
+// then the previously equipped item in that slot is restored.
+//
+// Thrown consumables burst over a 3×3 area at half effect (resolveThrow); the
+// affected tiles come from wheel-model.js `affectedTiles`, so the on-screen
+// highlight and the damage resolution use the exact same geometry.
+
+import { isHostile, isSewerDweller } from './ai.js';
+import { burnGold } from './trade.js';
+
+// ── Poition (all six stats wired) ────────────────────────────────────────────
+// A poition moves exactly one of six stats by a signed amount: positive is a
+// potion, negative is a poison — same object, same shape, the sign is the
+// whole difference. Two runtime families:
+//   - TICK stats (health, mana, gold) — an instant (turns:1) delivers the
+//     whole amount immediately; a lasting one (turns>1) rides the shared
+//     tick machinery (buffs.js's BUFF_DEFS / applyDot). Thrown/given health
+//     poitions already used this (sludge/fire/poison aliases); resolveSelfUse
+//     below is what lets DRINKING one do the same thing.
+//   - RIDER stats (strength, defence) — no tick at all. The buff just has to
+//     exist and count down; the value is read where the number is actually
+//     computed (Law 2's flats bucket in combatAttack, the sum in
+//     _playerArmor) — see buffs.js's sumBuffStat.
+// `speed` is neither — it never touches a buff list. It converts straight
+// into haste/slow CHARGES spent at the _advanceWorld chokepoint (main.js);
+// see buffs.js's worldBeatPlan.
+//
+// poitionBuff is the ONE flip seam every path (thrown burst, hand-fed sewer
+// fare, and self-use below) routes through, so a species-dependent sign
+// inversion can't drift into a second implementation. It emits one of two
+// record shapes depending on the stat family — not two competing seams, one
+// seam whose output shape depends on what's being moved:
+//   - tick stats  → { id, turns, dmg }    (dmg negated: a potion heals, i.e.
+//                                          applyDot's `hp - dmg` convention)
+//   - rider stats → { id, turns, stat, amount }  (read via sumBuffStat)
+export function poitionBuff(p, flip = false) {
+    if (!p) return null;
+    const amount = flip ? -p.amount : p.amount;
+    const turns = p.turns ?? 1;
+    if (p.stat === 'strength' || p.stat === 'defence') {
+        return { id: p.as || p.stat, turns, stat: p.stat, amount };
+    }
+    return { id: p.as || p.stat, turns, dmg: -amount };
+}
+
+export const ITEMS = {
+    rock: {
+        id: 'rock',
+        name: '[Rock]',
+        description: 'A heavy chunk of sewer masonry. Better thrown than held — though a clatter down the tunnel turns heads.',
+        useType: 'throw',
+        equipSlot: 'sides',
+        range: 4,
+        damage: 3,
+        damageType: 'physical',
+        pullsAggro: true,      // enemies investigate where it lands (see main.js _rockClatter)
+        consumable: true,
+        fallbackColor: '#888888',
+        baseValue: 3,
+    },
+    sludge_sack: {
+        id: 'sludge_sack',
+        name: '[Sludge Sack]',
+        description: 'A burlap sack cinched with a leather tie, heavy with sewer sludge. Bursts on impact and keeps eating.',
+        useType: 'throw',
+        equipSlot: 'sides',
+        range: 5,
+        poition: { stat: 'health', amount: -3, turns: 5, as: 'sludge' },
+        damageType: 'sludge',
+        sewerFare: true,       // Phase D: medicine to the things that live down there
+        consumable: true,
+        fallbackColor: '#9a52c8',
+        baseValue: 10,
+    },
+    // (poisons) The poison half of a fire poition (plans/poisons.md); it replaced
+    // the Fire Bottle. Thrown, it bursts like any DoT poition, and whoever it
+    // burns also gets fire blood: while both last, every hit they land sets the
+    // target burning (Game._spreadFireBlood). Drinkable on purpose.
+    fire_blood: {
+        id: 'fire_blood',
+        name: '[Fire Blood]',
+        description: 'Thrown, it sets everyone it splashes burning. Drunk, you burn, and every hit you land sets the target burning too.',
+        category: 'poition',
+        useType: 'throw',
+        drinkable: true,
+        equipSlot: 'sides',
+        range: 5,
+        poition: { stat: 'health', amount: -5, turns: 5, as: 'fire' },
+        fireBlood: true,
+        enemyThrows: true,   // one of the two poisons an enemy throws at you (npc.js)
+        damageType: 'fire',
+        consumable: true,
+        fallbackColor: '#e07a2a',
+        baseValue: 17,
+    },
+    // (poisons) Sludge Brain: no burst of its own. Where it lands it leaves a
+    // 3-tile sludge puddle, the landing tile and the throw's two forward
+    // diagonals (puddles.js); ending a turn in it applies the Sludge DoT.
+    sludge_brain: {
+        id: 'sludge_brain',
+        name: '[Sludge Brain]',
+        description: 'Thrown, it leaves a 3-tile sludge puddle for 8 turns. Ending a turn in it applies Sludge; sewer dwellers are healed instead.',
+        category: 'poition',
+        useType: 'throw',
+        equipSlot: 'sides',
+        range: 5,
+        puddle: { kind: 'sludge', turns: 8 },
+        enemyThrows: true,
+        damageType: 'sludge',
+        consumable: true,
+        fallbackColor: '#5aa84a',
+        baseValue: 12,
+    },
+    soap: {
+        id: 'soap',
+        name: '[Soap]',
+        description: 'Industrial-grade lye bar. Cuts through sludge. The Sewer\'s most valuable commodity.',
+        equipSlot: 'back',
+        equipDuration: 3,
+        useType: 'self',
+        effect: 'cure_sludge',
+        armor: 2,               // a bar strapped at your back turns a hit or two while it lasts
+        consumable: true,
+        fallbackColor: '#aaaaff',
+        baseValue: 15,
+    },
+    pipe: {
+        id: 'pipe',
+        name: '[Pipe]',
+        description: 'Rusty copper pipe, wrenched free from the wall. Swings like it means it.',
+        equipSlot: 'weapon',
+        useType: 'melee',
+        range: 1,
+        damage: 12,
+        consumable: false,
+        canJamDoors: true,   // (zone pursuit) Use it to wedge the door you came through shut
+        fallbackColor: '#666666',
+        baseValue: 8,
+    },
+    bandage: {
+        id: 'bandage',
+        name: '[Bandage]',
+        description: 'Torn fabric strip, reasonably clean. Stops the bleeding, not the pain.',
+        equipSlot: 'front',
+        equipDuration: 2,
+        useType: 'self',
+        effect: 'heal',
+        healAmount: 25,
+        armor: 1,               // wrapped across the front — a little padding while it holds
+        consumable: true,
+        fallbackColor: '#ffaaaa',
+        baseValue: 25,
+    },
+
+    // ── Armor (persistent equips — the Sewer starter set) ─────────────────────
+    // A full one-piece-per-body-zone set of junk-punk scavenger gear, found
+    // around the Sewer. Four are pure data (they ride the _playerArmor() sum);
+    // Shoe Bags carry `sludgeImmune` (see _hasSludgeImmunity in main.js).
+    foil_hat: {
+        id: 'foil_hat',
+        name: '[Foil Hat]',
+        description: 'Tin-foil, triple-layered. They can\'t read you now.',
+        equipSlot: 'top',
+        useType: 'equip',
+        armor: 2,
+        consumable: false,
+        fallbackColor: '#c8c8d0',
+        baseValue: 10,
+    },
+    cardboard_cuirass: {
+        id: 'cardboard_cuirass',
+        name: '[Cardboard Cuirass]',
+        description: 'A refrigerator box with the arm-holes torn out. FRAGILE, stencilled on both sides. It is not wrong.',
+        equipSlot: 'front',
+        useType: 'equip',
+        armor: 4,
+        consumable: false,
+        fallbackColor: '#b58a56',
+        baseValue: 14,
+    },
+    latex_gloves: {
+        id: 'latex_gloves',
+        name: '[Latex Gloves]',
+        description: 'Powder-blue, one size too big, snapped at the wrist. Surgical, in the loosest sense.',
+        equipSlot: 'sides',
+        useType: 'equip',
+        armor: 1,
+        consumable: false,
+        fallbackColor: '#9fc7e8',
+        baseValue: 8,
+    },
+    red_cape: {
+        id: 'red_cape',
+        name: '[Red Cape]',
+        description: 'Torn from something that left in a hurry. Snags on everything. Makes you feel taller.',
+        equipSlot: 'back',
+        useType: 'equip',
+        armor: 1,
+        consumable: false,
+        fallbackColor: '#c03030',
+        baseValue: 10,
+    },
+    shoe_bags: {
+        id: 'shoe_bags',
+        name: '[Shoe Bags]',
+        description: 'Garbage-bag socks, double-knotted at the shin. The Sewer stays out of your socks.',
+        equipSlot: 'bottom',
+        useType: 'equip',
+        armor: 2,
+        sludgeImmune: true,
+        consumable: false,
+        fallbackColor: '#3a3a3a',
+        baseValue: 10,
+    },
+
+    // ── Ambro (food — healing) ──────────────────────────────────────────────
+    boardwalk_burger: {
+        id: 'boardwalk_burger',
+        name: '[Boardwalk Burger]',
+        description: 'Jersey\'s house special. Grease-soaked, overcooked, perfect.',
+        category: 'ambro',
+        useType: 'self',
+        effect: 'heal',
+        healAmount: 15,
+        consumable: true,
+        fallbackColor: '#cc8844',
+        baseValue: 15,
+    },
+
+    // (Phase 4) MQ2 deliverable — a quest item, so it can't be sold/thrown/given
+    // away EXCEPT to its sanctioned delivery target (QuestEngine.expectsDelivery).
+    // Templates: boardwalk_burger (food) + catalytic_converter (questItem).
+    burger_fries: {
+        id: 'burger_fries',
+        name: '[Burger & Fries]',
+        description: 'A warm paper bag, grease-spotted, smells incredible. For delivery — not for eating.',
+        category: 'quest',
+        useType: 'none',
+        consumable: false,
+        questItem: true,
+        tier: 'orange',
+        baseValue: 0,
+        fallbackColor: '#cc8844',
+    },
+    // (Remembrance Rings) Dropped by the Were-Rat boss. A quest item so it can't
+    // be sold / thrown / given / lost; carried to Platero (Downtown) and fashioned
+    // into the Rat Ring. useType 'none' — inert in the bag; Platero's dialogue
+    // (_fashionRing) consumes it.
+    wererat_fur: {
+        id: 'wererat_fur',
+        name: '[Tuft of Wererat Fur]',
+        description: 'A braided tuft that stays blood-warm. Platero could set it into something you\'d wear.',
+        category: 'quest',
+        useType: 'none',
+        consumable: false,
+        questItem: true,
+        tier: 'orange',
+        baseValue: 0,
+        fallbackColor: '#7a5a3a',
+    },
+    mystery_meat: {
+        id: 'mystery_meat',
+        name: '[Mystery Meat]',
+        description: "Grey, sweating, and warm in a way meat should not be. It's food to somebody.",
+        category: 'ambro',
+        useType: 'throw',
+        equipSlot: 'sides',
+        range: 3,
+        damage: 3,
+        damageType: 'poison',
+        sewerFare: true,
+        consumable: true,
+        fallbackColor: '#8a6a5a',
+        baseValue: 3,
+    },
+    tunnel_mushroom: {
+        id: 'tunnel_mushroom',
+        name: '[Tunnel Mushroom]',
+        description: 'Pale, damp, and thriving where nothing should. Something down here eats these on purpose.',
+        category: 'ambro',
+        useType: 'throw',
+        equipSlot: 'sides',
+        range: 4,
+        poition: { stat: 'health', amount: -5, turns: 2, as: 'poison' },
+        damageType: 'poison',
+        sewerFare: true,
+        consumable: true,
+        fallbackColor: '#b8b89a',
+        baseValue: 9,
+    },
+    hot_dog: {
+        id: 'hot_dog',
+        name: '[Hot Dog]',
+        description: 'Boardwalk classic. Been on the roller since this morning. Maybe yesterday.',
+        category: 'ambro',
+        useType: 'self',
+        effect: 'heal',
+        healAmount: 10,
+        consumable: true,
+        fallbackColor: '#cc6633',
+        baseValue: 10,
+    },
+
+    // ── Quest items ───────────────────────────────────────────────────────────
+    // questItem: true blocks throw/smash/give so it can't be lost. The malaprop
+    // ("Cataclysmic") is intentional — it's how the delivery boy says it.
+    catalytic_converter: {
+        id: 'catalytic_converter',
+        name: '[Cataclysmic Converter]',
+        description: 'The thingamajig that makes the car go. Rat people tore it clean out. Smells like grease and betrayal. No ordinary merchant wants it — but Macc pays.',
+        category: 'quest',
+        useType: 'none',
+        useHint: "[The Cataclysmic Converter belongs in your car — head to your car in Town and tap (or walk into) it to drop it back in.]",
+        consumable: false,
+        questItem: true,
+        // (Phase 6d) An ORANGE tier despite baseValue 0: worthless to ordinary
+        // merchants, but a legendary find to the one buyer who wants it (Macc,
+        // 500 GP). The tier + the special buyer are how "this has a special use"
+        // reads without a segregated quest-item tab.
+        tier: 'orange',
+        fallbackColor: '#9a8a6a',
+        baseValue: 0,
+    },
+
+    // ── Special / mechanic-shop stock (Phase 6d + Chapter Two) ────────────────
+    // Pike's grappling_hook is the canyon's way UP/OUT (the mobility unlock).
+    // (Phase 2) A bottle of alcohol — NOT for drinking. Poured into the fixed
+    // car's tank it burns fast and weak, slowing the too-hot engine just enough
+    // to ramp the North bridge instead of punching through it. Bought from Hooch
+    // the bootlegger in Town; consumed at the car (_interactCar).
+    alcohol: {
+        id: 'alcohol',
+        name: '[Bottle of Alcohol]',
+        description: 'Cheap, high-proof, and mean. Burns FAST and burns out fast — barely a push. Not a drink. A tank\'s worth of "slow down".',
+        useType: 'none',
+        consumable: false,
+        fallbackColor: '#8a5a2a',
+        baseValue: 20,
+    },
+    grappling_hook: {
+        id: 'grappling_hook',
+        name: '[Grappling Hook]',
+        description: "Pike's big coil of rope and an iron hook that bites stone and holds. A way UP.",
+        useType: 'none',
+        consumable: false,
+        questItem: true,
+        fallbackColor: '#9a7b4a',
+        baseValue: 1000,
+    },
+
+    // ── Poition (a potion, a poison — the pun is the point) ──────────────────
+    // The six below are the beneficial half of the category: a poition moves
+    // exactly one of six stats, and here amount is always positive. Their
+    // negative-amount siblings are the sludge_sack / tunnel_mushroom /
+    // fire_blood health-poitions above. All six resolve through
+    // resolveSelfUse's poition branch below when drunk (useType:'self').
+    health_poition: {
+        id: 'health_poition',
+        name: '[Health Poition]',
+        description: 'Vial of thick red syrup, corked with a wine stopper. Stings on the way down. Works anyway.',
+        category: 'poition',
+        poition: { stat: 'health', amount: 25, turns: 1 },
+        consumable: true,
+        useType: 'self',
+        fallbackColor: '#c8384a',
+        baseValue: 25,
+    },
+    mana_poition: {
+        id: 'mana_poition',
+        name: '[Mana Poition]',
+        description: 'Vial of something blue that fizzes on its own. Drink it fast — thinking about it too long makes it worse.',
+        category: 'poition',
+        poition: { stat: 'mana', amount: 20, turns: 1 },
+        consumable: true,
+        useType: 'self',
+        fallbackColor: '#4a86c8',
+        baseValue: 30,
+    },
+    gold_poition: {
+        id: 'gold_poition',
+        name: '[Gold Poition]',
+        description: "Swallow it and cough up loose change for about a minute straight. Where it comes from is above your pay grade.",
+        category: 'poition',
+        poition: { stat: 'gold', amount: 50, turns: 1 },
+        consumable: true,
+        useType: 'self',
+        fallbackColor: '#e0b83a',
+        baseValue: 50,
+    },
+    strength_poition: {
+        id: 'strength_poition',
+        name: '[Strength Poition]',
+        description: 'Thick as tar and tastes like a bad idea. Your arms believe it before your brain does.',
+        category: 'poition',
+        poition: { stat: 'strength', amount: 6, turns: 5 },
+        consumable: true,
+        useType: 'self',
+        fallbackColor: '#b5522a',
+        baseValue: 20,
+    },
+    defence_poition: {
+        id: 'defence_poition',
+        name: '[Defence Poition]',
+        description: 'Sets like plaster somewhere behind your ribs. Hurts going down, helps for a while after.',
+        category: 'poition',
+        poition: { stat: 'defence', amount: 4, turns: 6 },
+        consumable: true,
+        useType: 'self',
+        fallbackColor: '#7a8a9a',
+        baseValue: 15,
+    },
+    speed_poition: {
+        id: 'speed_poition',
+        name: '[Speed Poition]',
+        description: 'Fizzy, cold, gone in one gulp. Everything after moves faster than your judgment does.',
+        category: 'poition',
+        poition: { stat: 'speed', amount: 2, turns: 1 },
+        consumable: true,
+        useType: 'self',
+        fallbackColor: '#3ac8a0',
+        baseValue: 40,
+    },
+};
+
+// ── Value tiers (Phase 6d) ────────────────────────────────────────────────────
+// A Borderlands-style rarity ladder that makes worth legible at a glance —
+// examine text names the tier, the trade cell wears its colour. By default the
+// tier is DERIVED from baseValue (so tier and price stay in sync — the tier is
+// the visible face of the value that also sets the price); an item may override
+// with an explicit `tier` when its worth isn't its ordinary-market value (the
+// Converter: baseValue 0 to a merchant, but an Orange find to Macc).
+export const VALUE_TIERS = [
+    { key: 'grey',   name: 'Common',    color: '#9aa0a6', max: 3 },
+    { key: 'green',  name: 'Uncommon',  color: '#4f9b4a', max: 9 },
+    { key: 'blue',   name: 'Rare',      color: '#4a86c8', max: 24 },
+    { key: 'purple', name: 'Epic',      color: '#9a52c8', max: 59 },
+    { key: 'orange', name: 'Legendary', color: '#e08a2a', max: Infinity },
+];
+
+export function itemTier(itemDef) {
+    if (!itemDef) return VALUE_TIERS[0];
+    if (itemDef.tier) return VALUE_TIERS.find(t => t.key === itemDef.tier) || VALUE_TIERS[0];
+    const v = itemDef.baseValue ?? 0;
+    return VALUE_TIERS.find(t => v <= t.max) || VALUE_TIERS[VALUE_TIERS.length - 1];
+}
+
+// Equip an item into its slot. Returns a log message.
+// If the slot is occupied, the old item is stored as a pending restore.
+export function equipItem(game, itemDef) {
+    const slot = itemDef.equipSlot;
+    if (!slot) return null;
+
+    const old = game.equipment[slot];
+
+    // If this item has a duration, set up the temporary equip
+    if (itemDef.equipDuration) {
+        // If a temp-equip already holds this slot, drop it and inherit its
+        // previousItem so the restore chain points at the REAL underlying
+        // item, not the soon-to-expire temp one. Without this, two same-slot
+        // temp equips (e.g. two soaps) corrupt the slot on expiry. Re-applying
+        // effectively refreshes the duration.
+        const existingIdx = game.tempEquips.findIndex(te => te.slot === slot);
+        let underlying = old;
+        if (existingIdx >= 0) {
+            underlying = game.tempEquips[existingIdx].previousItem;
+            game.tempEquips.splice(existingIdx, 1);
+        }
+        game.tempEquips.push({
+            slot,
+            itemDef,
+            turnsLeft: itemDef.equipDuration,
+            previousItem: underlying,
+        });
+        game.equipment[slot] = itemDef;
+        return old
+            ? `[${itemDef.name} equipped to ${slot} for ${itemDef.equipDuration} turns — ${old.name} removed]`
+            : `[${itemDef.name} equipped to ${slot} for ${itemDef.equipDuration} turns]`;
+    }
+
+    // Permanent equip (like pipe → weapon slot)
+    game.equipment[slot] = itemDef;
+    return old
+        ? `[${itemDef.name} equipped to ${slot} — replaced ${old.name}]`
+        : `[${itemDef.name} equipped to ${slot}]`;
+}
+
+// Persistent equip via the Use action (armor pieces — useType: 'equip'). Moves
+// the item into its body-zone slot; any piece already worn there goes back into
+// the bag. The caller (main.js _doItemUse) removes the used item from the
+// hotbar so it isn't duplicated.
+function resolveEquip(game, itemDef) {
+    const slot = itemDef.equipSlot;
+    if (!slot) return `[${itemDef.name} can't be worn]`;
+    const old = game.equipment[slot];
+    game.equipment[slot] = itemDef;
+    if (old && old.id !== itemDef.id) game._addToInventory(old);
+    return old && old.id !== itemDef.id
+        ? `[Equipped ${itemDef.name} — ${old.name} back in your bag]`
+        : `[Equipped ${itemDef.name}]`;
+}
+
+// Take a worn armor piece off and return it to the bag. Weapon and temp-equips
+// are excluded: the weapon slot is never emptied (melee reads
+// equipment.weapon.damage), and duration equips wear off on their own. Returns
+// a log message, or null on a no-op (empty / weapon slot).
+export function unequipItem(game, slot) {
+    if (slot === 'weapon') return null;
+    const item = game.equipment[slot];
+    if (!item) return null;
+    if ((game.tempEquips || []).some(te => te.slot === slot)) {
+        return `[${item.name} will wear off on its own]`;
+    }
+    if (!game._addToInventory(item)) return '[Your bag is full — no room to stow it]';
+    game.equipment[slot] = null;
+    return `[Unequipped ${item.name}]`;
+}
+
+// Called each turn during enemy resolution to tick down temp equips
+export function tickTempEquips(game) {
+    const messages = [];
+    const still = [];
+
+    for (const te of game.tempEquips) {
+        te.turnsLeft--;
+        if (te.turnsLeft <= 0) {
+            // Restore previous item
+            game.equipment[te.slot] = te.previousItem;
+            messages.push(te.previousItem
+                ? `[${te.itemDef.name} expired — ${te.previousItem.name} re-equipped to ${te.slot}]`
+                : `[${te.itemDef.name} expired — ${te.slot} slot empty]`
+            );
+        } else {
+            still.push(te);
+        }
+    }
+
+    game.tempEquips = still;
+    return messages;
+}
+
+// Resolve a Use action. Returns a log message string.
+// stackCount: how many items are in the stack (for throw damage calc)
+export function resolveUse(game, itemDef, direction, stackCount = 1) {
+    if (!itemDef) return null;
+
+    switch (itemDef.useType) {
+        case 'self':
+            return resolveSelfUse(game, itemDef);
+        case 'throw':
+            return resolveThrow(game, itemDef, direction, stackCount);
+        case 'melee':
+            return resolveMelee(game, itemDef, direction);
+        case 'equip':
+            return resolveEquip(game, itemDef);
+        default:
+            return itemDef.useHint || `[Used ${itemDef.name}]`;
+    }
+}
+
+// ── Ownership lens (PD-2) ────────────────────────────────────────────────────
+// The player holds items in THREE separate stores — inventory slots, equipped
+// gear (a named-slot map), and temp-equips. A "do I own / can I use item X"
+// check that scans only the bag misses equipped gear — which is how a throwable
+// stowed in the 'sides' slot used to hide its own Throw verb. These walk all
+// three as one read-only sequence so any ownership question has a single answer.
+export function* ownedItemDefs(game) {
+    for (const s of (game.inventory || [])) if (s && s.itemDef) yield s.itemDef;
+    const eq = game.equipment || {};
+    for (const k of Object.keys(eq)) if (eq[k]) yield eq[k];
+    for (const t of (game.tempEquips || [])) if (t && t.itemDef) yield t.itemDef;
+}
+
+export function hasItemDef(game, pred) {
+    for (const def of ownedItemDefs(game)) if (pred(def)) return true;
+    return false;
+}
+
+function resolveSelfUse(game, itemDef) {
+    // Equip into slot (with duration if applicable)
+    const equipMsg = equipItem(game, itemDef);
+
+    if (itemDef.effect === 'cure_sludge') {
+        // Soap is tracked via _soapUsedThisTurn in main.js
+        // It cancels sludge at end of resolution without harm
+        if (game.hasBuff && game.hasBuff('sludge')) {
+            return equipMsg
+                ? `${equipMsg} [Soap applied — sludge will be neutralized]`
+                : `[Used ${itemDef.name} — sludge will be neutralized]`;
+        }
+        return equipMsg
+            ? `${equipMsg} [Already clean]`
+            : `[Used ${itemDef.name} — already clean]`;
+    }
+
+    if (itemDef.effect === 'heal') {
+        const before = game.playerHp;
+        game.playerHp = Math.min(game.playerMaxHp, game.playerHp + itemDef.healAmount);
+        const healed = game.playerHp - before;
+        if (healed > 0 && game._spawnHitSplat) {
+            game._spawnHitSplat(game.playerX, game.playerY, `+${healed}`, 'heal', { omni: true });
+        }
+        const verb = itemDef.category === 'ambro' ? 'Ate' : 'Used';
+        return equipMsg
+            ? `${equipMsg} [Healed ${healed} HP]`
+            : `[${verb} ${itemDef.name} — healed ${healed} HP]`;
+    }
+
+    if (itemDef.poition) {
+        const msg = applyPoitionSelf(game, itemDef);
+        return equipMsg ? `${equipMsg} ${msg}` : msg;
+    }
+
+    return equipMsg || `[Used ${itemDef.name}]`;
+}
+
+// Drinking a poition (useType:'self') resolves its ONE stat right here — the
+// counterpart to resolveThrow's isDot branch and give-action.js's
+// applySewerFareEffect, both of which already apply a `poition` to something
+// OTHER than the player. Same flip seam (poitionBuff) as those two, so a
+// species-dependent inversion can't grow a second implementation: `flip` is
+// always computed from isSewerDweller the same way applySewerFareGive does,
+// even though every shipped self-use poition has sewerFare:false today (so
+// flip is always false in practice) — a future effect that makes the PLAYER
+// a sewer-dweller (Rat Form?) inherits the inversion for free instead of
+// needing its own.
+function applyPoitionSelf(game, itemDef) {
+    const p = itemDef.poition;
+    const flip = !!(itemDef.sewerFare && isSewerDweller(game));
+    const buff = poitionBuff(p, flip);
+    // Recover the flipped, signed amount regardless of which shape poitionBuff
+    // returned (rider carries it as `.amount`; tick carries it negated as `.dmg`).
+    const amount = buff.stat ? buff.amount : -buff.dmg;
+
+    switch (p.stat) {
+        case 'health': {
+            if (p.turns > 1) {
+                game.addBuff(buff.id, 'Health Poition', buff.turns, amount >= 0 ? 'buff' : 'debuff', { dmg: buff.dmg });
+                return `[${itemDef.name} — takes hold]`;
+            }
+            const before = game.playerHp;
+            game.playerHp = Math.max(0, Math.min(game.playerMaxHp, game.playerHp + amount));
+            const delta = game.playerHp - before;
+            if (delta > 0 && game._spawnHitSplat) game._spawnHitSplat(game.playerX, game.playerY, `+${delta}`, 'heal', { omni: true });
+            return delta >= 0 ? `[${itemDef.name} — healed ${delta} HP]` : `[${itemDef.name} — lost ${-delta} HP]`;
+        }
+        case 'mana': {
+            // MP is real (main.js:3231/:3276 spend it on spells) — instant like
+            // health; turns>1 rides the same tick machinery (buffs.js) for symmetry.
+            if (p.turns > 1) {
+                game.addBuff(buff.id, 'Mana Poition', buff.turns, amount >= 0 ? 'buff' : 'debuff', { dmg: buff.dmg });
+                return `[${itemDef.name} — takes hold]`;
+            }
+            const before = game.playerMp;
+            game.playerMp = Math.max(0, Math.min(game.playerMaxMp, game.playerMp + amount));
+            const delta = game.playerMp - before;
+            return delta >= 0 ? `[${itemDef.name} — restored ${delta} MP]` : `[${itemDef.name} — drained ${-delta} MP]`;
+        }
+        case 'gold': {
+            if (amount >= 0) {
+                // Minting: a gold potion conjures GP from nowhere. trade.js's
+                // transferGold requires a real `from` holder with the balance to
+                // move, and burnGold only ever REMOVES gold — neither models
+                // "gold that appears from nothing," so there's no home for this
+                // in the transaction spine. Direct mutation, same as every other
+                // poition's potion side.
+                game.gold = (game.gold || 0) + amount;
+                return `[${itemDef.name} — +${amount}g]`;
+            }
+            // Poisoning: burnGold IS the declared sink, but its contract is
+            // all-or-nothing (refuses the whole burn if the holder can't cover
+            // it) — a gold poison needs the OPPOSITE: take whatever's there and
+            // no more, never refuse. Pre-clamp so the call to burnGold always
+            // succeeds; burnGold still owns the actual mutation + audit hook.
+            const take = Math.min(-amount, game.gold || 0);
+            if (take > 0) burnGold(game, take, 'gold_poition');
+            return `[${itemDef.name} — lost ${take}g]`;
+        }
+        case 'strength':
+        case 'defence': {
+            // Rider — no tick, just has to exist and count down (see buffs.js's
+            // header comment + sumBuffStat). addBuff refreshes turns on a
+            // re-drink rather than stacking, same as every other buff.
+            const name = p.stat === 'strength' ? 'Strength Poition' : 'Defence Poition';
+            game.addBuff(buff.id, name, buff.turns, amount >= 0 ? 'buff' : 'debuff', { stat: buff.stat, amount: buff.amount });
+            return `[${itemDef.name} — ${p.stat} ${amount >= 0 ? '+' : ''}${amount} for ${buff.turns} turns]`;
+        }
+        case 'speed': {
+            // Charges, not a buff — never touches game.buffs. See
+            // _advanceWorld's chokepoint guard (main.js) + worldBeatPlan (buffs.js).
+            if (amount >= 0) {
+                game._hasteCharges = (game._hasteCharges || 0) + amount;
+                return `[${itemDef.name} — the world holds still for your next ${amount} actions]`;
+            }
+            game._slowCharges = (game._slowCharges || 0) + (-amount);
+            return `[${itemDef.name} — the world doubles up for your next ${-amount} actions]`;
+        }
+        default:
+            return `[Used ${itemDef.name}]`;
+    }
+}
+
+// (combat-feel-pass) Thrown items fly straight and BURST over a one-shot 3×3
+// area centered on impact, applying the item's effect at HALF to every valid
+// target — respect-the-target: damage hits hostiles only, heals touch
+// friendlies only (latent until allies exist). Fully deterministic. Exported so
+// the wheel's Throw always throws (routing through resolveUse used to make
+// 'self' consumables heal-and-vanish and silently drop the throw).
+export function resolveThrow(game, itemDef, direction, _stackCount = 1, targetTile = null) {
+    const range = itemDef.range || 5; // match wheel-model aimRange's throw fallback (single default)
+    let ix, iy, hitWall = false;
+
+    if (targetTile) {
+        // Real placement (wheel reticle): land on the chosen tile. A non-hostile on
+        // this exact tile was deliberately chosen (the wheel routes offensive verbs
+        // on a friendly through the Plus Ultra confirm) — allowCenterFriendly lets
+        // the burst hit them (below).
+        ix = targetTile.x; iy = targetTile.y;
+        // Defensive range clamp (Chebyshev): the seed/nudge are range-clamped, but
+        // a stale express-repeat tile (player moved) or any future caller must
+        // never burst farther than the item's reach — fall the impact short.
+        const dxt = ix - game.playerX, dyt = iy - game.playerY;
+        if (Math.max(Math.abs(dxt), Math.abs(dyt)) > range) {
+            ix = game.playerX + Math.max(-range, Math.min(range, dxt));
+            iy = game.playerY + Math.max(-range, Math.min(range, dyt));
+        }
+    } else {
+        // Legacy direction throw (hotbar / ITEM_THROW_DIR): fly straight, stop on
+        // the first occupant (burst centred on it) or the last open tile.
+        if (!direction) return `[Throw ${itemDef.name} — no direction]`;
+        const { dx, dy } = direction;
+        ix = game.playerX; iy = game.playerY;
+        for (let i = 0; i < range; i++) {
+            const nx = ix + dx, ny = iy + dy;
+            if (!game.map.isWalkable(nx, ny)) { hitWall = true; break; }
+            ix = nx; iy = ny;
+            if (game.enemies.some(e => e.entity.isAlive() && e.x === ix && e.y === iy)) break;
+        }
+    }
+
+    // (poisons) A puddle item lays its puddle where it lands, fanned away from
+    // the thrower (puddles.js).
+    if (itemDef.puddle && game._layPuddle) {
+        const n = game._layPuddle({ x: game.playerX, y: game.playerY }, { x: ix, y: iy },
+                                  itemDef.puddle.kind, itemDef.puddle.turns);
+        return `[${itemDef.name} leaves a puddle on ${n} tile${n === 1 ? '' : 's'}]`;
+    }
+
+    const dtype = itemDef.damageType || 'physical';
+    const isDamage = typeof itemDef.damage === 'number';
+    const isHeal = itemDef.effect === 'heal' && typeof itemDef.healAmount === 'number';
+    const isDot = !!(itemDef.poition && typeof itemDef.poition.amount === 'number' && typeof itemDef.poition.turns === 'number');
+    const allowCenterFriendly = !!targetTile; // real placement implies the Plus Ultra gate already cleared
+    let affected = 0;
+
+    if (isDot) {
+        // The 3x3 burst applies HALF TURNS at the edge, not half damage. A weaker
+        // tick would misprice the item against the harness's dotValue ladder,
+        // whereas a shorter burn is exactly "less of the same thing".
+        // Re-throwing REFRESHES (longest duration, strongest tick) rather than
+        // stacking a second instance — two sludge sacks should not double-tick.
+        for (const foe of game._entitiesInRadius(ix, iy, 1)) {
+            const hostile = isHostile(foe);
+            const isCentre = foe.x === ix && foe.y === iy;
+            if (!(hostile || (allowCenterFriendly && isCentre))) continue;
+            const turns = isCentre ? itemDef.poition.turns : Math.max(1, Math.floor(itemDef.poition.turns / 2));
+            // Magnitude preserved, sign flipped: the same five-times-two is poison
+            // to a human and regeneration to the things that live down here. One
+            // baseValue stays honest for both because the numbers are identical.
+            // poitionBuff's `flip` does the inversion — see its doc comment above.
+            const buff = poitionBuff(itemDef.poition, !!(itemDef.sewerFare && isSewerDweller(foe)));
+            const list = foe.buffs || (foe.buffs = []);
+            const existing = list.find(b => b.id === buff.id);
+            if (existing) {
+                existing.turns = Math.max(existing.turns, turns);
+                // "Refresh takes the strongest tick" — with dmg now signed, "strongest"
+                // means largest MAGNITUDE (heals and poisons never mix on one target,
+                // since a given foe's species doesn't change between throws), not the
+                // arithmetic max. Math.max(-5, -3) would pick -3 — the WEAKER heal —
+                // exactly backwards from the harm case it was copied from.
+                existing.dmg = Math.abs(buff.dmg) > Math.abs(existing.dmg ?? 0) ? buff.dmg : existing.dmg;
+            } else {
+                list.push({ id: buff.id, turns, dmg: buff.dmg });
+            }
+            // (poisons) Fire Blood: the burn comes with fire blood for as long.
+            if (itemDef.fireBlood && game._grantFireBlood) game._grantFireBlood(foe, turns);
+            affected++;
+        }
+    } else if (isDamage) {
+        // 3×3 (radius 1) around impact, half effect. Bystander friendlies are
+        // spared (hostile-only); the deliberately-aimed centre tile's occupant is
+        // hit even if friendly (real-placement / Plus Ultra path only).
+        //
+        // (C4) Flat-damage sewer fare inverts for the things that live down here,
+        // the same as every other sewerFare item — but it cannot do it THROUGH
+        // combatAttack. That pipeline (and Entity.takeDamage's
+        // `Math.max(1, rawDamage - armor)` floor under it) is built for positive
+        // damage only: a negative number clamps back to "at least 1 damage"
+        // instead of healing, and pushing negatives through the elemental /
+        // backstab / hit-splat / kill-event machinery to fix one sewer item would
+        // risk all of it. So the dweller case does what the hand-fed path already
+        // does — a direct HP delta, never touching combatAttack — and everyone
+        // else goes through combat unchanged. Species decides, not hostility,
+        // exactly as give-action.js's applySewerFareGive reads it.
+        for (const foe of game._entitiesInRadius(ix, iy, 1)) {
+            const hostile = isHostile(foe);
+            const isCentre = foe.x === ix && foe.y === iy;
+            if (!(hostile || (allowCenterFriendly && isCentre))) continue;
+            // Half effect at the burst's reach, harm or mend alike — the same
+            // discount the damage case has always taken.
+            const mag = Math.max(1, Math.round(itemDef.damage / 2));
+            if (itemDef.sewerFare && isSewerDweller(foe)) {
+                const ent = foe.entity;
+                if (!ent) continue;
+                const before = ent.hp;
+                ent.hp = Math.min(ent.maxHp, ent.hp + mag);
+                const healed = ent.hp - before;
+                // A dweller already at full health wasn't "caught in the splash"
+                // any more than an immune foe was — don't count it.
+                if (healed > 0) {
+                    if (game._spawnHitSplat) game._spawnHitSplat(foe.x, foe.y, `+${healed}`, 'heal', { omni: true });
+                    affected++;
+                }
+                continue;
+            }
+            // combatAttack returns null on immune (0-contract) — an immune foe
+            // wasn't "caught in the splash", so don't count it.
+            if (game.combatAttack(foe, mag, { type: dtype, omni: true })) affected++;
+        }
+    } else if (isHeal) {
+        // Friendlies only — currently just the player (no allies in 1.0). Catches
+        // the player if the impact lands within radius 1 of their tile.
+        if (Math.abs(ix - game.playerX) <= 1 && Math.abs(iy - game.playerY) <= 1) {
+            const before = game.playerHp;
+            game.playerHp = Math.min(game.playerMaxHp, game.playerHp + Math.max(1, Math.round(itemDef.healAmount / 2)));
+            const healed = game.playerHp - before;
+            if (healed > 0) {
+                if (game._spawnHitSplat) game._spawnHitSplat(game.playerX, game.playerY, `+${healed}`, 'heal', { omni: true });
+                affected++;
+            }
+        }
+    }
+
+    if (isDot) {
+        if (affected > 0) return `[${itemDef.name} bursts — ${affected} caught in it]`;
+        return hitWall ? `[${itemDef.name} splatters against the wall]` : `[Threw ${itemDef.name} — splashed no one]`;
+    }
+    if (isDamage) {
+        if (affected > 0) return `[${itemDef.name} bursts — ${affected} caught in the splash]`;
+        return hitWall ? `[${itemDef.name} splatters against the wall]` : `[Threw ${itemDef.name} — splashed no one]`;
+    }
+    if (isHeal) {
+        return affected > 0 ? `[${itemDef.name} bursts in a healing splash]` : `[Threw ${itemDef.name} — no one to mend]`;
+    }
+    return `[Threw ${itemDef.name} — it shatters harmlessly]`;
+}
+
+function resolveMelee(game, itemDef, direction) {
+    if (!direction) return `[Swing ${itemDef.name} — no direction]`;
+
+    const { dx, dy } = direction;
+    const tx = game.playerX + dx;
+    const ty = game.playerY + dy;
+
+    const hit = game.enemies.find(e => e.entity.isAlive() && e.x === tx && e.y === ty);
+    if (hit) {
+        // Swung item's own damageType (undefined → neutral), matching the weapon paths.
+        const result = game.combatAttack(hit, itemDef.damage, { type: itemDef.damageType });
+        return `[Hit ${hit.entity.name} with ${itemDef.name} — ${result}]`;
+    }
+
+    return `[Swung ${itemDef.name} — nothing there]`;
+}
+
+// ── kitHealValue — what a kit item does to its own carrier ───────────────────
+//
+// Law 6f authored enemy kits and put their value on the nameplate, but nothing
+// ever consumed them. This is the valuation half of letting an enemy drink its
+// own supplies: how much HP `def` would restore to a drinker, 0 if it would do
+// nothing or actively hurt them.
+//
+// The sewerFare sign-flip rides poitionBuff and mirrors applySewerFareEffect
+// (give-action.js) exactly, so "medicine to a dweller, poison to everyone else"
+// has ONE implementation and the two paths cannot drift.
+export function kitHealValue(def, sewerDweller) {
+    if (!def) return 0;
+
+    // Ordinary food / bandages: a flat heal, and being a dweller changes nothing.
+    if (def.effect === 'heal') return def.healAmount ?? 0;
+
+    const flip = !!(def.sewerFare && sewerDweller);
+
+    // Tick-stat poitions. A dweller flips the sign; anyone else is poisoning
+    // themselves, which values at 0 so kitChoice never picks it.
+    if (def.poition && def.poition.stat === 'health') {
+        const buff = poitionBuff(def.poition, flip);
+        if (buff && buff.dmg < 0) return -buff.dmg * (def.poition.turns ?? 1);
+        return 0;
+    }
+
+    // Flat-damage sewer fare (mystery_meat) — applySewerFareEffect applies
+    // `+damage` to a dweller and `-damage` to everyone else.
+    if (def.sewerFare && typeof def.damage === 'number') return flip ? def.damage : 0;
+
+    return 0;
+}
+
+// ── applyKitItem — an enemy actually swallows the thing ──────────────────────
+//
+// The application half, kept next to kitHealValue so valuation and effect cannot
+// drift apart. Mirrors give-action.js's applySewerFareEffect branch for branch —
+// a poition rides the buff list (so it heals over its authored turns, exactly as
+// it would for the player), while flat food and flat-damage sewer fare land as an
+// immediate HP delta.
+//
+// `drinker` is an Enemy: it has .entity and .addBuff. Returns the def, or null if
+// it did nothing.
+export function applyKitItem(def, drinker, sewerDweller) {
+    if (!def || !drinker) return null;
+    const ent = drinker.entity;
+    if (!ent) return null;
+    const flip = !!(def.sewerFare && sewerDweller);
+    const gain = (n) => { ent.hp = Math.min(ent.maxHp, ent.hp + n); };
+
+    if (def.poition && def.poition.stat === 'health') {
+        const b = poitionBuff(def.poition, flip);
+        if (!b) return null;
+        drinker.addBuff(b.id, def.name ?? b.id, b.turns, b.dmg < 0 ? 'buff' : 'debuff', { dmg: b.dmg });
+        return def;
+    }
+    if (def.effect === 'heal') { gain(def.healAmount ?? 0); return def; }
+    if (def.sewerFare && typeof def.damage === 'number') { gain(flip ? def.damage : -def.damage); return def; }
+    return null;
+}

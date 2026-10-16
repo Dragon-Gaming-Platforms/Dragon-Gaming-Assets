@@ -1,0 +1,16 @@
+{
+  "name": "Violencetown",
+  "desc": "A turn-based 2D action-RPG of small violences across a hand-authored world: one input is one action is one world tick, so combat, moods and the day/night cycle only advance when you act, while townsfolk keep wandering on their own dice. Radial action wheel, quests, spells, crafting and a full offline save.",
+  "controls": "Arrow keys or WASD to move, one key or tap per action - act through the radial wheel and fight turn by turn",
+  "shelf": "RPG & Adventure",
+  "tags": [
+    "games",
+    "rpg",
+    "turn-based",
+    "action",
+    "zero-dependency"
+  ],
+  "badge": "New",
+  "creator": "RussellDangerr",
+  "image": "1.png"
+}
