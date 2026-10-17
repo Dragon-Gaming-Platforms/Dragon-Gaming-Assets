@@ -1,0 +1,658 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+<title>Pente</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    background: #030712;
+    color: #fff;
+    overflow: hidden;
+    height: 100vh;
+    height: 100dvh;
+    user-select: none;
+    -webkit-user-select: none;
+    -webkit-tap-highlight-color: transparent;
+  }
+
+  /* MENU */
+  #menu {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    padding: 1.5rem;
+  }
+  #menu.hidden { display: none; }
+  .menu-title {
+    font-size: 3rem;
+    font-weight: 900;
+    letter-spacing: 0.2em;
+    margin-bottom: 0.25rem;
+  }
+  .menu-divider {
+    width: 4rem;
+    height: 2px;
+    background: #b45309;
+    border-radius: 9999px;
+    margin: 1rem auto;
+  }
+  .menu-desc {
+    color: #6b7280;
+    font-size: 0.85rem;
+    max-width: 280px;
+    text-align: center;
+    line-height: 1.6;
+    margin-bottom: 3rem;
+  }
+  .menu-buttons {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    width: 100%;
+    max-width: 280px;
+  }
+  .menu-btn {
+    border: none;
+    color: #fff;
+    font-weight: 700;
+    font-size: 1.1rem;
+    padding: 1rem;
+    border-radius: 1rem;
+    cursor: pointer;
+    transition: filter 0.15s;
+  }
+  .menu-btn:active { filter: brightness(0.85); }
+  .btn-pvp { background: #2563eb; }
+  .btn-pvp:hover { background: #3b82f6; }
+  .btn-pvai { background: #7c3aed; }
+  .btn-pvai:hover { background: #8b5cf6; }
+  .menu-help {
+    margin-top: 3rem;
+    text-align: center;
+    max-width: 280px;
+  }
+  .menu-help-title {
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: #6b7280;
+    margin-bottom: 0.4rem;
+  }
+  .menu-help-text {
+    font-size: 0.72rem;
+    color: #4b5563;
+    line-height: 1.55;
+  }
+
+  /* GAME */
+  #game {
+    display: none;
+    flex-direction: column;
+    height: 100%;
+    overflow: hidden;
+  }
+  #game.active { display: flex; }
+
+  .top-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.4rem 0.75rem;
+    flex-shrink: 0;
+  }
+  .top-btn {
+    background: none;
+    border: none;
+    color: #6b7280;
+    font-size: 0.85rem;
+    font-weight: 500;
+    cursor: pointer;
+    padding: 0.25rem;
+  }
+  .top-btn:hover { color: #fff; }
+  .top-title {
+    font-size: 1rem;
+    font-weight: 700;
+    letter-spacing: 0.15em;
+  }
+
+  .status-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.25rem 0.75rem 0.35rem;
+    flex-shrink: 0;
+  }
+  .player-info {
+    display: flex;
+    align-items: center;
+    gap: 0.35rem;
+    font-size: 0.72rem;
+    color: #9ca3af;
+  }
+  .player-info .cap-count {
+    color: #fff;
+    font-weight: 700;
+  }
+  .player-info .cap-max {
+    color: #4b5563;
+  }
+  .status-center {
+    text-align: center;
+  }
+  .status-turn {
+    font-size: 0.72rem;
+    color: #9ca3af;
+  }
+  .status-win {
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: #fbbf24;
+  }
+  .thinking-dot {
+    display: inline-block;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    background: #a78bfa;
+    margin-left: 4px;
+    vertical-align: middle;
+    animation: pulse 1s ease-in-out infinite;
+  }
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.3; }
+  }
+
+  .board-container {
+    position: relative;
+    flex: 1;
+    min-height: 0;
+  }
+  .board-scroll {
+    position: absolute;
+    inset: 0;
+    overflow: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+  .board-inner {
+    /* width set by JS */
+  }
+  .board-inner svg {
+    display: block;
+    width: 100%;
+  }
+
+  .zoom-controls {
+    position: absolute;
+    bottom: 0.75rem;
+    right: 0.75rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+    z-index: 10;
+  }
+  .zoom-btn {
+    width: 2.5rem;
+    height: 2.5rem;
+    border-radius: 50%;
+    background: rgba(31,41,55,0.92);
+    border: 1px solid #374151;
+    color: #fff;
+    font-size: 1.2rem;
+    font-weight: 700;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.4);
+  }
+  .zoom-btn:active { background: #4b5563; }
+  .zoom-btn.fit { font-size: 0.7rem; font-weight: 700; }
+
+  .play-again-wrap {
+    position: absolute;
+    bottom: 0.75rem;
+    left: 0.75rem;
+    z-index: 10;
+    display: none;
+  }
+  .play-again-wrap.show { display: block; }
+  .play-again-btn {
+    background: #eab308;
+    border: none;
+    color: #1c1917;
+    font-weight: 700;
+    font-size: 0.85rem;
+    padding: 0.65rem 1.5rem;
+    border-radius: 9999px;
+    cursor: pointer;
+    box-shadow: 0 2px 10px rgba(0,0,0,0.4);
+  }
+  .play-again-btn:hover { background: #facc15; }
+  .play-again-btn:active { background: #ca8a04; }
+
+  /* Stone click area */
+  .cell-hit { cursor: pointer; }
+</style>
+</head>
+<body>
+
+<div id="menu">
+  <div class="menu-title">PENTE</div>
+  <div class="menu-divider"></div>
+  <p class="menu-desc">Align five stones in a row or capture five pairs of your opponent's stones to win.</p>
+  <div class="menu-buttons">
+    <button class="menu-btn btn-pvp" onclick="startGame('pvp')">👥 Two Players</button>
+    <button class="menu-btn btn-pvai" onclick="startGame('pvai')">🤖 Play vs AI</button>
+  </div>
+  <div class="menu-help">
+    <div class="menu-help-title">How captures work</div>
+    <div class="menu-help-text">Flank exactly two opponent stones in a straight line with yours to remove them. Example: ⚪⚫⚫⚪ — the two black stones are captured.</div>
+  </div>
+</div>
+
+<div id="game">
+  <div class="top-bar">
+    <button class="top-btn" onclick="goMenu()">← Menu</button>
+    <span class="top-title">PENTE</span>
+    <button class="top-btn" onclick="resetGame()">New</button>
+  </div>
+  <div class="status-bar">
+    <div class="player-info" id="p1info">
+      <svg width="10" height="10"><circle cx="5" cy="5" r="4.5" fill="#e8e8e8" stroke="#aaa" stroke-width="0.5"/></svg>
+      <span id="p1label">White</span>
+      <span class="cap-count" id="p1caps">0</span>
+      <span class="cap-max">/5</span>
+    </div>
+    <div class="status-center" id="statusCenter">
+      <span class="status-turn" id="statusTurn">White's turn</span>
+      <span class="status-win" id="statusWin" style="display:none"></span>
+    </div>
+    <div class="player-info" id="p2info">
+      <svg width="10" height="10"><circle cx="5" cy="5" r="4.5" fill="#1e1e38" stroke="#555" stroke-width="0.5"/></svg>
+      <span id="p2label">Black</span>
+      <span class="cap-count" id="p2caps">0</span>
+      <span class="cap-max">/5</span>
+    </div>
+  </div>
+  <div class="board-container">
+    <div class="board-scroll" id="boardScroll">
+      <div class="board-inner" id="boardInner">
+        <svg id="boardSvg"></svg>
+      </div>
+    </div>
+    <div class="zoom-controls">
+      <button class="zoom-btn" onclick="changeZoom(0.3)">+</button>
+      <button class="zoom-btn" onclick="changeZoom(-0.3)">−</button>
+      <button class="zoom-btn fit" onclick="setZoom(1)">Fit</button>
+    </div>
+    <div class="play-again-wrap" id="playAgainWrap">
+      <button class="play-again-btn" onclick="resetGame()">Play Again</button>
+    </div>
+  </div>
+</div>
+
+<script>
+const SIZE = 19;
+const EMPTY = 0, P1 = 1, P2 = 2;
+const DIRS = [[0,1],[1,0],[1,1],[1,-1]];
+const MID = 9;
+const STAR_PTS = [3, 9, 15];
+const PAD = 1.3;
+const GRID = SIZE - 1;
+const VB = GRID + PAD * 2;
+
+let board, turn, caps, winner, winLine, lastMove, mode, aiThinking, moveCount, zoom;
+
+// Pending AI callbacks belong to one match, never to a restarted board.
+let generation = 0;
+function initState() {
+  generation++;
+  board = Array.from({length:SIZE}, () => Array(SIZE).fill(0));
+  turn = P1;
+  caps = {1:0, 2:0};
+  winner = null;
+  winLine = [];
+  lastMove = null;
+  aiThinking = false;
+  moveCount = 0;
+}
+
+function inB(r, c) { return r >= 0 && r < SIZE && c >= 0 && c < SIZE; }
+
+function getCaptures(b, r, c, p) {
+  const o = 3 - p, res = [];
+  for (const [dr, dc] of DIRS) {
+    for (const s of [1, -1]) {
+      const r1=r+dr*s, c1=c+dc*s, r2=r+dr*s*2, c2=c+dc*s*2, r3=r+dr*s*3, c3=c+dc*s*3;
+      if (inB(r1,c1) && inB(r2,c2) && inB(r3,c3) && b[r1][c1]===o && b[r2][c2]===o && b[r3][c3]===p)
+        res.push([r1,c1],[r2,c2]);
+    }
+  }
+  return res;
+}
+
+function getFive(b, r, c, p) {
+  for (const [dr, dc] of DIRS) {
+    let cnt = 1; const stones = [[r,c]];
+    for (let i=1; i<SIZE; i++) { const nr=r+dr*i, nc=c+dc*i; if(inB(nr,nc)&&b[nr][nc]===p){cnt++;stones.push([nr,nc]);}else break; }
+    for (let i=1; i<SIZE; i++) { const nr=r-dr*i, nc=c-dc*i; if(inB(nr,nc)&&b[nr][nc]===p){cnt++;stones.push([nr,nc]);}else break; }
+    if (cnt >= 5) return stones;
+  }
+  return null;
+}
+
+function doMove(r, c, player) {
+  board[r][c] = player;
+  const captured = getCaptures(board, r, c, player);
+  for (const [cr, cc] of captured) board[cr][cc] = EMPTY;
+  caps[player] += captured.length / 2;
+  lastMove = [r, c];
+  moveCount++;
+  const five = getFive(board, r, c, player);
+  if (five) { winner = player; winLine = five; }
+  if (caps[player] >= 5) winner = player;
+}
+
+function evalDir(b, r, c, dr, dc, p) {
+  let cnt = 1, open = 0, i;
+  for (i=1; inB(r+dr*i,c+dc*i) && b[r+dr*i][c+dc*i]===p; i++) cnt++;
+  if (inB(r+dr*i,c+dc*i) && b[r+dr*i][c+dc*i]===EMPTY) open++;
+  for (i=1; inB(r-dr*i,c-dc*i) && b[r-dr*i][c-dc*i]===p; i++) cnt++;
+  if (inB(r-dr*i,c-dc*i) && b[r-dr*i][c-dc*i]===EMPTY) open++;
+  if (cnt>=5) return 100000;
+  if (cnt===4 && open===2) return 50000;
+  if (cnt===4 && open===1) return 10000;
+  if (cnt===3 && open===2) return 5000;
+  if (cnt===3 && open===1) return 500;
+  if (cnt===2 && open===2) return 200;
+  if (cnt===2 && open===1) return 50;
+  return 0;
+}
+
+function scoreMove(r, c, p) {
+  const o = 3 - p;
+  let score = 0;
+  const tb = board.map(row => [...row]);
+  tb[r][c] = p;
+  if (getFive(tb, r, c, p)) return 1000000;
+  const cap = getCaptures(tb, r, c, p);
+  const capN = cap.length / 2;
+  if (caps[p] + capN >= 5) return 900000;
+  score += capN * 6000;
+  const tb2 = board.map(row => [...row]);
+  tb2[r][c] = o;
+  if (getFive(tb2, r, c, o)) score += 500000;
+  const oCap = getCaptures(tb2, r, c, o);
+  if (caps[o] + oCap.length / 2 >= 5) score += 450000;
+  score += (oCap.length / 2) * 3500;
+  for (const [dr, dc] of DIRS) {
+    score += evalDir(tb, r, c, dr, dc, p);
+    tb[r][c] = o;
+    score += evalDir(tb, r, c, dr, dc, o) * 0.85;
+    tb[r][c] = p;
+  }
+  for (const [dr, dc] of DIRS) {
+    for (const s of [1, -1]) {
+      const nr = r+dr*s, nc = c+dc*s;
+      if (inB(nr, nc) && tb[nr][nc] === p) {
+        const br = r-dr*s, bc = c-dc*s, fr = nr+dr*s, fc = nc+dc*s;
+        if (inB(br,bc) && inB(fr,fc)) {
+          const bv = tb[br][bc], fv = tb[fr][fc];
+          if ((bv===o && fv===EMPTY)||(fv===o && bv===EMPTY)) score -= 2500;
+          else if (bv===EMPTY && fv===EMPTY) score -= 350;
+        }
+      }
+    }
+  }
+  score += Math.max(0, 12 - (Math.abs(r-MID) + Math.abs(c-MID)));
+  return score;
+}
+
+function computeAI() {
+  const cands = new Set();
+  let hasStone = false;
+  for (let r=0; r<SIZE; r++) for (let c=0; c<SIZE; c++) {
+    if (board[r][c] !== EMPTY) {
+      hasStone = true;
+      for (let dr=-2; dr<=2; dr++) for (let dc=-2; dc<=2; dc++) {
+        const nr=r+dr, nc=c+dc;
+        if (inB(nr,nc) && board[nr][nc]===EMPTY) cands.add(nr*SIZE+nc);
+      }
+    }
+  }
+  if (!hasStone) return [MID, MID];
+  let best = -Infinity, bestM = [];
+  for (const k of cands) {
+    const r = Math.floor(k/SIZE), c = k%SIZE;
+    const s = scoreMove(r, c, P2);
+    if (s > best) { best = s; bestM = [[r,c]]; }
+    else if (s === best) bestM.push([r,c]);
+  }
+  return bestM.length > 0 ? bestM[Math.floor(Math.random()*bestM.length)] : [MID, MID];
+}
+
+function isWinStone(r, c) {
+  return winLine.some(([wr,wc]) => wr===r && wc===c);
+}
+
+/* ---- RENDERING ---- */
+
+function renderBoard() {
+  const svg = document.getElementById('boardSvg');
+  svg.setAttribute('viewBox', `0 0 ${VB} ${VB}`);
+
+  let html = `
+    <defs>
+      <radialGradient id="bgGrad" cx="50%" cy="42%" r="65%">
+        <stop offset="0%" stop-color="#d4a640"/>
+        <stop offset="100%" stop-color="#a07518"/>
+      </radialGradient>
+      <radialGradient id="whiteGrad" cx="35%" cy="30%" r="60%">
+        <stop offset="0%" stop-color="#ffffff"/>
+        <stop offset="100%" stop-color="#d0d0d0"/>
+      </radialGradient>
+      <radialGradient id="blackGrad" cx="35%" cy="30%" r="60%">
+        <stop offset="0%" stop-color="#2a2a50"/>
+        <stop offset="100%" stop-color="#0e0e20"/>
+      </radialGradient>
+      <filter id="ds"><feDropShadow dx="0.03" dy="0.06" stdDeviation="0.07" flood-opacity="0.45"/></filter>
+    </defs>
+    <rect width="${VB}" height="${VB}" fill="url(#bgGrad)" rx="0.35"/>`;
+
+  // Grid lines
+  for (let i = 0; i < SIZE; i++) {
+    html += `<line x1="${PAD}" y1="${PAD+i}" x2="${PAD+GRID}" y2="${PAD+i}" stroke="rgba(0,0,0,0.28)" stroke-width="0.04"/>`;
+    html += `<line x1="${PAD+i}" y1="${PAD}" x2="${PAD+i}" y2="${PAD+GRID}" stroke="rgba(0,0,0,0.28)" stroke-width="0.04"/>`;
+  }
+
+  // Star points
+  for (const r of STAR_PTS) {
+    for (const c of STAR_PTS) {
+      html += `<circle cx="${PAD+c}" cy="${PAD+r}" r="0.12" fill="rgba(0,0,0,0.32)"/>`;
+    }
+  }
+
+  // Cells
+  for (let r = 0; r < SIZE; r++) {
+    for (let c = 0; c < SIZE; c++) {
+      const x = PAD + c, y = PAD + r;
+      const stone = board[r][c];
+      const isLast = lastMove && lastMove[0]===r && lastMove[1]===c;
+      const isWin = isWinStone(r, c);
+      const clickable = stone === EMPTY && !winner && !aiThinking;
+
+      html += `<rect x="${x-0.5}" y="${y-0.5}" width="1" height="1" fill="transparent"
+        ${clickable ? `class="cell-hit" data-r="${r}" data-c="${c}"` : ''}/>`;
+
+      if (stone === P1) {
+        html += `<circle cx="${x}" cy="${y}" r="0.44" fill="url(#whiteGrad)" stroke="#bbb" stroke-width="0.02" filter="url(#ds)" pointer-events="none"/>`;
+      } else if (stone === P2) {
+        html += `<circle cx="${x}" cy="${y}" r="0.44" fill="url(#blackGrad)" stroke="#333" stroke-width="0.02" filter="url(#ds)" pointer-events="none"/>`;
+      }
+
+      if (isLast && !winner && stone !== EMPTY) {
+        html += `<circle cx="${x}" cy="${y}" r="0.12" fill="${stone===P1?'#3b82f6':'#60a5fa'}" opacity="0.9" pointer-events="none"/>`;
+      }
+
+      if (isWin) {
+        html += `<circle cx="${x}" cy="${y}" r="0.5" fill="none" stroke="#fbbf24" stroke-width="0.07" pointer-events="none">
+          <animate attributeName="opacity" values="0.9;0.3;0.9" dur="1.2s" repeatCount="indefinite"/>
+        </circle>`;
+      }
+    }
+  }
+
+  svg.innerHTML = html;
+
+  // Attach click events
+  svg.querySelectorAll('.cell-hit').forEach(el => {
+    el.addEventListener('click', function() {
+      const r = parseInt(this.getAttribute('data-r'));
+      const c = parseInt(this.getAttribute('data-c'));
+      handleClick(r, c);
+    });
+  });
+}
+
+function updateStatus() {
+  const p1label = document.getElementById('p1label');
+  const p2label = document.getElementById('p2label');
+  const p1caps = document.getElementById('p1caps');
+  const p2caps = document.getElementById('p2caps');
+  const statusTurn = document.getElementById('statusTurn');
+  const statusWin = document.getElementById('statusWin');
+  const playAgain = document.getElementById('playAgainWrap');
+
+  p1label.textContent = mode === 'pvai' ? 'You' : 'White';
+  p2label.textContent = mode === 'pvai' ? 'AI' : 'Black';
+  p1caps.textContent = caps[P1];
+  p2caps.textContent = caps[P2];
+
+  if (winner) {
+    statusTurn.style.display = 'none';
+    statusWin.style.display = '';
+    if (mode === 'pvai') {
+      statusWin.textContent = '🎉 ' + (winner===P1 ? 'You Win!' : 'AI Wins!');
+    } else {
+      statusWin.textContent = '🎉 ' + (winner===P1 ? 'White Wins!' : 'Black Wins!');
+    }
+    playAgain.classList.add('show');
+  } else {
+    statusTurn.style.display = '';
+    statusWin.style.display = 'none';
+    playAgain.classList.remove('show');
+    if (mode === 'pvai') {
+      if (turn === P1) {
+        statusTurn.innerHTML = 'Your turn';
+      } else {
+        statusTurn.innerHTML = 'AI thinking…<span class="thinking-dot"></span>';
+      }
+    } else {
+      statusTurn.textContent = turn === P1 ? "White's turn" : "Black's turn";
+    }
+  }
+}
+
+function render() {
+  renderBoard();
+  updateStatus();
+}
+
+/* ---- INTERACTION ---- */
+
+function handleClick(r, c) {
+  if (winner || aiThinking || board[r][c] !== EMPTY) return;
+  if (mode === 'pvai' && turn === P2) return;
+
+  doMove(r, c, turn);
+  if (!winner) turn = 3 - turn;
+  render();
+
+  if (mode === 'pvai' && turn === P2 && !winner) {
+    aiThinking = true;
+    render();
+    const matchGeneration = generation;
+    setTimeout(() => {
+      if (matchGeneration !== generation) return;
+      const mv = computeAI();
+      if (mv) {
+        doMove(mv[0], mv[1], P2);
+        if (!winner) turn = P1;
+        scrollToPos(mv[0], mv[1]);
+      }
+      aiThinking = false;
+      render();
+    }, 450);
+  }
+}
+
+/* ---- ZOOM / SCROLL ---- */
+
+function setZoom(val) {
+  zoom = Math.max(1, Math.min(3, val));
+  const inner = document.getElementById('boardInner');
+  inner.style.width = (zoom * 100) + '%';
+  centerBoard();
+}
+
+function changeZoom(delta) {
+  setZoom(zoom + delta);
+}
+
+function centerBoard() {
+  const el = document.getElementById('boardScroll');
+  setTimeout(() => {
+    el.scrollLeft = (el.scrollWidth - el.clientWidth) / 2;
+    el.scrollTop = (el.scrollHeight - el.clientHeight) / 2;
+  }, 50);
+}
+
+function scrollToPos(r, c) {
+  const el = document.getElementById('boardScroll');
+  setTimeout(() => {
+    const fracX = (PAD + c) / VB;
+    const fracY = (PAD + r) / VB;
+    const targetLeft = fracX * el.scrollWidth - el.clientWidth / 2;
+    const targetTop = fracY * el.scrollHeight - el.clientHeight / 2;
+    el.scrollTo({ left: targetLeft, top: targetTop, behavior: 'smooth' });
+  }, 60);
+}
+
+/* ---- GAME FLOW ---- */
+
+function startGame(m) {
+  mode = m;
+  zoom = 1.8;
+  initState();
+  document.getElementById('menu').classList.add('hidden');
+  document.getElementById('game').classList.add('active');
+  const inner = document.getElementById('boardInner');
+  inner.style.width = (zoom * 100) + '%';
+  render();
+  centerBoard();
+}
+
+function resetGame() {
+  initState();
+  render();
+  centerBoard();
+}
+
+function goMenu() {
+  document.getElementById('menu').classList.remove('hidden');
+  document.getElementById('game').classList.remove('active');
+  initState();
+}
+
+// Initialize
+initState();
+zoom = 1.8;
+</script>
+</body>
+</html>

@@ -1,0 +1,5 @@
+Source: https://github.com/z-biz-game/z-biz-game-nurikabe-cos
+Revision: 032b899ad7dbd6addd0fcb76415cf21099427234
+Vendored: 2026-10-17
+License: MIT (see LICENSE)
+Changes: Original Chinese UI retained; optional PWA registration/manifest removed and social image paths made relative; development tools omitted.

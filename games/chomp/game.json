@@ -1,0 +1,14 @@
+{
+  "name": "Chomp",
+  "desc": "Take bites from a chocolate grid, removing the chosen square and everything below and to its right. Avoid the poisoned upper-left square. Play against the computer or solve built-in strategy challenges. Chinese-language interface.",
+  "controls": "Click or drag to choose a bite; arrows move the cursor; Enter bites; U undo; R restart; P pause; H opens rules",
+  "shelf": "Puzzle & Logic",
+  "tags": [
+    "games",
+    "html5",
+    "board",
+    "strategy",
+    "chomp"
+  ],
+  "creator": "z-biz-game"
+}

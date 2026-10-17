@@ -1,0 +1,498 @@
+/* 颜色、间距、时长全部来自 js/theme.js（经 applyThemeVars() 落到 CSS 变量）。
+   这份表里除了几何尺寸不该有字面色号 —— 那是"画布和界面长成两个游戏"的唯一来源。 */
+
+[hidden] { display: none !important; }
+
+* { box-sizing: border-box; }
+
+html, body {
+  margin: 0;
+  min-height: 100%;
+  background: linear-gradient(180deg, var(--bg-top) 0%, var(--bg-bottom) 62%, var(--surface) 100%);
+  background-attachment: fixed;
+  color: var(--ink);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+}
+
+body { touch-action: manipulation; }
+
+#app {
+  max-width: 1180px;
+  margin: 0 auto;
+  padding: var(--space-page) var(--space-page) var(--space-inner);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-card);
+  min-height: 100vh;
+  /* 画布的边长是照 .stage 的内容盒算出来的，而 .stage 的宽由 #view-game 的轨道决定：
+     所以"要不要收成单列"必须问 #app 有多宽，不能问视口有多宽 —— 内嵌、带侧栏的宿主里
+     视口宽而容器窄，媒体查询会答应一个画布放不下的两列布局。inline-size 容器就是这一问。 */
+  container-type: inline-size;
+}
+
+.mono { font-family: var(--font-mono); font-variant-numeric: tabular-nums; }
+
+/* ---------- 顶栏 ---------- */
+
+.topbar {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: var(--space-card);
+}
+
+.brand h1 {
+  margin: 0;
+  font: 700 30px/1.1 var(--font-sans);
+  letter-spacing: 0.16em;
+}
+
+.brand .sub {
+  margin: 4px 0 0;
+  color: var(--ink-dim);
+  font-size: 12px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+}
+
+.top-actions { display: flex; gap: var(--space-gutter); }
+
+button {
+  font: inherit;
+  color: inherit;
+  cursor: pointer;
+  border-radius: var(--radius-button);
+  border: 1px solid var(--line);
+  background: var(--surface);
+  padding: 10px 16px;
+  min-height: var(--touch-min);
+  box-shadow: var(--shadow-level1);
+  transition: background var(--dur-tap) var(--ease-ease), border-color var(--dur-tap) var(--ease-ease), transform var(--dur-tap) var(--ease-spring);
+}
+
+button:active { transform: translateY(1px); }
+button:focus-visible { outline: 2px solid var(--info); outline-offset: 2px; }
+
+button.ghost:hover { border-color: var(--line-heavy); background: var(--surface-lift); }
+
+button.primary {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: var(--land-ink);
+  font-weight: 700;
+  box-shadow: var(--shadow-level2);
+}
+
+button.primary:hover { background: var(--accent-edge); }
+
+button[aria-pressed="true"] {
+  border-color: var(--accent);
+  background: var(--accent-soft);
+  color: var(--ink);
+}
+
+button.link {
+  border: 0;
+  background: none;
+  color: var(--ink-faint);
+  /* "看着像一行小字"不是躲开 44×44 的理由：页脚那个清空存档的按钮是真能点的，
+     命中盒照样按主题的 --touch-min 撑满，只是不描边、不垫底色。 */
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: var(--touch-min);
+  padding: 0 8px;
+  text-decoration: underline;
+  font-size: 12px;
+  box-shadow: none;
+}
+
+/* ---------- 视图 ---------- */
+
+main { flex: 1; }
+
+.view { animation: rise var(--dur-base) var(--ease-ease) both; }
+
+@keyframes rise {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: none; }
+}
+
+.reduce-motion .view,
+.reduce-motion button { animation: none; transition: none; }
+
+/* 选档页 */
+
+.menu-hero h2 {
+  margin: 0 0 6px;
+  font-size: 19px;
+  font-weight: 700;
+}
+
+.menu-hero p {
+  margin: 0;
+  max-width: 74ch;
+  color: var(--ink-dim);
+  font-size: 13.5px;
+  line-height: 1.75;
+}
+
+.menu-cols {
+  display: grid;
+  grid-template-columns: minmax(280px, 340px) 1fr;
+  gap: var(--space-card);
+  margin-top: var(--space-card);
+  align-items: start;
+}
+
+.col { display: flex; flex-direction: column; gap: var(--space-inner); }
+
+.col-title {
+  margin: 0;
+  font-size: 11px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+  font-weight: 600;
+}
+
+.tiers { display: flex; flex-direction: column; gap: 8px; }
+
+.tier {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: var(--space-inner);
+  text-align: left;
+  padding: 13px 15px;
+}
+
+.tier .tier-name { font-weight: 700; }
+.tier .tier-note { color: var(--ink-dim); font-size: 12px; }
+.tier .tier-size { color: var(--ink-faint); font-size: 12px; }
+
+.resume {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: var(--space-inner);
+  padding: 12px 14px;
+  border: 1px dashed var(--accent);
+  border-radius: var(--radius-card);
+  background: var(--accent-soft);
+}
+
+.resume-txt { display: flex; flex-direction: column; gap: 2px; font-size: 13px; }
+.resume-txt span { color: var(--ink-dim); font-size: 12px; }
+
+.records {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+  gap: 8px;
+}
+
+.records li {
+  border: 1px solid var(--line);
+  border-radius: var(--radius-chip);
+  padding: 9px 11px;
+  background: var(--surface);
+  font-size: 12px;
+}
+
+.records b { display: block; font-size: 13px; margin-bottom: 3px; }
+.records span { color: var(--ink-dim); }
+
+.rules {
+  margin: 0;
+  padding-left: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  font-size: 12.5px;
+  line-height: 1.6;
+  color: var(--ink-dim);
+}
+
+.rules b { color: var(--ink); }
+
+.pencil-rules {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  font-size: 12px;
+  color: var(--ink-dim);
+}
+
+.pencil-rules li {
+  border: 1px solid var(--line);
+  border-radius: var(--radius-chip);
+  padding: 5px 9px;
+  background: var(--bg-bottom);
+}
+
+.pencil-rules i { font-style: normal; color: var(--ink-faint); }
+
+.rules-note {
+  margin: 6px 0 0;
+  font-size: 11.5px;
+  color: var(--ink-faint);
+}
+
+.rules-note b { color: var(--ink-dim); }
+
+/* 对局页 */
+
+#view-game {
+  display: grid;
+  grid-template-columns: 1fr minmax(268px, 310px);
+  gap: var(--space-card);
+  align-items: start;
+}
+
+.stage {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-card);
+  background: var(--surface);
+  padding: var(--space-card);
+  box-shadow: var(--shadow-level2);
+  /* 画布的宽是照着 .stage 的内容盒算出来的，而画布自己是个 inline style 的定宽盒子：
+     网格轨道默认不许收到 min-content 以下，于是缩窗口时这条 1fr 轨被上一帧的画布顶着不撒手，
+     500px 视口里量到 568px 的盘 —— 横向滚动条就是这么来的（也正是"照容器量"这条规矩
+     唯一需要补的一刀：容器得先真能缩）。 */
+  min-width: 0;
+}
+
+.stage-head { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+
+.puzzle-name { font-weight: 700; letter-spacing: 0.08em; }
+
+.chip {
+  border: 1px solid var(--line);
+  border-radius: var(--radius-chip);
+  padding: 4px 9px;
+  font-size: 12px;
+  color: var(--ink-dim);
+  background: var(--bg-bottom);
+}
+
+.chip.proof-count { color: var(--success); border-color: var(--success); }
+.chip.proof-pencil { color: var(--warn); border-color: var(--warn); }
+
+/* 装得下就居中，装不下就贴左：300px 容器里的 10×10 只能靠 Cell.min 地板保住整格，
+   这时纯 center 会把 288px 的画布往两边各甩出去 14px —— 左边那一条是滚不回去的死角，
+   玩家看到的永远是"第一列被切掉半格"。safe center 把溢出全落到右边，那里横向滚动够得着。 */
+#board-wrap { position: relative; align-self: safe center; }
+
+#board {
+  display: block;
+  border-radius: var(--radius-card);
+  touch-action: none;
+  /* 一手落墙、一手落岛：光标跟着当前模式走，不看面板也知道手里捏的是哪种。 */
+  cursor: cell;
+}
+
+.conflict-line {
+  margin: 0;
+  min-height: 18px;
+  font-size: 12.5px;
+  color: var(--error);
+}
+
+.conflict-line.good { color: var(--success); }
+
+#win-veil {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  background: var(--veil);
+  border-radius: var(--radius-card);
+  animation: rise var(--dur-base) var(--ease-ease) both;
+}
+
+.win-card {
+  text-align: center;
+  padding: var(--space-card);
+  border: 1px solid var(--accent);
+  border-radius: var(--radius-card);
+  background: var(--surface-lift);
+  max-width: 86%;
+  box-shadow: var(--shadow-level3);
+}
+
+.win-card h3 { margin: 0 0 6px; font-size: 19px; }
+.win-card p { margin: 0 0 8px; font-size: 13px; color: var(--ink-dim); }
+.win-record { color: var(--success) !important; font-weight: 700; }
+.win-actions { display: flex; gap: var(--space-gutter); justify-content: center; }
+
+.panel {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-inner);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-card);
+  background: var(--surface);
+  padding: var(--space-card);
+}
+
+.modes { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+.mode { text-align: center; }
+
+/* 模式按钮上的方块就是画布上那两种颜色的读数。 */
+#btn-mode-wall::before,
+#btn-mode-land::before {
+  content: '';
+  display: inline-block;
+  width: 11px;
+  height: 11px;
+  margin-right: 6px;
+  border-radius: 3px;
+  vertical-align: -1px;
+}
+#btn-mode-wall::before { background: var(--wall); box-shadow: inset 0 0 0 1px var(--wall-edge); }
+#btn-mode-land::before { background: var(--land); box-shadow: inset 0 0 0 1px var(--land-edge); }
+
+.acts { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+
+.acts .primary { grid-column: 1 / -1; }
+.acts .primary span { margin-left: 6px; }
+
+.stats {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px 10px;
+  border-top: 1px solid var(--line);
+  padding-top: var(--space-inner);
+}
+
+.stat { display: flex; justify-content: space-between; font-size: 12.5px; color: var(--ink-dim); }
+.stat b { color: var(--ink); }
+.stat.bad b { color: var(--error); }
+
+.hint-box {
+  border: 1px solid var(--line);
+  border-radius: var(--radius-chip);
+  padding: 11px 12px;
+  background: var(--bg-bottom);
+}
+
+.hint-box h4 {
+  margin: 0 0 5px;
+  font-size: 12px;
+  letter-spacing: 0.08em;
+  color: var(--hint);
+}
+
+.hint-box p { margin: 0; font-size: 12.5px; line-height: 1.65; color: var(--ink-dim); }
+
+.legend {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 12px;
+  font-size: 11.5px;
+  color: var(--ink-dim);
+}
+
+.legend span { display: inline-flex; align-items: center; gap: 5px; }
+.sw { width: 11px; height: 11px; border-radius: 3px; display: inline-block; }
+.sw-wall { background: var(--wall); box-shadow: inset 0 0 0 1px var(--wall-edge); }
+.sw-land { background: var(--land); box-shadow: inset 0 0 0 1px var(--land-edge); }
+.sw-unknown { background: var(--unknown-cell); box-shadow: inset 0 0 0 1px var(--line-heavy); }
+.sw-free { background: var(--land); box-shadow: inset 0 0 0 2px var(--pencil-strong); }
+.sw-done { background: var(--success); }
+.sw-bad { background: var(--error); }
+
+.keyhint {
+  margin: 0;
+  font-size: 11px;
+  line-height: 1.7;
+  color: var(--ink-faint);
+}
+
+.keyhint b { color: var(--ink-dim); font-weight: 600; }
+
+.foot {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--space-card);
+  align-items: center;
+  color: var(--ink-faint);
+  font-size: 11.5px;
+  border-top: 1px solid var(--line);
+  padding-top: var(--space-inner);
+}
+
+.foot code { font-family: var(--font-mono); color: var(--ink-dim); }
+
+/* 单列的门槛照的是 #app 的内容盒（860 = 旧那条 900 视口规则减去 2×20 页边距），
+   画布能不能放下由这一轨决定；菜单页那两条仍旧照视口：它们排的是文字卡，
+   收成几列是排版口味，不是"棋盘溢出容器"那种会把格子切一半的问题。 */
+@container (max-width: 860px) {
+  #view-game { grid-template-columns: minmax(0, 1fr); }
+}
+
+@media (max-width: 900px) {
+  .menu-cols { grid-template-columns: 1fr; }
+  .foot { flex-direction: column; align-items: flex-start; }
+}
+
+/* 中央分发：safe-area 兜底 */
+
+/* ---------- safe-area：刘海与主屏条不吃掉按钮（中央分发，akari-cos 同口径） ---------- */
+:root {
+  --sat: env(safe-area-inset-top, 0px);
+  --sar: env(safe-area-inset-right, 0px);
+  --sab: env(safe-area-inset-bottom, 0px);
+  --sal: env(safe-area-inset-left, 0px);
+}
+html, body {
+  padding-left: var(--sal);
+  padding-right: var(--sar);
+}
+body {
+  padding-top: var(--sat);
+  padding-bottom: var(--sab);
+  min-height: 100vh;
+  min-height: 100dvh;
+}
+/* 贴边的固定/吸底元素自己让开主屏条，别让 home indicator 压住按钮 */
+.fixed-bottom, .bottom-bar, .hud-bottom, footer.app-footer {
+  padding-bottom: calc(var(--sab) + env(safe-area-inset-bottom, 0px));
+}
+
+
+/* ============================================================
+   44px 触摸命中下限（Apple HIG 手机可用性底线）
+   每个真正可点的元素都要有 ≥44×44 CSS px 的命中盒。
+   min-height / min-width 是**硬下限**：只会把过小的盒子撑到 44px，
+   本来就够大的控件（宽药丸、整行列表项、大数字键）外形一点不变。
+
+   两处非平凡之处：
+   1) 需要 !important —— 各组件自己有 `.shelf button { min-width: 34px }`
+      这类更"贴身"的规则，类选择器的优先级高于任何标签堆叠，
+      不加的话这条底线会被组件规则逐个抵消。
+   2) 先把 --touch-min 定死：tapa / nurikabe 早就写了
+      `min-height: var(--touch-min)`，但全仓没有任何地方定义过这个变量，
+      无 fallback 的 var() 在计算值阶段整条作废 —— 那是个看着像 44px、
+      实际什么都不保证的死规则。这里补上定义，让它们原本的意图真正成立。
+   ============================================================ */
+:root { --touch-min: 44px; }
+button,
+select,
+input,
+textarea,
+a[href],
+[role="button"] {
+  min-height: 44px !important;
+  min-width: 44px !important;
+}

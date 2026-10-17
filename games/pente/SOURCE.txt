@@ -1,0 +1,5 @@
+Source: https://github.com/OKSufi/PenteGame
+Revision: 997038ffec7451b91d9c037d27d3960c96f71762
+Vendored: 2026-10-17
+License: MIT (see LICENSE)
+Changes: Entry point renamed from Index.html to index.html; cancel stale AI callbacks when restarting or returning to the menu.

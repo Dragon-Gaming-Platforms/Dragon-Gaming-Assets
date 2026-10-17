@@ -1,0 +1,5 @@
+Source: https://github.com/z-biz-game/z-biz-game-chomp-cos
+Revision: 4f4427c76bc6b0e8ce0f80dd15e58f1179d7220c
+Vendored: 2026-10-17
+License: MIT (see LICENSE)
+Changes: Original Chinese UI retained; optional PWA registration/manifest removed and social image paths made relative; development tools omitted.

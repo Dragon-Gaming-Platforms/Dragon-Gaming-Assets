@@ -1,0 +1,15 @@
+{
+  "name": "Hex",
+  "desc": "Connect opposite edges of a hexagonal board before your opponent. Play locally with two players or against three AI difficulty levels, on boards from 7×7 to 13×13. Includes the pie rule. Italian-language interface.",
+  "controls": "Click an empty hex to place a stone; Red connects top to bottom, Cyan left to right; Nuova partita starts a new game",
+  "shelf": "Puzzle & Logic",
+  "tags": [
+    "games",
+    "html5",
+    "board",
+    "hex",
+    "ai",
+    "local-multiplayer"
+  ],
+  "creator": "Luca Nenni"
+}

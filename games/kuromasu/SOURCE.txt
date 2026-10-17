@@ -1,0 +1,5 @@
+Source: https://github.com/z-biz-game/z-biz-game-kuromasu-cos
+Revision: d83042cae235a1478f267de19593463298b73399
+Vendored: 2026-10-17
+License: MIT (see LICENSE)
+Changes: Original Chinese UI retained; optional PWA registration/manifest removed and social image paths made relative; development tools omitted.
