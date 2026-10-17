@@ -1,0 +1,14 @@
+{
+  "name": "Make 24",
+  "desc": "Combine four numbers with addition, subtraction, multiplication and division to reach a target of 24, 36 or 48. Solo puzzle mode with undo and solution reveal.",
+  "controls": "Click a card, an operation, then another card; 1–4 pick cards; + − * / choose operations; Backspace undo; R reset",
+  "shelf": "Puzzle & Logic",
+  "tags": [
+    "games",
+    "html5",
+    "puzzle",
+    "math",
+    "numbers"
+  ],
+  "creator": "Joshua Muller"
+}

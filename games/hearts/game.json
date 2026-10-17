@@ -1,0 +1,14 @@
+{
+  "name": "Hearts",
+  "desc": "Classic Hearts against three computer opponents, with passing, shoot-the-moon scoring, three AI difficulties and local statistics.",
+  "controls": "Click three cards to pass, then Pass Cards; click a legal card to play; Game starts a new match",
+  "shelf": "Puzzle & Logic",
+  "tags": [
+    "games",
+    "html5",
+    "cards",
+    "hearts",
+    "single-player"
+  ],
+  "creator": "wesmcd6"
+}

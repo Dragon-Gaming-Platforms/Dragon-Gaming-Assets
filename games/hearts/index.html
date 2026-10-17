@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Hearts</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <div id="app">
+    <!-- Title / menu bar (classic Windows look) -->
+    <div class="titlebar">
+      <div class="title-left">
+        <span class="suit-mini red">&hearts;</span>
+        <span class="title-text" id="titleText">Hearts</span>
+      </div>
+      <div class="menubar">
+        <button class="menu-btn" id="menuGame">Game</button>
+        <button class="menu-btn" id="menuStats">Stats</button>
+        <button class="menu-btn" id="menuHelp">Help</button>
+        <button class="menu-btn" id="soundToggle" title="Toggle sound">&#128266; Sound</button>
+      </div>
+      <div class="window-controls">
+        <span class="wc">&#8211;</span>
+        <span class="wc">&#9723;</span>
+        <span class="wc close">&#10005;</span>
+      </div>
+    </div>
+
+    <!-- Green felt table -->
+    <div class="table" id="table">
+      <!-- Opponent hands -->
+      <div class="seat seat-north" id="seat-north">
+        <div class="nameplate" id="name-north">Robin</div>
+        <div class="hand hand-h" id="hand-north"></div>
+      </div>
+
+      <div class="seat seat-west" id="seat-west">
+        <div class="nameplate" id="name-west">Alex</div>
+        <div class="hand hand-v" id="hand-west"></div>
+      </div>
+
+      <div class="seat seat-east" id="seat-east">
+        <div class="nameplate" id="name-east">Casey</div>
+        <div class="hand hand-v" id="hand-east"></div>
+      </div>
+
+      <!-- Center play area -->
+      <div class="center" id="center">
+        <div class="trick-slot slot-north" id="trick-north"></div>
+        <div class="trick-slot slot-west" id="trick-west"></div>
+        <div class="trick-slot slot-east" id="trick-east"></div>
+        <div class="trick-slot slot-south" id="trick-south"></div>
+        <div class="center-msg" id="centerMsg"></div>
+      </div>
+
+      <!-- Player's hand (south) -->
+      <div class="seat seat-south" id="seat-south">
+        <div class="hand hand-h player-hand" id="hand-south"></div>
+        <div class="nameplate you" id="name-south">You</div>
+      </div>
+
+      <!-- Pass button -->
+      <button class="pass-btn" id="passBtn" hidden>Pass Cards</button>
+    </div>
+
+    <!-- Status bar -->
+    <div class="statusbar">
+      <span id="statusText">Welcome to Hearts</span>
+    </div>
+  </div>
+
+  <!-- Scoreboard dialog -->
+  <div class="modal-overlay" id="scoreModal" hidden>
+    <div class="dialog">
+      <div class="dialog-title">
+        <span>Score</span>
+        <span class="dialog-close" id="scoreClose">&#10005;</span>
+      </div>
+      <div class="dialog-body">
+        <table class="score-table" id="scoreTable"></table>
+        <div class="dialog-note" id="scoreNote"></div>
+      </div>
+      <div class="dialog-buttons">
+        <button class="btn" id="scoreOk">OK</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- New game dialog -->
+  <div class="modal-overlay" id="newGameModal" hidden>
+    <div class="dialog">
+      <div class="dialog-title">
+        <span>Hearts</span>
+        <span class="dialog-close" id="newGameClose">&#10005;</span>
+      </div>
+      <div class="dialog-body">
+        <p class="dialog-label">Enter your name:</p>
+        <input type="text" id="playerNameInput" class="text-input" maxlength="16" value="You" />
+        <p class="field-label">Difficulty:</p>
+        <div class="difficulty-group" id="difficultyGroup">
+          <label><input type="radio" name="difficulty" value="easy" /> Easy</label>
+          <label><input type="radio" name="difficulty" value="normal" checked /> Normal</label>
+          <label><input type="radio" name="difficulty" value="hard" /> Hard</label>
+        </div>
+        <p class="dialog-note">First player to reach 100 points loses. Lowest score wins!</p>
+      </div>
+      <div class="dialog-buttons">
+        <button class="btn" id="newGameOk">OK</button>
+        <button class="btn" id="newGameCancel">Cancel</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Stats dialog -->
+  <div class="modal-overlay" id="statsModal" hidden>
+    <div class="dialog">
+      <div class="dialog-title">
+        <span>Statistics</span>
+        <span class="dialog-close" id="statsClose">&#10005;</span>
+      </div>
+      <div class="dialog-body">
+        <table class="score-table" id="statsTable"></table>
+      </div>
+      <div class="dialog-buttons">
+        <button class="btn" id="statsReset">Reset</button>
+        <button class="btn" id="statsOk">OK</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Help / about dialog -->
+  <div class="modal-overlay" id="helpModal" hidden>
+    <div class="dialog dialog-wide">
+      <div class="dialog-title">
+        <span>How to Play Hearts</span>
+        <span class="dialog-close" id="helpClose">&#10005;</span>
+      </div>
+      <div class="dialog-body help-body">
+        <h3>Object of the Game</h3>
+        <p>Hearts is a trick-taking game for four players. The goal is to have the
+          <strong>lowest</strong> score. Play continues until a player reaches 100 points.</p>
+        <h3>Scoring</h3>
+        <ul>
+          <li>Each <span class="red">&hearts;</span> heart is worth <strong>1 point</strong>.</li>
+          <li>The <span class="black">&spades;</span> Queen of Spades is worth <strong>13 points</strong>.</li>
+          <li><strong>Shooting the Moon:</strong> take <em>all</em> hearts and the Queen of Spades
+            to give every other player 26 points instead.</li>
+        </ul>
+        <h3>How to Play</h3>
+        <ul>
+          <li>Each round begins by passing 3 cards (left, right, across, then no pass).</li>
+          <li>The player holding the <strong>2 of Clubs</strong> leads the first trick.</li>
+          <li>You must follow the led suit if you can.</li>
+          <li>Hearts cannot be led until they are "broken" (played on another suit),
+            unless you have only hearts left.</li>
+          <li>No hearts or the Queen of Spades may be played on the first trick.</li>
+        </ul>
+      </div>
+      <div class="dialog-buttons">
+        <button class="btn" id="helpOk">OK</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="cards.js"></script>
+  <script src="sound.js"></script>
+  <script src="hearts.js"></script>
+</body>
+</html>

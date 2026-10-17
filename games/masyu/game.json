@@ -1,0 +1,15 @@
+{
+  "name": "Masyu",
+  "desc": "Draw one loop through every pearl: turn at black pearls and go straight through white ones. Generated puzzles with hints and local saves. Original Chinese-language interface.",
+  "controls": "Drag between adjacent cells to draw; right-click an edge to mark it excluded; H hint; Z undo; N new puzzle",
+  "shelf": "Puzzle & Logic",
+  "tags": [
+    "games",
+    "html5",
+    "puzzle",
+    "logic",
+    "loop",
+    "masyu"
+  ],
+  "creator": "z-biz-game"
+}

@@ -1,0 +1,5 @@
+Source: https://github.com/joshuaMarkMuller/make-24
+Revision: 04148b237a11120b7a44c37f0fb3e9caab9ee53d
+Vendored: 2026-10-17
+License: MIT (see LICENSE)
+Changes: Only standalone solo/projector mode included. Server, multiplayer host/race pages, tooling and unused assets omitted. About credit distinguishes the original author from this mirror.

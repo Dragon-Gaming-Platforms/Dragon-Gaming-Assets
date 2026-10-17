@@ -1,0 +1,5 @@
+Source: https://github.com/z-biz-game/z-biz-game-slither-cos
+Revision: 4a97b48cf26fa33899d0f692bed20c645b5f98a3
+Vendored: 2026-10-17
+License: MIT (see LICENSE)
+Changes: Optional PWA manifest/service-worker registration removed; social preview image paths made relative. Original Chinese-language UI retained.

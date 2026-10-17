@@ -1,0 +1,15 @@
+{
+  "name": "Slitherlink",
+  "desc": "Draw one closed loop along grid edges to satisfy the numbered clues. Generated puzzles, undo and local saves. Original Chinese-language interface.",
+  "controls": "Click an edge to draw or erase a line; right-click marks an excluded edge; use Undo to revert; R restarts",
+  "shelf": "Puzzle & Logic",
+  "tags": [
+    "games",
+    "html5",
+    "puzzle",
+    "logic",
+    "loop",
+    "slitherlink"
+  ],
+  "creator": "z-biz-game"
+}
