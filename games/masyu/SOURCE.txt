@@ -1,0 +1,5 @@
+Source: https://github.com/z-biz-game/z-biz-game-masyu-cos
+Revision: 80ee7a6e641bcd364192bbe6c091e582ddd10dae
+Vendored: 2026-10-17
+License: MIT (see LICENSE)
+Changes: Optional PWA manifest/service-worker registration removed; social preview image paths made relative. Original Chinese-language UI retained.

@@ -1,0 +1,5 @@
+Source: https://github.com/wesmcd6/Game-of-hearts
+Revision: 4184d8cd23d49789ee49769daa894aa83deeddf0
+Vendored: 2026-10-17
+License: MIT (see LICENSE)
+Changes: Guard card input during deal/trick animations and invalidate delayed game actions when a new hand starts, preventing rapid-click and restart races.
