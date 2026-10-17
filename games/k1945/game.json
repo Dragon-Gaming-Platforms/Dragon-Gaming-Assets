@@ -1,0 +1,16 @@
+{
+  "name": "K1945",
+  "desc": "A vertically scrolling WWII bomber shoot 'em up in the 1945 style: fight through the gauntlet, blast ground defenses, and take down the stage boss — solo or in two-player co-op.",
+  "controls": "WASD to fly, U to fire, I for bomb, 1 to start (arrow keys + K/L for player 2)",
+  "shelf": "Arcade & Action",
+  "tags": [
+    "arcade",
+    "shooter",
+    "shmup",
+    "vertical",
+    "co-op"
+  ],
+  "badge": "New",
+  "creator": "bombzj",
+  "image": "title.png"
+}
