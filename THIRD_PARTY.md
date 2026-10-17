@@ -399,4 +399,5 @@ never invent a license.
 | Hex | `games/hex/` | [lucanenni/hex-game](https://github.com/lucanenni/hex-game) | MIT — Tailwind CDN replaced with locally generated Tailwind CSS 3.4.17 (MIT, license included); Google Fonts removed, using system fallbacks. Original Italian UI retained; hidden-state priority preserved for replay. | 2026-10-17 |
 | Pente | `games/pente/` | [OKSufi/PenteGame](https://github.com/OKSufi/PenteGame) | MIT — Entry point renamed from Index.html to index.html; cancel stale AI callbacks when restarting or returning to the menu. | 2026-10-17 |
 | Falling Sand Lab | `games/falling-sand-lab/` | Original build (Dragon Gaming Platforms) | Original work — MIT (custom simulation and code-drawn visuals; no third-party assets) | 2026-10-17 |
+| K1945 | `games/k1945/` | [bombzj/k1945](https://github.com/bombzj/k1945) | MIT — unmodified | 2026-10-17 |
 | Boids Lab | `games/boids-lab/` | Original build (Dragon Gaming Platforms) | Original work — MIT (custom flocking simulation and code-drawn visuals; no third-party assets) | 2026-10-17 |
