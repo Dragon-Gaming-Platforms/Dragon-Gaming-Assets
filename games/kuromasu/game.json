@@ -1,0 +1,14 @@
+{
+  "name": "Kuromasu",
+  "desc": "Shade cells so every numbered cell sees exactly that many white cells along its row and column. Black cells cannot touch orthogonally and all white cells stay connected. Generated puzzles with hints and local saves. Chinese-language interface.",
+  "controls": "Select black (B) or white (W), then click or drag over cells; H hint; Z undo; R restart",
+  "shelf": "Puzzle & Logic",
+  "tags": [
+    "games",
+    "html5",
+    "puzzle",
+    "logic",
+    "kuromasu"
+  ],
+  "creator": "z-biz-game"
+}

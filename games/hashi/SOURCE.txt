@@ -1,0 +1,5 @@
+Source: https://github.com/z-biz-game/z-biz-game-hashi-cos
+Revision: 27e469429de816c6fc5840fb7beb46c048f25c6e
+Vendored: 2026-10-17
+License: MIT (see LICENSE)
+Changes: Original Chinese UI retained; optional PWA registration/manifest removed and social image paths made relative; development tools omitted.

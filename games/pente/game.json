@@ -1,0 +1,15 @@
+{
+  "name": "Pente",
+  "desc": "Place stones on a 19×19 board. Win by making five in a row or capturing five pairs of opposing stones. Play against a computer opponent or a friend on the same device.",
+  "controls": "Click an empty intersection to place a stone; flank exactly two opponent stones to capture them; New restarts; +/− zoom",
+  "shelf": "Puzzle & Logic",
+  "tags": [
+    "games",
+    "html5",
+    "board",
+    "pente",
+    "ai",
+    "local-multiplayer"
+  ],
+  "creator": "OKSufi"
+}
