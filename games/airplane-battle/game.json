@@ -1,0 +1,15 @@
+{
+  "name": "Airplane Battle",
+  "desc": "A dynamic air-combat arcade shooter: fly the hero plane through streams of bullets from nine enemy types and chase a high score on desktop or mobile.",
+  "controls": "Arrow keys, mouse, or touch to steer — weapons fire automatically",
+  "shelf": "Arcade & Action",
+  "tags": [
+    "arcade",
+    "shooter",
+    "air-combat",
+    "plane"
+  ],
+  "badge": "New",
+  "creator": "albertime-th",
+  "image": "title.png"
+}
