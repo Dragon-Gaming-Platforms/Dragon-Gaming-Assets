@@ -1,0 +1,14 @@
+{
+  "name": "Hashi",
+  "desc": "Connect numbered islands with one or two bridges. Match every island’s number, avoid crossing bridges, and connect all islands in one network. Built-in campaign, hints and local saves. Chinese-language interface.",
+  "controls": "Drag between aligned islands to cycle 0, 1 or 2 bridges; U undo; R restart; H hint",
+  "shelf": "Puzzle & Logic",
+  "tags": [
+    "games",
+    "html5",
+    "puzzle",
+    "logic",
+    "bridges"
+  ],
+  "creator": "z-biz-game"
+}

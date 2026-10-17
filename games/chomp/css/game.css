@@ -1,0 +1,207 @@
+/* 毒格巧克力 — one stylesheet, no framework, no font file. The palette is cocoa: dark tray,
+   milk squares, poison in pale green. Layout is a two-column stage that collapses to a single
+   column under 860px, and the canvas keeps an aspect ratio the view can actually fit. */
+
+:root {
+  --bg: #1b120c;
+  --bg2: #241811;
+  --tray: #3a2415;
+  --ink: #f3e3cf;
+  --ink-dim: #bfa795;
+  --line: rgba(214, 173, 128, 0.22);
+  --poison: #c9f2a0;
+  --good: #8fd6ff;
+  --bad: #ff9c7a;
+  --primary: #7a4a24;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  background: radial-gradient(1200px 700px at 30% -10%, #35221590, transparent 60%), var(--bg);
+  color: var(--ink);
+  font: 15px/1.55 ui-sans-serif, -apple-system, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+}
+
+.topbar {
+  display: flex; align-items: baseline; gap: 16px; flex-wrap: wrap;
+  padding: 14px 20px 10px; border-bottom: 1px solid var(--line);
+}
+.brand { margin: 0; font-size: 21px; letter-spacing: 1px; }
+.brand small { margin-left: 8px; font-size: 12px; color: var(--ink-dim); letter-spacing: 3px; }
+.brand-mark { margin-right: 8px; color: var(--poison); }
+.modes { display: flex; gap: 6px; }
+.modes button {
+  background: transparent; color: var(--ink-dim); border: 1px solid var(--line);
+  padding: 4px 12px; border-radius: 999px; font: inherit; cursor: pointer;
+}
+.modes button[aria-pressed="true"] { color: var(--ink); border-color: var(--poison); background: #2c1d12; }
+.totals { margin: 0 0 0 auto; color: var(--ink-dim); font-size: 13px; }
+
+.stage {
+  display: grid; grid-template-columns: minmax(320px, 1fr) 340px; gap: 18px;
+  padding: 18px 20px 28px; align-items: start;
+}
+@media (max-width: 860px) { .stage { grid-template-columns: 1fr; } }
+
+.board { position: relative; }
+#board {
+  display: block; width: 100%; height: clamp(320px, 58vh, 560px);
+  background: linear-gradient(160deg, var(--bg2), #1d1410);
+  border: 1px solid var(--line); border-radius: 14px;
+  touch-action: none; cursor: crosshair;
+}
+.hint-line { min-height: 22px; margin: 8px 2px 0; color: var(--ink-dim); font-size: 14px; }
+
+.curtain {
+  position: absolute; inset: 0; display: grid; place-items: center;
+  background: rgba(16, 10, 6, 0.72); border-radius: 14px;
+}
+.curtain[hidden] { display: none; }
+.curtain-card {
+  width: min(88%, 340px); background: var(--bg2); border: 1px solid var(--line);
+  border-radius: 12px; padding: 16px 18px; text-align: center;
+}
+.stars { margin: 0; font-size: 24px; color: var(--poison); letter-spacing: 4px; }
+.curtain-card h2 { margin: 6px 0 4px; font-size: 19px; }
+.tally { margin: 0 0 12px; color: var(--ink-dim); font-size: 14px; }
+.curtain-actions { display: flex; gap: 8px; justify-content: center; }
+
+button {
+  font: inherit; cursor: pointer; border-radius: 8px; padding: 6px 12px;
+  color: var(--ink); background: #33220f; border: 1px solid var(--line);
+}
+button:hover:not(:disabled) { background: var(--primary); }
+button:disabled { opacity: 0.45; cursor: not-allowed; }
+button.primary { background: var(--primary); border-color: #a06a3a; }
+
+.panel { display: grid; gap: 12px; }
+.crumbs { margin: 0; font-size: 13px; color: var(--ink-dim); }
+.crumbs b { color: var(--ink); }
+
+.readout { margin: 0; display: grid; grid-template-columns: auto 1fr; gap: 4px 10px; font-size: 14px; }
+.readout dt { color: var(--ink-dim); }
+.readout dd { margin: 0; font-variant-numeric: tabular-nums; }
+.readout dd.win { color: var(--good); }
+.readout dd.lose { color: var(--bad); }
+.readout dd.poison { color: var(--poison); }
+
+.controls { display: flex; flex-wrap: wrap; gap: 6px; }
+.legend { margin: 0; font-size: 12.5px; color: var(--ink-dim); }
+.legend b { color: var(--poison); }
+
+.drawer, .about { border: 1px solid var(--line); border-radius: 10px; padding: 8px 12px; background: #201510; }
+.drawer summary, .about summary { cursor: pointer; color: var(--ink); }
+.proof { margin: 8px 0 0; padding-left: 20px; font-size: 13px; color: var(--ink-dim); }
+.proof code { color: var(--ink); }
+.proof-more, .chip-more { margin: 6px 0 0; font-size: 12px; color: var(--ink-dim); }
+.about p { margin: 8px 0; font-size: 13px; color: var(--ink-dim); }
+.about code { color: var(--ink); background: #2b1c12; padding: 1px 5px; border-radius: 4px; }
+.about .save { display: flex; align-items: center; gap: 8px; }
+
+.toast {
+  position: fixed; left: 50%; bottom: 26px; transform: translateX(-50%);
+  background: #12240f; color: var(--poison); border: 1px solid #3f6b2a;
+  padding: 8px 16px; border-radius: 999px; font-size: 14px; z-index: 20;
+}
+.toast[hidden] { display: none; }
+
+/* ---------------------------------------------------------------- system layer
+   Everything below is about being usable on a phone in your hand rather than on a 1040px
+   window: the insets the notch and the home bar take, the finger-sized targets, and the two
+   switches (pause, reduced motion) that decide whether the board is allowed to move at all. */
+
+/* env() is only non-zero when the viewport asked for `viewport-fit=cover`, which index.html does.
+   Without these the topbar sits under the notch and the toast under the home indicator. */
+.topbar {
+  padding: calc(14px + env(safe-area-inset-top)) calc(20px + env(safe-area-inset-right))
+           calc(10px + env(safe-area-inset-bottom)) calc(20px + env(safe-area-inset-left));
+}
+.stage {
+  padding: calc(18px + env(safe-area-inset-top)) calc(20px + env(safe-area-inset-right))
+           calc(28px + env(safe-area-inset-bottom)) calc(20px + env(safe-area-inset-left));
+}
+.toast { bottom: calc(26px + env(safe-area-inset-bottom)); max-width: calc(100vw - 2 * env(safe-area-inset-left)); }
+.modal-card { max-height: calc(100vh - env(safe-area-inset-top) - env(safe-area-inset-bottom) - 32px); overflow: auto; }
+
+/* 44x44 is the touch floor, not a suggestion — the panel buttons read as text but a thumb has
+   to land on them from a moving car. */
+button {
+  min-height: 44px; min-width: 44px;
+  padding: 8px 14px;
+  font-variant-numeric: tabular-nums;
+}
+.modes button { min-height: 44px; }
+
+.hud { display: flex; gap: 6px; margin-left: auto; }
+.hud button { font-size: 13px; letter-spacing: 0.5px; }
+.hud button[aria-pressed="true"] { border-color: var(--poison); color: var(--poison); background: #2c1d12; }
+.totals { margin: 0; font-size: 13px; }
+
+kbd {
+  font: 12px/1.4 ui-monospace, SFMono-Regular, Menlo, monospace;
+  background: #2b1c12; border: 1px solid var(--line); border-bottom-width: 2px;
+  border-radius: 4px; padding: 1px 5px; color: var(--ink);
+}
+.legend kbd { color: var(--poison); }
+
+.paused-curtain .curtain-card h2 { color: var(--poison); }
+
+.modal {
+  position: fixed; inset: 0; z-index: 30; display: grid; place-items: center;
+  padding: calc(16px + env(safe-area-inset-top)) calc(16px + env(safe-area-inset-right))
+           calc(16px + env(safe-area-inset-bottom)) calc(16px + env(safe-area-inset-left));
+  background: rgba(12, 7, 4, 0.82);
+}
+.modal[hidden] { display: none; }
+.modal-card {
+  width: min(620px, 100%); background: var(--bg2); border: 1px solid var(--line);
+  border-radius: 14px; padding: 20px 22px; box-shadow: 0 18px 60px rgba(0, 0, 0, 0.55);
+}
+.modal-card h2 { margin: 0 0 10px; font-size: 20px; color: var(--poison); }
+.tut-steps { margin: 0; padding-left: 22px; display: grid; gap: 10px; font-size: 14.5px; }
+.tut-steps p { margin: 0; color: var(--ink); }
+.tut-steps img { display: block; margin: 8px 0 0; border-radius: 10px; }
+.tut-steps code { color: var(--poison); }
+.tut-keys { margin: 14px 0 12px; font-size: 13px; color: var(--ink-dim); }
+.modal-card .curtain-actions { justify-content: flex-start; }
+
+/* A real branch, not a comment: with the OS asking for less motion the board stops animating
+   (js/core/anim.js drops the particles and freezes the pulse) and nothing here may keep moving
+   underneath it, so transitions and keyframes are cut rather than shortened. */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+  .toast { transform: none; }
+  button:hover:not(:disabled) { transform: none; }
+}
+
+/* 中央分发：safe-area 兜底 */
+
+/* ---------- safe-area：刘海与主屏条不吃掉按钮（中央分发，akari-cos 同口径） ---------- */
+:root {
+  --sat: env(safe-area-inset-top, 0px);
+  --sar: env(safe-area-inset-right, 0px);
+  --sab: env(safe-area-inset-bottom, 0px);
+  --sal: env(safe-area-inset-left, 0px);
+}
+html, body {
+  padding-left: var(--sal);
+  padding-right: var(--sar);
+}
+body {
+  padding-top: var(--sat);
+  padding-bottom: var(--sab);
+  min-height: 100vh;
+  min-height: 100dvh;
+}
+/* 贴边的固定/吸底元素自己让开主屏条，别让 home indicator 压住按钮 */
+.fixed-bottom, .bottom-bar, .hud-bottom, footer.app-footer {
+  padding-bottom: calc(var(--sab) + env(safe-area-inset-bottom, 0px));
+}

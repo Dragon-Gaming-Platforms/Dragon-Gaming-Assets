@@ -1,0 +1,9 @@
+{
+  "name": "Falling Sand Lab",
+  "desc": "Paint a living pixel sandbox and watch sand pile, water flow, plants grow, and fire reshape the world.",
+  "controls": "Click or drag to paint; right-click to erase; Space to pause; 1–8 select elements; E selects the eraser.",
+  "shelf": "Interactive Stories & Experiments",
+  "tags": ["simulation", "sandbox", "physics", "pixel", "experiments"],
+  "badge": "New",
+  "creator": "Dragon Gaming Platforms"
+}

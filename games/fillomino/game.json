@@ -1,0 +1,14 @@
+{
+  "name": "Fillomino",
+  "desc": "Fill the grid with connected numbered regions: each region must contain exactly its number of cells, and equal-sized regions cannot share a side. Generated puzzles with hints and local saves. Chinese-language interface.",
+  "controls": "Press a number key or choose a digit, then click or drag to fill cells; 0 erases; H hint; Z undo; use the new-puzzle controls to start again",
+  "shelf": "Puzzle & Logic",
+  "tags": [
+    "games",
+    "html5",
+    "puzzle",
+    "logic",
+    "regions"
+  ],
+  "creator": "z-biz-game"
+}

@@ -1,0 +1,14 @@
+{
+  "name": "Nurikabe",
+  "desc": "Build numbered white islands separated by a connected black sea, without any 2×2 black squares. Built-in puzzles, hints, undo and local saves. Chinese-language interface.",
+  "controls": "Choose sea (1) or land (2), then click or drag over cells; H hint; Z undo; use the new-puzzle controls to start again",
+  "shelf": "Puzzle & Logic",
+  "tags": [
+    "games",
+    "html5",
+    "puzzle",
+    "logic",
+    "islands"
+  ],
+  "creator": "z-biz-game"
+}
