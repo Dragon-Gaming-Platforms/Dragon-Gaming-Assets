@@ -405,3 +405,4 @@ never invent a license.
 | K1945 | `games/k1945/` | [bombzj/k1945](https://github.com/bombzj/k1945) | MIT — unmodified | 2026-10-17 |
 | Boids Lab | `games/boids-lab/` | Original build (Dragon Gaming Platforms) | Original work — MIT (custom flocking simulation and code-drawn visuals; no third-party assets) | 2026-10-17 |
 | Airplane Battle | `games/airplane-battle/` | [albertime-th/air-war-game](https://github.com/albertime-th/air-war-game) | MIT — unmodified | 2026-10-17 |
+| Particle Life Lab | `games/particle-life-lab/` | Original build (Dragon Gaming Platforms) | Original work — MIT (custom particle chemistry simulation and code-drawn visuals; no third-party assets) | 2026-10-17 |

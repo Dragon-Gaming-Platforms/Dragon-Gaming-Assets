@@ -1,0 +1,9 @@
+{
+  "name": "Particle Life Lab",
+  "desc": "Build a tiny chemistry of motion. Tune how four colored species attract and repel one another, then watch new patterns emerge.",
+  "controls": "Click a matrix cell to cycle its force. Drag on the field to attract; use the field button or Shift/right-drag to repel. Space pauses.",
+  "shelf": "Interactive Stories & Experiments",
+  "tags": ["simulation", "particles", "chemistry", "sandbox", "experiments"],
+  "badge": "New",
+  "creator": "Dragon Gaming Platforms"
+}
