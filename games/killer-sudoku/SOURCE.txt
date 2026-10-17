@@ -2,4 +2,4 @@ Source: https://github.com/sutts101/killer
 Revision: d47e2dbd82627136af8f3397b7a1369048b6b6e6
 Vendored: 2026-10-17
 License: MIT (see LICENSE)
-Changes: Existing committed bundle included with local fixes to persist newly generated puzzles and journal cleared cells for save/undo/redo and discard abandoned redo branches (contains Lodash 4.17.3, MIT notice included). Bootstrap 3.3.7 and jQuery slim 3.1.1 localized with MIT notices; duplicate Bootstrap script removed; Modernizr replaced with a local canvas feature check. Original desktop-only layout retained.
+Changes: Existing committed dist/bundle.js promoted to the game root, with local fixes to persist newly generated puzzles and journal cleared cells for save/undo/redo and discard abandoned redo branches (contains Lodash 4.17.3, MIT notice included). Bootstrap 3.3.7 and jQuery slim 3.1.1 localized with MIT notices; duplicate Bootstrap script removed; Modernizr replaced with a local canvas feature check. Original desktop-only layout retained.
