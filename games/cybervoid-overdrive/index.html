@@ -1,0 +1,358 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>CYBERVOID: OVERDRIVE - Cyberpunk Roguelite Twin-Stick Shooter</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+    <!-- Game Rendering Canvas -->
+    <canvas id="gameCanvas"></canvas>
+
+    <!-- Retro CRT Scanline Shader Overlay -->
+    <div class="scanlines"></div>
+
+    <!-- Custom Aim Reticle & Active Reload Indicator -->
+    <div id="customCrosshair">
+        <div class="crosshair-reticle">
+            <div class="crosshair-center"></div>
+            <div class="crosshair-ring"></div>
+            <div class="crosshair-pip top"></div>
+            <div class="crosshair-pip bottom"></div>
+            <div class="crosshair-pip left"></div>
+            <div class="crosshair-pip right"></div>
+            <div class="crosshair-reload-bar"></div>
+        </div>
+    </div>
+
+    <!-- HUD OVERLAY -->
+    <div id="hud" class="hidden">
+        <!-- Top XP Progress Bar -->
+        <div class="hud-xp-container">
+            <div id="xpFill" class="hud-xp-fill"></div>
+        </div>
+
+        <!-- Top Status Bar -->
+        <div class="hud-top-bar">
+            <!-- Vitals (HP, Shield, EMP Ultimate, Dash Charges) -->
+            <div class="hud-vitals">
+                <!-- HP -->
+                <div class="vitals-row">
+                    <span class="vitals-badge" style="color: #ff0055;">HP</span>
+                    <div class="bar-track">
+                        <div id="hpFill" class="bar-fill hp-fill"></div>
+                        <span id="hpText" class="bar-text">100 / 100</span>
+                    </div>
+                </div>
+
+                <!-- Shield -->
+                <div class="vitals-row">
+                    <span class="vitals-badge" style="color: #00f0ff;">SHIELD</span>
+                    <div class="bar-track">
+                        <div id="shieldFill" class="bar-fill shield-fill"></div>
+                        <span id="shieldText" class="bar-text">50 / 50</span>
+                    </div>
+                </div>
+
+                <!-- EMP Ultimate -->
+                <div class="vitals-row">
+                    <span class="vitals-badge" style="color: #00ffcc;">EMP [Q]</span>
+                    <div class="bar-track">
+                        <div id="ultFill" class="bar-fill ult-fill" style="width: 0%;"></div>
+                        <span class="bar-text">NOVA CHARGE</span>
+                    </div>
+                </div>
+
+                <!-- Dash Pips -->
+                <div class="dash-charges">
+                    <span class="dash-label">DASH [SPACE]:</span>
+                    <div id="dashPips" class="dash-pips">
+                        <div class="dash-pip active"></div>
+                        <div class="dash-pip active"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Score & Level Info & Quick Actions -->
+            <div class="hud-score-panel">
+                <span class="score-label">SCORE</span>
+                <span id="hudScore" class="score-value">0</span>
+                <div class="high-score-wrap">
+                    BEST: <span id="hudHighScore">0</span> | LVL: <span id="hudLevel" style="color: var(--neon-blue); font-weight: 700;">1</span>
+                </div>
+                <div class="hud-quick-actions">
+                    <button id="btnMuteHud" class="hud-icon-btn" onclick="window.game.toggleMute()" title="Mute/Unmute Audio (M)">🔊</button>
+                    <button id="btnPauseHud" class="hud-icon-btn" onclick="window.game.togglePause()" title="Pause Mission (ESC)">⏸</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Combo Multiplier Meter -->
+        <div id="comboCounter" class="hud-combo hidden">
+            <span class="combo-number">x2</span>
+            <span class="combo-label">ADRENALINE</span>
+            <div class="combo-meter-track">
+                <div id="comboMeterFill" class="combo-meter-fill"></div>
+            </div>
+        </div>
+
+        <!-- Boss Health HUD Bar -->
+        <div id="bossHud" class="hud-boss hidden">
+            <div id="bossName" class="boss-title">APEX OVERLORD</div>
+            <div class="boss-bar-track">
+                <div id="bossHpFill" class="boss-bar-fill"></div>
+            </div>
+        </div>
+
+        <!-- Bottom Bar: Weapon Slots & Ammo -->
+        <div class="hud-bottom-bar">
+            <!-- Weapon Hotbar -->
+            <div id="weaponSlots" class="weapon-inventory">
+                <!-- Dynamically populated via JS -->
+            </div>
+
+            <!-- Ammo Counter & Active Reload Sweetspot Gauge -->
+            <div class="ammo-display">
+                <span id="weaponName" class="weapon-active-name">PULSE CARBINE</span>
+                <div class="ammo-numbers">
+                    <span id="ammoCurrent">32</span><span class="ammo-max">/ <span id="ammoMax">32</span></span>
+                </div>
+
+                <!-- Dedicated Gears-style Active Reload Bar -->
+                <div id="activeReloadTrack" class="active-reload-track hidden">
+                    <div class="reload-zone-bg"></div>
+                    <div class="reload-sweetspot-zone"></div>
+                    <div id="activeReloadCursor" class="active-reload-cursor"></div>
+                    <span class="active-reload-label">PERFECT RELOAD [R]</span>
+                </div>
+
+                <span class="reload-hint">[R] RELOAD | [F] AUTO-FIRE</span>
+            </div>
+        </div>
+    </div>
+
+    <!-- MOBILE / TOUCH VIRTUAL CONTROLS -->
+    <div id="touchControls" class="touch-controls hidden">
+        <!-- Left Virtual Movement Stick -->
+        <div id="touchStickLeft" class="touch-stick-zone">
+            <div class="touch-stick-base">
+                <div id="touchStickKnob" class="touch-stick-knob"></div>
+            </div>
+        </div>
+
+        <!-- Right Virtual Action Buttons -->
+        <div class="touch-action-buttons">
+            <button id="touchFireBtn" class="touch-action-btn fire-btn">🔥<br><span>FIRE</span></button>
+            <button id="touchDashBtn" class="touch-action-btn dash-btn">⚡<br><span>DASH</span></button>
+            <button id="touchEmpBtn" class="touch-action-btn emp-btn">💥<br><span>EMP</span></button>
+            <button id="touchReloadBtn" class="touch-action-btn reload-btn">🔄<br><span>RELOAD</span></button>
+            <button id="touchSwapBtn" class="touch-action-btn swap-btn">🔫<br><span>SWAP</span></button>
+        </div>
+    </div>
+
+    <!-- MAIN MENU OVERLAY -->
+    <div id="mainMenu" class="modal-overlay">
+        <div class="menu-card">
+            <h1 class="game-title">CYBERVOID</h1>
+            <div class="game-subtitle">OVERDRIVE // ROGUELITE BULLET-HELL</div>
+
+            <button id="btnPlay" class="btn-primary" onclick="window.game.startNewGame()">DEPLOY SHIP [ENTER]</button>
+            <button id="btnHowToPlay" class="btn-secondary" onclick="toggleModal('codexModal')">ARMORY & INTEL</button>
+
+            <div class="menu-audio-controls">
+                <div class="audio-slider-row">
+                    <span>MASTER VOL</span>
+                    <input type="range" id="masterVolSlider" min="0" max="1" step="0.05" value="0.8" oninput="window.audio.setMasterVolume(this.value)">
+                </div>
+                <div class="audio-slider-row">
+                    <span>SFX VOL</span>
+                    <input type="range" id="sfxVolSlider" min="0" max="1" step="0.05" value="0.85" oninput="window.audio.setSfxVolume(this.value)">
+                </div>
+                <div class="audio-slider-row">
+                    <span>SYNTH MUSIC</span>
+                    <input type="range" id="musicVolSlider" min="0" max="1" step="0.05" value="0.45" oninput="window.audio.setMusicVolume(this.value)">
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- LEVEL UP UPGRADE MODAL -->
+    <div id="levelUpModal" class="modal-overlay hidden">
+        <div class="level-up-container">
+            <h2 class="level-up-title">SYSTEM UPGRADE AVAILABLE</h2>
+            <div class="level-up-sub">SELECT ONE AUGMENTATION MATRIX</div>
+            <div id="upgradeCardsContainer" class="upgrade-cards-grid">
+                <!-- Cards injected dynamically via upgrades.js -->
+            </div>
+        </div>
+    </div>
+
+    <!-- PAUSE MENU MODAL -->
+    <div id="pauseModal" class="modal-overlay hidden">
+        <div class="menu-card">
+            <h2 class="game-title" style="font-size: 32px;">SYSTEM PAUSED</h2>
+            <div class="game-subtitle">TACTICAL SUSPENSION</div>
+            <button class="btn-primary" onclick="window.game.togglePause()">RESUME [ESC]</button>
+            <button class="btn-secondary" onclick="window.game.startNewGame()">RESTART MISSION</button>
+            <button class="btn-secondary" onclick="location.reload()">MAIN MENU</button>
+        </div>
+    </div>
+
+    <!-- GAME OVER MODAL -->
+    <div id="gameOverModal" class="modal-overlay hidden">
+        <div class="menu-card">
+            <h2 class="game-title" style="color: var(--neon-pink); font-size: 36px;">VESSEL DESTROYED</h2>
+            <div class="game-subtitle">MISSION SUMMARY</div>
+
+            <div class="stats-grid">
+                <div class="stat-item">
+                    <span class="stat-title">FINAL SCORE</span>
+                    <span id="finalScore" class="stat-value" style="color: var(--neon-yellow);">0</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-title">HIGH SCORE</span>
+                    <span id="finalHighScore" class="stat-value">0</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-title">HOSTILES PURGED</span>
+                    <span id="finalKills" class="stat-value">0</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-title">WAVE REACHED</span>
+                    <span id="finalWave" class="stat-value" style="color: var(--neon-blue);">1</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-title">TIME SURVIVED</span>
+                    <span id="finalTime" class="stat-value">0s</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-title">PEAK ADRENALINE</span>
+                    <span id="finalCombo" class="stat-value" style="color: var(--neon-pink);">x1</span>
+                </div>
+            </div>
+
+            <button class="btn-primary" onclick="window.game.startNewGame()">DEPLOY AGAIN [ENTER]</button>
+            <button class="btn-secondary" onclick="location.reload()">RETURN TO HANGAR</button>
+        </div>
+    </div>
+
+    <!-- VICTORY MODAL -->
+    <div id="victoryModal" class="modal-overlay hidden">
+        <div class="menu-card victory-card">
+            <h2 class="game-title victory-title">SYSTEM LIBERATED!</h2>
+            <div class="game-subtitle victory-subtitle">APEX NEXUS OVERLORD NEUTRALIZED // SECTOR CLEARED</div>
+
+            <div class="stats-grid">
+                <div class="stat-item">
+                    <span class="stat-title">FINAL SCORE</span>
+                    <span id="vicFinalScore" class="stat-value" style="color: var(--neon-yellow);">0</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-title">HIGH SCORE</span>
+                    <span id="vicHighScore" class="stat-value">0</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-title">HOSTILES PURGED</span>
+                    <span id="vicFinalKills" class="stat-value">0</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-title">FINAL PILOT LEVEL</span>
+                    <span id="vicFinalLevel" class="stat-value" style="color: var(--neon-blue);">0</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-title">TIME SURVIVED</span>
+                    <span id="vicFinalTime" class="stat-value">0s</span>
+                </div>
+                <div class="stat-item">
+                    <span class="stat-title">PEAK ADRENALINE</span>
+                    <span id="vicFinalCombo" class="stat-value" style="color: var(--neon-pink);">x1</span>
+                </div>
+            </div>
+
+            <button class="btn-primary endless-btn" onclick="window.game.continueEndless()">CONTINUE IN ENDLESS OVERDRIVE</button>
+            <button class="btn-secondary" onclick="window.game.startNewGame()">DEPLOY AGAIN [ENTER]</button>
+            <button class="btn-secondary" onclick="location.reload()">RETURN TO HANGAR</button>
+        </div>
+    </div>
+
+    <!-- CODEX / INTEL MODAL -->
+    <div id="codexModal" class="modal-overlay hidden">
+        <div class="menu-card" style="max-width: 680px;">
+            <h2 class="game-title" style="font-size: 28px;">PILOT MANUAL & INTEL</h2>
+            <div class="game-subtitle">TACTICAL BRIEFING</div>
+
+            <div class="codex-content">
+                <div class="codex-section">
+                    <h3>🕹️ FLIGHT CONTROLS</h3>
+                    <div class="codex-item"><strong>W, A, S, D / Arrows:</strong> Thruster Movement & Strafing</div>
+                    <div class="codex-item"><strong>Mouse Aim + Left Click:</strong> Aim Reticle & Fire Weapon</div>
+                    <div class="codex-item"><strong>Space / Shift / Right Click:</strong> Hyperspace Dash (Invulnerable dodge!)</div>
+                    <div class="codex-item"><strong>R:</strong> Reload (Press again in sweet spot for Perfect Active Reload!)</div>
+                    <div class="codex-item"><strong>Q or E:</strong> EMP Nova Bomb (Destroys all bullets & stuns arena)</div>
+                    <div class="codex-item"><strong>1 - 7 or Scroll Wheel:</strong> Switch Arsenal</div>
+                    <div class="codex-item"><strong>F:</strong> Toggle Continuous Auto-Fire</div>
+                </div>
+
+                <div class="codex-section">
+                    <h3>🔫 WEAPON ARSENAL</h3>
+                    <div class="codex-item"><strong>Pulse Carbine:</strong> High-precision plasma rifle with rapid cycling.</div>
+                    <div class="codex-item"><strong>Scatter Sweeper:</strong> 8-pellet buckshot spread with extreme knockback.</div>
+                    <div class="codex-item"><strong>Hyper Railgun:</strong> Penetrating particle slug piercing all enemies in a line.</div>
+                    <div class="codex-item"><strong>Seeker Swarm:</strong> Micro-missiles tracking targets with explosive cluster radius.</div>
+                    <div class="codex-item"><strong>Arc Tesla Coil:</strong> High-voltage lightning branching to multiple nearby foes.</div>
+                    <div class="codex-item"><strong>Void Torch:</strong> Piercing cone of raging plasma flame applying burn DoT.</div>
+                    <div class="codex-item"><strong>Singularity Launcher:</strong> Gravitational vortex pulling enemies in before detonating!</div>
+                </div>
+
+                <div class="codex-section">
+                    <h3>⚡ ADVANCED MECHANICS</h3>
+                    <div class="codex-item"><strong>Perfect Active Reload:</strong> Press R while reloading when the slider hits the center window for instant reload + 4s of bonus Crits and Fire Rate!</div>
+                    <div class="codex-item"><strong>Adrenaline Combo:</strong> String rapid kills to multiply your score up to x10, increasing movement speed and charging your EMP Ultimate!</div>
+                    <div class="codex-item"><strong>Boss Encounters:</strong> Face the G-700 Titan on Wave 5 and the Apex Nexus Overlord on Wave 10!</div>
+                </div>
+            </div>
+
+            <button class="btn-primary" onclick="toggleModal('codexModal')">CLOSE INTEL</button>
+        </div>
+    </div>
+
+    <!-- UI Modal Helper Script -->
+    <script>
+        function toggleModal(id) {
+            const el = document.getElementById(id);
+            if (el) {
+                el.classList.toggle('hidden');
+            }
+        }
+        window.addEventListener('keydown', (e) => {
+            if (e.code === 'Enter') {
+                const menu = document.getElementById('mainMenu');
+                const over = document.getElementById('gameOverModal');
+                const victory = document.getElementById('victoryModal');
+                if (!menu.classList.contains('hidden')) {
+                    window.game.startNewGame();
+                } else if (!over.classList.contains('hidden')) {
+                    window.game.startNewGame();
+                } else if (!victory.classList.contains('hidden')) {
+                    window.game.startNewGame();
+                }
+            } else if (e.code === 'KeyM') {
+                if (window.game) {
+                    window.game.toggleMute();
+                }
+            }
+        });
+    </script>
+
+    <!-- Game Engine Scripts (Ordered) -->
+    <script src="js/audio.js"></script>
+    <script src="js/particles.js"></script>
+    <script src="js/weapons.js"></script>
+    <script src="js/upgrades.js"></script>
+    <script src="js/enemies.js"></script>
+    <script src="js/game.js"></script>
+
+</body>
+</html>

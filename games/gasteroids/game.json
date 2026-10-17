@@ -1,0 +1,15 @@
+{
+  "name": "Gasteroids",
+  "desc": "A Galaga-meets-Asteroids wave shooter: slide your ship across the screen and blast the incoming asteroid horde before it reaches Earth.",
+  "controls": "Move the mouse to steer — weapons fire automatically",
+  "shelf": "Arcade & Action",
+  "tags": [
+    "arcade",
+    "shooter",
+    "asteroids",
+    "wave"
+  ],
+  "badge": "New",
+  "creator": "DevTony101",
+  "image": "title.png"
+}

@@ -1,0 +1,15 @@
+{
+  "name": "Battle City",
+  "desc": "The classic destructible-walls tank arcade: fight through waves of enemy tanks, protect your base, and clear every stage.",
+  "controls": "WASD to move, Space to shoot (arrow keys + Enter for player 2)",
+  "shelf": "Arcade & Action",
+  "tags": [
+    "arcade",
+    "tank",
+    "shooter",
+    "classic"
+  ],
+  "badge": "New",
+  "creator": "d4vucat",
+  "image": "title.png"
+}
