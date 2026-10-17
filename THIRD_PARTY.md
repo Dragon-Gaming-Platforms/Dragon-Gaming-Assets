@@ -401,3 +401,4 @@ never invent a license.
 | Falling Sand Lab | `games/falling-sand-lab/` | Original build (Dragon Gaming Platforms) | Original work — MIT (custom simulation and code-drawn visuals; no third-party assets) | 2026-10-17 |
 | K1945 | `games/k1945/` | [bombzj/k1945](https://github.com/bombzj/k1945) | MIT — unmodified | 2026-10-17 |
 | Boids Lab | `games/boids-lab/` | Original build (Dragon Gaming Platforms) | Original work — MIT (custom flocking simulation and code-drawn visuals; no third-party assets) | 2026-10-17 |
+| Airplane Battle | `games/airplane-battle/` | [albertime-th/air-war-game](https://github.com/albertime-th/air-war-game) | MIT — unmodified | 2026-10-17 |
