@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <meta charset="utf-8">
+        <link type="text/css" href="css/style.css" rel="StyleSheet">
+        <script type="module" src="js/halma.mjs"></script>
+        <title>Halma</title>
+    </head>
+    <body>
+        <h1>Halma</h1>
+        <form id="halmaForm" class="container">
+            <fieldset class="item-a">
+                <legend>Number of players</legend>
+                <label class="block">
+                    <input name="rbPlayers" type="radio" value="2">2
+                </label>
+                <label class="block">
+                    <input name="rbPlayers" type="radio" value="4">4
+                </label>
+            </fieldset>
+            <fieldset class="item-b">
+                <legend>Number of pieces</legend>
+                <label class="block">
+                    <input name="rbPieces" type="radio" value="3">3
+                </label>
+                <label class="block">
+                    <input name="rbPieces" type="radio" value="6">6
+                </label>
+                <label class="block">
+                    <input name="rbPieces" type="radio" value="10">10
+                </label>
+                <label class="block">
+                    <input name="rbPieces" type="radio" value="15">15
+                </label>
+                <label class="block">
+                    <input name="rbPieces" type="radio" value="19">19
+                </label>
+                <label class="block">
+                    <input name="rbPieces" type="radio" value="21">21
+                </label>
+            </fieldset>
+            <fieldset class="item-c">
+                <legend>Size of the board</legend>
+                <input id="inputWidth" type="number">
+            </fieldset>
+            <div class="item-abc">
+                <input id="newGameButton" type="submit" value="Start new game">
+                <input id="endTurnButton" type="submit" id="endturnbtn" value="End turn">
+                <span class="bold" id="messages"></span>
+            </div>
+            <div id="boardContainer">
+            </div>
+        </form>
+
+        <div id="boardDiv">
+            
+        </div>
+    </body>
+</html>

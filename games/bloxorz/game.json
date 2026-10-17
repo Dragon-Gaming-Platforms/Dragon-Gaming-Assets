@@ -1,0 +1,16 @@
+{
+  "name": "Bloxorz",
+  "desc": "The classic 3D cube puzzle: roll the elongated block across floating islands and fit it exactly into its matching hole. Raw WebGL with no engine, multiple levels, and a free camera you can swing around.",
+  "controls": "Arrow keys to roll the block, WASD/QE to orbit the camera, R to reset the view",
+  "shelf": "Puzzle & Logic",
+  "tags": [
+    "games",
+    "bloxorz",
+    "3d",
+    "puzzle",
+    "webgl"
+  ],
+  "badge": "New",
+  "creator": "binary-signal",
+  "image": "1.png"
+}
