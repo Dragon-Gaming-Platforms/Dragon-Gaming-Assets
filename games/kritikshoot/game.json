@@ -1,0 +1,16 @@
+{
+  "name": "KritikShoot",
+  "desc": "A top-down 'crimson void' arena survival shooter: fight procedural waves, build your weapon loadout, survive the corruption zones, and race your ghost in Daily Challenge runs.",
+  "controls": "WASD to move, mouse or arrows to aim, click or Space to fire, E to switch weapons, Esc to pause",
+  "shelf": "Arcade & Action",
+  "tags": [
+    "arcade",
+    "shooter",
+    "arena",
+    "wave",
+    "survival"
+  ],
+  "badge": "New",
+  "creator": "LeagueStar",
+  "image": "title.png"
+}
