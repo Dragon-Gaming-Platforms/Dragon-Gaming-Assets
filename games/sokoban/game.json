@@ -1,0 +1,14 @@
+{
+  "name": "Sokoban",
+  "desc": "Classic box-pushing puzzles with three compact levels. Push every crate onto a target; boxes cannot be pulled. Code-drawn geometric graphics.",
+  "controls": "Arrow keys or on-screen arrows move; Restart resets the level; Levels returns to difficulty selection",
+  "shelf": "Puzzle & Logic",
+  "tags": [
+    "games",
+    "html5",
+    "board",
+    "puzzle",
+    "sokoban"
+  ],
+  "creator": "Paweł Kochański"
+}

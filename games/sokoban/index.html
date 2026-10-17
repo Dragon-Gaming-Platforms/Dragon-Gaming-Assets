@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<!-- Modified 2026-10-17: local geometric graphics, controls and instructions. GPL-3.0. -->
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="ie=edge">
+    <link rel="stylesheet" href="index.css">
+    <script src="index.js" defer></script>
+    <title>Sokoban</title>
+</head>
+<body>
+    <h1>Sokoban - Let's push these crates!</h1>
+    <div class="menu">
+        <h2>Choose your difficulty:</h2>
+        <div>
+            <button class="menu_button">Easy</button>
+            <button class="menu_button">Medium</button>
+            <button class="menu_button">Hard</button>
+        </div>
+    </div>
+    <div class="board">
+    </div>
+<section id="controls" hidden aria-label="Game controls">
+    <p>Moves: <span id="moves" aria-live="polite">0</span></p>
+    <div class="dpad">
+        <button data-key="ArrowUp" aria-label="Move up">↑</button>
+        <button data-key="ArrowLeft" aria-label="Move left">←</button>
+        <button data-key="ArrowDown" aria-label="Move down">↓</button>
+        <button data-key="ArrowRight" aria-label="Move right">→</button>
+    </div>
+    <p><button id="restart">Restart</button> <button id="levels">Levels</button></p>
+</section>
+<p class="instructions">Push all crates onto the orange targets. Use arrow keys or the on-screen buttons. You cannot pull crates.</p>
+<footer>
+    <p>Game by Paweł Kochański · Geometric graphics adapted for this edition · <a href="LICENSE">GPL-3.0</a> · <a href="SOURCE.txt">Source</a></p>
+</footer>
+</body>
+</html>

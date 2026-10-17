@@ -1,0 +1,5 @@
+Source: https://github.com/pawelkochanski/sokoban
+Revision: c3a20b79d2929b843438a2e68fdcf0e8cc397f96
+Vendored: 2026-10-17
+License: GPL-3.0 (see LICENSE)
+Changes: Original JavaScript source retained with fixes for completion, move counting and input lifecycle; added restart/menu and touch controls. Google Fonts and sprite assets omitted; replaced with original CSS geometric graphics.
