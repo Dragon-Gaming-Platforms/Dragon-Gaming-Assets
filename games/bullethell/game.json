@@ -1,0 +1,15 @@
+{
+  "name": "Bullet Hell",
+  "desc": "A classic bullet-hell (danmaku) shooter: weave through walls of bullets, pick up power-ups, and survive escalating enemy waves and boss assaults.",
+  "controls": "Arrow keys to move, Z to fire",
+  "shelf": "Arcade & Action",
+  "tags": [
+    "arcade",
+    "shooter",
+    "danmaku",
+    "bullet-hell"
+  ],
+  "badge": "New",
+  "creator": "selenebun",
+  "image": "title.png"
+}

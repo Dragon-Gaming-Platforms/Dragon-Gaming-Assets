@@ -1,0 +1,15 @@
+{
+  "name": "Cybervoid Overdrive",
+  "desc": "A neon cyberpunk twin-stick bullet-hell roguelite: survive escalating enemy waves, grab upgrades, and chase a high score.",
+  "controls": "WASD or arrow keys to move, mouse to aim, hold click to fire",
+  "shelf": "Arcade & Action",
+  "tags": [
+    "arcade",
+    "twin-stick",
+    "shooter",
+    "roguelite"
+  ],
+  "badge": "New",
+  "creator": "HurayraIIT",
+  "image": "title.png"
+}

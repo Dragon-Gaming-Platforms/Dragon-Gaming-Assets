@@ -1,0 +1,15 @@
+{
+  "name": "Zaxxon 3D",
+  "desc": "An isometric 3D arcade shooter: pilot your craft through an axonometric gauntlet of turrets, aliens, and destructible walls.",
+  "controls": "W/A/S/D or arrow keys to steer, Space or Enter to fire",
+  "shelf": "Arcade & Action",
+  "tags": [
+    "arcade",
+    "shooter",
+    "isometric",
+    "3d"
+  ],
+  "badge": "New",
+  "creator": "queirozPedro",
+  "image": "title.png"
+}
