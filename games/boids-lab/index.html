@@ -1,0 +1,907 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#081019">
+  <meta name="description" content="A hands-on flocking simulation. Tune alignment, cohesion, and separation to see a murmuration emerge.">
+  <title>Boids Lab</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --ink: #edf3f3;
+      --muted: #9aa9b4;
+      --quiet: #71828f;
+      --line: rgba(177, 202, 210, .13);
+      --panel: rgba(16, 26, 36, .94);
+      --raised: rgba(27, 42, 54, .78);
+      --mint: #83e3c4;
+      --mint-deep: #275c55;
+      --gold: #efc574;
+      --blue: #79bce8;
+      --violet: #ad9af0;
+      --radius: 20px;
+      font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      font-synthesis: none;
+      text-rendering: optimizeLegibility;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
+
+    * { box-sizing: border-box; }
+    body {
+      min-width: 320px;
+      min-height: 100vh;
+      margin: 0;
+      color: var(--ink);
+      background:
+        radial-gradient(ellipse at 10% 0%, rgba(37, 108, 99, .18), transparent 35rem),
+        radial-gradient(ellipse at 93% 40%, rgba(64, 76, 123, .15), transparent 34rem),
+        #081019;
+    }
+    button, input { font: inherit; }
+    button { color: inherit; }
+    button:focus-visible, input:focus-visible {
+      outline: 2px solid var(--mint);
+      outline-offset: 3px;
+    }
+
+    .page { width: min(1280px, calc(100% - 48px)); margin: 0 auto; padding: 30px 0 34px; }
+    .masthead { display: flex; align-items: center; justify-content: space-between; gap: 22px; margin-bottom: 23px; }
+    .identity { display: flex; align-items: center; gap: 14px; min-width: 0; }
+    .mark {
+      display: grid;
+      place-items: center;
+      flex: 0 0 48px;
+      width: 48px;
+      height: 48px;
+      border: 1px solid rgba(131, 227, 196, .29);
+      border-radius: 15px;
+      background: linear-gradient(145deg, rgba(53, 117, 104, .34), rgba(21, 45, 54, .55));
+      box-shadow: inset 0 1px rgba(255,255,255,.06), 0 8px 25px rgba(0,0,0,.2);
+    }
+    .mark svg { width: 29px; height: 29px; }
+    .identity-copy { min-width: 0; }
+    .eyebrow, .micro-label { margin: 0; color: var(--mint); font-size: 10px; font-weight: 800; letter-spacing: .17em; line-height: 1.4; text-transform: uppercase; }
+    h1 { margin: 3px 0 0; font-size: clamp(22px, 3vw, 30px); font-weight: 730; letter-spacing: -.045em; line-height: 1.12; }
+    .intro { max-width: 360px; margin: 0; color: var(--muted); font-size: 13px; line-height: 1.55; text-align: right; }
+
+    .lab-grid { display: grid; grid-template-columns: minmax(0, 1fr) 296px; align-items: stretch; gap: 18px; }
+    .card {
+      min-width: 0;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: var(--panel);
+      box-shadow: 0 22px 70px rgba(0,0,0,.24), inset 0 1px rgba(255,255,255,.025);
+      backdrop-filter: blur(14px);
+    }
+    .stage-card { padding: 19px; }
+    .stage-heading { display: flex; align-items: center; justify-content: space-between; gap: 14px; min-height: 48px; margin: 0 2px 13px; }
+    .stage-copy { min-width: 0; }
+    .stage-copy h2 { margin: 3px 0 0; font-size: 16px; font-weight: 670; letter-spacing: -.02em; }
+    .state-chip { display: inline-flex; align-items: center; gap: 8px; flex: 0 0 auto; padding: 8px 11px; border: 1px solid var(--line); border-radius: 999px; color: #cbd7de; background: rgba(255,255,255,.03); font-size: 9px; font-weight: 800; letter-spacing: .13em; text-transform: uppercase; }
+    .state-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--mint); box-shadow: 0 0 11px rgba(131,227,196,.75); }
+    .state-chip.paused .state-dot { background: var(--gold); box-shadow: 0 0 10px rgba(239,197,116,.55); }
+
+    .arena {
+      position: relative;
+      height: clamp(350px, 58vh, 670px);
+      min-height: 330px;
+      overflow: hidden;
+      border: 1px solid rgba(171, 200, 212, .15);
+      border-radius: 15px;
+      background: #09131d;
+      isolation: isolate;
+      touch-action: none;
+      cursor: crosshair;
+    }
+    .arena::after { position: absolute; z-index: 1; inset: 0; border-radius: inherit; box-shadow: inset 0 0 100px rgba(2,6,13,.18); content: ""; pointer-events: none; }
+    canvas { display: block; width: 100%; height: 100%; }
+    .canvas-hud { position: absolute; z-index: 2; inset: 13px 13px auto; display: flex; align-items: flex-start; justify-content: space-between; gap: 10px; pointer-events: none; }
+    .hud-chip { display: inline-flex; align-items: center; gap: 8px; padding: 8px 10px; border: 1px solid rgba(202,223,228,.12); border-radius: 10px; color: #c7d4dc; background: rgba(8,16,25,.62); box-shadow: 0 6px 24px rgba(0,0,0,.15); backdrop-filter: blur(8px); font-size: 9px; font-weight: 750; letter-spacing: .1em; text-transform: uppercase; }
+    .hud-chip b { color: #f0f5f2; font-size: 12px; font-variant-numeric: tabular-nums; letter-spacing: 0; }
+    .hud-spark { width: 6px; height: 6px; border-radius: 50%; background: var(--mint); box-shadow: 0 0 10px var(--mint); }
+    .canvas-corner { position: absolute; z-index: 2; right: 14px; bottom: 12px; color: rgba(188,207,218,.55); font-size: 9px; letter-spacing: .12em; text-transform: uppercase; pointer-events: none; }
+
+    .stage-actions { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px; padding: 13px 1px 0; }
+    .button-cluster { display: flex; flex-wrap: wrap; gap: 8px; }
+    .button {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 7px;
+      min-height: 37px;
+      padding: 0 11px;
+      border: 1px solid rgba(184,205,216,.15);
+      border-radius: 10px;
+      color: #d1dde2;
+      background: rgba(255,255,255,.035);
+      cursor: pointer;
+      font-size: 11px;
+      font-weight: 650;
+      transition: transform .16s ease, background .16s ease, border-color .16s ease, color .16s ease;
+    }
+    .button:hover { transform: translateY(-1px); border-color: rgba(184,205,216,.3); background: rgba(255,255,255,.075); }
+    .button.primary { border-color: rgba(131,227,196,.3); color: #cbf4e7; background: rgba(42,103,88,.24); }
+    .button.primary:hover { border-color: rgba(131,227,196,.57); background: rgba(42,103,88,.37); }
+    .button.field-mode { color: #a8c9e9; }
+    .button.field-mode[aria-pressed="true"] { border-color: rgba(173,154,240,.45); color: #d9d1ff; background: rgba(112,87,177,.18); }
+    .button-icon { font-size: 13px; line-height: 1; }
+    .stage-hint { margin: 9px 2px 0; color: var(--quiet); font-size: 10px; line-height: 1.5; }
+    kbd { padding: 2px 5px; border: 1px solid rgba(194,210,221,.15); border-radius: 5px; color: #adbcc7; background: rgba(255,255,255,.04); font-family: inherit; font-size: 9px; }
+
+    .side-panel { display: flex; flex-direction: column; gap: 0; padding: 18px; }
+    .panel-section + .panel-section { margin-top: 20px; padding-top: 18px; border-top: 1px solid var(--line); }
+    .section-head { display: flex; align-items: baseline; justify-content: space-between; gap: 10px; margin-bottom: 12px; }
+    .section-head h2 { margin: 0; color: #e7eef1; font-size: 13px; font-weight: 720; letter-spacing: -.015em; }
+    .section-head span, .section-head output { color: var(--quiet); font-size: 10px; font-variant-numeric: tabular-nums; }
+    .section-head output { color: var(--mint); font-weight: 700; }
+
+    .presets { display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap: 7px; }
+    .preset {
+      display: grid;
+      justify-items: center;
+      gap: 6px;
+      min-width: 0;
+      padding: 9px 4px 8px;
+      border: 1px solid rgba(186,205,216,.12);
+      border-radius: 10px;
+      color: #a8b7c1;
+      background: rgba(255,255,255,.024);
+      cursor: pointer;
+      font-size: 9px;
+      font-weight: 640;
+      transition: border-color .16s ease, background .16s ease, color .16s ease;
+    }
+    .preset:hover { border-color: rgba(186,205,216,.3); color: #eaf1f3; }
+    .preset.active { border-color: rgba(131,227,196,.42); color: #d9f7ed; background: rgba(56,112,97,.18); }
+    .preset-icon { width: 22px; height: 17px; color: var(--mint); }
+    .preset:nth-child(2) .preset-icon { color: var(--blue); }
+    .preset:nth-child(3) .preset-icon { color: var(--gold); }
+
+    .range-block + .range-block { margin-top: 14px; }
+    .range-title { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; margin-bottom: 3px; }
+    .range-title label { color: #c7d2d9; font-size: 11px; font-weight: 650; }
+    .range-title output { color: var(--mint); font-size: 10px; font-variant-numeric: tabular-nums; }
+    .range-help { margin: 2px 0 0; color: var(--quiet); font-size: 9px; line-height: 1.4; }
+    input[type="range"] { display: block; width: 100%; height: 15px; margin: 0; accent-color: var(--mint); cursor: pointer; }
+
+    .population-row { display: grid; grid-template-columns: 1fr auto; align-items: center; gap: 8px; margin-top: 16px; }
+    .population-row label { color: #c7d2d9; font-size: 11px; font-weight: 650; }
+    .population-row output { color: var(--mint); font-size: 10px; font-variant-numeric: tabular-nums; }
+    .population-row input { grid-column: 1 / -1; }
+
+    .option-row { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-top: 14px; }
+    .option-copy { min-width: 0; }
+    .option-copy strong { display: block; color: #c9d5dc; font-size: 11px; font-weight: 650; }
+    .option-copy small { display: block; margin-top: 2px; color: var(--quiet); font-size: 9px; line-height: 1.35; }
+    .toggle { position: relative; flex: 0 0 37px; width: 37px; height: 21px; }
+    .toggle input { position: absolute; width: 1px; height: 1px; opacity: 0; }
+    .toggle-track { position: absolute; inset: 0; border: 1px solid rgba(184,205,216,.19); border-radius: 99px; background: #182631; cursor: pointer; transition: background .16s, border-color .16s; }
+    .toggle-track::after { position: absolute; top: 3px; left: 3px; width: 13px; height: 13px; border-radius: 50%; background: #83949e; content: ""; transition: transform .16s, background .16s; }
+    .toggle input:checked + .toggle-track { border-color: rgba(131,227,196,.4); background: rgba(58,139,115,.43); }
+    .toggle input:checked + .toggle-track::after { transform: translateX(16px); background: var(--mint); }
+    .toggle input:focus-visible + .toggle-track { outline: 2px solid var(--mint); outline-offset: 3px; }
+
+    .boundary-choice { display: grid; grid-template-columns: 1fr 1fr; gap: 5px; margin-top: 15px; padding: 3px; border: 1px solid rgba(184,205,216,.11); border-radius: 9px; background: rgba(0,0,0,.12); }
+    .boundary-choice button { min-height: 27px; border: 0; border-radius: 6px; color: var(--quiet); background: transparent; cursor: pointer; font-size: 9px; font-weight: 650; }
+    .boundary-choice button[aria-pressed="true"] { color: #d9f5eb; background: rgba(70,139,118,.25); box-shadow: inset 0 0 0 1px rgba(131,227,196,.12); }
+
+    .field-note { margin-top: auto; padding: 14px 13px 13px; border: 1px solid rgba(131,227,196,.13); border-radius: 13px; background: linear-gradient(145deg, rgba(37,80,74,.19), rgba(23,39,50,.24)); }
+    .field-note .micro-label { color: #85d4ba; font-size: 9px; }
+    .field-note p { margin: 7px 0 0; color: #aab8c1; font-size: 10px; line-height: 1.65; }
+    .field-note strong { color: #e0eceb; font-weight: 660; }
+
+    .footer-note { display: flex; justify-content: space-between; gap: 14px; margin: 15px 3px 0; color: #748390; font-size: 10px; letter-spacing: .025em; }
+    .footer-note span:last-child { text-align: right; }
+
+    @media (max-width: 980px) {
+      .lab-grid { grid-template-columns: minmax(0,1fr); }
+      .side-panel { display: grid; grid-template-columns: minmax(0, .85fr) minmax(0, 1.15fr); column-gap: 22px; row-gap: 17px; }
+      .side-panel .panel-section + .panel-section { margin-top: 0; padding-top: 0; border-top: 0; }
+      .preset-section { grid-column: 1; grid-row: 1; }
+      .global-section { grid-column: 1; grid-row: 2; }
+      .rules-section { grid-column: 2; grid-row: 1 / span 2; }
+      .side-panel .field-note { grid-column: 1 / -1; margin-top: 0; }
+    }
+    @media (max-width: 620px) {
+      .page { width: min(100% - 24px, 520px); padding: 18px 0 23px; }
+      .masthead { align-items: flex-start; margin-bottom: 16px; }
+      .identity { gap: 10px; }
+      .mark { flex-basis: 40px; width: 40px; height: 40px; border-radius: 13px; }
+      .mark svg { width: 24px; height: 24px; }
+      .intro { display: none; }
+      .stage-card { padding: 12px; border-radius: 16px; }
+      .stage-heading { min-height: 42px; margin-bottom: 9px; }
+      .stage-copy h2 { font-size: 14px; }
+      .state-chip { padding: 7px 8px; font-size: 8px; }
+      .arena { height: clamp(320px, 52vh, 500px); min-height: 320px; border-radius: 11px; }
+      .canvas-hud { inset: 9px 9px auto; }
+      .hud-chip { padding: 7px 8px; font-size: 8px; }
+      .hud-chip b { font-size: 11px; }
+      .stage-actions { align-items: stretch; flex-direction: column; padding-top: 10px; }
+      .button-cluster { display: grid; grid-template-columns: 1fr 1fr; }
+      .button { min-height: 39px; }
+      .stage-hint { margin-top: 8px; font-size: 9px; }
+      .side-panel { display: flex; gap: 0; padding: 15px; border-radius: 16px; }
+      .side-panel .panel-section + .panel-section { margin-top: 18px; padding-top: 17px; border-top: 1px solid var(--line); }
+      .side-panel .field-note { margin-top: 18px; }
+      .footer-note { flex-direction: column; gap: 4px; margin-top: 12px; }
+      .footer-note span:last-child { text-align: left; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { scroll-behavior: auto !important; transition-duration: .01ms !important; }
+    }
+  </style>
+</head>
+<body>
+  <main class="page">
+    <header class="masthead">
+      <div class="identity">
+        <div class="mark" aria-hidden="true">
+          <svg viewBox="0 0 36 36" fill="none">
+            <path d="M8 24.5c4.8-9.8 14.6-12.8 21-13" stroke="#83e3c4" stroke-width="1.3" stroke-linecap="round" stroke-dasharray="2 3"/>
+            <path d="m22.5 7.8 7.8 3.7-6.6 5.5" stroke="#83e3c4" stroke-width="1.3" stroke-linecap="round" stroke-linejoin="round"/>
+            <circle cx="8" cy="24.5" r="3.2" fill="#efc574"/><circle cx="17.1" cy="19.2" r="2.4" fill="#79bce8"/><circle cx="29" cy="11.5" r="3.1" fill="#83e3c4"/>
+          </svg>
+        </div>
+        <div class="identity-copy">
+          <p class="eyebrow">A living study of motion</p>
+          <h1>Boids Lab</h1>
+        </div>
+      </div>
+      <p class="intro">Three simple rules can make a crowd feel alive.<br>Change the field, then watch the flock find its way.</p>
+    </header>
+
+    <div class="lab-grid">
+      <section class="card stage-card" aria-labelledby="stage-title">
+        <div class="stage-heading">
+          <div class="stage-copy">
+            <p class="micro-label">Emergent behavior</p>
+            <h2 id="stage-title">A murmuration in miniature</h2>
+          </div>
+          <div class="state-chip" id="stateChip" aria-live="polite">
+            <span class="state-dot" aria-hidden="true"></span><span id="stateLabel">In motion</span>
+          </div>
+        </div>
+
+        <div class="arena" id="arena">
+          <canvas id="flock" aria-label="Animated flocking simulation of boids. Drag to influence the flock."></canvas>
+          <div class="canvas-hud" aria-hidden="true">
+            <div class="hud-chip"><span class="hud-spark"></span><span id="hudState">LIVE FIELD</span></div>
+            <div class="hud-chip"><b id="boidCount">160</b><span>boids</span></div>
+          </div>
+          <div class="canvas-corner" aria-hidden="true">FIELD STUDY 01</div>
+        </div>
+
+        <div class="stage-actions">
+          <div class="button-cluster">
+            <button class="button primary" id="pauseButton" type="button" aria-label="Pause flock">
+              <span class="button-icon" id="pauseIcon" aria-hidden="true">Ⅱ</span><span id="pauseText">Pause</span>
+            </button>
+            <button class="button field-mode" id="fieldButton" type="button" aria-pressed="false" aria-label="Switch field to repel">
+              <span class="button-icon" id="fieldIcon" aria-hidden="true">◎</span><span id="fieldText">Attract field</span>
+            </button>
+            <button class="button" id="addButton" type="button" aria-label="Add twenty boids">
+              <span class="button-icon" aria-hidden="true">＋</span>Add 20
+            </button>
+            <button class="button" id="shuffleButton" type="button" aria-label="Reseed the flock">
+              <span class="button-icon" aria-hidden="true">↻</span>Reseed
+            </button>
+          </div>
+        </div>
+        <p class="stage-hint">Drag across the field to guide the flock. Switch to repel, or hold <kbd>Shift</kbd> / right-drag to push it away. <kbd>Space</kbd> pauses.</p>
+      </section>
+
+      <aside class="card side-panel" aria-label="Flock settings">
+        <section class="panel-section preset-section" aria-labelledby="preset-heading">
+          <div class="section-head"><h2 id="preset-heading">Starting pattern</h2><span>choose a mood</span></div>
+          <div class="presets" role="group" aria-label="Flock presets">
+            <button class="preset active" type="button" data-preset="murmuration" aria-pressed="true" aria-label="Murmuration preset, shortcut 1">
+              <svg class="preset-icon" viewBox="0 0 24 18" fill="none" aria-hidden="true"><path d="M2 12c4-8 14-9 20-5M4 16c5-5 11-6 17-4M8 3c4 1 8 4 10 8" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/><circle cx="5" cy="8" r="1.1" fill="currentColor"/><circle cx="13" cy="5" r="1.1" fill="currentColor"/><circle cx="19" cy="12" r="1.1" fill="currentColor"/></svg>
+              <span>Murmuration</span>
+            </button>
+            <button class="preset" type="button" data-preset="school" aria-pressed="false" aria-label="School preset, shortcut 2">
+              <svg class="preset-icon" viewBox="0 0 24 18" fill="none" aria-hidden="true"><path d="M4 4c5-3 12-2 16 2M3 9c6-2 12-1 18 2M5 14c5 1 10 0 14-2" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/><circle cx="8" cy="5" r="1" fill="currentColor"/><circle cx="15" cy="10" r="1" fill="currentColor"/><circle cx="10" cy="14" r="1" fill="currentColor"/></svg>
+              <span>School</span>
+            </button>
+            <button class="preset" type="button" data-preset="scatter" aria-pressed="false" aria-label="Scatter preset, shortcut 3">
+              <svg class="preset-icon" viewBox="0 0 24 18" fill="none" aria-hidden="true"><path d="m4 4 4 3m8-3-3 4m7 6-5-2M5 15l4-3" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/><circle cx="4" cy="4" r="1.2" fill="currentColor"/><circle cx="17" cy="3" r="1.2" fill="currentColor"/><circle cx="20" cy="14" r="1.2" fill="currentColor"/><circle cx="4" cy="15" r="1.2" fill="currentColor"/></svg>
+              <span>Scatter</span>
+            </button>
+          </div>
+        </section>
+
+        <section class="panel-section global-section" aria-labelledby="global-heading">
+          <div class="section-head"><h2 id="global-heading">Field settings</h2></div>
+          <div class="population-row">
+            <label for="population">Flock size</label><output id="populationValue" for="population">160</output>
+            <input id="population" type="range" min="40" max="260" step="10" value="160" aria-label="Flock size">
+          </div>
+          <div class="range-block" style="margin-top:16px">
+            <div class="range-title"><label for="speed">Flight speed</label><output id="speedValue" for="speed">58%</output></div>
+            <input id="speed" type="range" min="10" max="100" value="58" aria-label="Flight speed">
+          </div>
+          <div class="option-row">
+            <div class="option-copy"><strong>Light trails</strong><small>Leave a soft path behind the flock</small></div>
+            <label class="toggle" aria-label="Toggle light trails"><input id="trails" type="checkbox" checked><span class="toggle-track"></span></label>
+          </div>
+          <div class="boundary-choice" role="group" aria-label="Choose field boundaries">
+            <button type="button" data-boundary="wrap" aria-pressed="true">Wrap edges</button>
+            <button type="button" data-boundary="bounce" aria-pressed="false">Bounce off</button>
+          </div>
+        </section>
+
+        <section class="panel-section rules-section" aria-labelledby="rules-heading">
+          <div class="section-head"><h2 id="rules-heading">The three rules</h2><span>adjust the blend</span></div>
+          <div class="range-block">
+            <div class="range-title"><label for="separation">Separation</label><output id="separationValue" for="separation">62%</output></div>
+            <input id="separation" type="range" min="0" max="100" value="62" aria-label="Separation strength">
+            <p class="range-help">Keep a little space from nearby neighbors.</p>
+          </div>
+          <div class="range-block">
+            <div class="range-title"><label for="alignment">Alignment</label><output id="alignmentValue" for="alignment">68%</output></div>
+            <input id="alignment" type="range" min="0" max="100" value="68" aria-label="Alignment strength">
+            <p class="range-help">Turn in roughly the same direction.</p>
+          </div>
+          <div class="range-block">
+            <div class="range-title"><label for="cohesion">Cohesion</label><output id="cohesionValue" for="cohesion">46%</output></div>
+            <input id="cohesion" type="range" min="0" max="100" value="46" aria-label="Cohesion strength">
+            <p class="range-help">Drift toward the center of the group.</p>
+          </div>
+        </section>
+
+        <div class="field-note">
+          <p class="micro-label">Why it feels alive</p>
+          <p>Each boid follows only local neighbors. <strong>Alignment, cohesion, and separation</strong> are simple on their own; together, they make a flock.</p>
+        </div>
+      </aside>
+    </div>
+
+    <footer class="footer-note">
+      <span>No score, no destination—just a small system finding its shape.</span>
+      <span>Runs locally in this tab. No network, no data collection.</span>
+    </footer>
+  </main>
+
+  <script>
+    (() => {
+      'use strict';
+
+      const canvas = document.getElementById('flock');
+      const arena = document.getElementById('arena');
+      const context = canvas.getContext('2d', { alpha: false });
+      const pauseButton = document.getElementById('pauseButton');
+      const pauseIcon = document.getElementById('pauseIcon');
+      const pauseText = document.getElementById('pauseText');
+      const stateChip = document.getElementById('stateChip');
+      const stateLabel = document.getElementById('stateLabel');
+      const hudState = document.getElementById('hudState');
+      const fieldButton = document.getElementById('fieldButton');
+      const fieldText = document.getElementById('fieldText');
+      const fieldIcon = document.getElementById('fieldIcon');
+      const countLabel = document.getElementById('boidCount');
+      const presetButtons = Array.from(document.querySelectorAll('[data-preset]'));
+      const boundaryButtons = Array.from(document.querySelectorAll('[data-boundary]'));
+
+      const controls = {
+        population: document.getElementById('population'),
+        populationValue: document.getElementById('populationValue'),
+        speed: document.getElementById('speed'),
+        speedValue: document.getElementById('speedValue'),
+        separation: document.getElementById('separation'),
+        separationValue: document.getElementById('separationValue'),
+        alignment: document.getElementById('alignment'),
+        alignmentValue: document.getElementById('alignmentValue'),
+        cohesion: document.getElementById('cohesion'),
+        cohesionValue: document.getElementById('cohesionValue'),
+        trails: document.getElementById('trails')
+      };
+
+      let width = 0;
+      let height = 0;
+      let dpr = 1;
+      let background = null;
+      let boids = [];
+      let paused = false;
+      let boundary = 'wrap';
+      let preset = 'murmuration';
+      let lastTime = 0;
+      let pointerId = null;
+      let pointer = { x: 0, y: 0, inside: false, active: false, repel: false };
+      let fieldRepel = false;
+      let paintRequested = true;
+      const perceptionRadius = 88;
+      const separationRadius = 28;
+      const tau = Math.PI * 2;
+
+      const clamp = (value, min, max) => Math.max(min, Math.min(max, value));
+      const random = (min, max) => min + Math.random() * (max - min);
+      const read = (input) => Number(input.value) / 100;
+
+      function makeBoid(x, y, angle, speed = random(1.2, 2.2)) {
+        return {
+          x, y,
+          vx: Math.cos(angle) * speed,
+          vy: Math.sin(angle) * speed,
+          hue: random(157, 196),
+          size: random(2.2, 3.6)
+        };
+      }
+
+      function setPresetButtons() {
+        for (const button of presetButtons) {
+          const selected = button.dataset.preset === preset;
+          button.classList.toggle('active', selected);
+          button.setAttribute('aria-pressed', String(selected));
+        }
+      }
+
+      function markPresetCustom() {
+        preset = 'custom';
+        for (const button of presetButtons) {
+          button.classList.remove('active');
+          button.setAttribute('aria-pressed', 'false');
+        }
+      }
+
+      function updateOutputs() {
+        controls.populationValue.textContent = controls.population.value;
+        countLabel.textContent = boids.length.toLocaleString();
+        controls.speedValue.textContent = `${controls.speed.value}%`;
+        controls.separationValue.textContent = `${controls.separation.value}%`;
+        controls.alignmentValue.textContent = `${controls.alignment.value}%`;
+        controls.cohesionValue.textContent = `${controls.cohesion.value}%`;
+      }
+
+      function createFormation(name) {
+        if (!width || !height) return;
+        const count = Number(controls.population.value);
+        const centerX = width / 2;
+        const centerY = height / 2;
+        const radiusX = Math.min(width * 0.34, 250);
+        const radiusY = Math.min(height * 0.32, 175);
+        boids = [];
+
+        if (name === 'scatter') {
+          for (let i = 0; i < count; i++) {
+            const angle = random(0, tau);
+            boids.push(makeBoid(random(8, width - 8), random(8, height - 8), angle, random(1.7, 3.1)));
+          }
+          paintRequested = true;
+          updateOutputs();
+          return;
+        }
+
+        for (let i = 0; i < count; i++) {
+          const angle = (i / count) * tau + random(-0.13, 0.13);
+          const radial = Math.sqrt(Math.random());
+          let x = centerX + Math.cos(angle) * radiusX * radial;
+          let y = centerY + Math.sin(angle) * radiusY * radial;
+          let heading;
+          let speed;
+          if (name === 'school') {
+            x = centerX + random(-radiusX * 0.52, radiusX * 0.52);
+            y = centerY + random(-radiusY * 0.42, radiusY * 0.42);
+            heading = random(-0.18, 0.18);
+            speed = random(1.0, 1.8);
+          } else {
+            heading = angle + Math.PI / 2 + random(-0.34, 0.34);
+            speed = random(1.3, 2.5);
+          }
+          boids.push(makeBoid(clamp(x, 4, width - 4), clamp(y, 4, height - 4), heading, speed));
+        }
+        paintRequested = true;
+        updateOutputs();
+      }
+
+      function applyPreset(name) {
+        preset = name;
+        if (name === 'murmuration') {
+          controls.separation.value = '62';
+          controls.alignment.value = '68';
+          controls.cohesion.value = '46';
+          controls.speed.value = '58';
+        } else if (name === 'school') {
+          controls.separation.value = '72';
+          controls.alignment.value = '78';
+          controls.cohesion.value = '76';
+          controls.speed.value = '42';
+        } else if (name === 'scatter') {
+          controls.separation.value = '82';
+          controls.alignment.value = '30';
+          controls.cohesion.value = '18';
+          controls.speed.value = '74';
+        }
+        createFormation(name);
+        setPresetButtons();
+        updateOutputs();
+        paintRequested = true;
+      }
+
+      function resizeCanvas() {
+        const bounds = arena.getBoundingClientRect();
+        if (bounds.width < 80 || bounds.height < 80) return;
+        const nextWidth = bounds.width;
+        const nextHeight = bounds.height;
+        const oldWidth = width;
+        const oldHeight = height;
+        width = nextWidth;
+        height = nextHeight;
+        dpr = Math.min(window.devicePixelRatio || 1, 2);
+        canvas.width = Math.round(width * dpr);
+        canvas.height = Math.round(height * dpr);
+        context.setTransform(dpr, 0, 0, dpr, 0, 0);
+        context.imageSmoothingEnabled = true;
+
+        background = context.createLinearGradient(0, 0, 0, height);
+        background.addColorStop(0, '#0a1721');
+        background.addColorStop(.54, '#0a131d');
+        background.addColorStop(1, '#081019');
+
+        if (oldWidth > 0 && oldHeight > 0 && boids.length) {
+          const scaleX = width / oldWidth;
+          const scaleY = height / oldHeight;
+          for (const boid of boids) {
+            boid.x *= scaleX;
+            boid.y *= scaleY;
+          }
+        } else {
+          createFormation(preset);
+        }
+        drawBackground(true);
+        updateOutputs();
+        paintRequested = true;
+      }
+
+      function drawBackground(resetTrails = false) {
+        if (!width || !height) return;
+        const drawGrid = !controls.trails.checked || resetTrails;
+        if (!controls.trails.checked || resetTrails) {
+          context.fillStyle = background;
+          context.fillRect(0, 0, width, height);
+        } else {
+          context.fillStyle = 'rgba(8, 16, 25, 0.14)';
+          context.fillRect(0, 0, width, height);
+        }
+        if (!drawGrid) return;
+        context.save();
+        context.strokeStyle = 'rgba(158, 193, 205, 0.035)';
+        context.lineWidth = 1;
+        const spacing = 48;
+        context.beginPath();
+        for (let x = spacing; x < width; x += spacing) { context.moveTo(x, 0); context.lineTo(x, height); }
+        for (let y = spacing; y < height; y += spacing) { context.moveTo(0, y); context.lineTo(width, y); }
+        context.stroke();
+        context.restore();
+      }
+
+      function shortestDelta(delta, extent) {
+        if (boundary !== 'wrap') return delta;
+        if (delta > extent / 2) return delta - extent;
+        if (delta < -extent / 2) return delta + extent;
+        return delta;
+      }
+
+      function limitVector(x, y, max) {
+        const length = Math.hypot(x, y);
+        if (length > max && length > 0) return [x * max / length, y * max / length];
+        return [x, y];
+      }
+
+      function steering(averageX, averageY, boid, maxSpeed, maxForce) {
+        const length = Math.hypot(averageX, averageY);
+        if (length < 0.0001) return [0, 0];
+        const desiredX = averageX / length * maxSpeed;
+        const desiredY = averageY / length * maxSpeed;
+        return limitVector(desiredX - boid.vx, desiredY - boid.vy, maxForce);
+      }
+
+      function updateBoids(step) {
+        if (!boids.length || !width || !height) return;
+        const maxSpeed = 1.1 + read(controls.speed) * 3.25;
+        const maxForce = 0.052;
+        const separationWeight = read(controls.separation) * 2.25;
+        const alignmentWeight = read(controls.alignment) * 1.7;
+        const cohesionWeight = read(controls.cohesion) * 1.25;
+        const perceptionSq = perceptionRadius * perceptionRadius;
+        const separationSq = separationRadius * separationRadius;
+        const pointerRadius = 172;
+        const pointerRadiusSq = pointerRadius * pointerRadius;
+        const accelerations = new Array(boids.length);
+
+        for (let i = 0; i < boids.length; i++) {
+          const boid = boids[i];
+          let neighborCount = 0;
+          let alignX = 0, alignY = 0;
+          let centerX = 0, centerY = 0;
+          let separateX = 0, separateY = 0;
+
+          for (let j = 0; j < boids.length; j++) {
+            if (i === j) continue;
+            const other = boids[j];
+            const dx = shortestDelta(other.x - boid.x, width);
+            const dy = shortestDelta(other.y - boid.y, height);
+            const distanceSq = dx * dx + dy * dy;
+            if (distanceSq === 0 || distanceSq > perceptionSq) continue;
+            neighborCount++;
+            alignX += other.vx;
+            alignY += other.vy;
+            centerX += dx;
+            centerY += dy;
+            if (distanceSq < separationSq) {
+              const falloff = 1 / Math.max(distanceSq, 16);
+              separateX -= dx * falloff;
+              separateY -= dy * falloff;
+            }
+          }
+
+          let ax = 0, ay = 0;
+          if (neighborCount) {
+            const align = steering(alignX / neighborCount, alignY / neighborCount, boid, maxSpeed, maxForce);
+            const cohesion = steering(centerX / neighborCount, centerY / neighborCount, boid, maxSpeed, maxForce);
+            const separation = steering(separateX, separateY, boid, maxSpeed, maxForce);
+            ax += align[0] * alignmentWeight + cohesion[0] * cohesionWeight + separation[0] * separationWeight;
+            ay += align[1] * alignmentWeight + cohesion[1] * cohesionWeight + separation[1] * separationWeight;
+          }
+
+          if (pointer.active) {
+            const dx = shortestDelta(pointer.x - boid.x, width);
+            const dy = shortestDelta(pointer.y - boid.y, height);
+            const distanceSq = dx * dx + dy * dy;
+            if (distanceSq > 0 && distanceSq < pointerRadiusSq) {
+              const distance = Math.sqrt(distanceSq);
+              const force = (1 - distance / pointerRadius) * (pointer.repel ? -0.46 : 0.46);
+              ax += dx / distance * force;
+              ay += dy / distance * force;
+            }
+          }
+
+          accelerations[i] = limitVector(ax, ay, maxForce * 4.2);
+        }
+
+        for (let i = 0; i < boids.length; i++) {
+          const boid = boids[i];
+          const acceleration = accelerations[i];
+          boid.vx += acceleration[0] * step;
+          boid.vy += acceleration[1] * step;
+          let speed = Math.hypot(boid.vx, boid.vy);
+          if (speed > maxSpeed) {
+            boid.vx = boid.vx / speed * maxSpeed;
+            boid.vy = boid.vy / speed * maxSpeed;
+            speed = maxSpeed;
+          } else if (speed < 0.55) {
+            const angle = speed > 0.0001 ? Math.atan2(boid.vy, boid.vx) : random(0, tau);
+            boid.vx = Math.cos(angle) * 0.55;
+            boid.vy = Math.sin(angle) * 0.55;
+            speed = 0.55;
+          }
+          boid.x += boid.vx * step;
+          boid.y += boid.vy * step;
+
+          if (boundary === 'wrap') {
+            if (boid.x < 0) boid.x += width;
+            else if (boid.x >= width) boid.x -= width;
+            if (boid.y < 0) boid.y += height;
+            else if (boid.y >= height) boid.y -= height;
+          } else {
+            const margin = 10;
+            if (boid.x < margin) { boid.x = margin; boid.vx = Math.abs(boid.vx); }
+            else if (boid.x > width - margin) { boid.x = width - margin; boid.vx = -Math.abs(boid.vx); }
+            if (boid.y < margin) { boid.y = margin; boid.vy = Math.abs(boid.vy); }
+            else if (boid.y > height - margin) { boid.y = height - margin; boid.vy = -Math.abs(boid.vy); }
+          }
+        }
+      }
+
+      function drawBoids() {
+        if (!width || !height) return;
+        drawBackground(false);
+        if (pointer.inside) {
+          context.save();
+          const glow = context.createRadialGradient(pointer.x, pointer.y, 2, pointer.x, pointer.y, 86);
+          glow.addColorStop(0, pointer.active ? (pointer.repel ? 'rgba(173,154,240,.12)' : 'rgba(131,227,196,.12)') : 'rgba(131,227,196,.035)');
+          glow.addColorStop(1, 'rgba(131,227,196,0)');
+          context.fillStyle = glow;
+          context.beginPath();
+          context.arc(pointer.x, pointer.y, 86, 0, tau);
+          context.fill();
+          if (pointer.active) {
+            context.strokeStyle = pointer.repel ? 'rgba(185,166,250,.46)' : 'rgba(131,227,196,.46)';
+            context.lineWidth = 1;
+            context.setLineDash([3, 5]);
+            context.beginPath();
+            context.arc(pointer.x, pointer.y, 33, 0, tau);
+            context.stroke();
+          }
+          context.restore();
+        }
+
+        for (const boid of boids) {
+          const angle = Math.atan2(boid.vy, boid.vx);
+          const size = boid.size;
+          context.save();
+          context.translate(boid.x, boid.y);
+          context.rotate(angle);
+          context.shadowColor = `hsla(${boid.hue}, 82%, 69%, .62)`;
+          context.shadowBlur = 8;
+          context.fillStyle = `hsla(${boid.hue}, 77%, 74%, .91)`;
+          context.beginPath();
+          context.moveTo(size * 2.15, 0);
+          context.lineTo(-size * 1.1, -size * .88);
+          context.lineTo(-size * .55, 0);
+          context.lineTo(-size * 1.1, size * .88);
+          context.closePath();
+          context.fill();
+          context.shadowBlur = 0;
+          context.fillStyle = 'rgba(238,250,246,.52)';
+          context.beginPath();
+          context.arc(size * .32, 0, size * .35, 0, tau);
+          context.fill();
+          context.restore();
+        }
+      }
+
+      function setPaused(value) {
+        paused = Boolean(value);
+        stateChip.classList.toggle('paused', paused);
+        stateLabel.textContent = paused ? 'Paused' : 'In motion';
+        hudState.textContent = paused ? 'FIELD HELD' : 'LIVE FIELD';
+        pauseButton.setAttribute('aria-label', paused ? 'Resume flock' : 'Pause flock');
+        pauseIcon.textContent = paused ? '▶' : 'Ⅱ';
+        pauseText.textContent = paused ? 'Resume' : 'Pause';
+        lastTime = performance.now();
+        paintRequested = true;
+      }
+
+      function setBoundary(value) {
+        boundary = value;
+        for (const button of boundaryButtons) {
+          button.setAttribute('aria-pressed', String(button.dataset.boundary === boundary));
+        }
+      }
+
+      function setFieldMode(repel) {
+        fieldRepel = Boolean(repel);
+        fieldButton.setAttribute('aria-pressed', String(fieldRepel));
+        fieldButton.setAttribute('aria-label', fieldRepel ? 'Switch field to attract' : 'Switch field to repel');
+        fieldText.textContent = fieldRepel ? 'Repel field' : 'Attract field';
+        fieldIcon.textContent = fieldRepel ? '⊗' : '◎';
+        paintRequested = true;
+      }
+
+      function eventPoint(event) {
+        const rect = canvas.getBoundingClientRect();
+        if (!rect.width || !rect.height) return null;
+        return {
+          x: clamp((event.clientX - rect.left) * width / rect.width, 0, width),
+          y: clamp((event.clientY - rect.top) * height / rect.height, 0, height)
+        };
+      }
+
+      function changePopulation(value) {
+        const desired = Number(value);
+        if (desired < boids.length) boids.length = desired;
+        while (boids.length < desired) {
+          const angle = random(0, tau);
+          const centerX = width / 2;
+          const centerY = height / 2;
+          const spread = Math.min(width, height) * 0.32;
+          boids.push(makeBoid(clamp(centerX + random(-spread, spread), 2, width - 2), clamp(centerY + random(-spread, spread), 2, height - 2), angle));
+        }
+        updateOutputs();
+        markPresetCustom();
+        paintRequested = true;
+      }
+
+      for (const button of presetButtons) {
+        button.addEventListener('click', () => applyPreset(button.dataset.preset));
+      }
+      for (const button of boundaryButtons) {
+        button.addEventListener('click', () => setBoundary(button.dataset.boundary));
+      }
+      for (const key of ['separation', 'alignment', 'cohesion', 'speed']) {
+        controls[key].addEventListener('input', () => {
+          markPresetCustom();
+          updateOutputs();
+        });
+      }
+      controls.population.addEventListener('input', () => changePopulation(controls.population.value));
+      controls.trails.addEventListener('change', () => { drawBackground(true); paintRequested = true; });
+
+      pauseButton.addEventListener('click', () => setPaused(!paused));
+      document.getElementById('fieldButton').addEventListener('click', () => setFieldMode(!fieldRepel));
+      document.getElementById('shuffleButton').addEventListener('click', () => createFormation(preset === 'custom' ? 'murmuration' : preset));
+      document.getElementById('addButton').addEventListener('click', () => {
+        const limit = Number(controls.population.max);
+        for (let i = 0; i < 20 && boids.length < limit; i++) {
+          const angle = random(0, tau);
+          const x = pointer.inside ? pointer.x + random(-28, 28) : random(width * .25, width * .75);
+          const y = pointer.inside ? pointer.y + random(-28, 28) : random(height * .25, height * .75);
+          boids.push(makeBoid(clamp(x, 3, width - 3), clamp(y, 3, height - 3), angle));
+        }
+        controls.population.value = String(boids.length);
+        updateOutputs();
+        markPresetCustom();
+        paintRequested = true;
+      });
+
+      canvas.addEventListener('contextmenu', (event) => event.preventDefault());
+      canvas.addEventListener('pointerenter', (event) => {
+        const point = eventPoint(event);
+        if (point) { pointer.x = point.x; pointer.y = point.y; pointer.inside = true; paintRequested = true; }
+      });
+      canvas.addEventListener('pointerleave', () => {
+        if (pointerId === null) { pointer.inside = false; paintRequested = true; }
+      });
+      canvas.addEventListener('pointermove', (event) => {
+        const point = eventPoint(event);
+        if (!point) return;
+        pointer.x = point.x;
+        pointer.y = point.y;
+        pointer.inside = true;
+        if (pointerId === event.pointerId) pointer.active = true;
+        paintRequested = true;
+      });
+      canvas.addEventListener('pointerdown', (event) => {
+        if (event.button !== 0 && event.button !== 2) return;
+        const point = eventPoint(event);
+        if (!point) return;
+        event.preventDefault();
+        pointerId = event.pointerId;
+        pointer.x = point.x;
+        pointer.y = point.y;
+        pointer.inside = true;
+        pointer.active = true;
+        pointer.repel = event.button === 2 || event.shiftKey || fieldRepel;
+        if (canvas.setPointerCapture) canvas.setPointerCapture(event.pointerId);
+        paintRequested = true;
+      });
+      const stopPointer = (event) => {
+        if (pointerId !== event.pointerId) return;
+        pointerId = null;
+        pointer.active = false;
+        paintRequested = true;
+      };
+      canvas.addEventListener('pointerup', stopPointer);
+      canvas.addEventListener('pointercancel', stopPointer);
+      canvas.addEventListener('lostpointercapture', stopPointer);
+
+      window.addEventListener('keydown', (event) => {
+        const target = event.target;
+        if (target instanceof HTMLElement && (target.isContentEditable || ['INPUT', 'TEXTAREA', 'SELECT'].includes(target.tagName))) return;
+        if (event.code === 'Space') {
+          event.preventDefault();
+          setPaused(!paused);
+        } else if (event.key === '1') applyPreset('murmuration');
+        else if (event.key === '2') applyPreset('school');
+        else if (event.key === '3') applyPreset('scatter');
+        else if (event.key.toLowerCase() === 'r') createFormation(preset === 'custom' ? 'murmuration' : preset);
+      });
+
+      function frame(time) {
+        if (!lastTime) lastTime = time;
+        const delta = clamp(time - lastTime, 0, 40);
+        lastTime = time;
+        if (!paused && delta > 0) updateBoids(delta / (1000 / 60));
+        if (!paused || paintRequested) {
+          drawBoids();
+          paintRequested = false;
+        }
+        requestAnimationFrame(frame);
+      }
+
+      updateOutputs();
+      setPaused(false);
+      setFieldMode(false);
+      if ('ResizeObserver' in window) new ResizeObserver(resizeCanvas).observe(arena);
+      else window.addEventListener('resize', resizeCanvas);
+      requestAnimationFrame((time) => {
+        resizeCanvas();
+        lastTime = time || performance.now();
+        requestAnimationFrame(frame);
+      });
+    })();
+  </script>
+</body>
+</html>

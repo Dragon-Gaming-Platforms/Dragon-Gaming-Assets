@@ -1,0 +1,9 @@
+{
+  "name": "Boids Lab",
+  "desc": "Shape a living flock with alignment, cohesion, and separation. Tune the rules, shepherd the birds, and watch patterns emerge.",
+  "controls": "Drag to attract; use the field button or Shift/right-drag to repel. Space pauses; 1–3 selects a flock preset.",
+  "shelf": "Interactive Stories & Experiments",
+  "tags": ["simulation", "boids", "flocking", "physics", "experiments"],
+  "badge": "New",
+  "creator": "Dragon Gaming Platforms"
+}

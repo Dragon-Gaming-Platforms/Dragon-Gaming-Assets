@@ -400,3 +400,4 @@ never invent a license.
 | Pente | `games/pente/` | [OKSufi/PenteGame](https://github.com/OKSufi/PenteGame) | MIT — Entry point renamed from Index.html to index.html; cancel stale AI callbacks when restarting or returning to the menu. | 2026-10-17 |
 | Falling Sand Lab | `games/falling-sand-lab/` | Original build (Dragon Gaming Platforms) | Original work — MIT (custom simulation and code-drawn visuals; no third-party assets) | 2026-10-17 |
 | K1945 | `games/k1945/` | [bombzj/k1945](https://github.com/bombzj/k1945) | MIT — unmodified | 2026-10-17 |
+| Boids Lab | `games/boids-lab/` | Original build (Dragon Gaming Platforms) | Original work — MIT (custom flocking simulation and code-drawn visuals; no third-party assets) | 2026-10-17 |
