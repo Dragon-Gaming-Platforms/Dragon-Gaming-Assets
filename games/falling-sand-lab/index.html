@@ -1,0 +1,1142 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#0b1017">
+  <meta name="description" content="A quiet little pixel sandbox. Paint with the elements and see what happens.">
+  <title>Falling Sand Lab</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --ink: #f1f4f6;
+      --muted: #9ca8b7;
+      --subtle: #6f7c8d;
+      --line: rgba(177, 195, 214, .13);
+      --panel: rgba(18, 26, 36, .92);
+      --panel-raised: #182331;
+      --teal: #6fe0c1;
+      --teal-dark: #183c3b;
+      --amber: #f4bd65;
+      --sand: #e8bd70;
+      --water: #58b7e8;
+      --stone: #a7b1bc;
+      --wood: #ba7952;
+      --plant: #76d598;
+      --fire: #ff804c;
+      --oil: #caa956;
+      --lava: #ff5b3d;
+      --radius: 20px;
+      font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      font-synthesis: none;
+      text-rendering: optimizeLegibility;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      min-width: 320px;
+      min-height: 100vh;
+      margin: 0;
+      color: var(--ink);
+      background:
+        radial-gradient(ellipse at 12% 0%, rgba(31, 92, 91, .18), transparent 39rem),
+        radial-gradient(ellipse at 94% 34%, rgba(114, 69, 43, .13), transparent 32rem),
+        #0b1017;
+    }
+
+    button, input { font: inherit; }
+    button { color: inherit; }
+    button:focus-visible, input:focus-visible {
+      outline: 2px solid var(--teal);
+      outline-offset: 3px;
+    }
+
+    .page {
+      width: min(1280px, calc(100% - 48px));
+      margin: 0 auto;
+      padding: 30px 0 34px;
+    }
+
+    .masthead {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 24px;
+      margin-bottom: 24px;
+    }
+
+    .brand {
+      display: flex;
+      align-items: center;
+      gap: 15px;
+      min-width: 0;
+    }
+
+    .brand-mark {
+      display: grid;
+      place-items: center;
+      flex: 0 0 48px;
+      width: 48px;
+      height: 48px;
+      border: 1px solid rgba(111, 224, 193, .35);
+      border-radius: 15px;
+      background: linear-gradient(145deg, rgba(72, 153, 132, .25), rgba(24, 47, 53, .6));
+      box-shadow: inset 0 1px rgba(255,255,255,.07), 0 8px 28px rgba(0,0,0,.18);
+    }
+
+    .brand-mark svg { width: 27px; height: 27px; }
+    .brand-copy { min-width: 0; }
+    .eyebrow, .micro-label {
+      margin: 0;
+      color: var(--teal);
+      font-size: 10px;
+      font-weight: 800;
+      letter-spacing: .17em;
+      line-height: 1.35;
+      text-transform: uppercase;
+    }
+    h1 {
+      margin: 3px 0 0;
+      font-size: clamp(22px, 3vw, 30px);
+      font-weight: 720;
+      letter-spacing: -.045em;
+      line-height: 1.12;
+    }
+    .masthead-note {
+      max-width: 310px;
+      margin: 0;
+      color: var(--muted);
+      font-size: 13px;
+      line-height: 1.5;
+      text-align: right;
+    }
+
+    .workspace {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 284px;
+      align-items: stretch;
+      gap: 18px;
+    }
+
+    .card {
+      min-width: 0;
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      background: var(--panel);
+      box-shadow: 0 22px 70px rgba(0, 0, 0, .22), inset 0 1px rgba(255,255,255,.025);
+      backdrop-filter: blur(14px);
+    }
+
+    .stage-card { padding: 19px; }
+    .stage-heading {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 16px;
+      min-height: 48px;
+      margin: 0 2px 14px;
+    }
+    .stage-title { min-width: 0; }
+    .stage-title h2 {
+      margin: 3px 0 0;
+      font-size: 16px;
+      font-weight: 650;
+      letter-spacing: -.015em;
+    }
+    .live-state {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      flex: 0 0 auto;
+      padding: 8px 10px;
+      border: 1px solid var(--line);
+      border-radius: 999px;
+      color: #c4ced8;
+      background: rgba(255,255,255,.025);
+      font-size: 10px;
+      font-weight: 800;
+      letter-spacing: .12em;
+      text-transform: uppercase;
+    }
+    .status-dot {
+      width: 7px;
+      height: 7px;
+      border-radius: 50%;
+      background: var(--teal);
+      box-shadow: 0 0 10px rgba(111,224,193,.75);
+    }
+    .live-state.paused .status-dot {
+      background: var(--amber);
+      box-shadow: 0 0 10px rgba(244,189,101,.55);
+    }
+
+    .viewport {
+      position: relative;
+      height: clamp(320px, 57vh, 630px);
+      min-height: 320px;
+      overflow: hidden;
+      border: 1px solid rgba(174, 198, 220, .13);
+      border-radius: 14px;
+      background:
+        linear-gradient(135deg, rgba(23,36,50,.35), transparent 42%),
+        #0c121b;
+      cursor: crosshair;
+      touch-action: none;
+      isolation: isolate;
+    }
+    .viewport::after {
+      position: absolute;
+      z-index: 1;
+      pointer-events: none;
+      content: "";
+      inset: 0;
+      border-radius: inherit;
+      box-shadow: inset 0 0 80px rgba(2,6,12,.12);
+    }
+    canvas {
+      display: block;
+      width: 100%;
+      height: 100%;
+      image-rendering: pixelated;
+      image-rendering: crisp-edges;
+    }
+    .empty-note {
+      position: absolute;
+      z-index: 2;
+      inset: 0;
+      display: grid;
+      align-content: center;
+      justify-items: center;
+      gap: 9px;
+      padding: 24px;
+      color: rgba(202, 215, 226, .7);
+      text-align: center;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity .25s ease;
+    }
+    .empty-note.visible { opacity: 1; }
+    .empty-note svg { width: 34px; height: 34px; color: rgba(111,224,193,.7); }
+    .empty-note strong { color: #cbd5df; font-size: 14px; font-weight: 650; }
+    .empty-note span { max-width: 270px; font-size: 12px; line-height: 1.55; }
+
+    .stage-footer {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 12px 2px 0;
+      color: var(--subtle);
+      font-size: 11px;
+      line-height: 1.5;
+    }
+    .stage-footer kbd, .material kbd {
+      min-width: 21px;
+      padding: 2px 5px;
+      border: 1px solid rgba(198,211,224,.13);
+      border-radius: 5px;
+      color: #94a2b2;
+      background: rgba(255,255,255,.035);
+      font-family: inherit;
+      font-size: 10px;
+      text-align: center;
+    }
+    .keyboard-hint { white-space: nowrap; }
+    .world-count { color: #c0ccd6; font-variant-numeric: tabular-nums; white-space: nowrap; }
+
+    .side-card { display: flex; flex-direction: column; padding: 19px; }
+    .panel-section + .panel-section { margin-top: 21px; padding-top: 19px; border-top: 1px solid var(--line); }
+    .section-heading {
+      display: flex;
+      align-items: baseline;
+      justify-content: space-between;
+      gap: 10px;
+      margin-bottom: 12px;
+    }
+    .section-heading h2 {
+      margin: 0;
+      color: #e8edf1;
+      font-size: 13px;
+      font-weight: 700;
+      letter-spacing: -.01em;
+    }
+    .section-heading span { color: var(--subtle); font-size: 10px; }
+
+    .palette {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 7px;
+    }
+    .material {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      min-width: 0;
+      min-height: 39px;
+      padding: 0 8px;
+      border: 1px solid rgba(188,204,220,.1);
+      border-radius: 10px;
+      color: #aeb9c5;
+      background: rgba(255,255,255,.022);
+      cursor: pointer;
+      text-align: left;
+      transition: border-color .16s ease, background .16s ease, color .16s ease, transform .16s ease;
+    }
+    .material:hover { border-color: rgba(189,207,224,.27); background: rgba(255,255,255,.055); color: #eef3f6; transform: translateY(-1px); }
+    .material.selected {
+      border-color: rgba(111,224,193,.56);
+      color: #eef7f4;
+      background: linear-gradient(120deg, rgba(48,104,91,.24), rgba(30,58,59,.18));
+      box-shadow: inset 0 0 0 1px rgba(111,224,193,.07);
+    }
+    .material-name { min-width: 0; overflow: hidden; font-size: 11px; font-weight: 620; text-overflow: ellipsis; white-space: nowrap; }
+    .material kbd { margin-left: auto; }
+    .swatch {
+      flex: 0 0 10px;
+      width: 10px;
+      height: 10px;
+      border-radius: 3px;
+      background: var(--swatch);
+      box-shadow: 0 0 9px color-mix(in srgb, var(--swatch), transparent 66%);
+    }
+    .swatch.eraser {
+      display: grid;
+      place-items: center;
+      border: 1px dashed rgba(208,220,230,.5);
+      background: transparent;
+      box-shadow: none;
+    }
+    .swatch.eraser::after { width: 5px; height: 5px; border-radius: 50%; background: rgba(208,220,230,.75); content: ""; }
+
+    .brush-readout { color: var(--teal); font-size: 11px; font-variant-numeric: tabular-nums; }
+    .range-wrap { padding: 0 1px; }
+    input[type="range"] {
+      display: block;
+      width: 100%;
+      height: 16px;
+      margin: 0;
+      accent-color: var(--teal);
+      cursor: pointer;
+    }
+    .range-labels { display: flex; justify-content: space-between; margin-top: 4px; color: var(--subtle); font-size: 10px; }
+
+    .transport { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+    .control-button {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 7px;
+      min-height: 38px;
+      padding: 0 10px;
+      border: 1px solid rgba(192,208,222,.14);
+      border-radius: 10px;
+      color: #d6dfe7;
+      background: rgba(255,255,255,.035);
+      cursor: pointer;
+      font-size: 11px;
+      font-weight: 650;
+      transition: background .16s ease, border-color .16s ease, transform .16s ease;
+    }
+    .control-button:hover { border-color: rgba(192,208,222,.3); background: rgba(255,255,255,.075); transform: translateY(-1px); }
+    .control-button.primary { border-color: rgba(111,224,193,.24); color: #c5f5e8; background: rgba(48,112,96,.19); }
+    .control-button.primary:hover { border-color: rgba(111,224,193,.5); background: rgba(48,112,96,.31); }
+    .control-button.subtle { color: #9eabb8; }
+    .control-icon { font-size: 12px; line-height: 1; }
+
+    .chemistry {
+      margin-top: auto;
+      padding: 15px 13px 13px;
+      border: 1px solid rgba(111,224,193,.14);
+      border-radius: 13px;
+      background: linear-gradient(145deg, rgba(36,79,70,.18), rgba(22,37,47,.24));
+    }
+    .chemistry .micro-label { color: #7dcdb4; font-size: 9px; }
+    .chemistry p {
+      margin: 8px 0 0;
+      color: #a8b5c0;
+      font-size: 11px;
+      line-height: 1.65;
+    }
+    .chemistry strong { color: #d9e5e7; font-weight: 650; }
+
+    .bottom-line {
+      display: flex;
+      justify-content: space-between;
+      gap: 16px;
+      margin: 16px 3px 0;
+      color: #718092;
+      font-size: 10px;
+      letter-spacing: .025em;
+    }
+    .bottom-line span:last-child { text-align: right; }
+
+    @media (max-width: 950px) {
+      .workspace { grid-template-columns: minmax(0, 1fr); }
+      .side-card { display: grid; grid-template-columns: minmax(0, 1.25fr) minmax(190px, .75fr); column-gap: 22px; }
+      .side-card .panel-section + .panel-section { margin-top: 0; padding-top: 0; border-top: 0; }
+      .side-card .brush-section { grid-column: 2; grid-row: 1; }
+      .side-card .actions-section { grid-column: 2; grid-row: 2; margin-top: 16px; padding-top: 16px; border-top: 1px solid var(--line); }
+      .side-card .chemistry { grid-column: 1 / -1; margin-top: 17px; }
+      .side-card .palette-section { grid-column: 1; grid-row: 1 / span 2; }
+    }
+
+    @media (max-width: 600px) {
+      .page { width: min(100% - 24px, 520px); padding: 19px 0 24px; }
+      .masthead { align-items: flex-start; margin-bottom: 17px; }
+      .brand { gap: 11px; }
+      .brand-mark { flex-basis: 40px; width: 40px; height: 40px; border-radius: 13px; }
+      .brand-mark svg { width: 23px; height: 23px; }
+      .masthead-note { display: none; }
+      .stage-card { padding: 12px; border-radius: 16px; }
+      .stage-heading { min-height: 43px; margin: 0 2px 10px; }
+      .stage-title h2 { font-size: 14px; }
+      .live-state { gap: 6px; padding: 7px 8px; font-size: 9px; }
+      .viewport { height: clamp(320px, 52vh, 530px); min-height: 320px; border-radius: 11px; }
+      .stage-footer { align-items: flex-start; flex-direction: column; gap: 5px; padding-top: 9px; font-size: 10px; }
+      .side-card { grid-template-columns: 1fr; gap: 0; padding: 15px; border-radius: 16px; }
+      .side-card .palette-section, .side-card .brush-section, .side-card .actions-section, .side-card .chemistry { grid-column: 1; grid-row: auto; }
+      .side-card .brush-section { margin-top: 18px !important; padding-top: 17px !important; border-top: 1px solid var(--line) !important; }
+      .side-card .actions-section { margin-top: 17px !important; padding-top: 17px !important; border-top: 1px solid var(--line) !important; }
+      .side-card .chemistry { margin-top: 17px; }
+      .material { min-height: 41px; }
+      .bottom-line { flex-direction: column; gap: 4px; margin-top: 12px; }
+      .bottom-line span:last-child { text-align: left; }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { scroll-behavior: auto !important; transition-duration: .01ms !important; }
+    }
+  </style>
+</head>
+<body>
+  <main class="page">
+    <header class="masthead">
+      <div class="brand">
+        <div class="brand-mark" aria-hidden="true">
+          <svg viewBox="0 0 32 32" fill="none">
+            <path d="M16 3.5 18.7 12l8.8 2.8-8.8 2.8L16 26l-2.7-8.4-8.8-2.8 8.8-2.8L16 3.5Z" stroke="#79e1c3" stroke-width="1.5" stroke-linejoin="round"/>
+            <circle cx="24.5" cy="7.5" r="1.5" fill="#f3bd68"/>
+            <circle cx="7" cy="24" r="1" fill="#f3bd68"/>
+          </svg>
+        </div>
+        <div class="brand-copy">
+          <p class="eyebrow">A tiny physics playground</p>
+          <h1>Falling Sand Lab</h1>
+        </div>
+      </div>
+      <p class="masthead-note">A quiet little world made of pixels.<br>Drop in a few elements and see what happens.</p>
+    </header>
+
+    <div class="workspace">
+      <section class="card stage-card" aria-labelledby="world-heading">
+        <div class="stage-heading">
+          <div class="stage-title">
+            <p class="micro-label">Your world</p>
+            <h2 id="world-heading">An experiment in motion</h2>
+          </div>
+          <div class="live-state" id="liveState" aria-live="polite">
+            <span class="status-dot" aria-hidden="true"></span>
+            <span id="stateText">Running</span>
+          </div>
+        </div>
+        <div class="viewport" id="viewport">
+          <canvas id="world" aria-label="Interactive falling sand simulation. Click or drag to place the selected material."></canvas>
+          <div class="empty-note" id="emptyNote" aria-hidden="true">
+            <svg viewBox="0 0 36 36" fill="none" aria-hidden="true">
+              <path d="M18 4v28M4 18h28M8.1 8.1l19.8 19.8m0-19.8L8.1 27.9" stroke="currentColor" stroke-width="1.2" stroke-linecap="round"/>
+              <circle cx="18" cy="18" r="5" stroke="currentColor" stroke-width="1.2"/>
+            </svg>
+            <strong>A blank little world</strong>
+            <span>Choose an element, then click or drag to start your experiment.</span>
+          </div>
+        </div>
+        <div class="stage-footer">
+          <span>Click or drag to paint <span aria-hidden="true">·</span> Right-click to erase</span>
+          <span class="keyboard-hint"><kbd>Space</kbd> pause <span aria-hidden="true">·</span> <kbd>1–8</kbd> elements</span>
+          <span class="world-count" id="worldCount">0 particles</span>
+        </div>
+      </section>
+
+      <aside class="card side-card" aria-label="Sandbox controls">
+        <section class="panel-section palette-section" aria-labelledby="palette-heading">
+          <div class="section-heading">
+            <h2 id="palette-heading">Elements</h2>
+            <span>pick one to paint</span>
+          </div>
+          <div class="palette" id="palette" role="group" aria-label="Choose an element">
+            <button class="material selected" type="button" data-type="1" aria-pressed="true" aria-label="Sand, shortcut 1">
+              <span class="swatch" style="--swatch:var(--sand)"></span><span class="material-name">Sand</span><kbd>1</kbd>
+            </button>
+            <button class="material" type="button" data-type="2" aria-pressed="false" aria-label="Water, shortcut 2">
+              <span class="swatch" style="--swatch:var(--water)"></span><span class="material-name">Water</span><kbd>2</kbd>
+            </button>
+            <button class="material" type="button" data-type="3" aria-pressed="false" aria-label="Stone, shortcut 3">
+              <span class="swatch" style="--swatch:var(--stone)"></span><span class="material-name">Stone</span><kbd>3</kbd>
+            </button>
+            <button class="material" type="button" data-type="4" aria-pressed="false" aria-label="Wood, shortcut 4">
+              <span class="swatch" style="--swatch:var(--wood)"></span><span class="material-name">Wood</span><kbd>4</kbd>
+            </button>
+            <button class="material" type="button" data-type="5" aria-pressed="false" aria-label="Plant, shortcut 5">
+              <span class="swatch" style="--swatch:var(--plant)"></span><span class="material-name">Plant</span><kbd>5</kbd>
+            </button>
+            <button class="material" type="button" data-type="6" aria-pressed="false" aria-label="Fire, shortcut 6">
+              <span class="swatch" style="--swatch:var(--fire)"></span><span class="material-name">Fire</span><kbd>6</kbd>
+            </button>
+            <button class="material" type="button" data-type="7" aria-pressed="false" aria-label="Oil, shortcut 7">
+              <span class="swatch" style="--swatch:var(--oil)"></span><span class="material-name">Oil</span><kbd>7</kbd>
+            </button>
+            <button class="material" type="button" data-type="8" aria-pressed="false" aria-label="Lava, shortcut 8">
+              <span class="swatch" style="--swatch:var(--lava)"></span><span class="material-name">Lava</span><kbd>8</kbd>
+            </button>
+            <button class="material" type="button" data-type="0" aria-pressed="false" aria-label="Eraser, shortcut E">
+              <span class="swatch eraser"></span><span class="material-name">Eraser</span><kbd>E</kbd>
+            </button>
+          </div>
+        </section>
+
+        <section class="panel-section brush-section" aria-labelledby="brush-heading">
+          <div class="section-heading">
+            <h2 id="brush-heading">Brush size</h2>
+            <span class="brush-readout" id="brushReadout">5 cells</span>
+          </div>
+          <div class="range-wrap">
+            <input id="brushSize" type="range" min="1" max="15" value="5" aria-label="Brush size">
+            <div class="range-labels"><span>Fine</span><span>Broad</span></div>
+          </div>
+        </section>
+
+        <section class="panel-section actions-section" aria-label="World controls">
+          <div class="section-heading">
+            <h2>Take your time</h2>
+            <span>no score, no rush</span>
+          </div>
+          <div class="transport">
+            <button class="control-button primary" id="pauseButton" type="button" aria-label="Pause simulation">
+              <span class="control-icon" id="pauseIcon" aria-hidden="true">Ⅱ</span><span id="pauseLabel">Pause</span>
+            </button>
+            <button class="control-button" id="stepButton" type="button" aria-label="Advance simulation one step">
+              <span class="control-icon" aria-hidden="true">›</span>Step
+            </button>
+            <button class="control-button" id="sampleButton" type="button" aria-label="Load sample world">
+              <span class="control-icon" aria-hidden="true">✦</span>Sample world
+            </button>
+            <button class="control-button subtle" id="clearButton" type="button" aria-label="Clear the world">
+              <span class="control-icon" aria-hidden="true">↺</span>Clear
+            </button>
+          </div>
+        </section>
+
+        <div class="chemistry" aria-label="Element interactions">
+          <p class="micro-label">A few things to try</p>
+          <p><strong>Sand</strong> tumbles through water. <strong>Fire</strong> catches wood and plants. <strong>Water</strong> cools lava into stone. Give plants a little water and room to grow.</p>
+        </div>
+      </aside>
+    </div>
+
+    <footer class="bottom-line">
+      <span>Made for curiosity. Best played with a little patience.</span>
+      <span>Everything runs right here in your browser.</span>
+    </footer>
+  </main>
+
+  <script>
+    (() => {
+      'use strict';
+
+      const TYPE = {
+        EMPTY: 0,
+        SAND: 1,
+        WATER: 2,
+        STONE: 3,
+        WOOD: 4,
+        PLANT: 5,
+        FIRE: 6,
+        OIL: 7,
+        LAVA: 8,
+        SMOKE: 9,
+        STEAM: 10
+      };
+
+      const paletteButtons = Array.from(document.querySelectorAll('.material'));
+      const viewport = document.getElementById('viewport');
+      const canvas = document.getElementById('world');
+      const context = canvas.getContext('2d', { alpha: false, desynchronized: true });
+      const liveState = document.getElementById('liveState');
+      const stateText = document.getElementById('stateText');
+      const worldCount = document.getElementById('worldCount');
+      const emptyNote = document.getElementById('emptyNote');
+      const brushSizeInput = document.getElementById('brushSize');
+      const brushReadout = document.getElementById('brushReadout');
+      const pauseButton = document.getElementById('pauseButton');
+      const pauseIcon = document.getElementById('pauseIcon');
+      const pauseLabel = document.getElementById('pauseLabel');
+
+      const colors = {
+        [TYPE.EMPTY]: [[11, 17, 26], [12, 19, 29], [13, 20, 30], [10, 16, 25]],
+        [TYPE.SAND]: [[226, 177, 96], [241, 194, 113], [213, 160, 81], [233, 184, 102]],
+        [TYPE.WATER]: [[57, 157, 207], [70, 179, 224], [45, 139, 193], [88, 187, 226]],
+        [TYPE.STONE]: [[112, 128, 145], [139, 150, 163], [97, 112, 129], [158, 166, 173]],
+        [TYPE.WOOD]: [[141, 84, 53], [169, 105, 66], [125, 73, 50], [187, 119, 74]],
+        [TYPE.PLANT]: [[60, 154, 104], [77, 184, 119], [51, 135, 92], [102, 202, 126]],
+        [TYPE.FIRE]: [[255, 104, 51], [255, 143, 58], [242, 76, 45], [255, 183, 73]],
+        [TYPE.OIL]: [[125, 105, 48], [160, 132, 57], [106, 91, 44], [183, 148, 63]],
+        [TYPE.LAVA]: [[221, 63, 40], [250, 91, 43], [184, 45, 36], [255, 130, 49]],
+        [TYPE.SMOKE]: [[91, 105, 117], [111, 122, 132], [76, 90, 103], [129, 137, 144]],
+        [TYPE.STEAM]: [[147, 182, 194], [170, 201, 210], [126, 165, 181], [192, 213, 216]]
+      };
+
+      const cardinal = [[0, -1], [1, 0], [0, 1], [-1, 0]];
+      const around = [[-1, -1], [0, -1], [1, -1], [-1, 0], [1, 0], [-1, 1], [0, 1], [1, 1]];
+      let columns = 0;
+      let rows = 0;
+      let cells = new Uint8Array(0);
+      let age = new Uint8Array(0);
+      let shade = new Uint8Array(0);
+      let lastMoved = new Uint32Array(0);
+      let image = null;
+      let tick = 0;
+      let brushSize = Number(brushSizeInput.value);
+      let selectedType = TYPE.SAND;
+      let paused = false;
+      let activePointer = null;
+      let strokeType = selectedType;
+      let previousPoint = null;
+      let needsRender = true;
+      let accumulator = 0;
+      let previousTime = 0;
+      let hasInitialized = false;
+
+      const randInt = (limit) => Math.floor(Math.random() * limit);
+      const randomLife = (min, max) => min + randInt(max - min + 1);
+      const clamp = (value, min, max) => Math.max(min, Math.min(max, value));
+
+      function setCell(index, type, lifetime = 0) {
+        if (index < 0 || index >= cells.length) return;
+        cells[index] = type;
+        age[index] = lifetime;
+        shade[index] = randInt(256);
+        lastMoved[index] = tick;
+      }
+
+      function moveCell(from, to, swap = false) {
+        if (from < 0 || to < 0 || from >= cells.length || to >= cells.length) return false;
+        const movingType = cells[from];
+        const movingAge = age[from];
+        const movingShade = shade[from];
+        if (swap) {
+          cells[from] = cells[to];
+          age[from] = age[to];
+          shade[from] = shade[to];
+          lastMoved[from] = tick;
+        } else {
+          cells[from] = TYPE.EMPTY;
+          age[from] = 0;
+        }
+        cells[to] = movingType;
+        age[to] = movingAge;
+        shade[to] = movingShade;
+        lastMoved[to] = tick;
+        needsRender = true;
+        return true;
+      }
+
+      function allocateWorld(nextColumns, nextRows) {
+        const nextLength = nextColumns * nextRows;
+        const nextCells = new Uint8Array(nextLength);
+        const nextAge = new Uint8Array(nextLength);
+        const nextShade = new Uint8Array(nextLength);
+        const nextLastMoved = new Uint32Array(nextLength);
+        for (let index = 0; index < nextLength; index++) nextShade[index] = randInt(256);
+
+        if (columns > 0 && rows > 0) {
+          const shiftX = Math.floor((nextColumns - columns) / 2);
+          const shiftY = Math.floor((nextRows - rows) / 2);
+          const oldStartX = Math.max(0, -shiftX);
+          const oldStartY = Math.max(0, -shiftY);
+          const oldEndX = Math.min(columns, nextColumns - shiftX);
+          const oldEndY = Math.min(rows, nextRows - shiftY);
+          for (let y = oldStartY; y < oldEndY; y++) {
+            for (let x = oldStartX; x < oldEndX; x++) {
+              const oldIndex = y * columns + x;
+              const newIndex = (y + shiftY) * nextColumns + x + shiftX;
+              nextCells[newIndex] = cells[oldIndex];
+              nextAge[newIndex] = age[oldIndex];
+              nextShade[newIndex] = shade[oldIndex];
+            }
+          }
+        }
+
+        columns = nextColumns;
+        rows = nextRows;
+        cells = nextCells;
+        age = nextAge;
+        shade = nextShade;
+        lastMoved = nextLastMoved;
+        canvas.width = columns;
+        canvas.height = rows;
+        context.imageSmoothingEnabled = false;
+        image = context.createImageData(columns, rows);
+        needsRender = true;
+      }
+
+      function resizeWorld() {
+        const bounds = viewport.getBoundingClientRect();
+        if (bounds.width < 80 || bounds.height < 80) return;
+        const pitch = clamp(Math.floor(Math.min(bounds.width / 150, bounds.height / 92)), 3, 7);
+        const nextColumns = clamp(Math.floor(bounds.width / pitch), 90, 260);
+        const nextRows = clamp(Math.floor(bounds.height / pitch), 56, 190);
+        if (nextColumns === columns && nextRows === rows) return;
+        allocateWorld(nextColumns, nextRows);
+        if (!hasInitialized) {
+          hasInitialized = true;
+          seedSample();
+        }
+        updateReadout();
+      }
+
+      function blankWorld() {
+        cells.fill(TYPE.EMPTY);
+        age.fill(0);
+        lastMoved.fill(0);
+        for (let index = 0; index < shade.length; index++) shade[index] = randInt(256);
+        tick = 0;
+        accumulator = 0;
+        needsRender = true;
+        updateReadout();
+      }
+
+      function put(x, y, type) {
+        if (x < 0 || x >= columns || y < 0 || y >= rows) return;
+        const index = y * columns + x;
+        cells[index] = type;
+        age[index] = 0;
+        shade[index] = randInt(256);
+      }
+
+      function seedSample() {
+        blankWorld();
+        if (columns < 40 || rows < 30) return;
+        const floor = rows - 5;
+        const leftEdge = 4;
+        const rightEdge = columns - 5;
+
+        for (let y = floor; y < rows; y++) {
+          for (let x = leftEdge; x <= rightEdge; x++) put(x, y, TYPE.STONE);
+        }
+
+        // Two shallow sand banks make a little room for a pool in the middle.
+        const hill = (x, center, radius, peak) => Math.max(0, Math.round(peak * (1 - Math.pow((x - center) / radius, 2))));
+        const leftCenter = Math.floor(columns * 0.20);
+        const leftRadius = Math.floor(columns * 0.16);
+        const rightCenter = Math.floor(columns * 0.82);
+        const rightRadius = Math.floor(columns * 0.12);
+        for (let x = 6; x < Math.floor(columns * 0.37); x++) {
+          const height = hill(x, leftCenter, leftRadius, Math.floor(rows * 0.18));
+          for (let dy = 1; dy <= height; dy++) put(x, floor - dy, TYPE.SAND);
+        }
+        for (let x = Math.floor(columns * 0.65); x < columns - 6; x++) {
+          const height = hill(x, rightCenter, rightRadius, Math.floor(rows * 0.14));
+          for (let dy = 1; dy <= height; dy++) put(x, floor - dy, TYPE.SAND);
+        }
+
+        const poolLeft = Math.floor(columns * 0.41);
+        const poolRight = Math.floor(columns * 0.61);
+        const poolTop = floor - Math.max(8, Math.floor(rows * 0.11));
+        for (let y = poolTop; y < floor; y++) {
+          put(poolLeft, y, TYPE.STONE);
+          put(poolLeft + 1, y, TYPE.STONE);
+          put(poolRight - 1, y, TYPE.STONE);
+          put(poolRight, y, TYPE.STONE);
+        }
+        for (let y = poolTop + 2; y < floor; y++) {
+          for (let x = poolLeft + 2; x < poolRight - 1; x++) put(x, y, TYPE.WATER);
+        }
+
+        // A small tree, with a few living shoots near the waterline.
+        const trunkX = Math.floor(columns * 0.76);
+        const trunkBase = floor - hill(trunkX, rightCenter, rightRadius, Math.floor(rows * 0.14));
+        for (let y = trunkBase - 13; y < trunkBase; y++) put(trunkX, y, TYPE.WOOD);
+        for (let y = trunkBase - 17; y <= trunkBase - 12; y++) {
+          const spread = y < trunkBase - 15 ? 2 : 4;
+          for (let x = trunkX - spread; x <= trunkX + spread; x++) {
+            if (Math.abs(x - trunkX) + Math.abs(y - (trunkBase - 14)) < 7 && Math.random() > 0.16) put(x, y, TYPE.PLANT);
+          }
+        }
+        const sproutX = poolLeft - 2;
+        put(sproutX, floor - 1, TYPE.PLANT);
+        put(sproutX, floor - 2, TYPE.PLANT);
+        put(sproutX + 1, floor - 3, TYPE.PLANT);
+        needsRender = true;
+        updateReadout();
+      }
+
+      function selectMaterial(type) {
+        selectedType = type;
+        for (const button of paletteButtons) {
+          const selected = Number(button.dataset.type) === type;
+          button.classList.toggle('selected', selected);
+          button.setAttribute('aria-pressed', String(selected));
+        }
+      }
+
+      function setPaused(value) {
+        paused = Boolean(value);
+        liveState.classList.toggle('paused', paused);
+        stateText.textContent = paused ? 'Paused' : 'Running';
+        pauseButton.setAttribute('aria-label', paused ? 'Resume simulation' : 'Pause simulation');
+        pauseIcon.textContent = paused ? '▶' : 'Ⅱ';
+        pauseLabel.textContent = paused ? 'Resume' : 'Pause';
+        if (!paused) previousTime = performance.now();
+        needsRender = true;
+      }
+
+      function updateBrushReadout() {
+        brushSize = Number(brushSizeInput.value);
+        brushReadout.textContent = `${brushSize} ${brushSize === 1 ? 'cell' : 'cells'}`;
+      }
+
+      function updateReadout() {
+        let occupied = 0;
+        for (let i = 0; i < cells.length; i++) if (cells[i] !== TYPE.EMPTY) occupied++;
+        worldCount.textContent = `${occupied.toLocaleString()} ${occupied === 1 ? 'particle' : 'particles'}`;
+        emptyNote.classList.toggle('visible', occupied === 0);
+        emptyNote.setAttribute('aria-hidden', String(occupied !== 0));
+      }
+
+      function getPoint(event) {
+        const bounds = canvas.getBoundingClientRect();
+        if (bounds.width <= 0 || bounds.height <= 0) return null;
+        return {
+          x: clamp(Math.floor((event.clientX - bounds.left) * columns / bounds.width), 0, columns - 1),
+          y: clamp(Math.floor((event.clientY - bounds.top) * rows / bounds.height), 0, rows - 1)
+        };
+      }
+
+      function paintCircle(cx, cy, type) {
+        const radius = (brushSize - 1) / 2;
+        const reach = Math.ceil(radius);
+        for (let dy = -reach; dy <= reach; dy++) {
+          for (let dx = -reach; dx <= reach; dx++) {
+            if (dx * dx + dy * dy > radius * radius + 0.55) continue;
+            const x = cx + dx;
+            const y = cy + dy;
+            if (x < 0 || x >= columns || y < 0 || y >= rows) continue;
+            const index = y * columns + x;
+            cells[index] = type;
+            age[index] = type === TYPE.FIRE ? randomLife(50, 100) : 0;
+            shade[index] = randInt(256);
+            lastMoved[index] = tick;
+          }
+        }
+        needsRender = true;
+      }
+
+      function paintLine(from, to, type) {
+        if (!from || !to) return;
+        const dx = to.x - from.x;
+        const dy = to.y - from.y;
+        const steps = Math.max(Math.abs(dx), Math.abs(dy), 1);
+        for (let step = 0; step <= steps; step++) {
+          const ratio = step / steps;
+          paintCircle(Math.round(from.x + dx * ratio), Math.round(from.y + dy * ratio), type);
+        }
+      }
+
+      function touchIndex(x, y) {
+        if (x < 0 || y < 0 || x >= columns || y >= rows) return -1;
+        return y * columns + x;
+      }
+
+      function moveGranular(index, x, y) {
+        if (y + 1 >= rows) return false;
+        const below = index + columns;
+        if (cells[below] === TYPE.EMPTY) return moveCell(index, below);
+        if (cells[below] === TYPE.WATER) return moveCell(index, below, true);
+        const first = Math.random() < 0.5 ? -1 : 1;
+        for (const dx of [first, -first]) {
+          const target = touchIndex(x + dx, y + 1);
+          if (target < 0) continue;
+          if (cells[target] === TYPE.EMPTY) return moveCell(index, target);
+          if (cells[target] === TYPE.WATER) return moveCell(index, target, true);
+        }
+        return false;
+      }
+
+      function findAdjacent(x, y, type, diagonal = true) {
+        const directions = diagonal ? around : cardinal;
+        for (const [dx, dy] of directions) {
+          const index = touchIndex(x + dx, y + dy);
+          if (index >= 0 && cells[index] === type) return index;
+        }
+        return -1;
+      }
+
+      function reactWater(index, x, y) {
+        const lava = findAdjacent(x, y, TYPE.LAVA, true);
+        if (lava >= 0) {
+          setCell(lava, TYPE.STONE);
+          setCell(index, TYPE.STEAM, randomLife(42, 74));
+          return true;
+        }
+        const fire = findAdjacent(x, y, TYPE.FIRE, true);
+        if (fire >= 0) setCell(fire, TYPE.STEAM, randomLife(35, 60));
+        return false;
+      }
+
+      function moveLiquid(index, x, y, kind) {
+        const belowY = y + 1;
+        if (belowY < rows) {
+          const below = index + columns;
+          if (cells[below] === TYPE.EMPTY) return moveCell(index, below);
+          if (kind === TYPE.WATER && cells[below] === TYPE.OIL) return moveCell(index, below, true);
+          if (kind === TYPE.OIL && cells[below] === TYPE.WATER && Math.random() < 0.35) return moveCell(index, below, true);
+          const first = Math.random() < 0.5 ? -1 : 1;
+          for (const dx of [first, -first]) {
+            const target = touchIndex(x + dx, belowY);
+            if (target < 0) continue;
+            if (cells[target] === TYPE.EMPTY) return moveCell(index, target);
+            if (kind === TYPE.WATER && cells[target] === TYPE.OIL) return moveCell(index, target, true);
+          }
+        }
+        const first = Math.random() < 0.5 ? -1 : 1;
+        for (const dx of [first, -first]) {
+          const target = touchIndex(x + dx, y);
+          if (target < 0 || cells[target] !== TYPE.EMPTY) continue;
+          if (Math.random() < (kind === TYPE.LAVA ? 0.12 : kind === TYPE.OIL ? 0.42 : 0.72)) {
+            return moveCell(index, target);
+          }
+        }
+        return false;
+      }
+
+      function igniteAround(x, y, fromLava = false) {
+        for (const [dx, dy] of around) {
+          const target = touchIndex(x + dx, y + dy);
+          if (target < 0) continue;
+          const type = cells[target];
+          if (type !== TYPE.WOOD && type !== TYPE.PLANT && type !== TYPE.OIL) continue;
+          const chance = type === TYPE.OIL ? (fromLava ? 0.18 : 0.09) : type === TYPE.WOOD ? (fromLava ? 0.009 : 0.006) : 0.012;
+          if (Math.random() < chance) setCell(target, TYPE.FIRE, randomLife(52, 105));
+        }
+      }
+
+      function updateFire(index, x, y) {
+        const water = findAdjacent(x, y, TYPE.WATER, true);
+        if (water >= 0) {
+          setCell(index, TYPE.STEAM, randomLife(38, 66));
+          return;
+        }
+        igniteAround(x, y);
+        if (age[index] > 0) age[index]--;
+        if (age[index] === 0) {
+          if (Math.random() < 0.55) setCell(index, TYPE.SMOKE, randomLife(22, 45));
+          else setCell(index, TYPE.EMPTY);
+          return;
+        }
+        if (y > 0 && cells[index - columns] === TYPE.EMPTY && Math.random() < 0.14) {
+          moveCell(index, index - columns);
+        }
+      }
+
+      function updatePlant(index, x, y) {
+        let waterIndex = -1;
+        for (const [dx, dy] of around) {
+          const target = touchIndex(x + dx, y + dy);
+          if (target >= 0 && cells[target] === TYPE.WATER) { waterIndex = target; break; }
+        }
+        if (waterIndex < 0 || Math.random() > 0.008) return;
+        const candidates = [[0, -1], [-1, -1], [1, -1], [-1, 0], [1, 0]];
+        const offset = randInt(candidates.length);
+        for (let n = 0; n < candidates.length; n++) {
+          const [dx, dy] = candidates[(offset + n) % candidates.length];
+          const target = touchIndex(x + dx, y + dy);
+          if (target >= 0 && cells[target] === TYPE.EMPTY) {
+            setCell(target, TYPE.PLANT);
+            if (Math.random() < 0.11) setCell(waterIndex, TYPE.EMPTY);
+            return;
+          }
+        }
+      }
+
+      function updateVapor(index, x, y, type) {
+        if (age[index] > 0) age[index]--;
+        if (age[index] === 0) {
+          setCell(index, TYPE.EMPTY);
+          return;
+        }
+        const riseChance = type === TYPE.STEAM ? 0.68 : 0.55;
+        if (y > 0 && cells[index - columns] === TYPE.EMPTY && Math.random() < riseChance) {
+          moveCell(index, index - columns);
+          return;
+        }
+        const first = Math.random() < 0.5 ? -1 : 1;
+        for (const dx of [first, -first]) {
+          const target = touchIndex(x + dx, y);
+          if (target >= 0 && cells[target] === TYPE.EMPTY && Math.random() < 0.22) {
+            moveCell(index, target);
+            return;
+          }
+        }
+      }
+
+      function updateLava(index, x, y) {
+        const water = findAdjacent(x, y, TYPE.WATER, true);
+        if (water >= 0) {
+          setCell(index, TYPE.STONE);
+          setCell(water, TYPE.STEAM, randomLife(42, 74));
+          return;
+        }
+        igniteAround(x, y, true);
+        if (tick % 2 === 0 || Math.random() < 0.18) moveLiquid(index, x, y, TYPE.LAVA);
+      }
+
+      function updateWorld() {
+        if (!cells.length) return;
+        tick++;
+        for (let y = rows - 1; y >= 0; y--) {
+          const reverse = (y + tick) % 2 === 1;
+          for (let step = 0; step < columns; step++) {
+            const x = reverse ? columns - 1 - step : step;
+            const index = y * columns + x;
+            const type = cells[index];
+            if (type === TYPE.EMPTY || lastMoved[index] === tick) continue;
+
+            if (type === TYPE.SAND) {
+              moveGranular(index, x, y);
+            } else if (type === TYPE.WATER) {
+              if (!reactWater(index, x, y)) moveLiquid(index, x, y, TYPE.WATER);
+            } else if (type === TYPE.OIL) {
+              const above = y > 0 ? index - columns : -1;
+              if (above >= 0 && cells[above] === TYPE.WATER && Math.random() < 0.48) moveCell(index, above, true);
+              else moveLiquid(index, x, y, TYPE.OIL);
+            } else if (type === TYPE.FIRE) {
+              updateFire(index, x, y);
+            } else if (type === TYPE.PLANT) {
+              updatePlant(index, x, y);
+            } else if (type === TYPE.LAVA) {
+              updateLava(index, x, y);
+            } else if (type === TYPE.STEAM || type === TYPE.SMOKE) {
+              updateVapor(index, x, y, type);
+            }
+          }
+        }
+        needsRender = true;
+      }
+
+      function render() {
+        if (!image || !needsRender) return;
+        const pixels = image.data;
+        for (let index = 0, offset = 0; index < cells.length; index++, offset += 4) {
+          const type = cells[index];
+          const choices = colors[type] || colors[TYPE.EMPTY];
+          let colorIndex;
+          if (type === TYPE.FIRE || type === TYPE.LAVA) {
+            colorIndex = (Math.floor(tick / 2) + (shade[index] & 3) + (age[index] >> 3)) % choices.length;
+          } else {
+            colorIndex = shade[index] % choices.length;
+          }
+          const color = choices[colorIndex];
+          pixels[offset] = color[0];
+          pixels[offset + 1] = color[1];
+          pixels[offset + 2] = color[2];
+          pixels[offset + 3] = 255;
+        }
+        context.putImageData(image, 0, 0);
+        needsRender = false;
+      }
+
+      function animationFrame(now) {
+        if (!previousTime) previousTime = now;
+        const elapsed = Math.min(now - previousTime, 80);
+        previousTime = now;
+        if (!paused) {
+          accumulator = Math.min(accumulator + elapsed, 80);
+          const frameLength = 1000 / 60;
+          while (accumulator >= frameLength) {
+            updateWorld();
+            accumulator -= frameLength;
+          }
+        }
+        render();
+        requestAnimationFrame(animationFrame);
+      }
+
+      for (const button of paletteButtons) {
+        button.addEventListener('click', () => selectMaterial(Number(button.dataset.type)));
+      }
+
+      brushSizeInput.addEventListener('input', updateBrushReadout);
+      pauseButton.addEventListener('click', () => setPaused(!paused));
+      document.getElementById('stepButton').addEventListener('click', () => {
+        if (!paused) setPaused(true);
+        updateWorld();
+        render();
+      });
+      document.getElementById('sampleButton').addEventListener('click', seedSample);
+      document.getElementById('clearButton').addEventListener('click', blankWorld);
+
+      canvas.addEventListener('contextmenu', (event) => event.preventDefault());
+      canvas.addEventListener('pointerdown', (event) => {
+        if (event.button !== 0 && event.button !== 2) return;
+        const point = getPoint(event);
+        if (!point) return;
+        event.preventDefault();
+        activePointer = event.pointerId;
+        strokeType = event.button === 2 ? TYPE.EMPTY : selectedType;
+        previousPoint = point;
+        paintCircle(point.x, point.y, strokeType);
+        if (canvas.setPointerCapture) canvas.setPointerCapture(event.pointerId);
+        updateReadout();
+      });
+      canvas.addEventListener('pointermove', (event) => {
+        if (activePointer !== event.pointerId) return;
+        const point = getPoint(event);
+        if (!point) return;
+        paintLine(previousPoint, point, strokeType);
+        previousPoint = point;
+      });
+      const finishStroke = (event) => {
+        if (activePointer !== event.pointerId) return;
+        activePointer = null;
+        previousPoint = null;
+        updateReadout();
+      };
+      canvas.addEventListener('pointerup', finishStroke);
+      canvas.addEventListener('pointercancel', finishStroke);
+      canvas.addEventListener('lostpointercapture', finishStroke);
+
+      window.addEventListener('keydown', (event) => {
+        const target = event.target;
+        if (target instanceof HTMLElement && (target.isContentEditable || ['INPUT', 'TEXTAREA', 'SELECT'].includes(target.tagName))) return;
+        if (event.code === 'Space') {
+          event.preventDefault();
+          setPaused(!paused);
+          return;
+        }
+        if (/^[1-8]$/.test(event.key)) {
+          selectMaterial(Number(event.key));
+          return;
+        }
+        if (event.key.toLowerCase() === 'e') selectMaterial(TYPE.EMPTY);
+        if (event.key === '[') brushSizeInput.value = String(Math.max(1, Number(brushSizeInput.value) - 1));
+        if (event.key === ']') brushSizeInput.value = String(Math.min(15, Number(brushSizeInput.value) + 1));
+        updateBrushReadout();
+      });
+
+      updateBrushReadout();
+      setPaused(false);
+      if ('ResizeObserver' in window) new ResizeObserver(resizeWorld).observe(viewport);
+      else window.addEventListener('resize', resizeWorld);
+      requestAnimationFrame(() => {
+        resizeWorld();
+        previousTime = performance.now();
+        requestAnimationFrame(animationFrame);
+      });
+      window.setInterval(updateReadout, 650);
+    })();
+  </script>
+</body>
+</html>
