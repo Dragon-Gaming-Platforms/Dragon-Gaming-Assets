@@ -1,0 +1,16 @@
+{
+  "name": "3D Tic-Tac-Toe",
+  "desc": "Make three in a row across a 3×3×3 cube, including lines between layers. Play against a computer, with two local players, or watch two computers.",
+  "controls": "Choose Human or Computer for each side; click cells in the three layer grids; replay after a win or draw",
+  "shelf": "Puzzle & Logic",
+  "tags": [
+    "games",
+    "html5",
+    "board",
+    "tic-tac-toe",
+    "3d",
+    "ai",
+    "local-multiplayer"
+  ],
+  "creator": "Guntur Kurniawan Heryanto"
+}

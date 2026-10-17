@@ -1,0 +1,92 @@
+  .tile, .space {
+    position: relative; height: 40px; width: 40px;
+    float: left; margin: 1px 1px; white-space: nowrap;
+    line-height: 40px;
+    border-radius: 8px;
+    -moz-border-radius: 8px;
+    -webkit-border-radius: 8px;
+  }
+  .tile { background: #2d2d2d; }
+  .space { background: white; }
+  .B { background: #394966; }
+  .W { background: #d9dee2; }
+  #header {
+    border-radius: 8px; -moz-border-radius: 8px; -webkit-border-radius: 8px;
+    background: #2d2d2d;
+    color: #FFFFFF;
+    width: auto;
+    height: 70px;
+  }
+  #title { padding: 2px 2px 2px 15px; font-size: 50px; font-weight: bold; }
+  #options { position: relative; margin-top: 10px; margin-bottom: 20px; }
+  .board { margin-bottom: 20px; }
+
+  ul {
+    padding: 0;
+    margin: 0;
+    list-style: none;
+    }
+
+  li {
+    float: left;
+    position: relative;
+    width: 100px;
+    }
+
+  li ul {
+    display: none;
+    position: absolute;
+    top: 1em;
+    left: 0;
+    }
+
+  li > ul {
+      top: auto;
+      left: auto;
+      }
+
+  li:hover ul { display: block; }
+  ul, p, label { font-family: 'Inconsolata', monospace, Tahoma, sans-serif;; font-size: 12px; }
+
+  .select { height: 20px;}
+  li.select { margin-top: 0px; }
+  li.select, li.select > ul {
+      background: #FFFFFF;
+      border: 1px solid #B8B8B8;
+      border-radius: 10px;
+
+  }
+  li#player1 { border-right: 8px solid #2e3a51; }
+  li#player2 { border-right: 8px solid #d9dee2; margin-left: 10px; }
+
+  div.select { margin-left: 5px; color: #000000; }
+  li.option {
+      background: #D8D8D8;
+      padding-left: 5px;
+      color: #000000;
+
+  }
+  li.option:hover { background: #E8E8E8; font-weight: 200 }
+
+  #dialogDiv {
+    border-radius: 8px; -moz-border-radius: 8px; -webkit-border-radius: 8px;
+    border: 2px solid grey;
+    background: #C8C8C8;
+    color: black;
+    position: relative;
+
+  }
+  #dialogText {
+    width: 150px;
+    height: 20px;
+  }
+  #newGameButton {
+    margin-bottom: 10px;
+  }
+
+/* Local hosting: use system fonts and keep the canvas inside narrow iframes. */
+body { font-family: ui-monospace, monospace; }
+canvas { max-width: 100%; height: auto; }
+#title { font-size: clamp(1.6rem, 7vw, 50px); }
+.tile { cursor: pointer; }
+li.select:focus-within ul { display: block; }

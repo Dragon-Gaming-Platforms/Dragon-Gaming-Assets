@@ -1,0 +1,15 @@
+{
+  "name": "Killer Sudoku",
+  "desc": "Ian’s Killer Sudoku: fill each row, column and 3×3 box with 1–9 while meeting the dotted cages’ sums without repeats. Includes generated difficulties, pencil candidates, undo/redo and a sum calculator. Desktop keyboard and mouse required.",
+  "controls": "Hover a cell or use arrows; 1–9 toggle candidates; Shift+1–9 sets a value; C clears; Z undo; Y redo; S sum calculator; Go generates a puzzle",
+  "shelf": "Puzzle & Logic",
+  "tags": [
+    "games",
+    "html5",
+    "board",
+    "sudoku",
+    "killer-sudoku",
+    "logic"
+  ],
+  "creator": "Ian Sutton"
+}

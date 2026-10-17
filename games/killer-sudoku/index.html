@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+
+    <title>Ian's Killer Sudoku</title>
+
+    <link rel="stylesheet" href="vendor/bootstrap.min.css">
+
+
+
+
+
+    <style>
+        body {
+            padding-top: 20px;
+        }
+        canvas {
+            outline: none;
+            border: 2px solid;
+        }
+        div.col-left {
+            width: 560px;
+            position: fixed;
+        }
+        form.form-inline {
+            padding-top: 15px;
+        }
+        form.form-inline > button {
+            margin-left: 8px;
+        }
+        div.col-right {
+            padding-left: 580px;
+        }
+        h1 {
+            font-size: 24px;
+        }
+        td {
+            padding: 2px;
+        }
+        td.key, td.explanation {
+            padding-left: 15px;
+        }
+        div.footer {
+            font-size: 10px;
+        }
+        div.filtered {
+            color: lightgray;
+        }
+        #sumCalculator > .panel {
+            margin-top: 20px;
+        }
+    </style>
+
+<script src="vendor/jquery.slim.min.js"></script>
+<script src="vendor/bootstrap.min.js"></script>
+<script>window.Modernizr = { canvas: !!document.createElement("canvas").getContext };</script>
+</head>
+
+<body>
+<div class="container visible-xs-block visible-sm-block">
+    <h1>Confession time...</h1>
+    <p>
+        <b>Ian's Killer Sudoku</b> uses HTML canvas with some absolute fonts and doesn't scale down terribly
+        well. Truth be told, with your current screen resolution, it would look a bit shit. So better not to show at all (for now).
+        Sorry about that...
+    </p>
+</div>
+<div class="container visible-md-block visible-lg-block">
+    <div class="row">
+        <div id="game" class="col-left">
+            <canvas id="killer" width="540" height="540" tabindex="1"></canvas>
+            <form class="form-inline">
+                <div class="form-group">
+                    <label for="level">New game:</label>
+                    <select id="level">
+                        <option value="0.1">Easy</option>
+                        <option value="0.3">Moderate</option>
+                        <option value="0.5">Somewhat hard</option>
+                        <option value="0.7">Hard</option>
+                        <option value="0.9">Very hard</option>
+                    </select>
+                </div>
+                <button id="newGame" type="button" class="btn btn-primary btn-xs">Go</button>
+            </form>
+        </div>
+        <div id="help" class="col-right">
+            <ul id="tabsheet" class="nav nav-tabs" data-tabs="tabs">
+                <li class="active"><a href="#home" data-toggle="tab">Home</a></li>
+                <li><a href="#sumCalculator" data-toggle="tab">Sum calculator</a></li>
+                <li><a href="#about" data-toggle="tab">About</a></li>
+            </ul>
+            <div class="tab-content">
+                <div class="tab-pane fade in active" id="home">
+                    <h1>Welcome to Ian's Killer Sudoku</h1>
+                    <p>
+                        The <a href="http://en.wikipedia.org/wiki/Killer_sudoku" target="_blank">objective</a> is to fill the grid with numbers from 1 to 9 such that:
+                    <ul>
+                        <li>Each row, column, and "nonet" (3x3 box of cells) contains each number exactly once</li>
+                        <li>The sum of all numbers in a "cage" (region surrounded by dotted lines) matches the number shown in its corner</li>
+                        <li>No number appears more than once in a cage</li>
+                    </ul>
+                    </p>
+                    <p>
+                        To play:
+                    <ul>
+                        <li>Use the mouse and/or cursor keys to focus on a cell. Use the keyboard to enter possible values.
+                            For example, if you have a cage with <b>2</b> cells and a sum of <b>3</b>, go to each cell and enter '1' followed by '2'</li>
+                    </ul>
+                    <p>
+                        Keyboard:
+                        <table>
+                            <tr>
+                                <td class="key">1-9</td>
+                                <td class="explanation"><b>Toggle</b> value</td>
+                            </tr>
+                            <tr>
+                                <td class="key">Shift 1-9</td>
+                                <td class="explanation"><b>Set</b> value</td>
+                            </tr>
+                            <tr>
+                                <td class="key">c</td>
+                                <td class="explanation"><b>Clear</b> all values in cell</td>
+                            </tr>
+                            <tr>
+                                <td class="key">s</td>
+                                <td class="explanation">Show <b>sum calculator</b> for current cell / cage</td>
+                            </tr>
+                            <tr>
+                                <td class="key">z</td>
+                                <td class="explanation"><b>Undo</b> previous entry</td>
+                            </tr>
+                            <tr>
+                                <td class="key">y</td>
+                                <td class="explanation"><b>Redo</b> (aka undo undo) previous entry</td>
+                            </tr>
+                        </table>
+                    </p>
+                </div>
+                <div class="tab-pane fade" id="sumCalculator">
+                    <div class="panel panel-warning" xxxstyle="margin-top: 20px">
+                        <div class="panel-heading">
+                            <b>How many ways can you get <input id="sumCalcSum" type="text" size="2"> from <input id="sumCalcLength" type="text" size="1"> cells?</b>
+                        </div>
+                        <div id="sumCalcBody" class="panel-body">
+                        </div>
+                        <div id="sumCalcFooter" class="panel-footer">
+                            <table>
+                                <tr>
+                                    <td>Include:</td>
+                                    <td id="sumCalcIncludes"></td>
+                                </tr>
+                                <tr>
+                                    <td>Exclude:</td>
+                                    <td id="sumCalcExcludes"></td>
+                                </tr>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+                <div class="tab-pane fade" id="about">
+                    <h1>About this Killer Sudoku</h1>
+                    <p>
+                        Wrote this as a pet project in about 3 weeks in 2014. Proof (to me anyway) of the beauty of CoffeeScript syntax.
+                    </p>
+                    <p>
+                        Quick refresh end of 2016 when my dodgy hosting solution stopped working, including moving from bitbucket to github and
+                        plugging in Webpack for the build.
+                    </p>
+                    <p>
+                        When I first wrote this I had been planning to add live tips to help a user solve the current Sudoku, the interesting bit here
+                        being trying to mirror the human thought process (as opposed to simply applying computational brute force). Maybe I will
+                        still get to this some day (even if I have to swallow my CoffeeScript pride and vomit it up as ES6). We'll see...
+                    </p>
+                </div>
+            </div>
+            <div class="footer">
+                <hr>
+                <footer>
+                    <p class="text-right"><a href="https://github.com/sutts101/killer">&copy; 2014-2016 Ian Sutton</a></p>
+                </footer>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="bundle.js"></script>
+
+</body>
+</html>
