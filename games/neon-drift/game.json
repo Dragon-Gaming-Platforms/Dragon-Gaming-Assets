@@ -1,0 +1,16 @@
+{
+  "name": "Neon-Drift",
+  "desc": "A neon-lit open-world drift arcade: explore the city, master high-speed drifts, evade the police, unlock new cars, and chase the high score.",
+  "controls": "WASD or arrows to drive, Shift to drift",
+  "shelf": "Arcade & Action",
+  "tags": [
+    "arcade",
+    "racing",
+    "drift",
+    "open-world",
+    "3d"
+  ],
+  "badge": "New",
+  "creator": "trustworthy-coder",
+  "image": "title.png"
+}

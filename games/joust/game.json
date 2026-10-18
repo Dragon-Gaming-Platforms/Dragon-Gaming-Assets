@@ -1,0 +1,15 @@
+{
+  "name": "Joust",
+  "desc": "A modern reimplementation of the 1982 arcade classic: ride a war goose across the platforms and flip enemy knights out of the sky by ramming them from above.",
+  "controls": "Arrow keys to fly — hit enemies from a higher position to flip them",
+  "shelf": "Arcade & Action",
+  "tags": [
+    "arcade",
+    "classic",
+    "platformer",
+    "joust"
+  ],
+  "badge": "New",
+  "creator": "cschladetsch",
+  "image": "title.png"
+}
