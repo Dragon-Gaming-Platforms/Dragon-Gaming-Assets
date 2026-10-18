@@ -1,0 +1,9 @@
+{
+  "name": "Ink Drift",
+  "desc": "A quiet, hands-on fluid art toy. Stir bright ink through a soft current, blend colors, and leave a trail that slowly fades.",
+  "controls": "Click or drag to inject ink and stir the current. Choose a pigment, adjust brush and flow, or press Space to pause.",
+  "shelf": "Interactive Stories & Experiments",
+  "tags": ["simulation", "fluid", "ink", "art", "sandbox"],
+  "badge": "New",
+  "creator": "Dragon Gaming Platforms"
+}
