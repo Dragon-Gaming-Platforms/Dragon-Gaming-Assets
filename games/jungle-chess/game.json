@@ -1,0 +1,14 @@
+{
+  "name": "Jungle Chess",
+  "desc": "Animal chess against a local computer opponent: use ranks, traps, swimming rats and lion/tiger river jumps to reach the enemy den. Traditional Chinese interface.",
+  "controls": "Click or tap your animal, then a highlighted destination; 新局 starts again; 音效 toggles sound",
+  "shelf": "Puzzle & Logic",
+  "tags": [
+    "games",
+    "html5",
+    "board",
+    "jungle-chess",
+    "ai"
+  ],
+  "creator": "Sampot (山姆鍋)"
+}

@@ -1,0 +1,995 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover, user-scalable=no" />
+<title>Trickster AI - Spades Trainer</title>
+<style>
+:root{--bg:#06271d;--bg2:#083527;--panel:#123d31;--panel2:#19483b;--line:#2f6657;--gold:#ffd365;--text:#f3fff9;--muted:#b8d5ca;--danger:#ef476f;--cream:#e7f7f1;--black:#111;--red:#d3263a;--safe-bottom:env(safe-area-inset-bottom,0px);--safe-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}html,body{margin:0;width:100%;height:100%;overflow:hidden;background:var(--bg);color:var(--text);font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}button,select{font:inherit}.app{height:100dvh;display:grid;grid-template-rows:auto auto 1fr auto;background:radial-gradient(circle at 20% 0%,#0e4b38 0,#06271d 45%,#041912 100%);padding-top:var(--safe-top)}
+.topbar{display:grid;grid-template-columns:1fr auto auto auto;gap:8px;align-items:center;padding:10px 10px 8px;border-bottom:1px solid rgba(255,255,255,.08);background:rgba(2,20,15,.58);backdrop-filter:blur(10px)}.brand{display:flex;align-items:center;gap:9px;min-width:0;overflow:hidden}.logo{width:38px;height:38px;border-radius:11px;background:var(--cream);color:#071d16;display:grid;place-items:center;font-size:25px;box-shadow:0 4px 12px rgba(0,0,0,.25)}.title{font-size:24px;font-weight:900;letter-spacing:-.04em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.ver{font-size:13px;color:var(--muted);font-weight:800;margin-left:3px}.btn{border:0;border-radius:15px;padding:13px 14px;font-weight:900;cursor:pointer;box-shadow:0 2px 0 rgba(0,0,0,.2);white-space:nowrap}.btn.gold{background:var(--gold);color:#111}.btn.light{background:#dff3ed;color:#111}.btn.dark{background:#1b5847;color:var(--text)}.btn:disabled{opacity:.45;filter:saturate(.6)}
+.status{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:8px;padding:7px 12px;font-size:15px;color:#d8eee6;background:rgba(0,0,0,.22);border-bottom:1px solid rgba(255,255,255,.06)}.status b{color:var(--gold)}.status .center{text-align:center;font-weight:900;color:var(--gold)}.status .right{text-align:right}.mobileBid{display:none;padding:8px 10px;background:rgba(0,0,0,.18);border-bottom:1px solid rgba(255,255,255,.06)}.bidPrompt{font-size:16px;font-weight:900;color:var(--gold);margin:0 0 7px 2px}.bidGrid{display:grid;grid-template-columns:repeat(5,1fr);gap:7px}.bidGrid button{height:43px;border:0;border-radius:12px;background:var(--gold);font-weight:950;color:#111;font-size:18px}.bidGrid .nil{grid-column:span 2;background:#e9f8f4}.coachLine{font-size:13px;line-height:1.25;color:#e5fff5;margin:7px 2px 0}.coachLine b{color:var(--gold)}
+.tableWrap{min-height:0;padding:10px 10px 4px;display:grid}.table{height:100%;min-height:0;border:1px solid rgba(255,255,255,.12);border-radius:22px;background:linear-gradient(145deg,rgba(18,61,49,.96),rgba(5,36,27,.96));box-shadow:inset 0 0 0 1px rgba(255,255,255,.04),0 10px 35px rgba(0,0,0,.28);display:grid;grid-template-rows:auto 1fr auto;gap:6px;padding:10px;position:relative;overflow:hidden}.players{display:grid;grid-template-columns:1fr 1fr 1fr;gap:7px}.player{border-radius:16px;background:rgba(255,255,255,.065);padding:8px;display:grid;grid-template-columns:auto 1fr;gap:7px;align-items:center;min-width:0;border:2px solid transparent}.player.active{border-color:var(--gold);box-shadow:0 0 0 1px rgba(255,211,101,.45)}.avatar{width:34px;height:34px;border-radius:50%;display:grid;place-items:center;font-weight:950;color:#071d16}.w{background:#ffc9d7}.n{background:#bfe0ff}.e{background:#dcff94}.pName{font-weight:950;font-size:17px;line-height:1}.pMeta{font-size:12px;color:var(--muted);line-height:1.12;margin-top:3px}.message{font-weight:950;color:var(--gold);font-size:16px;line-height:1.15;min-height:19px;padding:0 3px}.handReport{color:var(--text);font-weight:750;line-height:1.18}.handReport .headline{color:var(--gold);font-weight:950;font-size:18px;margin-bottom:6px}.handReport .grade{display:inline-block;background:rgba(255,211,101,.16);border:1px solid rgba(255,211,101,.45);color:var(--gold);border-radius:999px;padding:3px 8px;margin-left:4px}.handReport .quick{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin:6px 0}.handReport .pill{background:rgba(255,255,255,.07);border-radius:10px;padding:6px;color:#dff8f0;font-size:13px}.handReport b{color:var(--gold)}.handReport ul{margin:5px 0 0 18px;padding:0;color:#d7eee6;font-size:13px}.handReport li{margin:2px 0}.felt{min-height:0;border-radius:18px;background:radial-gradient(circle at 50% 45%,rgba(38,92,75,.55),rgba(8,38,29,.92));position:relative;display:grid;place-items:center;overflow:hidden}.felt:after{content:"SPADES TRAINER";position:absolute;font-weight:950;letter-spacing:.18em;font-size:22px;color:rgba(255,255,255,.028);transform:rotate(-9deg)}.trick{position:relative;width:220px;height:155px;z-index:1}.played{position:absolute;width:58px;height:80px;border-radius:9px;background:#f9f9f9;color:#111;box-shadow:0 4px 10px rgba(0,0,0,.35);display:grid;grid-template-rows:auto 1fr auto;padding:5px;font-weight:950}.played .suit{font-size:24px;place-self:center}.played.north{top:0;left:81px}.played.west{top:55px;left:0}.played.east{top:55px;right:0}.played.south{bottom:0;left:81px}.played.red{color:var(--red)}.youPanel{border:3px solid var(--gold);background:rgba(255,255,255,.065);border-radius:18px;padding:6px 8px;text-align:center;font-weight:950}.youPanel .pMeta{font-size:13px}.handDock{padding:4px 8px calc(8px + var(--safe-bottom));background:linear-gradient(180deg,rgba(8,45,34,.98),rgba(4,24,18,.98));border-top:1px solid rgba(255,255,255,.08)}.hand{height:114px;position:relative;max-width:100%;margin:0 auto;touch-action:manipulation}.card{position:absolute;bottom:0;width:58px;height:88px;border:0;border-radius:10px;background:#fff;color:#111;box-shadow:0 3px 10px rgba(0,0,0,.45);font-weight:950;font-size:19px;text-align:left;padding:6px 0 0 7px;transition:transform .12s ease, filter .12s ease, opacity .12s ease;transform-origin:bottom center}.card .s{display:block;font-size:24px;line-height:1;margin-top:14px;text-align:center}.card.red{color:var(--red)}.card.selected{transform:translateY(-18px) scale(1.06)!important;z-index:50}.card.illegal{opacity:.34;filter:grayscale(.55)}.card:disabled{pointer-events:none}.emptyHand{height:80px;border-radius:17px;background:rgba(0,0,0,.18);display:grid;place-items:center;color:var(--muted);font-weight:800}.bottomSheet,.menuSheet{position:fixed;left:0;right:0;bottom:0;background:#082a20;border-radius:24px 24px 0 0;border:1px solid rgba(255,255,255,.16);box-shadow:0 -15px 50px rgba(0,0,0,.55);z-index:20;padding:18px 16px calc(18px + var(--safe-bottom));transform:translateY(110%);transition:transform .2s ease}.bottomSheet.show,.menuSheet.show{transform:translateY(0)}.sheetTitle{font-size:24px;font-weight:950;margin-bottom:10px}.sheetText{color:#d8eee6;line-height:1.35;margin-bottom:14px}.sheetActions{display:grid;grid-template-columns:repeat(5,1fr);gap:8px}.sheetActions button{height:48px;border:0;border-radius:13px;font-weight:950;background:var(--gold);font-size:18px}.sheetActions .wide{grid-column:span 2;background:#e9f8f4}.menuGrid{display:grid;gap:9px}.menuGrid button{padding:15px;border:0;border-radius:14px;background:#184c3d;color:var(--text);font-weight:900;text-align:left}.overlay{position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:19;display:none}.overlay.show{display:block}.toast{position:fixed;left:12px;right:12px;top:calc(72px + var(--safe-top));z-index:25;background:#0b3528;border:1px solid rgba(255,255,255,.14);box-shadow:0 10px 30px rgba(0,0,0,.35);border-radius:16px;padding:12px 14px;color:#eafff8;font-weight:750;display:none}.toast.show{display:block}.desktopPanel{display:none}.hidden{display:none!important}
+@media (max-width:520px){.topbar{grid-template-columns:1fr auto auto auto;padding:8px 10px}.title{font-size:23px}.ver{font-size:12px}.logo{width:36px;height:36px}.btn{padding:12px 12px;border-radius:13px;font-size:16px}.btn.menu{padding:12px 10px}.tableWrap{padding:8px 8px 3px}.table{border-radius:19px;padding:8px;gap:5px}.players{gap:5px}.player{padding:7px 5px;border-radius:14px}.avatar{width:31px;height:31px}.pName{font-size:16px}.pMeta{font-size:11px}.felt{border-radius:16px}.message{font-size:15px}.played{width:52px;height:72px}.trick{width:196px;height:140px}.played.north,.played.south{left:72px}.hand{height:104px}.card{width:52px;height:82px;font-size:17px}.card .s{font-size:22px;margin-top:12px}.mobileBid{display:block}.coachLine{display:none}.app.bidding{grid-template-rows:auto auto auto 1fr auto}.app.playing{grid-template-rows:auto auto 1fr auto}.app.playing .mobileBid{display:none}.app.playing .table{grid-template-rows:auto 1fr auto}.app.bidding .felt{min-height:0}.app.bidding .trick{display:none}.app.bidding .table{grid-template-rows:auto auto 1fr auto}.app.bidding .tableWrap{min-height:0}.app.bidding .felt{max-height:160px}.app.bidding .message{font-size:18px}.app.bidding .handDock{padding-top:2px}.app.bidding .hand{height:104px}.sheetActions{grid-template-columns:repeat(5,1fr)}}
+@media (min-width:850px){.app{grid-template-rows:auto auto auto 1fr auto}.app.playing{grid-template-rows:auto auto 1fr auto}.mobileBid{display:block;max-width:1100px;width:100%;margin:0 auto;padding:10px 14px}.app.playing .mobileBid{display:none}.bidGrid{grid-template-columns:repeat(10,1fr)}.bidGrid button{height:46px}.coachLine{display:block;font-size:15px}.desktopPanel{display:block}.tableWrap{max-width:1100px;width:100%;margin:0 auto}.handDock{max-width:1100px;width:100%;margin:0 auto}.card{width:64px;height:96px}.hand{height:125px}.btn.menu{display:inline-block}}
+@media (max-width:520px){.handReport .headline{font-size:16px}.handReport .quick{grid-template-columns:1fr 1fr}.handReport .pill{font-size:12px;padding:5px}.handReport ul{font-size:12px;margin-left:16px}}
+@media (max-height:720px) and (max-width:520px){.topbar{padding:6px 8px}.logo{width:32px;height:32px}.title{font-size:20px}.btn{padding:10px 9px;font-size:15px}.status{font-size:13px;padding:5px 10px}.bidGrid button{height:36px}.mobileBid{padding:6px 8px}.coachLine{display:none}.tableWrap{padding:6px}.player{padding:5px}.avatar{width:28px;height:28px}.pName{font-size:14px}.pMeta{font-size:10.5px}.message{font-size:14px}.hand{height:96px}.card{width:48px;height:76px}.felt:after{font-size:17px}.youPanel{padding:4px}.table{gap:4px}}
+
+/* v0.8.0 mobile match-over header fit */
+.handReport{max-width:100%;overflow-wrap:anywhere;word-break:normal}
+.handReport .pill{min-width:0;overflow-wrap:anywhere}
+.handReport .quick{min-width:0}
+.message{overflow-y:auto;max-height:100%;padding-right:2px}
+.endHint{color:var(--gold);font-weight:950;margin-top:5px;font-size:15px}
+.reportDock{display:none}
+@media (max-width:520px){
+  .handReport{font-size:13px;line-height:1.16}
+  .handReport .headline{font-size:15px;margin-bottom:4px}
+  .handReport .grade{padding:2px 7px}
+  .handReport .quick{gap:5px;margin:4px 0}
+  .handReport .pill{font-size:11.5px;line-height:1.15;padding:5px}
+  .handReport ul{font-size:11.5px;line-height:1.16;margin:3px 0 0 14px}
+  .handReport li{margin:1px 0}
+}
+
+/* v0.8.0: prevent the match-over control from colliding with the title on iPhone */
+.app.matchOver #newHandBtn{background:#ffd365;color:#111;opacity:1;filter:none}
+@media (max-width:520px){
+  .topbar{grid-template-columns:minmax(0,1fr) auto auto auto}
+  .brand{gap:7px}
+  .title{font-size:20px;max-width:150px}
+  .ver{font-size:11px}
+  .btn{font-size:15px;padding:10px 10px}
+  .btn.dark{min-width:74px}
+  .app.matchOver .title{max-width:132px}
+  .app.matchOver #newHandBtn{min-width:70px;padding-left:9px;padding-right:9px}
+}
+@media (max-width:390px){
+  .title{font-size:18px;max-width:126px}
+  .btn{font-size:14px;padding:9px 8px}
+  .logo{width:31px;height:31px;font-size:22px}
+  .app.matchOver .title{max-width:112px}
+}
+
+/* v0.8.0: rule coach / renege teaching */
+.ruleCoach{border:1px solid rgba(255,211,101,.34);background:rgba(255,211,101,.10);border-radius:12px;padding:7px 9px;margin:6px 3px 0;color:#eafff8;font-size:13px;line-height:1.22;font-weight:800}
+.ruleCoach b{color:var(--gold)}
+.ruleCoach.warn{border-color:rgba(239,71,111,.55);background:rgba(239,71,111,.14)}
+.card.legal{box-shadow:0 0 0 2px rgba(255,211,101,.42),0 3px 10px rgba(0,0,0,.45)}
+.card.illegal{opacity:.22!important;filter:grayscale(.85) brightness(.72)!important}
+.card.illegal:after{content:"🔒";position:absolute;right:4px;bottom:4px;font-size:15px;opacity:.9}
+@media (max-width:520px){.ruleCoach{font-size:12px;padding:6px 8px;margin-top:4px}.card.illegal:after{font-size:13px}}
+.card.special,.played.special{box-shadow:0 0 0 2px rgba(255,211,101,.75),0 4px 12px rgba(0,0,0,.45)}
+
+.matchReport{border:1px solid rgba(255,211,101,.55);background:linear-gradient(135deg,rgba(255,211,101,.14),rgba(255,255,255,.06));border-radius:16px;padding:12px;margin:8px 0;box-shadow:0 8px 24px rgba(0,0,0,.25)}
+.matchReport .bigTitle{font-size:24px;font-weight:1000;color:#ffd365;letter-spacing:-.03em}
+.matchReport .winnerLine{font-size:18px;font-weight:950;margin:4px 0 8px}
+.matchStats{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:8px 0}
+.matchStat{background:rgba(255,255,255,.08);border-radius:12px;padding:8px;border:1px solid rgba(255,255,255,.08)}
+.matchStat span{display:block;color:#b8d5ca;font-size:12px}.matchStat b{font-size:18px;color:#f3fff9}
+@media(max-width:520px){.matchReport .bigTitle{font-size:20px}.matchStats{grid-template-columns:1fr 1fr}.matchStat b{font-size:16px}}
+
+</style>
+
+
+
+
+
+<style id="trickster-v070-css">
+.contractBar{display:grid;grid-template-columns:1fr 1fr 1fr;gap:6px;padding:6px 10px;background:rgba(4,30,22,.74);border-bottom:1px solid rgba(255,255,255,.07);font-size:12px;color:#d8eee6}
+.contractPill{background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.10);border-radius:10px;padding:6px 8px;font-weight:850;line-height:1.15}
+.contractPill b{color:#ffd365}.contractPill.warn b{color:#ffb3c5}.contractPill.good b{color:#9ff3c9}
+.betaTag{font-size:10px;color:#ffd365;margin-left:4px;font-weight:900}
+.lessonBox{border:1px solid rgba(255,211,101,.35);background:rgba(255,211,101,.09);border-radius:12px;padding:8px;margin-top:7px}
+.lessonBox b{color:#ffd365}.miniBars{display:grid;gap:4px;margin-top:6px}.miniBar{display:grid;grid-template-columns:80px 1fr 42px;gap:6px;align-items:center;font-size:12px}.barTrack{height:8px;border-radius:99px;background:rgba(255,255,255,.12);overflow:hidden}.barFill{height:100%;background:#ffd365;border-radius:99px}.progressGrid{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin:10px 0}.progressCard{border-radius:13px;background:rgba(255,255,255,.07);padding:10px;border:1px solid rgba(255,255,255,.08)}.progressCard b{color:#ffd365;font-size:20px}.challengeChoice{display:block;width:100%;margin:8px 0;padding:12px;border:0;border-radius:13px;background:#184c3d;color:#f3fff9;text-align:left;font-weight:900}.challengeChoice.good{background:#1c6b4d}.challengeChoice.bad{background:#5b2633}.reportBox{white-space:pre-wrap;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:12px;background:#031b14;border:1px solid rgba(255,255,255,.12);padding:10px;border-radius:12px;margin-top:8px;max-height:260px;overflow:auto}.smallNote{font-size:12px;color:#b8d5ca;line-height:1.25}.menuGrid .accentBtn{background:#ffd365;color:#061c15;text-align:center}
+@media(max-width:520px){.contractBar{grid-template-columns:1fr;font-size:11px;padding:5px 8px}.contractPill{padding:5px 7px}.progressGrid{grid-template-columns:1fr}.miniBar{grid-template-columns:72px 1fr 34px}}
+</style>
+
+
+<style id="trickster-v080-css">
+.testGrid{display:grid;gap:7px;margin-top:8px}
+.testRow{display:grid;grid-template-columns:34px 1fr;gap:8px;align-items:start;background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.10);border-radius:12px;padding:8px}
+.testIcon{width:28px;height:28px;border-radius:50%;display:grid;place-items:center;font-weight:1000}
+.testPass .testIcon{background:#1c6b4d;color:#d8ffe8}.testFail .testIcon{background:#772c3c;color:#ffe1e7}
+.testName{font-weight:950}.testDetail{font-size:12px;color:#b8d5ca;margin-top:2px;line-height:1.25}
+.auditCard{background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.10);border-radius:13px;padding:10px;margin:8px 0}
+.auditCard b{color:#ffd365}.auditMeta{font-size:12px;color:#b8d5ca;line-height:1.25}
+.replayControls{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:10px 0}.replayControls button{border:0;border-radius:12px;padding:11px;font-weight:950;background:#ffd365;color:#061c15}
+.replayTitle{font-size:19px;font-weight:1000;color:#ffd365;margin-bottom:6px}.replayPlays{line-height:1.5}.replayCoach{margin-top:8px;padding:8px;border-radius:12px;background:rgba(255,211,101,.11);border:1px solid rgba(255,211,101,.35)}
+.snapshotBlock{white-space:pre-wrap;font-family:ui-monospace,SFMono-Regular,Menlo,monospace;font-size:11px;line-height:1.25;background:#031b14;border:1px solid rgba(255,255,255,.12);border-radius:12px;padding:10px;max-height:310px;overflow:auto;margin-top:8px}
+.trustBadge{display:inline-block;border:1px solid rgba(255,211,101,.45);border-radius:999px;padding:2px 8px;font-size:11px;color:#ffd365;font-weight:950;margin-left:6px}
+</style>
+
+<style>
+/* Hosting layout repair: account for the inserted contract bar and scroll long sheets. */
+.app, .app.playing { grid-template-rows: auto auto auto minmax(0,1fr) auto; }
+.app.bidding { grid-template-rows: auto auto auto auto minmax(0,1fr) auto; }
+.app.bidding .mobileBid { display:block; }
+.contractBar { grid-template-columns: repeat(3,minmax(0,1fr)); }
+.contractPill { min-width:0; overflow-wrap:anywhere; }
+.table, .app.playing .table, .app.bidding .table { display:flex; flex-direction:column; }
+.players, .youPanel { flex-shrink:0; }
+.message { flex-shrink:0; max-height:30%; min-height:19px; overflow-y:auto; }
+.ruleCoach { max-height:25%; overflow-y:auto; flex-shrink:0; }
+.felt { flex:1; min-height:0; }
+.message:has(.handReport), .message:has(.matchReport) { flex:1; max-height:none; min-height:0; }
+.table:has(.handReport) .felt { display:none; }
+.bottomSheet, .menuSheet { max-height:90dvh; overflow-y:auto; }
+</style>
+</head>
+<body>
+<div id="app" class="app bidding">
+  <header class="topbar">
+    <div class="brand"><div class="logo">♠</div><div class="title">Trickster AI <span class="ver">v0.8.0</span></div></div>
+    <button id="newHandBtn" class="btn gold">New Hand</button>
+    <button id="hintBtn" class="btn light">Hint</button>
+    <button id="menuBtn" class="btn dark menu">☰ Menu</button>
+  </header>
+  <div class="status"><div id="scoreText">NS 0 (0 bags) · EW 0 (0 bags)</div><div class="center" id="handText">Hand 0</div><div class="right" id="turnText">Turn: You</div></div>
+  <section id="mobileBid" class="mobileBid">
+    <div class="bidPrompt">Choose your bid</div>
+    <div class="bidGrid" id="bidGrid"></div>
+    <div class="coachLine" id="bidCoach"></div>
+  </section>
+  <main class="tableWrap">
+    <section class="table">
+      <div class="players">
+        <div id="pW" class="player"><div class="avatar w">W</div><div><div class="pName">West</div><div class="pMeta" id="metaW">Bid: - | Tricks: 0 | Cards: 0</div></div></div>
+        <div id="pN" class="player"><div class="avatar n">N</div><div><div class="pName">North / Partner</div><div class="pMeta" id="metaN">Bid: - | Tricks: 0 | Cards: 0</div></div></div>
+        <div id="pE" class="player"><div class="avatar e">E</div><div><div class="pName">East</div><div class="pMeta" id="metaE">Bid: - | Tricks: 0 | Cards: 0</div></div></div>
+      </div>
+      <div class="message" id="message">Press New Hand to start.</div>
+      <div id="ruleCoach" class="ruleCoach hidden"></div>
+      <div class="felt"><div class="trick" id="trickArea"></div></div>
+      <div id="youPanel" class="youPanel"><div class="pName">You / South</div><div class="pMeta" id="metaS">Bid: - | Tricks: 0 | Cards: 0</div></div>
+    </section>
+  </main>
+  <footer class="handDock"><div id="hand" class="hand"><div class="emptyHand">Your cards will appear here</div></div></footer>
+</div>
+<div id="overlay" class="overlay"></div>
+<div id="coachSheet" class="bottomSheet"><div class="sheetTitle">Coach</div><div id="coachText" class="sheetText">Start a hand and I’ll help you bid and play legally.</div><button id="closeCoach" class="btn gold" style="width:100%">Got it</button></div>
+<div id="menuSheet" class="menuSheet"><div class="sheetTitle">Menu</div><div class="menuGrid"><button id="modeBtn">Rule set</button><button id="rulesBtn">Rules used</button><button id="historyBtn">Trick history</button><button id="resetBtn">Reset match</button><button id="appStoreBtn">App Store prep notes</button><button id="privacyBtn">Privacy & analytics</button><button id="closeMenu">Close</button></div></div>
+<div id="modeSheet" class="bottomSheet"><div class="sheetTitle">Rule Set Presets</div><div id="modeText" class="sheetText"></div><div id="modeChoices" class="menuGrid"></div><button id="closeMode" class="btn gold" style="width:100%;margin-top:10px">Done</button></div>
+<div id="toast" class="toast"></div>
+<script>
+const suits=['♣','♦','♥','♠'];
+const ranks=['2','3','4','5','6','7','8','9','10','J','Q','K','A'];
+const players=['S','W','N','E'];
+const names={S:'You',W:'West',N:'North',E:'East'};
+const red=new Set(['♦','♥']);
+const RULESETS={
+  standard:{key:'standard',name:'Standard Spades',short:'Standard',removed:[],jokers:false,explain:'Standard 52-card Spades. No jokers. A♠ is the highest trump, then K♠ down to 2♠. This is the common app/tournament-style preset.'},
+  joker:{key:'joker',name:'Joker-Joker',short:'Joker-Joker',removed:['2♣','2♦'],jokers:true,explain:'Joker-Joker adds Big Joker and Little Joker as the two highest trump cards. This preset removes 2♣ and 2♦ to keep a 52-card deck. Trump order: Big Joker, Little Joker, A♠, K♠ ... 2♠.'},
+  jjdd:{key:'jjdd',name:'Joker-Joker-Deuce-Deuce',short:'JJDD',removed:['2♣','2♥'],jokers:true,explain:'Joker-Joker-Deuce-Deuce adds Big Joker and Little Joker and makes only 2♠ a special high deuce trump. 2♦ stays a normal diamond. This preset removes 2♣ and 2♥ to keep 52 cards. Trump order: Big Joker, Little Joker, 2♠, A♠, K♠ ... 3♠. House rules vary, so this follows your table rules.'}
+};
+let currentMode=localStorage.getItem('dragon-spades-v1:tricksterRuleMode')||'standard';
+if(!RULESETS[currentMode])currentMode='standard';
+const ANALYTICS={enabled:true,provider:'local-only',debug:false};
+const sessionId=crypto?.randomUUID?crypto.randomUUID():'s-'+Date.now().toString(36)+'-'+Math.random().toString(36).slice(2);
+function track(event,props={}){
+  if(!ANALYTICS.enabled)return;
+  const safeProps={mode:currentMode,phase:state?.phase||'init',...props};
+  // Privacy guardrail: gameplay/product-health counters stay local-only.
+  // Cloudflare Web Analytics, when its beacon token is added, tracks aggregate traffic such as visits, device/browser, referrers, and returning visits.
+  // This app does not send names, emails, exact hands, exact cards, children’s info, or personal player profiles.
+  if(ANALYTICS.debug)console.info('[analytics-local]',event,safeProps);
+  try{
+    const key='dragon-spades-v1:tricksterLocalAnalyticsCounts';
+    const counts=JSON.parse(localStorage.getItem(key)||'{}');
+    counts[event]=(counts[event]||0)+1;
+    localStorage.setItem(key,JSON.stringify(counts));
+  }catch(e){}
+}
+// Each deal owns its delayed AI and trick-resolution actions.
+let dealGeneration=0;
+function gameDelay(callback,ms){const generation=dealGeneration;return setTimeout(()=>{if(generation===dealGeneration)callback()},ms)}
+let state;
+function ruleset(){return RULESETS[currentMode]}
+function fresh(){dealGeneration++;state={hands:{S:[],W:[],N:[],E:[]},bids:{S:null,W:null,N:null,E:null},tricks:{S:0,W:0,N:0,E:0},scores:{NS:0,EW:0},bags:{NS:0,EW:0},handNo:0,turn:'S',leader:'S',phase:'idle',trick:[],spadesBroken:false,matchOver:false,selected:null,log:`Fresh match. Rule set: <b>${ruleset().name}</b>. Start a new hand.`,lastReport:'',stickyLog:'',lastAINote:'',trickHistory:[],handStats:{legalPlays:0,reneges:0,blockedIllegalClicks:0,humanPlays:[],recommendedBid:0,startTrumps:0,startAces:0,startShorts:0,startSpecials:[]}}}
+fresh();
+function card(rank,suit,extra={}){return {rank,suit,id:(extra.id||rank+suit),label:(extra.label||rank),joker:!!extra.joker,name:(extra.name||rank+suit)}}
+function deck(){let d=[];const remove=new Set(ruleset().removed);for(const s of suits){for(const r of ranks){const id=r+s;if(!remove.has(id))d.push(card(r,s));}}if(ruleset().jokers){d.push(card('BJ','🃏',{id:'BJ',label:'BJ',joker:true,name:'Big Joker'}));d.push(card('LJ','🃏',{id:'LJ',label:'LJ',joker:true,name:'Little Joker'}));}return d}
+function normalRankValue(c){return ranks.indexOf(c.rank)+2}
+function isSpecialTrump(c){return c.joker||(currentMode==='jjdd'&&c.id==='2♠')}
+function isTrump(c){return c.joker||c.suit==='♠'}
+function effectiveSuit(c){return isTrump(c)?'♠':c.suit}
+function trumpPower(c){if(c.id==='BJ')return 100;if(c.id==='LJ')return 99;if(currentMode==='jjdd'&&c.id==='2♠')return 98;if(c.suit==='♠')return normalRankValue(c);return normalRankValue(c)}
+function val(c){return isTrump(c)?trumpPower(c):normalRankValue(c)}
+function displayCard(c){return c.joker?c.name:c.id}
+function shuffle(a){for(let i=a.length-1;i>0;i--){let j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a}
+function team(p){return p==='S'||p==='N'?'NS':'EW'}
+function next(p){return players[(players.indexOf(p)+1)%4]}
+function sortHand(h){h.sort((a,b)=>{const ta=isTrump(a),tb=isTrump(b);if(ta!==tb)return ta?1:-1;if(!ta&&!tb){const sd=suits.indexOf(a.suit)-suits.indexOf(b.suit);if(sd)return sd;return normalRankValue(a)-normalRankValue(b)}return val(a)-val(b)})}
+function suitName(s){return {'♣':'clubs','♦':'diamonds','♥':'hearts','♠':'spades/trump'}[s]||s}
+function legal(hand){if(state.trick.length===0){if(!state.spadesBroken){const non=hand.filter(c=>!isTrump(c));return non.length?non:hand}return hand}const led=effectiveSuit(state.trick[0].card);const follow=hand.filter(c=>effectiveSuit(c)===led);return follow.length?follow:hand}
+function legalReason(card,hand=state.hands.S){if(state.trick.length===0){if(isTrump(card)&&!state.spadesBroken&&hand.some(c=>!isTrump(c)))return 'Trump/spades have not been broken. Lead a non-trump card unless your hand is all trump.';return ''}const led=effectiveSuit(state.trick[0].card);const follow=hand.filter(c=>effectiveSuit(c)===led);if(follow.length&&effectiveSuit(card)!==led)return `Illegal renege: ${suitName(led)} were led and you still have ${follow.length} ${suitName(led)} card(s). You must follow suit.`;return ''}
+function specialList(hand){return hand.filter(isSpecialTrump).map(displayCard)}
+function modeCoachLine(){const rs=ruleset();if(currentMode==='standard')return 'Standard mode: no jokers; A♠ is highest trump.';if(currentMode==='joker')return 'Joker-Joker mode: Big Joker and Little Joker are the top two trump cards.';return 'JJDD mode: Big Joker, Little Joker, and 2♠ are special high trump cards. 2♦ is a normal diamond.'}
+function ruleCoachText(){if(state.phase!=='play'||state.turn!=='S'||!state.hands.S.length)return '';const h=state.hands.S,l=legal(h);const specials=specialList(h);let extra=specials.length?` Special trump in your hand: <b>${specials.join(', ')}</b>.`:'';if(state.trick.length===0){if(!state.spadesBroken&&l.length<h.length)return `<b>Lead rule:</b> trump/spades are locked until broken. Lead any highlighted non-trump card.${extra}`;return `<b>Lead:</b> you may lead any highlighted card.${extra}`}const led=effectiveSuit(state.trick[0].card);if(l.length<h.length)return `<b>Follow suit: ${suitName(led)}.</b> You have ${l.length} ${suitName(led)} card(s), so every other suit is locked. Playing a spade, joker, special trump, or off-suit card here would be a renege.${extra}`;return `<b>Void in ${suitName(led)}.</b> You have no ${suitName(led)}, so you may play any highlighted card, including trump.${extra}`}
+function beats(a,b){const at=isTrump(a),bt=isTrump(b);if(at&&!bt)return true;if(!at&&bt)return false;if(effectiveSuit(a)!==effectiveSuit(b))return false;return val(a)>val(b)}
+function trickWinner(){let best=state.trick[0];for(const play of state.trick.slice(1))if(beats(play.card,best.card))best=play;return best.player}
+function lowFirst(cards){return cards.slice().sort((a,b)=>val(a)-val(b))}
+function highFirst(cards){return cards.slice().sort((a,b)=>val(b)-val(a))}
+function estimateBid(hand){let bid=0;for(const c of hand){if(c.joker)bid+=1.1;else if(currentMode==='jjdd'&&c.id==='2♠')bid+=1;else if(c.suit==='♠'&&['A','K','Q','J','10'].includes(c.rank))bid+=.75;else if(c.rank==='A'&&!isTrump(c))bid+=1;else if(c.rank==='K'&&!isTrump(c))bid+=.25}const suitsHeld={};for(const s of suits)suitsHeld[s]=hand.filter(c=>!isTrump(c)&&c.suit===s).length;bid+=Object.values(suitsHeld).filter(n=>n<=1).length*.35;return Math.max(1,Math.min(8,Math.round(bid)))}
+function bidRead(){const h=state.hands.S;const aces=h.filter(c=>c.rank==='A'&&!isTrump(c)).length;const tr=h.filter(isTrump).length;const specials=specialList(h);const counts=suits.map(s=>h.filter(c=>!isTrump(c)&&c.suit===s).length);const shorts=counts.filter(n=>n<=1).length;const b=estimateBid(h);let specialText=specials.length?` Special power cards: <b>${specials.join(', ')}</b>.`:'';return `<b>Bidding read:</b> ${modeCoachLine()} You have ${aces} non-trump ace(s), ${tr} trump card(s), and ${shorts} short side suit(s).${specialText} Reasonable bid: <b>${b}</b>.`}
+function startHand(){if(state.matchOver){toast('Match is over. Use Menu → Reset match.');return}dealGeneration++;track('Started hand');state.handNo++;state.phase='bidding';state.trick=[];state.tricks={S:0,W:0,N:0,E:0};state.bids={S:null,W:null,N:null,E:null};state.turn='S';state.leader='S';state.spadesBroken=false;let d=shuffle(deck());for(const p of players)state.hands[p]=[];for(let i=0;i<d.length;i++)state.hands[players[i%4]].push(d[i]);for(const p of players)sortHand(state.hands[p]);const h=state.hands.S;const counts=suits.map(s=>h.filter(c=>!isTrump(c)&&c.suit===s).length);state.trickHistory=[];state.lastAINote='';state.handStats={legalPlays:0,reneges:0,blockedIllegalClicks:0,humanPlays:[],recommendedBid:estimateBid(h),startTrumps:h.filter(isTrump).length,startAces:h.filter(c=>c.rank==='A'&&!isTrump(c)).length,startShorts:counts.filter(n=>n<=1).length,startSpecials:specialList(h)};state.lastReport='';state.stickyLog='';state.lastAINote='';state.log='Choose your bid using the bid buttons above.';state.selected=null;render()}
+function bid(n){if(state.phase!=='bidding')return;state.bids.S=n;state.bids.W=estimateBid(state.hands.W);state.bids.N=estimateBid(state.hands.N);state.bids.E=estimateBid(state.hands.E);state.phase='play';state.turn='S';state.leader='S';state.stickyLog='';state.log=`You bid ${n}. Play a card to lead. ${modeCoachLine()}`;render()}
+function currentWinnerPlay(){if(!state.trick.length)return null;let best=state.trick[0];for(const play of state.trick.slice(1))if(beats(play.card,best.card))best=play;return best}
+function cheapest(cards){return lowFirst(cards)[0]}
+function partnerProtectedChoice(p,l,winPlay){
+  const winning=winPlay.card;
+  const safe=lowFirst(l.filter(c=>!beats(c,winning)));
+  const safeNonTrump=lowFirst(safe.filter(c=>!isTrump(c)));
+
+  // Hard North/South partnership rule:
+  // If South is currently winning, North must protect that book.
+  // North may only overtake/cut South when EVERY legal card would do so.
+  if(p==='N'&&winPlay.player==='S'){
+    if(safeNonTrump.length)return safeNonTrump[0];
+    if(safe.length)return safe[0];
+    return cheapest(l); // legally forced: no safe card exists
+  }
+
+  // Same team rule for all other partner-winning cases.
+  if(safeNonTrump.length)return safeNonTrump[0];
+  if(safe.length)return safe[0];
+  return cheapest(l); // forced overtake
+}
+function aiChoose(p){
+  const l=legal(state.hands[p]);
+  if(state.trick.length===0){
+    let non=l.filter(c=>!isTrump(c));
+    let pool=non.length?non:l;
+    return cheapest(pool);
+  }
+
+  const winPlay=currentWinnerPlay();
+  const winning=winPlay.card;
+  const led=effectiveSuit(state.trick[0].card);
+  const follow=l.filter(c=>effectiveSuit(c)===led);
+  const partnerWinning=team(winPlay.player)===team(p);
+  const canWin=lowFirst(l.filter(c=>beats(c,winning)));
+  const nonTrump=lowFirst(l.filter(c=>!isTrump(c)));
+
+  // If partner is already winning, protect the book. No cutting, overtrumping, or overtaking unless forced.
+  if(partnerWinning)return partnerProtectedChoice(p,l,winPlay);
+
+  // If an opponent is winning, save the trick with the cheapest winner.
+  if(canWin.length)return canWin[0];
+
+  // If void and unable to win, throw away non-trump first.
+  if(!follow.length&&nonTrump.length)return nonTrump[0];
+
+  return cheapest(l);
+}
+function playCard(p,card){const l=legal(state.hands[p]);if(!l.some(c=>c.id===card.id)){toast('Renege prevention: illegal card blocked.');return false}state.hands[p]=state.hands[p].filter(c=>c.id!==card.id);if(p==='S'){state.handStats.legalPlays++;state.handStats.humanPlays.push({card:displayCard(card),led:state.trick[0]?.card?effectiveSuit(state.trick[0].card):'lead',trickNo:13-state.hands.S.length})}if(isTrump(card))state.spadesBroken=true;state.trick.push({player:p,card});return true}
+function humanCard(card){
+  if(state.phase!=='play'||state.turn!=='S')return;
+  if(state.stickyLog)state.stickyLog='';
+  const l=legal(state.hands.S);
+  if(!l.some(c=>c.id===card.id)){
+    // Big-thumb protection: blocked illegal taps teach the rule, but they are NOT counted as reneges and do not hurt your grade.
+    state.handStats.blockedIllegalClicks=(state.handStats.blockedIllegalClicks||0)+1;
+    track('Illegal renege blocked',{requiredSuit:state.trick[0]?.card?.suit?'follow_suit':'lead_rule'});
+    const why=legalReason(card);
+    state.selected=null;
+    state.log=`<div class="ruleCoach warn"><b>Illegal tap blocked — no penalty.</b> ${why||'That card is not legal in this position.'} The app did not count this as a renege.</div>`;
+    toast('Illegal tap blocked — no penalty.');
+    render();
+    return;
+  }
+  if(state.selected!==card.id){
+    state.selected=card.id;
+    state.log=`Tap ${displayCard(card)} again to play it.`;
+    render();
+    return;
+  }
+  playCard('S',card);
+  state.selected=null;
+  afterPlay();
+}
+function trickReviewText(w){const cards=state.trick.map(t=>`${names[t.player]} ${displayCard(t.card)}`).join(' · ');const note=state.lastAINote?`<br><span style="color:#ffd365">Coach: ${state.lastAINote}</span>`:'';return `<b>Trick complete — ${names[w]} won.</b><br><span style="color:#d8eee6">Count these cards before the next trick: ${cards}</span>${note}`}
+function recordTrickHistory(w){
+  const entry={
+    no:(state.trickHistory?.length||0)+1,
+    winner:w,
+    led:state.trick[0]?.card?effectiveSuit(state.trick[0].card):'',
+    plays:state.trick.map(t=>({player:t.player,card:displayCard(t.card)})),
+    coach:state.lastAINote||''
+  };
+  state.trickHistory.push(entry);
+}
+function trickHistoryHTML(){
+  if(!state.trickHistory||!state.trickHistory.length)return '<b>Trick history</b><br>No completed tricks yet.';
+  const rows=state.trickHistory.map(t=>{
+    const plays=t.plays.map(p=>`${names[p.player]} ${p.card}`).join(' · ');
+    const coach=t.coach?`<br><span style="color:#ffd365"><b>Coach:</b> ${t.coach}</span>`:'';
+    return `<div class="pill" style="margin:8px 0"><b>Trick ${t.no}</b> — ${names[t.winner]} won<br><span style="color:#d8eee6">${plays}</span>${coach}</div>`;
+  }).join('');
+  return `<b>Trick history</b><br><span style="color:#d8eee6">Review each completed trick so you can count cards and verify partner play.</span>${rows}`;
+}
+function afterPlay(){
+  if(state.trick.length===4){
+    const w=trickWinner();
+    state.tricks[w]++;
+    state.turn=w;
+    state.leader=w;
+    state.phase='resolve';
+    recordTrickHistory(w);
+    state.stickyLog=trickReviewText(w);
+    state.log='';
+    render();
+    gameDelay(()=>{
+      state.trick=[];
+      state.lastAINote='';
+      if(state.hands.S.length===0){scoreHand();return}
+      state.phase='play';
+      state.log=`${names[w]} won the trick. ${names[w]} leads next.`;
+      render();
+      if(state.turn!=='S')gameDelay(aiLoop,650)
+    },2200);
+    return;
+  }
+  state.turn=next(state.turn);
+  render();
+  if(state.turn!=='S')gameDelay(aiLoop,650)
+}
+function explainNorthPlay(before,legalBefore,c){
+  if(!before){
+    if(isTrump(c))return `North led ${displayCard(c)} because trump was legal to lead and it was the cheapest lead available.`;
+    return `North led ${displayCard(c)} as a low, safe lead instead of spending a power card.`;
+  }
+  const partnerWinning=team(before.player)===team('N');
+  const safeCards=legalBefore.filter(x=>!beats(x,before.card));
+  const ledSuit=suitName(effectiveSuit(state.trick[0]?.card||before.card));
+  if(before.player==='S'){
+    if(!beats(c,before.card))return `North protected your winning ${displayCard(before.card)} by playing ${displayCard(c)} and not cutting you.`;
+    if(safeCards.length===0)return `North was legally forced to play ${displayCard(c)}. ${ledSuit} were led and North had no safe lower legal card.`;
+    return `Warning: North should have protected your winning ${displayCard(before.card)}. A safe card was available.`;
+  }
+  if(partnerWinning&&!beats(c,before.card))return `North protected the partnership's winning card by playing ${displayCard(c)} safely.`;
+  if(!partnerWinning&&beats(c,before.card))return `North saved the trick with the cheapest winning card: ${displayCard(c)}.`;
+  if(!partnerWinning&&!beats(c,before.card))return `North could not beat the current winner, so North played low with ${displayCard(c)}.`;
+  return `North played ${displayCard(c)} as the lowest legal card for this situation.`;
+}
+function aiLoop(){
+  if(state.phase!=='play'||state.turn==='S')return;
+  const p=state.turn;
+  state.log=`${names[p]} is thinking…`;
+  render();
+  gameDelay(()=>{
+    const before=currentWinnerPlay();
+    const legalBefore=legal(state.hands[p]);
+    const c=aiChoose(p);
+    let note='';
+    if(p==='N')note=explainNorthPlay(before,legalBefore,c);
+    playCard(p,c);
+    let special=isSpecialTrump(c)?` <b>${displayCard(c)}</b> is special trump in ${ruleset().short} mode.`:'';
+    if(p==='N'&&note)state.lastAINote=note;
+    state.log=`${names[p]} played ${displayCard(c)}.${special}${note?' '+note:''}`;
+    afterPlay()
+  },420)
+}
+function scoreTeam(t){const ps=t==='NS'?['S','N']:['W','E'];const bid=ps.reduce((a,p)=>a+(state.bids[p]||0),0);const got=ps.reduce((a,p)=>a+state.tricks[p],0);let delta=0,made=got>=bid;if(made){delta=bid*10+(got-bid);state.bags[t]+=got-bid;if(state.bags[t]>=10){delta-=100;state.bags[t]-=10}}else delta=-10*bid;for(const p of ps){if(state.bids[p]===0)delta+=state.tricks[p]===0?100:-100}state.scores[t]+=delta;return {bid,got,delta,made}}
+function ratingLabel(score){return score>=97?'A+':score>=92?'A':score>=88?'A-':score>=84?'B+':score>=80?'B':score>=74?'B-':score>=68?'C+':score>=62?'C':score>=55?'D':'F'}
+function stars(score){let n=score>=92?5:score>=84?4:score>=74?3:score>=64?2:1;return '★★★★★'.slice(0,n)+'☆☆☆☆☆'.slice(0,5-n)}
+function gradeBreakdown(ns){const bid=state.bids.S||0,won=state.tricks.S||0,teamBags=Math.max(0,ns.got-ns.bid),personalBags=Math.max(0,won-bid);const exactPersonal=won===bid,exactTeam=ns.got===ns.bid;let bidAccuracy=100-Math.min(45,Math.abs(bid-state.handStats.recommendedBid)*9);if(exactPersonal)bidAccuracy=Math.max(bidAccuracy,95);let contract=ns.made?88:48;if(exactTeam)contract=100;else if(ns.made&&teamBags<=1)contract=94;let personal=won>=bid?86:52;if(exactPersonal)personal=100;else if(won===bid+1)personal=94;else if(won>bid+1)personal=Math.max(72,92-(personalBags*8));else personal=Math.max(35,60-((bid-won)*14));let bagControl=100-Math.min(45,teamBags*10+Math.max(0,personalBags-1)*8);if(exactTeam)bagControl=100;let rules=state.handStats.reneges>0?45:100;let partnership=ns.made?90:62;if(exactTeam)partnership=100;else if(ns.made&&teamBags<=1)partnership=94;let overall=Math.round(bidAccuracy*.18+contract*.24+personal*.22+bagControl*.18+rules*.10+partnership*.08);return {overall,bidAccuracy:Math.round(bidAccuracy),contract:Math.round(contract),personal:Math.round(personal),bagControl:Math.round(bagControl),rules:Math.round(rules),partnership:Math.round(partnership),grade:ratingLabel(overall),teamBags,personalBags,exactPersonal,exactTeam}}
+function reportHTML(ns,ew){const g=gradeBreakdown(ns);const diff=(state.bids.S||0)-state.handStats.recommendedBid;let strengths=[],needs=[];if(g.exactTeam)strengths.push('Your team hit the contract exactly.');else if(ns.made)strengths.push('Your team made its contract.');else needs.push('Your team missed the contract; protect sure tricks earlier.');if(g.exactPersonal)strengths.push('You hit your personal bid exactly.');else if(state.tricks.S>=state.bids.S)strengths.push('You personally covered your bid.');else needs.push('You came up short on your personal bid.');if(state.handStats.reneges===0)strengths.push('Every completed play was legal with no renege.');else needs.push('A renege happened; follow suit whenever possible.');if((state.handStats.blockedIllegalClicks||0)>0)strengths.push(`${state.handStats.blockedIllegalClicks} illegal tap(s) were blocked for practice with no grade penalty.`);if(g.teamBags===0)strengths.push('Excellent bag control: no extra team tricks.');else if(g.teamBags<=1)strengths.push('Bag control was solid.');else needs.push(`Your team took ${g.teamBags} bag(s); avoid unnecessary tricks when safe.`);if(state.handStats.startSpecials.length)strengths.push(`You practiced ${ruleset().short} power cards: ${state.handStats.startSpecials.join(', ')}.`);if(Math.abs(diff)<=1)strengths.push('Your bid was close to the coach estimate.');else if(diff>1)needs.push(`Your bid was aggressive versus the coach estimate of ${state.handStats.recommendedBid}.`);else needs.push(`Your bid may have been conservative; coach estimate was ${state.handStats.recommendedBid}.`);if(needs.length===0)needs.push('Next focus: track which trump cards and aces are still live.');let recommendation=g.overall>=93?'Excellent hand. Keep using this same contract-first discipline.':g.teamBags>1?'Next focus: when your team is safe, duck marginal tricks to avoid bags.':!ns.made?'Next focus: identify sure winners early and protect partner’s contract.':Math.abs(diff)>1?`Next time, consider bidding closer to ${state.handStats.recommendedBid} with a similar hand shape.`:'Keep practicing card counting and endgame control.';let skillRows=[['Bid',g.bidAccuracy],['Contract',g.contract],['Your play',g.personal],['Bags',g.bagControl],['Rules',g.rules],['Partner',g.partnership]].map(([k,v])=>`<div style="display:flex;justify-content:space-between;gap:8px;font-size:12px;line-height:1.15"><span>${k}</span><span style="color:#ffd365;font-weight:950">${stars(v)} ${ratingLabel(v)}</span></div>`).join('');return `<div class="handReport"><div class="headline">♠ Hand Complete <span class="grade">Grade ${g.grade}</span></div><div class="quick"><div class="pill"><b>Your team</b><br>Bid ${ns.bid} · Took ${ns.got} · ${ns.made?'Made':'Set'} (${ns.delta>=0?'+':''}${ns.delta})</div><div class="pill"><b>You</b><br>Bid ${state.bids.S} · Won ${state.tricks.S} · Bags ${g.personalBags}</div></div><div class="pill" style="margin:5px 0"><b>Skill score</b><br>${skillRows}</div><div><b>Strengths</b><ul>${strengths.slice(0,5).map(x=>`<li>✓ ${x}</li>`).join('')}</ul></div><div><b>Needs work</b><ul>${needs.slice(0,3).map(x=>`<li>${x}</li>`).join('')}</ul></div><div class="pill" style="margin-top:6px"><b>Coach:</b> ${recommendation}</div></div>`}
+function scoreHand(){const ns=scoreTeam('NS');const ew=scoreTeam('EW');track('Completed hand',{nsMade:ns.made,ewMade:ew.made});state.phase='complete';state.stickyLog='';state.lastReport=reportHTML(ns,ew)+`<div class="endHint">Press New Hand for the next deal.</div>`;state.log=state.lastReport;if((Math.max(state.scores.NS,state.scores.EW)>=500&&state.scores.NS!==state.scores.EW)){track('Completed match',{winner:state.scores.NS>state.scores.EW?'NS':'EW'});state.matchOver=true;state.log=state.lastReport+`<div class="handReport"><div class="headline">${state.scores.NS>state.scores.EW?'North/South':'East/West'} wins the match. Use Menu → Reset match.</div></div>`}render()}
+function reset(){fresh();render()}
+function rulesHTML(){return `<b>${ruleset().name}</b><br>${ruleset().explain}<br><br><b>Shared rules</b><br>Partners: South/North vs West/East. First team to 500 wins. Follow suit is enforced. Trump/spades cannot be led until broken. Made bid = 10 × bid + bags. Failed bid = -10 × bid. 10 bags = -100. A zero bid is Nil: +100 for taking no tricks, -100 otherwise. In this edition, all tricks (including failed Nil tricks) count toward the team contract and bags. At 500 or above, the higher score wins; tied scores continue.<br><br><b>Coach note</b><br>${modeCoachLine()} Legal-card highlighting and renege coaching use this mode’s trump hierarchy.`}
+function showCoach(){track('Clicked hint');let text='Start a new hand and I’ll coach you.';if(state.phase==='bidding')text=bidRead();else if(state.phase==='resolve')text=`${state.stickyLog||state.log}<br><br><b>Card counting drill:</b> pause here and remember the led suit, any trump used, and which high cards are now gone.`;else if(state.phase==='play'){const l=legal(state.hands.S);text=state.turn==='S'?(ruleCoachText()||`Legal cards are highlighted. ${l.length<state.hands.S.length?'You must follow suit.':'You can play any highlighted card.'}`):`${names[state.turn]} is playing. Watch the led suit and count cards. ${modeCoachLine()}`}else text=state.lastReport||state.log;document.getElementById('coachText').innerHTML=text;openSheet('coachSheet')}
+function rules(){document.getElementById('coachText').innerHTML=rulesHTML();openSheet('coachSheet')}
+function appNotes(){document.getElementById('coachText').innerHTML='<b>App Store prep</b><br>Next steps: stronger per-mode AI, deeper replay analysis, private beta feedback, privacy policy, app icon, and TestFlight build.';openSheet('coachSheet')}
+function privacyNotes(){let counts={};try{counts=JSON.parse(localStorage.getItem('dragon-spades-v1:tricksterLocalAnalyticsCounts')||'{}')}catch(e){}const rows=['Visited app','Started hand','Completed hand','Completed match','Selected rule set','Clicked hint','Illegal renege blocked'].map(k=>`<div style="display:flex;justify-content:space-between;gap:10px"><span>${k}</span><b>${counts[k]||0}</b></div>`).join('');document.getElementById('coachText').innerHTML=`<b>Local-only edition</b><br>No analytics beacon or network service is loaded. Settings and performance statistics stay in this browser; current matches do not survive a page reload.<br><br><b>Gameplay stays local</b><br>The game still runs locally in each browser. Product-health events such as started hand, completed hand, selected rule set, clicked hint, and illegal renege blocked are stored as local counters on this device only. Blocked illegal taps are teaching events, not gameplay penalties.<br><br><b>Not tracked by this app</b><br>No names, emails, exact hands/cards, children’s info, or personal player profiles are collected or sent by this app.<br><br><b>This device counts</b><br>${rows}`;openSheet('coachSheet')}
+function openSheet(id){document.getElementById('overlay').classList.add('show');document.getElementById(id).classList.add('show')}
+function closeSheets(){document.getElementById('overlay').classList.remove('show');document.querySelectorAll('.bottomSheet,.menuSheet').forEach(x=>x.classList.remove('show'))}
+function toast(t){const el=document.getElementById('toast');el.textContent=t;el.classList.add('show');setTimeout(()=>el.classList.remove('show'),2500)}
+function cardHTML(c){return `<span>${c.label||c.rank}</span><span class="s">${c.suit}</span>`}
+function renderHand(){const el=document.getElementById('hand');el.innerHTML='';const h=state.hands.S;if(!h.length){el.innerHTML=state.phase==='complete'?'<div class="emptyHand">Hand report shown above</div>':'<div class="emptyHand">No cards</div>';return}const l=legal(h).map(c=>c.id);const W=el.clientWidth||window.innerWidth-16;const cardW=window.innerWidth<=520?(window.innerHeight<720?48:52):58;const n=h.length;const maxSpread=Math.max(0,W-cardW-4);const step=n>1?Math.min(cardW*.62,maxSpread/(n-1)):0;const total=cardW+step*(n-1);const start=(W-total)/2;h.forEach((c,i)=>{const b=document.createElement('button');b.className='card '+(red.has(c.suit)?'red ':'')+(state.selected===c.id?'selected ':'')+(l.includes(c.id)?'legal ':'illegal ')+(isSpecialTrump(c)?' special ':'');b.style.left=(start+i*step)+'px';b.style.zIndex=i+1;b.innerHTML=cardHTML(c);b.title=legalReason(c)||displayCard(c);b.onclick=()=>humanCard(c);el.appendChild(b)})}
+function renderTrick(){const el=document.getElementById('trickArea');el.innerHTML='';for(const t of state.trick){const div=document.createElement('div');div.className='played '+({S:'south',N:'north',E:'east',W:'west'}[t.player])+' '+(red.has(t.card.suit)?'red':'')+' '+(isSpecialTrump(t.card)?'special':'');div.innerHTML=cardHTML(t.card);el.appendChild(div)}}
+function renderBids(){const grid=document.getElementById('bidGrid');grid.innerHTML='';for(let i=1;i<=13;i++){let b=document.createElement('button');b.textContent=i;b.onclick=()=>bid(i);grid.appendChild(b)}let nil=document.createElement('button');nil.textContent='Nil';nil.className='nil';nil.onclick=()=>bid(0);grid.appendChild(nil);document.getElementById('mobileBid').classList.toggle('hidden',state.phase!=='bidding')}
+function renderModes(){const choices=document.getElementById('modeChoices');if(!choices)return;document.getElementById('modeText').innerHTML=`Current: <b>${ruleset().name}</b><br>${ruleset().explain}<br><br>Changing presets resets the match so the deck and AI stay consistent.`;choices.innerHTML='';for(const key of ['standard','joker','jjdd']){const b=document.createElement('button');b.innerHTML=`${key===currentMode?'✓ ':''}${RULESETS[key].name}<br><span style="color:#b8d5ca;font-size:12px;font-weight:700">${RULESETS[key].explain}</span>`;b.onclick=()=>setMode(key);choices.appendChild(b)}}
+function setMode(key){if(!RULESETS[key])return;currentMode=key;localStorage.setItem('dragon-spades-v1:tricksterRuleMode',key);track('Selected rule set',{selected:key});closeSheets();fresh();render();toast(`Rule set changed to ${RULESETS[key].name}.`)}
+function render(){document.getElementById('app').className='app '+(state.phase==='bidding'?'bidding':'playing')+(state.matchOver?' matchOver':'');document.getElementById('scoreText').textContent=`NS ${state.scores.NS} (${state.bags.NS} bags) · EW ${state.scores.EW} (${state.bags.EW} bags) · ${ruleset().short}`;document.getElementById('handText').textContent=`Hand ${state.handNo}`;document.getElementById('turnText').textContent=`Turn: ${names[state.turn]||'You'}`;const combinedMsg=state.stickyLog?(state.stickyLog+(state.log?`<div style="margin-top:8px;color:#d8eee6">${state.log}</div>`:'')):state.log;document.getElementById('message').innerHTML=combinedMsg;const rc=document.getElementById('ruleCoach');const rcText=ruleCoachText();rc.innerHTML=rcText;rc.classList.toggle('hidden',!rcText);document.getElementById('newHandBtn').textContent=state.matchOver?'Game Over':(state.phase==='bidding'?'Redeal':'New Hand');document.getElementById('newHandBtn').disabled=state.matchOver;for(const p of ['W','N','E','S']){document.getElementById('meta'+p).textContent=`Bid: ${state.bids[p]??'-'} | Tricks: ${state.tricks[p]} | Cards: ${state.hands[p].length}`;let pe=document.getElementById('p'+p);if(pe)pe.classList.toggle('active',state.turn===p)}document.getElementById('youPanel').classList.toggle('active',state.turn==='S');document.getElementById('bidCoach').innerHTML=state.phase==='bidding'?bidRead():'';const mb=document.getElementById('modeBtn');if(mb)mb.textContent=`Rule set: ${ruleset().name}`;renderBids();renderTrick();renderHand();renderModes()}
+document.getElementById('newHandBtn').onclick=startHand;
+document.getElementById('hintBtn').onclick=showCoach;
+document.getElementById('closeCoach').onclick=closeSheets;
+document.getElementById('overlay').onclick=closeSheets;
+document.getElementById('menuBtn').onclick=()=>openSheet('menuSheet');
+document.getElementById('closeMenu').onclick=closeSheets;
+document.getElementById('resetBtn').onclick=()=>{closeSheets();reset()};
+document.getElementById('rulesBtn').onclick=()=>{closeSheets();rules()};
+document.getElementById('historyBtn').onclick=()=>{closeSheets();document.getElementById('coachText').innerHTML=trickHistoryHTML();openSheet('coachSheet')};
+document.getElementById('appStoreBtn').onclick=()=>{closeSheets();appNotes()};
+document.getElementById('privacyBtn').onclick=()=>{closeSheets();privacyNotes()};
+document.getElementById('modeBtn').onclick=()=>{closeSheets();renderModes();openSheet('modeSheet')};
+document.getElementById('closeMode').onclick=closeSheets;
+window.addEventListener('resize',renderHand);
+track('Visited app',{referrer:document.referrer?'present':'none'});
+render();
+</script>
+
+<script id="trickster-v070-upgrade">
+(function(){
+  const VERSION='v0.8.0';
+  const CF_TOKEN='bcf3c824273d481db353b0cb79755b37';
+
+  // Visible beta/version polish.
+  const ver=document.querySelector('.ver'); if(ver) ver.textContent=VERSION;
+  const title=document.querySelector('.title'); if(title && !title.querySelector('.betaTag')) title.insertAdjacentHTML('beforeend','<span class="betaTag">PUBLIC BETA BUILD</span>');
+
+  function ensureContractBar(){
+    if(document.getElementById('contractBar'))return;
+    const status=document.querySelector('.status');
+    if(status)status.insertAdjacentHTML('afterend','<div id="contractBar" class="contractBar"><div class="contractPill">Team contract appears after bidding.</div><div class="contractPill">Progress appears during play.</div><div class="contractPill">Coach mode ready.</div></div>');
+  }
+  ensureContractBar();
+
+  function addMenuButton(id,label,afterId){
+    if(document.getElementById(id))return;
+    const after=document.getElementById(afterId);
+    const b=document.createElement('button');
+    b.id=id;b.textContent=label;
+    if(after&&after.parentNode)after.parentNode.insertBefore(b,after.nextSibling);
+  }
+  addMenuButton('progressBtn','Player progress','historyBtn');
+  addMenuButton('dailyBtn','Daily practice','progressBtn');
+  addMenuButton('countModeBtn','Card-counting mode','dailyBtn');
+  addMenuButton('feedbackBtn','Report this hand','privacyBtn');
+  addMenuButton('betaBtn','Public beta checklist','feedbackBtn');
+
+  const oldTrack=track;
+  track=function(event,props={}){ try{oldTrack(event,props)}catch(e){} };
+
+  function todayKey(){return new Date().toISOString().slice(0,10)}
+  function loadStats(){try{return JSON.parse(localStorage.getItem('dragon-spades-v1:tricksterPlayerStats')||'{}')}catch(e){return {}}}
+  function saveStats(s){try{localStorage.setItem('dragon-spades-v1:tricksterPlayerStats',JSON.stringify(s))}catch(e){}}
+  function initStats(){
+    const s=loadStats();
+    s.hands=s.hands||0;s.matches=s.matches||0;s.wins=s.wins||0;s.losses=s.losses||0;
+    s.contractsMade=s.contractsMade||0;s.exactHands=s.exactHands||0;s.totalBags=s.totalBags||0;
+    s.gradeTotal=s.gradeTotal||0;s.bestGrade=s.bestGrade||'—';s.currentMadeStreak=s.currentMadeStreak||0;s.bestMadeStreak=s.bestMadeStreak||0;
+    s.illegalTapsBlocked=s.illegalTapsBlocked||0;s.ruleUsage=s.ruleUsage||{};s.dailyCompleted=s.dailyCompleted||{};s.cardCountingMode=!!s.cardCountingMode;
+    return s;
+  }
+  function gradePoints(g){return g>=97?100:g>=92?95:g>=88?90:g>=84?86:g>=80?82:g>=74?78:g>=68?72:g>=62?66:g>=55?58:40}
+  function skillLevel(avg,hands){
+    if(hands<5)return 'Rookie';
+    if(avg>=92&&hands>=25)return 'Expert';
+    if(avg>=86)return 'Advanced';
+    if(avg>=76)return 'Intermediate';
+    if(avg>=65)return 'Developing';
+    return 'Beginner';
+  }
+  function bar(v){v=Math.max(0,Math.min(100,Math.round(v)));return `<div class="barTrack"><div class="barFill" style="width:${v}%"></div></div><span>${v}</span>`}
+  function recordProgress(ns,g){
+    const s=initStats();
+    s.hands++;
+    if(ns.made)s.contractsMade++;
+    if(g.exactTeam)s.exactHands++;
+    s.totalBags+=g.teamBags;
+    s.illegalTapsBlocked+=(state.handStats.blockedIllegalClicks||0);
+    s.gradeTotal+=g.overall;
+    if(!s.bestGradeScore||g.overall>s.bestGradeScore){s.bestGradeScore=g.overall;s.bestGrade=g.grade}
+    s.currentMadeStreak=ns.made?s.currentMadeStreak+1:0;
+    s.bestMadeStreak=Math.max(s.bestMadeStreak,s.currentMadeStreak);
+    s.ruleUsage[currentMode]=(s.ruleUsage[currentMode]||0)+1;
+    saveStats(s);
+  }
+
+  function contractStatusHTML(){
+    const nsBid=(state.bids.S||0)+(state.bids.N||0);
+    const nsTook=(state.tricks.S||0)+(state.tricks.N||0);
+    const ewBid=(state.bids.W||0)+(state.bids.E||0);
+    const ewTook=(state.tricks.W||0)+(state.tricks.E||0);
+    if(state.phase==='idle')return `<div class="contractPill">Start a hand to see contract status.</div><div class="contractPill">Mode: <b>${ruleset().short}</b></div><div class="contractPill">Coach: ready.</div>`;
+    if(state.phase==='bidding')return `<div class="contractPill">Choose an honest bid.</div><div class="contractPill">Coach estimate: <b>${state.handStats.recommendedBid||'-'}</b></div><div class="contractPill">Mode: <b>${ruleset().short}</b></div>`;
+    const need=Math.max(0,nsBid-nsTook), bags=Math.max(0,nsTook-nsBid);
+    const ewNeed=Math.max(0,ewBid-ewTook);
+    const cls=need===0?(bags>0?'warn':'good'):'';
+    let status=need>0?`Need <b>${need}</b> more`:`Contract safe${bags?` · <b>${bags}</b> bag(s)`:''}`;
+    return `<div class="contractPill ${cls}">NS bid ${nsBid} · took ${nsTook}<br>${status}</div><div class="contractPill">You: bid <b>${state.bids.S??'-'}</b> · won <b>${state.tricks.S}</b></div><div class="contractPill">EW bid ${ewBid} · took ${ewTook}<br>${ewNeed>0?`Need ${ewNeed}`:'Safe'}</div>`;
+  }
+
+  const oldRender=render;
+  render=function(){
+    oldRender();
+    ensureContractBar();
+    const cb=document.getElementById('contractBar'); if(cb)cb.innerHTML=contractStatusHTML();
+    const cm=document.getElementById('countModeBtn'); if(cm)cm.textContent=(initStats().cardCountingMode?'Card-counting: ON':'Card-counting: OFF');
+  };
+
+  const oldAfterPlay=afterPlay;
+  afterPlay=function(){
+    if(state.trick.length===4){
+      const w=trickWinner();
+      state.tricks[w]++;
+      state.turn=w; state.leader=w; state.phase='resolve';
+      recordTrickHistory(w);
+      state.stickyLog=trickReviewText(w);
+      state.log='';
+      render();
+      const delay=initStats().cardCountingMode?5200:2200;
+      gameDelay(()=>{
+        state.trick=[];
+        state.lastAINote='';
+        if(state.hands.S.length===0){scoreHand();return}
+        state.phase='play';
+        state.log=`${names[w]} won the trick. ${names[w]} leads next.`;
+        render();
+        if(state.turn!=='S')gameDelay(aiLoop,650)
+      },delay);
+      return;
+    }
+    state.turn=next(state.turn);
+    render();
+    if(state.turn!=='S')gameDelay(aiLoop,650)
+  };
+
+  function lessonForHand(ns,g){
+    if(!ns.made)return {title:'Lesson: protect sure tricks',body:'Your team was set. Count your sure winners early, protect partner winners, and use trump only when it actually saves a book.'};
+    if(g.teamBags>=3)return {title:'Lesson: bag control',body:'Your contract was safe, but the team took too many extras. Once your team has enough books, duck marginal tricks and stop spending power cards.'};
+    if(!g.exactPersonal)return {title:'Lesson: personal bid calibration',body:'Compare your bid to the tricks you actually won. Your goal is not to win every book; it is to make the team contract with as few bags as possible.'};
+    if(state.trickHistory.some(t=>(t.coach||'').includes('forced')))return {title:'Lesson: forced partner plays',body:'Some partner plays look wrong until you check the legal cards. Use Trick History to verify whether North was forced by the led suit.'};
+    return {title:'Lesson: contract discipline',body:'Excellent contract-first play. Keep counting trump, tracking live aces, and protecting partner winners instead of chasing unnecessary bags.'};
+  }
+
+  const oldReportHTML=reportHTML;
+  reportHTML=function(ns,ew){
+    const g=gradeBreakdown(ns);
+    const html=oldReportHTML(ns,ew);
+    const lesson=lessonForHand(ns,g);
+    const bars=`<div class="miniBars">
+      <div class="miniBar"><span>Bid</span>${bar(g.bidAccuracy)}</div>
+      <div class="miniBar"><span>Contract</span>${bar(g.contract)}</div>
+      <div class="miniBar"><span>Bags</span>${bar(g.bagControl)}</div>
+      <div class="miniBar"><span>Partner</span>${bar(g.partnership)}</div>
+    </div>`;
+    return html.replace('</div>`','</div>`') + `<div class="lessonBox"><b>${lesson.title}</b><br>${lesson.body}${bars}</div>`;
+  };
+
+
+  function matchReportHTML(ns,ew,g){
+    const nsWon=state.scores.NS>state.scores.EW;
+    const winner=nsWon?'North/South':'East/West';
+    const s=initStats();
+    const finalBags=state.bags.NS;
+    let score=g.overall;
+    if(nsWon)score=Math.max(score,90);else score=Math.min(score,74);
+    if(finalBags<=2)score+=3;
+    if(finalBags>=7)score-=7;
+    if(Math.abs(state.scores.NS-state.scores.EW)>=150&&nsWon)score+=2;
+    score=Math.max(40,Math.min(100,Math.round(score)));
+    const mGrade=ratingLabel(score);
+    const best=s.bestGrade&&s.bestGrade!=='—'?s.bestGrade:g.grade;
+    let strength='Contract discipline';
+    if(finalBags<=2&&nsWon)strength='Contract discipline and bag control';
+    if(g.exactTeam)strength='Exact contract control';
+    let focus='Avoid late-match bags';
+    if(!nsWon)focus='Protect sure tricks and reduce missed contracts';
+    else if(finalBags===0)focus='Keep tracking boss trump and partner winners';
+    else if(finalBags>=7)focus='Avoid late-match bags before the 10-bag penalty';
+    return `<div class="matchReport">
+      <div class="bigTitle">♠ Match Complete</div>
+      <div class="winnerLine">${winner} wins!</div>
+      <div class="matchStats">
+        <div class="matchStat"><span>Final Score</span><b>${state.scores.NS}–${state.scores.EW}</b></div>
+        <div class="matchStat"><span>Match Grade</span><b>${mGrade}</b></div>
+        <div class="matchStat"><span>Hands Played</span><b>${state.handNo}</b></div>
+        <div class="matchStat"><span>Best Hand</span><b>${best}</b></div>
+        <div class="matchStat"><span>Total Bags</span><b>${finalBags}</b></div>
+        <div class="matchStat"><span>Rule Set</span><b>${ruleset().short}</b></div>
+      </div>
+      <div class="lessonBox"><b>Biggest Strength:</b><br>${strength}</div>
+      <div class="lessonBox"><b>Next Focus:</b><br>${focus}</div>
+    </div>`;
+  }
+
+  scoreHand=function(){
+    const ns=scoreTeam('NS');
+    const ew=scoreTeam('EW');
+    const g=gradeBreakdown(ns);
+    recordProgress(ns,g);
+    track('Completed hand',{nsMade:ns.made,ewMade:ew.made});
+    state.phase='complete';state.stickyLog='';
+    state.lastReport=reportHTML(ns,ew)+`<div class="endHint">Press New Hand for the next deal.</div>`;
+    state.log=state.lastReport;
+    if((Math.max(state.scores.NS,state.scores.EW)>=500&&state.scores.NS!==state.scores.EW)){
+      const s=initStats();s.matches++;
+      if(state.scores.NS>state.scores.EW){s.wins++}else{s.losses++}
+      saveStats(s);
+      track('Completed match',{winner:state.scores.NS>state.scores.EW?'NS':'EW'});
+      state.matchOver=true;
+      state.log=matchReportHTML(ns,ew,g)+state.lastReport+`<div class="endHint">Match is over. Use Menu → Reset match.</div>`;
+    }
+    render();
+  };
+
+  function progressHTML(){
+    const s=initStats(), avg=s.hands?Math.round(s.gradeTotal/s.hands):0;
+    const made=s.hands?Math.round((s.contractsMade/s.hands)*100):0;
+    const exact=s.hands?Math.round((s.exactHands/s.hands)*100):0;
+    const bags=s.hands?(s.totalBags/s.hands).toFixed(1):'0.0';
+    const usage=Object.entries(s.ruleUsage).sort((a,b)=>b[1]-a[1]).map(([k,v])=>`<div style="display:flex;justify-content:space-between"><span>${RULESETS[k]?.name||k}</span><b>${v}</b></div>`).join('')||'No hands completed yet.';
+    return `<b>Player progress</b><div class="progressGrid">
+      <div class="progressCard">Skill level<br><b>${skillLevel(avg,s.hands)}</b><div class="smallNote">Average coach score: ${avg||'—'}</div></div>
+      <div class="progressCard">Hands played<br><b>${s.hands}</b><div class="smallNote">Matches: ${s.matches} · Wins: ${s.wins}</div></div>
+      <div class="progressCard">Contract rate<br><b>${made}%</b><div class="smallNote">Exact contracts: ${exact}%</div></div>
+      <div class="progressCard">Best streak<br><b>${s.bestMadeStreak}</b><div class="smallNote">Current made streak: ${s.currentMadeStreak}</div></div>
+      <div class="progressCard">Avg bags<br><b>${bags}</b><div class="smallNote">Lower is usually better.</div></div>
+      <div class="progressCard">Blocked taps<br><b>${s.illegalTapsBlocked}</b><div class="smallNote">Blocked practice taps do not hurt your grade.</div></div>
+    </div><b>Rule-set usage</b><div class="pill" style="margin-top:8px">${usage}</div>`;
+  }
+
+  function dailySeed(){
+    const d=todayKey().replaceAll('-','');
+    let n=0; for(const ch of d) n=(n*31+ch.charCodeAt(0))%9973;
+    return n;
+  }
+  function dailyHTML(){
+    const s=initStats(), key=todayKey(), done=s.dailyCompleted[key];
+    const seed=dailySeed();
+    const scenarios=[
+      {title:'Protect partner',prompt:'South is winning with K♥. North has 3♥ and A♥. What should North play?',choices:['A♥ to secure it','3♥ to protect South','Cut with trump'],answer:1,why:'North should play the safe low heart. Do not overtake your partner unless forced.'},
+      {title:'Avoid the bag',prompt:'Your team bid 6 and already has 6 books. You can win with A♣ or duck with 7♣. What is the training answer?',choices:['Win with A♣','Duck with 7♣','Cut with trump'],answer:1,why:'Once the contract is safe, avoid unnecessary bags when it is safe to duck.'},
+      {title:'Follow suit',prompt:'Clubs were led. You still have 4♣ and several spades. What is legal?',choices:['Play a spade','Play 4♣','Play any card'],answer:1,why:'You must follow suit when possible. Playing a spade while holding clubs would be a renege.'},
+      {title:'Card-counting check',prompt:'Big Joker, Little Joker, and 2♠ are gone in JJDD. What is now the boss trump?',choices:['A♠','2♦','K♠'],answer:0,why:'In your JJDD rules, 2♦ is not trump. Once Big Joker, Little Joker, and 2♠ are gone, A♠ is boss trump.'}
+    ];
+    const sc=scenarios[seed%scenarios.length];
+    const buttons=sc.choices.map((c,i)=>`<button class="challengeChoice" onclick="answerDaily(${i},${sc.answer},'${encodeURIComponent(sc.why)}')">${c}</button>`).join('');
+    return `<b>Daily practice — ${key}</b><br><div class="lessonBox"><b>${sc.title}</b><br>${sc.prompt}</div>${done?`<div class="pill"><b>Completed today.</b><br>${done}</div>`:buttons}<div class="smallNote">Daily practice is local to this device and does not send personal data.</div>`;
+  }
+  window.answerDaily=function(choice,answer,whyEncoded){
+    const why=decodeURIComponent(whyEncoded);
+    const s=initStats(), key=todayKey();
+    const correct=choice===answer;
+    s.dailyCompleted[key]=(correct?'Correct. ':'Review. ')+why;
+    saveStats(s);
+    document.getElementById('coachText').innerHTML=dailyHTML();
+    track('Daily practice answered',{correct});
+  };
+
+  function scenarioDrillsHTML(){
+    return `<b>Scenario drills</b>
+    <div class="lessonBox"><b>Drill 1: Partner protection</b><br>If you are winning and North is your partner, North should throw low and avoid cutting you unless forced.</div>
+    <div class="lessonBox"><b>Drill 2: Contract math</b><br>Before each trick ask: team bid, team books, books needed, bags risk.</div>
+    <div class="lessonBox"><b>Drill 3: Card counting</b><br>After every trick, say out loud: led suit, winner, trump played, and any boss cards now gone.</div>
+    <button class="challengeChoice accentBtn" onclick="document.getElementById('coachText').innerHTML=dailyHTML()">Open today’s challenge</button>`;
+  }
+
+  function reportHandText(){
+    const trickLines=(state.trickHistory||[]).map(t=>`Trick ${t.no}: ${t.plays.map(p=>`${names[p.player]} ${p.card}`).join(' | ')} -> ${names[t.winner]}${t.coach?`\\nCoach: ${t.coach}`:''}`).join('\\n');
+    return `Trickster AI feedback report
+Version: ${VERSION}
+Mode: ${ruleset().name}
+Score: NS ${state.scores.NS} (${state.bags.NS} bags) | EW ${state.scores.EW} (${state.bags.EW} bags)
+Hand: ${state.handNo}
+Phase: ${state.phase}
+Bids: You ${state.bids.S??'-'}, West ${state.bids.W??'-'}, North ${state.bids.N??'-'}, East ${state.bids.E??'-'}
+Tricks: You ${state.tricks.S}, West ${state.tricks.W}, North ${state.tricks.N}, East ${state.tricks.E}
+Blocked illegal taps: ${state.handStats.blockedIllegalClicks||0}
+
+${trickLines||'No completed tricks yet.'}
+
+Issue:
+Describe what looked wrong here.`;
+  }
+  async function feedbackHTML(){
+    const txt=reportHandText();
+    let copied=false;
+    try{await navigator.clipboard.writeText(txt);copied=true}catch(e){}
+    return `<b>Report this hand</b><br>${copied?'Copied a hand report to your clipboard. Paste it into a GitHub issue or message.':'Copy this report and paste it into a GitHub issue or message.'}<div class="reportBox">${txt.replace(/[&<>]/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[m]))}</div>`;
+  }
+
+  function publicBetaHTML(){
+    return `<b>Public beta checklist</b>
+    <div class="progressGrid">
+      <div class="progressCard"><b>✓</b><br>Polished mobile UI</div>
+      <div class="progressCard"><b>✓</b><br>Cloudflare analytics token installed</div>
+      <div class="progressCard"><b>✓</b><br>Stable rule presets: Standard, Joker-Joker, JJDD</div>
+      <div class="progressCard"><b>✓</b><br>Privacy screen and local-only gameplay counters</div>
+      <div class="progressCard"><b>Next</b><br>README screenshots and tester instructions</div>
+      <div class="progressCard"><b>Next</b><br>More AI test cases and rule tests</div>
+    </div><div class="smallNote">This is still a beta. Keep collecting screenshots when partner play looks questionable.</div>`;
+  }
+
+  // Rebind menu buttons.
+  const bind=()=> {
+    const progressBtn=document.getElementById('progressBtn');
+    if(progressBtn)progressBtn.onclick=()=>{closeSheets();document.getElementById('coachText').innerHTML=progressHTML();openSheet('coachSheet')};
+    const dailyBtn=document.getElementById('dailyBtn');
+    if(dailyBtn)dailyBtn.onclick=()=>{closeSheets();document.getElementById('coachText').innerHTML=scenarioDrillsHTML()+dailyHTML();openSheet('coachSheet')};
+    const countBtn=document.getElementById('countModeBtn');
+    if(countBtn)countBtn.onclick=()=>{const s=initStats();s.cardCountingMode=!s.cardCountingMode;saveStats(s);toast(s.cardCountingMode?'Card-counting mode on. Trick pause is longer.':'Card-counting mode off.');render()};
+    const feedbackBtn=document.getElementById('feedbackBtn');
+    if(feedbackBtn)feedbackBtn.onclick=async()=>{closeSheets();document.getElementById('coachText').innerHTML=await feedbackHTML();openSheet('coachSheet')};
+    const betaBtn=document.getElementById('betaBtn');
+    if(betaBtn)betaBtn.onclick=()=>{closeSheets();document.getElementById('coachText').innerHTML=publicBetaHTML();openSheet('coachSheet')};
+  };
+  bind();
+
+  const oldRulesHTML=rulesHTML;
+  rulesHTML=function(){return oldRulesHTML()+`<br><br><b>Training upgrades</b><br>Team contract status is shown during play. Trick history and replay notes are available in Menu. Card-counting mode extends the trick pause. Blocked accidental taps are teaching events only, not penalties.`};
+  appNotes=function(){document.getElementById('coachText').innerHTML=publicBetaHTML();openSheet('coachSheet')};
+
+  render();
+})();
+</script>
+
+
+<script id="trickster-v080-trust-testing">
+(function(){
+  const VERSION='v0.8.0';
+  const ver=document.querySelector('.ver'); if(ver) ver.textContent=VERSION;
+  const title=document.querySelector('.title');
+  if(title && !title.querySelector('.trustBadge')) title.insertAdjacentHTML('beforeend','<span class="trustBadge">TRUST TESTED</span>');
+
+  function esc(s){return String(s??'').replace(/[&<>]/g,m=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[m]))}
+  function ensureTrustState(){
+    if(!state)return;
+    if(!state.aiAudit)state.aiAudit=[];
+    if(!state.testResults)state.testResults=[];
+    if(!state.replayIndex)state.replayIndex=0;
+  }
+  ensureTrustState();
+
+  function addMenuButton(id,label,afterId){
+    if(document.getElementById(id))return;
+    const after=document.getElementById(afterId);
+    const b=document.createElement('button'); b.id=id; b.textContent=label;
+    if(after&&after.parentNode)after.parentNode.insertBefore(b,after.nextSibling);
+  }
+  addMenuButton('testsBtn','Trust tests','historyBtn');
+  addMenuButton('replayBtn','Trick replay','testsBtn');
+  addMenuButton('auditBtn','AI audit','replayBtn');
+
+  // Ensure each new hand starts with clean audit/replay state.
+  const baseStartHand=startHand;
+  startHand=function(){
+    baseStartHand();
+    ensureTrustState();
+    state.aiAudit=[];
+    state.replayIndex=0;
+    render();
+  };
+  const newHandBtn=document.getElementById('newHandBtn'); if(newHandBtn)newHandBtn.onclick=startHand;
+
+  function cloneCards(cards){return (cards||[]).map(displayCard)}
+  function legalNames(cards){return (cards||[]).map(displayCard).join(', ')||'none'}
+  function auditNorthPlay(before,legalBefore,chosen,note){
+    ensureTrustState();
+    const safeCards=before?legalBefore.filter(c=>!beats(c,before.card)):[];
+    const forced=before&&before.player==='S'&&beats(chosen,before.card)&&safeCards.length===0;
+    const bad=before&&before.player==='S'&&beats(chosen,before.card)&&safeCards.length>0;
+    const entry={
+      no:state.aiAudit.length+1,
+      hand:state.handNo,
+      trick:(state.trickHistory?.length||0)+1,
+      before:before?`${names[before.player]} ${displayCard(before.card)}`:'North led',
+      legal:cloneCards(legalBefore),
+      safe:cloneCards(safeCards),
+      chosen:displayCard(chosen),
+      note:note||'',
+      forced:!!forced,
+      warning:!!bad,
+      phase:state.phase,
+      mode:ruleset().short
+    };
+    state.aiAudit.push(entry);
+    return entry;
+  }
+
+  // Override AI loop to capture audit data before card is removed from North's hand.
+  aiLoop=function(){
+    if(state.phase!=='play'||state.turn==='S')return;
+    ensureTrustState();
+    const p=state.turn;
+    state.log=`${names[p]} is thinking…`;
+    render();
+    gameDelay(()=>{
+      const before=currentWinnerPlay();
+      const legalBefore=legal(state.hands[p]);
+      const c=aiChoose(p);
+      let note='';
+      if(p==='N')note=explainNorthPlay(before,legalBefore,c);
+      let audit=null;
+      if(p==='N')audit=auditNorthPlay(before,legalBefore,c,note);
+      playCard(p,c);
+      let special=isSpecialTrump(c)?` <b>${displayCard(c)}</b> is special trump in ${ruleset().short} mode.`:'';
+      if(p==='N'&&note)state.lastAINote=note+(audit?.warning?' ⚠️ Audit warning: a safe card existed.':'');
+      state.log=`${names[p]} played ${displayCard(c)}.${special}${note?' '+note:''}`;
+      afterPlay();
+    },420);
+  };
+
+  // Add stronger forced/not-forced verification into trick history entries.
+  const baseRecordTrickHistory=recordTrickHistory;
+  recordTrickHistory=function(w){
+    baseRecordTrickHistory(w);
+    ensureTrustState();
+    const last=state.trickHistory[state.trickHistory.length-1];
+    if(last){
+      const audits=state.aiAudit.filter(a=>a.trick===last.no);
+      if(audits.length){
+        const a=audits[audits.length-1];
+        last.audit=`North audit: chose ${a.chosen}. ${a.warning?'A safe card existed — review this hand.':a.forced?'North was forced.':'North was not forced and protected correctly when applicable.'}`;
+        if(last.coach)last.coach += ' ' + last.audit; else last.coach=last.audit;
+      }
+    }
+  };
+
+  function cardObj(id){
+    if(id==='BJ')return {rank:'BJ',suit:'🃏',id:'BJ',label:'BJ',joker:true,name:'Big Joker'};
+    if(id==='LJ')return {rank:'LJ',suit:'🃏',id:'LJ',label:'LJ',joker:true,name:'Little Joker'};
+    const rank=id.slice(0,-1), suit=id.slice(-1);
+    return {rank,suit,id,label:rank,joker:false,name:id};
+  }
+  function withMode(mode,fn){
+    const old=currentMode;
+    currentMode=mode;
+    try{return fn()}finally{currentMode=old}
+  }
+  function runTrustTests(){
+    const tests=[];
+    function test(name,fn,detail=''){
+      try{
+        const ok=!!fn();
+        tests.push({name,ok,detail:ok?(detail||'Passed'):(detail||'Failed')});
+      }catch(e){tests.push({name,ok:false,detail:e.message||String(e)})}
+    }
+    test('JJDD: 2♦ is not trump',()=>withMode('jjdd',()=>!isTrump(cardObj('2♦'))),'2♦ should behave as a normal diamond.');
+    test('JJDD: 2♠ beats A♠',()=>withMode('jjdd',()=>beats(cardObj('2♠'),cardObj('A♠'))),'2♠ is the only deuce power card in your JJDD rules.');
+    test('JJDD: A♠ beats K♠ after 2♠',()=>withMode('jjdd',()=>beats(cardObj('A♠'),cardObj('K♠'))),'Normal spade order still applies below 2♠.');
+    test('Joker order: Big Joker beats Little Joker',()=>withMode('jjdd',()=>beats(cardObj('BJ'),cardObj('LJ'))),'Big Joker should be top trump.');
+    test('Little Joker beats 2♠',()=>withMode('jjdd',()=>beats(cardObj('LJ'),cardObj('2♠'))),'Little Joker should be above 2♠.');
+    test('Follow suit blocks renege',()=>{
+      const oldTrick=state.trick, oldPhase=state.phase;
+      state.phase='play'; state.trick=[{player:'W',card:cardObj('9♣')}];
+      const hand=[cardObj('4♣'),cardObj('A♠')];
+      const ok=legal(hand).length===1&&legal(hand)[0].id==='4♣'&&legalReason(cardObj('A♠'),hand).includes('Illegal renege');
+      state.trick=oldTrick; state.phase=oldPhase;
+      return ok;
+    },'If clubs are led and you have clubs, spades are illegal.');
+    test('Spades cannot be led until broken',()=>{
+      const oldTrick=state.trick, oldBroken=state.spadesBroken;
+      state.trick=[]; state.spadesBroken=false;
+      const hand=[cardObj('4♣'),cardObj('A♠')];
+      const ok=legal(hand).length===1&&legal(hand)[0].id==='4♣';
+      state.trick=oldTrick; state.spadesBroken=oldBroken;
+      return ok;
+    },'Lead a non-trump card before spades/trump are broken.');
+    test('Score: bid 7 take 8 = +71 and 1 bag',()=>{
+      const oldB=state.bids, oldT=state.tricks, oldS=state.scores, oldBags=state.bags;
+      state.bids={S:3,N:4,W:0,E:0}; state.tricks={S:3,N:5,W:0,E:0}; state.scores={NS:0,EW:0}; state.bags={NS:0,EW:0};
+      const r=scoreTeam('NS');
+      const ok=r.delta===71&&state.bags.NS===1;
+      state.bids=oldB; state.tricks=oldT; state.scores=oldS; state.bags=oldBags;
+      return ok;
+    },'Standard contract scoring with one bag.');
+    test('North protects South winner when safe card exists',()=>{
+      const oldTrick=state.trick, oldHands=state.hands;
+      state.trick=[{player:'S',card:cardObj('Q♥')},{player:'W',card:cardObj('4♥')}];
+      state.hands={...state.hands,N:[cardObj('3♥'),cardObj('A♥')]};
+      const choice=aiChoose('N');
+      const ok=choice.id==='3♥';
+      state.trick=oldTrick; state.hands=oldHands;
+      return ok;
+    },'North should play 3♥ under your Q♥, not A♥.');
+    test('North forced explanation when no safe card exists',()=>{
+      const before={player:'S',card:cardObj('Q♥')};
+      const legalBefore=[cardObj('A♥')];
+      const note=explainNorthPlay(before,legalBefore,cardObj('A♥'));
+      return note.includes('forced');
+    },'If North only has A♥, the coach should explain the forced overtake.');
+    state.testResults=tests;
+    return tests;
+  }
+  function testsHTML(){
+    const results=runTrustTests();
+    const pass=results.filter(t=>t.ok).length;
+    const rows=results.map(t=>`<div class="testRow ${t.ok?'testPass':'testFail'}"><div class="testIcon">${t.ok?'✓':'!'}</div><div><div class="testName">${esc(t.name)}</div><div class="testDetail">${esc(t.detail)}</div></div></div>`).join('');
+    return `<b>Trust tests</b><br><span class="smallNote">${pass}/${results.length} tests passing. Run this after every new build before sharing.</span><div class="testGrid">${rows}</div>`;
+  }
+
+  function replayHTML(index){
+    const hist=state.trickHistory||[];
+    if(!hist.length)return '<b>Trick replay</b><br>No completed tricks yet.';
+    state.replayIndex=Math.max(0,Math.min(index,hist.length-1));
+    const t=hist[state.replayIndex];
+    const plays=t.plays.map(p=>`<div>${esc(names[p.player])}: <b>${esc(p.card)}</b></div>`).join('');
+    return `<b>Trick replay</b>
+      <div class="replayControls"><button onclick="replayStep(-1)">← Previous</button><button onclick="replayStep(1)">Next →</button></div>
+      <div class="auditCard"><div class="replayTitle">Trick ${t.no} — ${esc(names[t.winner])} won</div>
+      <div class="auditMeta">Led suit: ${esc(suitName(t.led)||t.led)} · Showing ${state.replayIndex+1} of ${hist.length}</div>
+      <div class="replayPlays">${plays}</div>
+      ${t.coach?`<div class="replayCoach"><b>Coach:</b> ${esc(t.coach)}</div>`:''}</div>`;
+  }
+  window.replayStep=function(delta){
+    document.getElementById('coachText').innerHTML=replayHTML((state.replayIndex||0)+delta);
+  };
+
+  function auditHTML(){
+    ensureTrustState();
+    const audits=state.aiAudit||[];
+    if(!audits.length)return '<b>AI decision audit</b><br>No North decisions recorded yet. Play a few tricks first.';
+    const rows=audits.slice().reverse().map(a=>`<div class="auditCard">
+      <b>Hand ${a.hand}, Trick ${a.trick}: North chose ${esc(a.chosen)}</b>
+      <div class="auditMeta">Before: ${esc(a.before)}<br>Legal: ${esc(a.legal.join(', ')||'none')}<br>Safe under winner: ${esc(a.safe.join(', ')||'none')}<br>Status: ${a.warning?'⚠️ Review — safe card existed':a.forced?'Forced play':'Normal/protected play'}</div>
+      ${a.note?`<div class="replayCoach">${esc(a.note)}</div>`:''}
+    </div>`).join('');
+    return `<b>AI decision audit</b><br><span class="smallNote">This explains North's choices and verifies whether North was forced.</span>${rows}`;
+  }
+
+  function fullSnapshot(){
+    const visibleHands = {
+      you: cloneCards(state.hands.S),
+      north_cards_remaining: state.hands.N?.length,
+      west_cards_remaining: state.hands.W?.length,
+      east_cards_remaining: state.hands.E?.length
+    };
+    const current = (state.trick||[]).map(t=>`${names[t.player]} ${displayCard(t.card)}`).join(' | ')||'none';
+    const tricks=(state.trickHistory||[]).map(t=>`Trick ${t.no}: ${t.plays.map(p=>`${names[p.player]} ${p.card}`).join(' | ')} -> ${names[t.winner]}${t.coach?`\nCoach: ${t.coach}`:''}`).join('\n');
+    const audits=(state.aiAudit||[]).map(a=>`North audit H${a.hand}T${a.trick}: chose ${a.chosen}; before=${a.before}; legal=${a.legal.join(',')}; safe=${a.safe.join(',')}; forced=${a.forced}; warning=${a.warning}; note=${a.note}`).join('\n');
+    return `Trickster AI exact-hand report
+Version: ${VERSION}
+Rule set: ${ruleset().name}
+URL mode: ${ruleset().short}
+Score: NS ${state.scores.NS} (${state.bags.NS} bags) | EW ${state.scores.EW} (${state.bags.EW} bags)
+Hand: ${state.handNo}
+Phase: ${state.phase}
+Turn: ${names[state.turn]}
+Bids: You ${state.bids.S??'-'}, West ${state.bids.W??'-'}, North ${state.bids.N??'-'}, East ${state.bids.E??'-'}
+Tricks: You ${state.tricks.S}, West ${state.tricks.W}, North ${state.tricks.N}, East ${state.tricks.E}
+Current trick: ${current}
+Visible/current hand info: ${JSON.stringify(visibleHands)}
+Legal cards for you now: ${state.hands.S?.length?legalNames(legal(state.hands.S)):'none'}
+Blocked illegal taps: ${state.handStats.blockedIllegalClicks||0}
+
+Completed tricks:
+${tricks||'none'}
+
+AI audit:
+${audits||'none'}
+
+Issue:
+Describe what looked wrong.`;
+  }
+
+  // Upgrade the existing feedback function by rebinding the button.
+  async function trustFeedbackHTML(){
+    const txt=fullSnapshot();
+    let copied=false;
+    try{await navigator.clipboard.writeText(txt);copied=true}catch(e){}
+    return `<b>Report this exact hand</b><br>${copied?'Copied the full hand snapshot to your clipboard.':'Copy this full snapshot and paste it into a GitHub issue or message.'}<div class="snapshotBlock">${esc(txt)}</div>`;
+  }
+
+  function bindTrustButtons(){
+    const testsBtn=document.getElementById('testsBtn');
+    if(testsBtn)testsBtn.onclick=()=>{closeSheets();document.getElementById('coachText').innerHTML=testsHTML();openSheet('coachSheet')};
+    const replayBtn=document.getElementById('replayBtn');
+    if(replayBtn)replayBtn.onclick=()=>{closeSheets();document.getElementById('coachText').innerHTML=replayHTML(state.replayIndex||0);openSheet('coachSheet')};
+    const auditBtn=document.getElementById('auditBtn');
+    if(auditBtn)auditBtn.onclick=()=>{closeSheets();document.getElementById('coachText').innerHTML=auditHTML();openSheet('coachSheet')};
+    const feedbackBtn=document.getElementById('feedbackBtn');
+    if(feedbackBtn)feedbackBtn.onclick=async()=>{closeSheets();document.getElementById('coachText').innerHTML=await trustFeedbackHTML();openSheet('coachSheet')};
+  }
+  bindTrustButtons();
+
+  const oldRulesHTML=rulesHTML;
+  rulesHTML=function(){return oldRulesHTML()+`<br><br><b>v0.8.0 Trust & Testing</b><br>Use Menu → Trust tests to verify scoring, follow-suit enforcement, JJDD trump order, and North protection logic. Use Trick replay and AI audit to review whether North was forced.`};
+
+  // Run tests once in console/local counters, but do not interrupt the player.
+  try{
+    const r=runTrustTests();
+    const failed=r.filter(x=>!x.ok).length;
+    if(failed)console.warn('Trickster AI trust tests failing:',r.filter(x=>!x.ok));
+    else console.info('Trickster AI trust tests passing:',r.length);
+  }catch(e){console.warn('Trust tests could not run',e)}
+
+  render();
+})();
+</script>
+
+</body>
+</html>
