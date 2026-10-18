@@ -1,0 +1,15 @@
+Moon-or-Sun
+Source: https://github.com/z-biz-game/z-biz-game-moonsun-cos
+Revision: 9ab09a5b8ec4fd19b421c6741cbaf0e46416e917
+License: MIT; Copyright (c) 2026 z-biz-game (see LICENSE).
+Retrieved: 2026-10-18
+
+Hosted subset: index.html, css/, js/ and local icons, including authored puzzle
+libraries where applicable. No runtime packages, accounts, APIs or CDNs.
+Electron/server/build tools, development fixtures, manifests and service-worker
+registration are omitted. Metadata image URLs made relative, localStorage key
+namespaced per hosted game, and an English rules/controls help page added.
+The original interface remains Simplified Chinese.
+
+Hosting fixes: confirm before clearing this game’s entire save.
+Resume the puzzle timer when undoing a win.

@@ -1,0 +1,16 @@
+Mid-loop
+Source: https://github.com/z-biz-game/z-biz-game-midloop-cos
+Revision: 3e2bc851fbf50a8eca426f341333589b06d66310
+License: MIT; Copyright (c) 2026 z-biz-game (see LICENSE).
+Retrieved: 2026-10-18
+
+Hosted subset: index.html, css/, js/ and local icons, including authored puzzle
+libraries where applicable. No runtime packages, accounts, APIs or CDNs.
+Electron/server/build tools, development fixtures, manifests and service-worker
+registration are omitted. Metadata image URLs made relative, localStorage key
+namespaced per hosted game, and an English rules/controls help page added.
+The original interface remains Simplified Chinese.
+
+Hosting fixes: confirm before clearing this game’s entire save.
+Recheck victory after undo/keyboard erase, avoiding a stale win and frozen board.
+Touch control buttons activated on pointer release, with duplicate native touch-click suppression, for embedded Chromium after canvas drags.

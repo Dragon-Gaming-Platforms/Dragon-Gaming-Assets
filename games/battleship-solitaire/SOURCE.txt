@@ -1,0 +1,16 @@
+Battleship Solitaire
+Source: https://github.com/z-biz-game/z-biz-game-fleet-cos
+Revision: cbc1a8b841dace4ae08741f7ec7e470c39ed435b
+License: MIT; Copyright (c) 2026 z-biz-game (see LICENSE).
+Retrieved: 2026-10-18
+
+Hosted subset: index.html, css/, js/ and local icons, including authored puzzle
+libraries where applicable. No runtime packages, accounts, APIs or CDNs.
+Electron/server/build tools, development fixtures, manifests and service-worker
+registration are omitted. Metadata image URLs made relative, localStorage key
+namespaced per hosted game, and an English rules/controls help page added.
+The original interface remains Simplified Chinese.
+
+Hosting fix: Water pen toggle exposes the existing legal water-marking action
+to touch players; all non-ship cells must be resolved to finish a puzzle.
+Touch control buttons activated on pointer release, with duplicate native touch-click suppression, for embedded Chromium after canvas drags.
