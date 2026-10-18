@@ -1,0 +1,8 @@
+{
+  "name": "Unit Converter",
+  "desc": "Convert length, mass, volume, temperature, area, speed, time, data, pressure, energy, frequency and angle using bundled static conversion tables. Works offline with no API.",
+  "controls": "Choose a category, enter a value, and select source and destination units. Swap units or copy the result.",
+  "shelf": "Tools & Utilities",
+  "tags": ["tools", "converter", "measurements", "offline", "utilities"],
+  "creator": "Dragon Gaming Assets contributors"
+}

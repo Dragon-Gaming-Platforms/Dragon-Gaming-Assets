@@ -1,0 +1,79 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#0f1318">
+  <meta name="description" content="Convert common units locally with static conversion tables. No network or API calls.">
+  <title>Unit Converter</title>
+  <style>
+    :root { color-scheme:dark; --bg:#0c1014; --panel:#151b21; --panel2:#1b242b; --line:#34424b; --ink:#edf5f7; --muted:#a3b2b8; --mint:#81e2cb; --blue:#83bfff; --amber:#f4c777; font-family:system-ui,-apple-system,"Segoe UI",sans-serif; }
+    * { box-sizing:border-box; }
+    body { min-width:320px; margin:0; color:var(--ink); background:radial-gradient(ellipse at 62% -18%,#193940 0,var(--bg) 58%); font-size:14px; line-height:1.5; }
+    button,input,select { font:inherit; }
+    .shell { width:min(1080px,calc(100% - 28px)); margin:auto; padding:24px 0 38px; }
+    header { display:flex; justify-content:space-between; align-items:flex-start; gap:16px; margin-bottom:18px; }
+    .brand { display:flex; align-items:center; gap:13px; }
+    .logo { width:46px; height:46px; display:grid; place-items:center; flex:none; border:1px solid #42655e; border-radius:14px; background:#172c2a; color:var(--mint); font:900 18px ui-monospace,monospace; }
+    .eyebrow { margin:0 0 3px; color:var(--mint); font-size:10px; font-weight:850; letter-spacing:.15em; text-transform:uppercase; }
+    h1 { margin:0; font-size:clamp(23px,4vw,32px); letter-spacing:-.04em; line-height:1.1; }
+    .subtitle { margin:6px 0 0; color:var(--muted); font-size:12px; }
+    .badge { padding:6px 10px; border:1px solid #31544e; border-radius:999px; background:#13231f; color:var(--mint); font-size:10px; font-weight:800; }
+    .converter { overflow:hidden; border:1px solid var(--line); border-radius:16px; background:linear-gradient(150deg,#172027,#11161c); box-shadow:0 22px 65px #0006; }
+    .converter-head { display:flex; justify-content:space-between; align-items:center; gap:12px; padding:14px 17px; border-bottom:1px solid var(--line); }
+    .converter-head h2 { margin:0; font-size:12px; letter-spacing:.06em; }
+    select,input[type="number"] { min-height:39px; padding:7px 9px; border:1px solid #3f5159; border-radius:8px; background:#0d1318; color:var(--ink); }
+    select:focus-visible,input:focus-visible,button:focus-visible { outline:2px solid var(--mint); outline-offset:2px; }
+    .category-select { width:min(260px,60%); }
+    .fields { display:grid; grid-template-columns:minmax(0,1fr) 54px minmax(0,1fr); gap:12px; align-items:center; padding:24px 22px 18px; }
+    .unit-field { display:grid; gap:8px; min-width:0; }
+    .unit-label { color:var(--muted); font-size:10px; font-weight:800; letter-spacing:.08em; text-transform:uppercase; }
+    .unit-field input { width:100%; min-height:62px; font:600 clamp(18px,3vw,26px) ui-monospace,monospace; letter-spacing:-.04em; }
+    .unit-field select { width:100%; }
+    .swap { width:46px; height:46px; display:grid; place-items:center; border:1px solid #3e5c5c; border-radius:14px; background:#19302f; color:var(--mint); cursor:pointer; font-size:19px; }
+    .swap:hover { border-color:var(--mint); transform:rotate(180deg); transition:transform .2s ease; }
+    .result-row { display:flex; justify-content:space-between; align-items:center; gap:10px; padding:0 22px 20px; }
+    .formula { color:var(--muted); font-size:10px; }
+    .buttons { display:flex; flex-wrap:wrap; gap:7px; }
+    .btn { min-height:34px; padding:7px 10px; border:1px solid #40595b; border-radius:8px; background:#1d2d32; color:var(--ink); cursor:pointer; font-size:10px; font-weight:800; }
+    .btn:hover { border-color:var(--mint); background:#243a3d; }
+    .btn.primary { border-color:#3b7668; background:#1c493e; color:#d7fff0; }
+    .status { min-height:17px; padding:0 22px 14px; color:var(--muted); font-size:10px; }
+    .quick-grid { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:10px; margin-top:14px; }
+    .quick { padding:12px 13px; border:1px solid var(--line); border-radius:11px; background:#121920; }
+    .quick strong { display:block; margin-bottom:3px; color:var(--amber); font-size:10px; letter-spacing:.04em; }
+    .quick span { color:var(--muted); font-size:10px; }
+    .note { margin-top:14px; padding:11px 13px; border:1px solid #39474b; border-radius:10px; background:#12191d; color:var(--muted); font-size:10px; }
+    .note strong { color:var(--ink); }
+    footer { margin-top:15px; color:#7a898f; font-size:10px; text-align:center; }
+    @media(max-width:700px) { .fields { grid-template-columns:1fr 44px 1fr; gap:8px; padding:16px 12px 14px; } .unit-field input { min-height:54px; } .result-row { align-items:flex-start; flex-direction:column; padding:0 12px 15px; } .status { padding:0 12px 12px; } .quick-grid { grid-template-columns:1fr 1fr; } }
+    @media(max-width:480px) { .shell { width:calc(100% - 18px); padding-top:16px; } .badge { max-width:88px; text-align:center; font-size:9px; } .converter-head { padding:11px 12px; } .category-select { width:58%; } .fields { grid-template-columns:1fr; } .swap { justify-self:center; transform:rotate(90deg); } .quick-grid { grid-template-columns:1fr; } }
+  </style>
+</head>
+<body>
+  <main class="shell">
+    <header>
+      <div class="brand"><div class="logo" aria-hidden="true">↔</div><div><p class="eyebrow">Static tables · local math</p><h1>Unit Converter</h1><p class="subtitle">Common measurements, converted instantly without a network lookup.</p></div></div>
+      <span class="badge">No API · no tracking</span>
+    </header>
+    <section class="converter" aria-label="Unit conversion">
+      <div class="converter-head"><h2>CONVERT UNITS</h2><label><span class="unit-label">Category </span><select id="category" class="category-select" aria-label="Conversion category"></select></label></div>
+      <div class="fields">
+        <label class="unit-field"><span class="unit-label">From</span><input id="from-value" type="number" value="1" step="any" inputmode="decimal" aria-label="Value to convert"><select id="from-unit" aria-label="Source unit"></select></label>
+        <button id="swap" class="swap" type="button" aria-label="Swap source and destination units" title="Swap units">⇄</button>
+        <label class="unit-field"><span class="unit-label">Result</span><input id="to-value" type="text" readonly aria-label="Converted value"><select id="to-unit" aria-label="Destination unit"></select></label>
+      </div>
+      <div class="result-row"><span id="formula" class="formula">—</span><div class="buttons"><label class="unit-label">Significant digits <select id="precision" aria-label="Significant digits"><option>6</option><option selected>10</option><option>12</option><option>14</option></select></label><button id="copy" class="btn primary" type="button">Copy result</button></div></div>
+      <div id="status" class="status" role="status" aria-live="polite">Choose a category and enter a value.</div>
+    </section>
+    <section class="quick-grid" aria-label="Conversion notes">
+      <div class="quick"><strong>Temperature</strong><span>Uses exact Celsius-based formulas for Celsius, Fahrenheit and Kelvin.</span></div>
+      <div class="quick"><strong>Digital storage</strong><span>SI units (kB, MB) use powers of 1000; IEC units (KiB, MiB) use powers of 1024.</span></div>
+      <div class="quick"><strong>Accuracy</strong><span>Results use static conversion factors. Display precision is adjustable; floating-point results are approximate.</span></div>
+    </section>
+    <div class="note"><strong>Offline by design:</strong> all categories and conversion factors are bundled in this page. No geolocation, exchange-rate service, external library, or network request is used.</div>
+    <footer>Unit Converter · Original MIT tool · Conversion constants are defined locally.</footer>
+  </main>
+  <script src="app.js" defer></script>
+</body>
+</html>
