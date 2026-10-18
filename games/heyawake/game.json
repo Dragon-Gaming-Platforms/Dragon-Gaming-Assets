@@ -1,0 +1,15 @@
+{
+  "name": "Heyawake",
+  "desc": "Shade cells to satisfy room counts, keep white cells connected, and break white corridors spanning three rooms. Fifty levels with hints and completion tracking.",
+  "controls": "Tap or drag cells; choose Cycle, Stone or Dot; Undo / Reset / Hint",
+  "shelf": "Puzzle & Logic",
+  "tags": [
+    "games",
+    "html5",
+    "puzzle",
+    "logic",
+    "heyawake"
+  ],
+  "badge": "New",
+  "creator": "OfferPk"
+}

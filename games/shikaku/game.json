@@ -1,0 +1,15 @@
+{
+  "name": "Shikaku",
+  "desc": "Partition the grid into rectangles, each enclosing one clue with matching area. Five difficulty tiers, logical hints and local saves. Original Simplified Chinese interface; English help included.",
+  "controls": "Drag between opposite rectangle corners; tap assigned cells to erase; H hint, Z undo; English help link below game",
+  "shelf": "Puzzle & Logic",
+  "tags": [
+    "games",
+    "html5",
+    "puzzle",
+    "logic",
+    "shikaku"
+  ],
+  "badge": "New",
+  "creator": "z-biz-game"
+}

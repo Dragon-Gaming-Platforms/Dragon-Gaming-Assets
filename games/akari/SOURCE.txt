@@ -1,0 +1,5 @@
+Source: https://github.com/SquaredWater/NikoliPuzzlePlayer
+Revision: e6274e36fd2546664d51581c25313e18bbac70cb
+License: MIT (see LICENSE)
+Vendored: 2026-10-18
+Hosting adaptations: Extracted Akari frontend and shared engine only; unrelated games and server omitted; direct entry defaults to Akari; browser storage namespaced. Akari shell/rules/controls localized to English. Puzzle-code navigation/reload URLs rebased to index.html.

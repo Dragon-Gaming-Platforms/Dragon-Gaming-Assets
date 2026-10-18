@@ -1,0 +1,15 @@
+{
+  "name": "Suguru",
+  "desc": "Fill each region with 1 through its size; touching cells, including diagonals, must differ. Five difficulty tiers, notes, hints and local saves. Original Simplified Chinese interface; English help included.",
+  "controls": "Select cell then number pad / keyboard; H hint, Z undo; English help link below game",
+  "shelf": "Puzzle & Logic",
+  "tags": [
+    "games",
+    "html5",
+    "puzzle",
+    "logic",
+    "suguru"
+  ],
+  "badge": "New",
+  "creator": "z-biz-game"
+}

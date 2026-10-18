@@ -1,0 +1,5 @@
+Source: https://github.com/z-biz-game/z-biz-game-suguru-cos
+Revision: bb4ef9fd281190eb26b35a3bf3b88ef8842c17d4
+License: MIT (see LICENSE)
+Vendored: 2026-10-18
+Hosting adaptations: Standalone browser runtime only; Electron/build tooling and service-worker registration omitted; metadata image URLs made relative; browser storage namespaced; English help added.
