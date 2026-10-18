@@ -1,0 +1,9 @@
+{
+  "name": "Glyphbound Tactics",
+  "desc": "A small, turn-based tactics skirmish. Lead a warden, ranger and seer across a cover-filled grid, combine movement with attacks and hold the central beacon to win.",
+  "controls": "Click a friendly unit, move to a highlighted tile, then click an enemy in range. Use Mend with the Seer; End Turn gives the enemy its move.",
+  "shelf": "Strategy & Idle",
+  "tags": ["tactics", "strategy", "turn-based", "grid", "skirmish"],
+  "badge": "New",
+  "creator": "Dragon Gaming Platforms"
+}
