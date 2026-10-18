@@ -1,0 +1,8 @@
+{
+  "name": "QR Code Studio",
+  "desc": "Generate QR codes for text or links entirely in the browser. Adjust error correction, quiet zone, module size and colors, then download a PNG or SVG. No QR API or network request is used.",
+  "controls": "Enter text, choose error correction and colors, then download PNG or SVG. The live preview updates as you edit.",
+  "shelf": "Tools & Utilities",
+  "tags": ["tools", "qr-code", "generator", "offline", "privacy"],
+  "creator": "Dragon Gaming Assets contributors"
+}

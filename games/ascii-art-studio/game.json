@@ -1,0 +1,8 @@
+{
+  "name": "ASCII Art Studio",
+  "desc": "Convert a local image into copyable monochrome ASCII art. Adjust output width, character density, contrast, brightness and inversion; download the result as plain text.",
+  "controls": "Choose or drop a local image, adjust the sliders and character set, then copy the ASCII output or download a .txt file.",
+  "shelf": "Tools & Utilities",
+  "tags": ["tools", "ascii", "image", "text-art", "offline"],
+  "creator": "Dragon Gaming Assets contributors"
+}

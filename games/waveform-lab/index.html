@@ -1,0 +1,164 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#10101a">
+  <meta name="description" content="Design and play single tones with a local waveform synthesizer and WAV exporter.">
+  <title>Waveform Lab</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #0d0e15;
+      --surface: #151722;
+      --surface-2: #1b1e2b;
+      --line: #30354a;
+      --ink: #f3f2fb;
+      --muted: #a7a9bd;
+      --accent: #bf9dff;
+      --accent-2: #66e0cc;
+      --hot: #ffbd7b;
+      font-family: system-ui, -apple-system, "Segoe UI", sans-serif;
+    }
+    * { box-sizing: border-box; }
+    body { min-width: 320px; margin: 0; color: var(--ink); background: radial-gradient(ellipse at 66% -20%, #262039 0, var(--bg) 58%); font-size: 14px; line-height: 1.5; }
+    button, input, select { font: inherit; }
+    .shell { width: min(1160px, calc(100% - 28px)); margin: auto; padding: 24px 0 36px; }
+    .header { display: flex; justify-content: space-between; align-items: flex-start; gap: 18px; margin-bottom: 18px; }
+    .identity { display: flex; align-items: center; gap: 14px; }
+    .logo { width: 48px; height: 48px; display: grid; place-items: center; border: 1px solid #584375; border-radius: 15px; background: linear-gradient(145deg, #36284c, #172f3a); color: var(--accent-2); font-size: 24px; font-weight: 900; }
+    .eyebrow { margin: 0 0 3px; color: var(--accent-2); font-size: 10px; font-weight: 800; letter-spacing: .16em; text-transform: uppercase; }
+    h1 { margin: 0; font-size: clamp(24px, 4vw, 34px); letter-spacing: -.045em; line-height: 1.12; }
+    .subtitle { margin: 7px 0 0; color: var(--muted); font-size: 13px; }
+    .local-badge { flex: none; padding: 7px 10px; border: 1px solid #31534f; border-radius: 999px; background: #13231f; color: var(--accent-2); font-size: 10px; font-weight: 800; }
+    .layout { display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(320px, .9fr); gap: 14px; align-items: start; }
+    .panel { overflow: hidden; border: 1px solid var(--line); border-radius: 16px; background: linear-gradient(145deg, #171a27, #11131c); box-shadow: 0 20px 60px #0006; }
+    .panel-head { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; padding: 15px 17px 12px; border-bottom: 1px solid var(--line); }
+    .panel-head h2 { margin: 0; font-size: 13px; letter-spacing: .04em; }
+    .panel-head p { margin: 3px 0 0; color: var(--muted); font-size: 11px; }
+    .chip { padding: 4px 8px; border: 1px solid #53476e; border-radius: 999px; color: var(--accent); font: 10px ui-monospace, monospace; }
+    .controls { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; padding: 15px 17px 17px; }
+    .field { display: grid; gap: 6px; min-width: 0; }
+    .field.full { grid-column: 1 / -1; }
+    .label-row { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; font-size: 11px; font-weight: 750; }
+    output { color: var(--accent-2); font: 11px ui-monospace, monospace; }
+    select, input[type="number"] { width: 100%; min-height: 36px; padding: 6px 8px; border: 1px solid #3b4055; border-radius: 8px; background: #0d1018; color: var(--ink); }
+    input[type="range"] { width: 100%; accent-color: var(--accent); }
+    select:focus-visible, input:focus-visible, button:focus-visible { outline: 2px solid var(--accent-2); outline-offset: 2px; }
+    .actions { display: flex; flex-wrap: wrap; gap: 8px; }
+    .btn { min-height: 37px; padding: 8px 12px; border: 1px solid #48425f; border-radius: 8px; background: #262237; color: var(--ink); cursor: pointer; font-size: 11px; font-weight: 800; }
+    .btn:hover { border-color: var(--accent); background: #302847; }
+    .btn.primary { border-color: #67518c; background: #443263; color: #f0e8ff; }
+    .btn.stop { border-color: #684232; background: #302017; color: var(--hot); }
+    .scope-wrap { padding: 14px; }
+    .scope { display: block; width: 100%; height: 190px; border: 1px solid #30384a; border-radius: 10px; background: #080b11; }
+    .scope-label { display: flex; justify-content: space-between; gap: 8px; margin-top: 7px; color: var(--muted); font: 10px ui-monospace, monospace; }
+    .keyboard { display: grid; grid-template-columns: repeat(13, minmax(0, 1fr)); gap: 4px; padding: 0 14px 14px; }
+    .key { min-width: 0; min-height: 56px; padding: 5px 1px; border: 1px solid #dadbe5; border-radius: 0 0 7px 7px; background: linear-gradient(#fff, #d8dce8); color: #29283a; cursor: pointer; font-size: 9px; font-weight: 750; touch-action: none; }
+    .key.black { border-color: #100e18; background: linear-gradient(#373044, #16131d); color: #f4efff; }
+    .key.active { border-color: var(--accent-2); background: linear-gradient(#a2f4df, #53bcae); color: #10101a; box-shadow: 0 0 14px #66e0cc55; }
+    .hint { margin: 0 14px 14px; padding: 10px 12px; border: 1px solid #30384a; border-radius: 9px; background: #10151d; color: var(--muted); font-size: 10px; }
+    .hint b { color: var(--ink); }
+    .status { min-height: 18px; color: var(--muted); font-size: 10px; }
+    footer { margin-top: 17px; color: #73798b; font-size: 10px; text-align: center; }
+    @media (max-width: 840px) { .layout { grid-template-columns: 1fr; } }
+    @media (max-width: 540px) {
+      .shell { width: min(100% - 18px, 1160px); padding-top: 16px; }
+      .header { align-items: flex-start; }
+      .identity { gap: 10px; }
+      .logo { width: 40px; height: 40px; border-radius: 12px; }
+      .subtitle { font-size: 11px; }
+      .local-badge { max-width: 93px; text-align: center; font-size: 9px; }
+      .controls { gap: 10px; padding: 12px; }
+      .panel-head { padding: 12px; }
+      .key { min-height: 48px; font-size: 8px; }
+    }
+  </style>
+</head>
+<body>
+  <main class="shell">
+    <header class="header">
+      <div class="identity">
+        <div class="logo" aria-hidden="true">∿</div>
+        <div>
+          <p class="eyebrow">Single-tone sound design</p>
+          <h1>Waveform Lab</h1>
+          <p class="subtitle">Shape a tone, play it from the keys, and export a WAV. No song grid, no upload.</p>
+        </div>
+      </div>
+      <span class="local-badge">100% local · no APIs</span>
+    </header>
+
+    <div class="layout">
+      <section class="panel" aria-label="Waveform and keyboard">
+        <div class="panel-head">
+          <div><h2>WAVEFORM SCOPE</h2><p>Preview one cycle of the selected oscillator.</p></div>
+          <span id="wave-chip" class="chip">SQUARE</span>
+        </div>
+        <div class="scope-wrap">
+          <canvas id="scope" class="scope" width="900" height="280" aria-label="Waveform preview"></canvas>
+          <div class="scope-label"><span id="frequency-readout">C4 · 261.63 Hz</span><span>Hold a key to sustain</span></div>
+        </div>
+        <div id="keyboard" class="keyboard" role="group" aria-label="One octave piano keyboard"></div>
+        <p class="hint"><b>Computer keys:</b> A W S E D F T G Y H U J K play C4 through C5. Hold a key or piano key to sustain; release to apply the release envelope.</p>
+      </section>
+
+      <section class="panel" aria-label="Synthesizer controls">
+        <div class="panel-head">
+          <div><h2>PATCH CONTROLS</h2><p>Real-time Web Audio plus a local WAV renderer.</p></div>
+          <span class="chip">ADSR</span>
+        </div>
+        <div class="controls">
+          <label class="field">
+            <span class="label-row">Oscillator</span>
+            <select id="waveform"><option value="square">Square</option><option value="triangle">Triangle</option><option value="sawtooth">Sawtooth</option><option value="sine">Sine</option></select>
+          </label>
+          <label class="field">
+            <span class="label-row">Master level <output id="gain-value">0.24</output></span>
+            <input id="gain" type="range" min="0.05" max="0.6" step="0.01" value="0.24">
+          </label>
+          <label class="field full">
+            <span class="label-row">Tuning <output id="tuning-value">261.63 Hz</output></span>
+            <input id="frequency" type="range" min="65.41" max="1046.5" step="0.01" value="261.63" aria-label="Tone frequency">
+          </label>
+          <label class="field">
+            <span class="label-row">Attack <output id="attack-value">0.02 s</output></span>
+            <input id="attack" type="range" min="0.005" max="0.8" step="0.005" value="0.02">
+          </label>
+          <label class="field">
+            <span class="label-row">Decay <output id="decay-value">0.12 s</output></span>
+            <input id="decay" type="range" min="0.005" max="0.8" step="0.005" value="0.12">
+          </label>
+          <label class="field">
+            <span class="label-row">Sustain <output id="sustain-value">0.48</output></span>
+            <input id="sustain" type="range" min="0" max="1" step="0.01" value="0.48">
+          </label>
+          <label class="field">
+            <span class="label-row">Release <output id="release-value">0.22 s</output></span>
+            <input id="release" type="range" min="0.02" max="1.5" step="0.01" value="0.22">
+          </label>
+          <label class="field full">
+            <span class="label-row">Low-pass filter <output id="cutoff-value">8.0 kHz</output></span>
+            <input id="cutoff" type="range" min="300" max="16000" step="100" value="8000">
+          </label>
+          <label class="field">
+            <span class="label-row">WAV note length <output id="duration-value">1.5 s</output></span>
+            <input id="duration" type="range" min="0.3" max="5" step="0.1" value="1.5">
+          </label>
+          <div class="field">
+            <span class="label-row">Actions</span>
+            <div class="actions">
+              <button id="play" class="btn primary" type="button">▶ Play tone</button>
+              <button id="stop" class="btn stop" type="button">■ Stop</button>
+              <button id="export" class="btn" type="button">↓ Export WAV</button>
+            </div>
+          </div>
+          <div id="status" class="status field full" role="status" aria-live="polite">Ready. Audio starts after you press Play or a key.</div>
+        </div>
+      </section>
+    </div>
+    <footer>Waveform Lab · Original MIT tool · Exported WAV is generated in this browser and never uploaded.</footer>
+  </main>
+  <script src="app.js" defer></script>
+</body>
+</html>

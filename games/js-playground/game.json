@@ -1,0 +1,8 @@
+{
+  "name": "JS Playground",
+  "desc": "Write JavaScript, inspect console output, and build a small DOM preview in a sandboxed iframe with an opaque origin and restrictive Content Security Policy. No packages or server execution.",
+  "controls": "Edit the code and press Run or Ctrl+Enter. Choose a starter snippet, inspect console output, and download your source. Code runs inside a sandboxed iframe.",
+  "shelf": "Tools & Utilities",
+  "tags": ["tools", "javascript", "coding", "playground", "sandbox"],
+  "creator": "Dragon Gaming Assets contributors"
+}
