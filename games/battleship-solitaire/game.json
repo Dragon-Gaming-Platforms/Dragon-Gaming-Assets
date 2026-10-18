@@ -1,0 +1,15 @@
+{
+  "name": "Battleship Solitaire",
+  "desc": "Deduce the positions of a fleet from row and column totals. Straight ships must not touch, even diagonally. Campaign and daily puzzles; not the two-player Battleship game. Original Simplified Chinese interface; English help included.",
+  "controls": "Drag along rows or columns to place ships; tap a ship to remove it. Use the Water pen button to mark every remaining cell as water. Right-click or long-press adds a question mark. English help link above game.",
+  "shelf": "Puzzle & Logic",
+  "tags": [
+    "games",
+    "html5",
+    "puzzle",
+    "logic",
+    "battleship-solitaire"
+  ],
+  "badge": "New",
+  "creator": "z-biz-game"
+}

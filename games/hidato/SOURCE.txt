@@ -1,0 +1,14 @@
+Hidato
+Source: https://github.com/z-biz-game/z-biz-game-hidato-cos
+Revision: 62b49172d824d3433ab7e6e33824c2a6629f43d1
+License: MIT; Copyright (c) 2026 z-biz-game (see LICENSE).
+Retrieved: 2026-10-18
+
+Hosted subset: index.html, css/, js/ and local icons, including authored puzzle
+libraries where applicable. No runtime packages, accounts, APIs or CDNs.
+Electron/server/build tools, development fixtures, manifests and service-worker
+registration are omitted. Metadata image URLs made relative, localStorage key
+namespaced per hosted game, and an English rules/controls help page added.
+The original interface remains Simplified Chinese.
+
+Hosting fixes: guard storage acquisition so blocked localStorage does not prevent play.

@@ -1,0 +1,15 @@
+{
+  "name": "Hidato",
+  "desc": "Complete a consecutive number chain using horizontal, vertical and diagonal neighbors. Seeded 5\u00d75, 6\u00d76 and 7\u00d77 puzzles with logical hints and local saves. Original Simplified Chinese interface; English help included.",
+  "controls": "Select a cell, then use the on-screen number pad; arrow keys move, R restarts; on-screen Hint, Undo and Check buttons. English help link above game.",
+  "shelf": "Puzzle & Logic",
+  "tags": [
+    "games",
+    "html5",
+    "puzzle",
+    "logic",
+    "hidato"
+  ],
+  "badge": "New",
+  "creator": "z-biz-game"
+}
