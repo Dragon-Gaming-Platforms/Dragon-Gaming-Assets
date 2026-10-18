@@ -1,0 +1,15 @@
+{
+  "name": "Space-Jam",
+  "desc": "A polished horizontal side-scrolling space shooter: blast through 10 themed levels of enemy formations and bosses, grab weapon upgrades, and top the high-score board.",
+  "controls": "WASD or arrows to move, auto-fire, B or click for smart bomb, P to pause",
+  "shelf": "Arcade & Action",
+  "tags": [
+    "arcade",
+    "shooter",
+    "shmup",
+    "horizontal"
+  ],
+  "badge": "New",
+  "creator": "DanMat",
+  "image": "title.png"
+}
