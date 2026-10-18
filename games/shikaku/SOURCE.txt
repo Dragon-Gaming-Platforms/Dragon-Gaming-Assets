@@ -1,0 +1,5 @@
+Source: https://github.com/z-biz-game/z-biz-game-shikaku-cos
+Revision: c93b353a4fa8c049a021fbc79bfd3aee5f4ab419
+License: MIT (see LICENSE)
+Vendored: 2026-10-18
+Hosting adaptations: Standalone browser runtime only; Electron/build tooling and service-worker registration omitted; metadata image URLs made relative; browser storage namespaced; English help added. Fixed single-cell clue entry: tap a 1 to commit its rectangle without needing a hint. Added confirmation before clearing this game’s local saves/records.

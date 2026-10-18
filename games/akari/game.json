@@ -1,0 +1,15 @@
+{
+  "name": "Akari — Light Up",
+  "desc": "Place bulbs to illuminate every white cell without lighting another bulb. Generated puzzles with difficulty settings, hints, undo and local saves.",
+  "controls": "Click / tap white cells for bulbs; Shift-click or right-click for marks; toolbar for hints and undo",
+  "shelf": "Puzzle & Logic",
+  "tags": [
+    "games",
+    "html5",
+    "puzzle",
+    "logic",
+    "akari"
+  ],
+  "badge": "New",
+  "creator": "Feukkor"
+}

@@ -1,0 +1,5 @@
+Source: https://github.com/OfferPk/zenheyawake
+Revision: 5930e31d01c04e4a3e5aebf3af057f6dda85b50b
+License: MIT (see LICENSE)
+Vendored: 2026-10-18
+Hosting adaptations: Standalone frontend files only; service-worker registration and PWA manifest omitted; browser storage namespaced. Repaired literal escaped newlines in frontend scripts; storage made optional/corruption-tolerant; delayed victory guarded against level changes. 10x10 board sizing allowed to shrink on narrow screens.

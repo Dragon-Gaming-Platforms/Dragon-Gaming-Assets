@@ -1,0 +1,15 @@
+{
+  "name": "Skyscrapers",
+  "desc": "Arrange tower heights without repeating in rows or columns, matching the visible-tower clues around the edges. Twenty supplied puzzles plus seeded play. Original Simplified Chinese interface; English help included.",
+  "controls": "Select cell then number pad / keyboard; H hint, Z undo; English help link below game",
+  "shelf": "Puzzle & Logic",
+  "tags": [
+    "games",
+    "html5",
+    "puzzle",
+    "logic",
+    "skyscrapers"
+  ],
+  "badge": "New",
+  "creator": "z-biz-game"
+}
