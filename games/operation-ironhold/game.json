@@ -1,0 +1,15 @@
+{
+  "name": "Operation Ironhold",
+  "desc": "A complete first-person shooter in one HTML file: clear the container yard of ten hostiles in three minutes with four weapons, double jumps, and mantles — every visual, sound, and model is generated at runtime.",
+  "controls": "WASD to move, mouse to aim, left click to fire, 1-4 for weapons, Space to jump (double jump / mantle)",
+  "shelf": "Arcade & Action",
+  "tags": [
+    "fps",
+    "shooter",
+    "action",
+    "single-file"
+  ],
+  "badge": "New",
+  "creator": "StarKnightt",
+  "image": "title.png"
+}
