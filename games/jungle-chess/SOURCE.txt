@@ -1,0 +1,5 @@
+Source: https://github.com/sampot/pg-jungle
+Revision: 28c5eb0a52909c971547b1b29e20fc17961b9e4b
+Vendored: 2026-10-18
+License: MIT (see LICENSE)
+Changes: Standalone runtime only; hosting/server files omitted. Correct cross-bank rat captures, weakened attackers in enemy traps, legal-move bounds and immobilization endings.

@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Akari — Light Up</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <main>
+      <p class="back"><a href="index.html">↻ Akari home</a></p>
+      <h1 id="title">Akari — Light Up</h1>
+
+      <div class="toolbar">
+        <label>Size <select id="size"></select></label>
+        <label>Difficulty <select id="difficulty"></select></label>
+        <button id="btn-new">New puzzle</button>
+      </div>
+
+      <div class="toolbar">
+        <button id="btn-undo" title="Ctrl+Z">Undo</button>
+        <button id="btn-redo" title="Ctrl+Y">Redo</button>
+        <button id="btn-reset">Reset board</button>
+        <button id="btn-check">Check</button>
+        <button id="btn-hint">Hint</button>
+        <button id="btn-reveal">Reveal</button>
+        <label><input type="checkbox" id="opt-errors" checked /> Highlight errors</label>
+      </div>
+
+      <div class="toolbar">
+        <label>Puzzle code <input id="code" size="20" spellcheck="false" /></label>
+        <button id="btn-load">Load code</button>
+        <button id="btn-copy">Copy code</button>
+      </div>
+
+      <div id="status"></div>
+      <div id="message"></div>
+
+      <div id="board-wrap">
+        <canvas id="board" tabindex="0"></canvas>
+      </div>
+      <div id="pad" class="toolbar"></div>
+
+      <details open>
+        <summary>Rules & controls</summary>
+        <ul id="rules"></ul>
+        <ul id="controls"></ul>
+        <ul>
+          <li>Ctrl+Z: undo. Ctrl+Y / Ctrl+Shift+Z: redo.</li>
+          <li>Share puzzle codes to play the same puzzle. Progress is saved locally in this browser.</li>
+        </ul>
+      </details>
+    </main>
+    <script type="module" src="src/app/play.js"></script>
+  </body>
+</html>

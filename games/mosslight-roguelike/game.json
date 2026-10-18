@@ -1,0 +1,9 @@
+{
+  "name": "Mosslight Roguelike",
+  "desc": "A turn-based ASCII expedition through an overgrown conservatory. Read the terrain, forage for amber seeds, manage your lantern and fend off tiny spirits as you cross five living clearings.",
+  "controls": "WASD or arrow keys to move. F pulses the lantern, R uses a herb, and E waits. Collect two seeds per clearing, then reach the gate.",
+  "shelf": "RPG & Adventure",
+  "tags": ["roguelike", "ascii", "survival", "turn-based", "exploration"],
+  "badge": "New",
+  "creator": "Dragon Gaming Platforms"
+}
