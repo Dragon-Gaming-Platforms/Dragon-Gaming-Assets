@@ -1,0 +1,946 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#10141c">
+  <meta name="description" content="A hands-on rope-and-pulley sandbox. Compare fixed, movable, and block-and-tackle rigs as you trade pulling distance for lifting force.">
+  <title>Pulley Lab</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --ink: #f1f2f2;
+      --muted: #a7afb8;
+      --quiet: #75808b;
+      --line: rgba(205, 196, 177, .14);
+      --panel: rgba(27, 29, 32, .94);
+      --raised: rgba(43, 43, 42, .82);
+      --paper: #e4d7b8;
+      --amber: #e5b968;
+      --mint: #83d4bc;
+      --blue: #8cbfe2;
+      --red: #ed907b;
+      --radius: 20px;
+      font-family: ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      font-synthesis: none;
+      text-rendering: optimizeLegibility;
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+    }
+    * { box-sizing: border-box; }
+    body {
+      min-width: 320px;
+      min-height: 100vh;
+      margin: 0;
+      color: var(--ink);
+      background:
+        radial-gradient(ellipse at 8% 0%, rgba(126, 94, 51, .16), transparent 34rem),
+        radial-gradient(ellipse at 95% 35%, rgba(54, 92, 103, .12), transparent 32rem),
+        #10141c;
+    }
+    button, input { font: inherit; }
+    button { color: inherit; }
+    button:focus-visible, input:focus-visible { outline: 2px solid var(--amber); outline-offset: 3px; }
+
+    .page { width: min(1280px, calc(100% - 48px)); margin: 0 auto; padding: 30px 0 34px; }
+    .masthead { display: flex; align-items: center; justify-content: space-between; gap: 22px; margin-bottom: 23px; }
+    .brand { display: flex; align-items: center; gap: 14px; min-width: 0; }
+    .brand-mark {
+      display: grid; place-items: center; flex: 0 0 48px; width: 48px; height: 48px;
+      border: 1px solid rgba(229,185,104,.34); border-radius: 15px;
+      background: linear-gradient(145deg, rgba(133,94,41,.32), rgba(57,61,61,.48));
+      box-shadow: inset 0 1px rgba(255,255,255,.06), 0 8px 25px rgba(0,0,0,.2);
+    }
+    .brand-mark svg { width: 29px; height: 29px; }
+    .brand-copy { min-width: 0; }
+    .eyebrow, .micro-label { margin: 0; color: var(--amber); font-size: 10px; font-weight: 800; letter-spacing: .17em; line-height: 1.4; text-transform: uppercase; }
+    h1 { margin: 3px 0 0; font-size: clamp(22px,3vw,30px); font-weight: 730; letter-spacing: -.045em; line-height: 1.12; }
+    .intro { max-width: 390px; margin: 0; color: var(--muted); font-size: 13px; line-height: 1.55; text-align: right; }
+
+    .lab-grid { display: grid; grid-template-columns: minmax(0,1fr) 314px; align-items: stretch; gap: 18px; }
+    .card { min-width: 0; border: 1px solid var(--line); border-radius: var(--radius); background: var(--panel); box-shadow: 0 22px 70px rgba(0,0,0,.24), inset 0 1px rgba(255,255,255,.025); backdrop-filter: blur(14px); }
+    .stage-card { padding: 19px; }
+    .stage-heading { display: flex; align-items: center; justify-content: space-between; gap: 14px; min-height: 48px; margin: 0 2px 13px; }
+    .stage-title { min-width: 0; }
+    .stage-title h2 { margin: 3px 0 0; font-size: 16px; font-weight: 670; letter-spacing: -.02em; }
+    .state-chip { display: inline-flex; align-items: center; gap: 8px; flex: 0 0 auto; padding: 8px 11px; border: 1px solid var(--line); border-radius: 999px; color: #d0d1cb; background: rgba(255,255,255,.03); font-size: 9px; font-weight: 800; letter-spacing: .13em; text-transform: uppercase; }
+    .state-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--mint); box-shadow: 0 0 10px rgba(131,212,188,.7); }
+    .state-chip.warning .state-dot { background: var(--red); box-shadow: 0 0 10px rgba(237,144,123,.56); }
+    .state-chip.success .state-dot { background: var(--mint); }
+
+    .rig-stage { position: relative; height: clamp(360px,59vh,680px); min-height: 330px; overflow: hidden; border: 1px solid rgba(208,198,174,.16); border-radius: 15px; background: #171b20; isolation: isolate; touch-action: none; }
+    .rig-stage::after { position: absolute; z-index: 1; inset: 0; border-radius: inherit; box-shadow: inset 0 0 90px rgba(0,0,0,.18); content: ""; pointer-events: none; }
+    canvas { display: block; width: 100%; height: 100%; touch-action: none; }
+    .canvas-hud { position: absolute; z-index: 2; inset: 13px 13px auto; display: flex; align-items: flex-start; justify-content: space-between; gap: 9px; pointer-events: none; }
+    .hud-chip { display: inline-flex; align-items: center; gap: 8px; padding: 8px 10px; border: 1px solid rgba(219,210,188,.13); border-radius: 10px; color: #d2d0c7; background: rgba(15,18,21,.65); box-shadow: 0 5px 20px rgba(0,0,0,.15); backdrop-filter: blur(8px); font-size: 9px; font-weight: 760; letter-spacing: .11em; text-transform: uppercase; }
+    .hud-chip strong { color: #f2d99f; font-size: 12px; font-variant-numeric: tabular-nums; letter-spacing: 0; }
+    .hud-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--amber); box-shadow: 0 0 9px rgba(229,185,104,.75); }
+    .canvas-caption { position: absolute; z-index: 2; right: 14px; bottom: 12px; color: rgba(218,210,194,.45); font-size: 8px; letter-spacing: .14em; text-transform: uppercase; pointer-events: none; }
+
+    .action-row { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 10px; padding: 13px 1px 0; }
+    .button-group { display: flex; flex-wrap: wrap; gap: 8px; }
+    .button { display: inline-flex; align-items: center; justify-content: center; gap: 7px; min-height: 38px; padding: 0 12px; border: 1px solid rgba(210,201,184,.16); border-radius: 10px; color: #dbd9d1; background: rgba(255,255,255,.035); cursor: pointer; font-size: 11px; font-weight: 660; transition: transform .16s ease, border-color .16s ease, background .16s ease, color .16s ease; }
+    .button:hover { transform: translateY(-1px); border-color: rgba(210,201,184,.32); background: rgba(255,255,255,.075); }
+    .button.primary { border-color: rgba(229,185,104,.36); color: #f2d9a4; background: rgba(129,92,39,.24); }
+    .button.primary:hover { border-color: rgba(229,185,104,.58); background: rgba(129,92,39,.37); }
+    .button-icon { font-size: 13px; line-height: 1; }
+    .action-hint { margin: 9px 2px 0; color: var(--quiet); font-size: 10px; line-height: 1.55; }
+    kbd { padding: 2px 5px; border: 1px solid rgba(204,204,194,.17); border-radius: 5px; color: #c4c3b9; background: rgba(255,255,255,.04); font-family: inherit; font-size: 9px; }
+
+    .operation-status { display: flex; align-items: flex-start; gap: 9px; margin: 12px 1px 0; padding: 10px 11px; border: 1px solid rgba(201,204,197,.1); border-radius: 10px; color: #b3b9b5; background: rgba(255,255,255,.022); font-size: 10px; line-height: 1.5; }
+    .operation-status::before { flex: 0 0 6px; width: 6px; height: 6px; margin-top: 4px; border-radius: 50%; background: #87968e; content: ""; }
+    .operation-status.success { border-color: rgba(131,212,188,.18); color: #bbddd2; background: rgba(52,108,91,.11); }
+    .operation-status.success::before { background: var(--mint); }
+    .operation-status.warning { border-color: rgba(237,144,123,.2); color: #ecc1b4; background: rgba(133,63,51,.12); }
+    .operation-status.warning::before { background: var(--red); }
+
+    .side-panel { display: flex; flex-direction: column; gap: 0; padding: 18px; }
+    .panel-section + .panel-section { margin-top: 20px; padding-top: 18px; border-top: 1px solid var(--line); }
+    .section-head { display: flex; align-items: baseline; justify-content: space-between; gap: 9px; margin-bottom: 12px; }
+    .section-head h2 { margin: 0; color: #eeece5; font-size: 13px; font-weight: 720; letter-spacing: -.015em; }
+    .section-head span, .section-head output { color: var(--quiet); font-size: 10px; font-variant-numeric: tabular-nums; }
+    .section-head output { color: var(--amber); font-weight: 700; }
+
+    .rig-options { display: grid; grid-template-columns: 1fr; gap: 7px; }
+    .rig-option { display: grid; grid-template-columns: 37px minmax(0,1fr) auto; align-items: center; gap: 9px; min-height: 58px; padding: 7px 9px; border: 1px solid rgba(207,198,182,.12); border-radius: 11px; color: #b9b9b1; background: rgba(255,255,255,.022); cursor: pointer; text-align: left; transition: border-color .16s ease, background .16s ease, transform .16s ease, color .16s ease; }
+    .rig-option:hover { border-color: rgba(207,198,182,.28); color: #edebe3; transform: translateY(-1px); }
+    .rig-option.selected { border-color: rgba(229,185,104,.42); color: #f1dfb8; background: linear-gradient(115deg, rgba(119,87,42,.2), rgba(54,60,57,.15)); box-shadow: inset 0 0 0 1px rgba(229,185,104,.07); }
+    .rig-icon { display: grid; place-items: center; width: 34px; height: 34px; border: 1px solid rgba(214,198,159,.12); border-radius: 9px; color: var(--amber); background: rgba(0,0,0,.13); }
+    .rig-icon svg { width: 25px; height: 25px; }
+    .rig-copy { min-width: 0; }
+    .rig-copy strong { display: block; color: inherit; font-size: 11px; font-weight: 700; }
+    .rig-copy small { display: block; margin-top: 3px; color: var(--quiet); font-size: 9px; line-height: 1.3; }
+    .rig-ratio { color: #e6c47f; font-size: 11px; font-weight: 780; font-variant-numeric: tabular-nums; white-space: nowrap; }
+
+    .range-block + .range-block { margin-top: 14px; }
+    .range-title { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; margin-bottom: 3px; }
+    .range-title label { color: #d1d0c8; font-size: 11px; font-weight: 650; }
+    .range-title output { color: var(--amber); font-size: 10px; font-variant-numeric: tabular-nums; }
+    .range-help { margin: 2px 0 0; color: var(--quiet); font-size: 9px; line-height: 1.4; }
+    input[type="range"] { display: block; width: 100%; height: 15px; margin: 0; accent-color: var(--amber); cursor: pointer; }
+
+    .force-card { margin-top: 16px; padding: 13px 12px 12px; border: 1px solid rgba(229,185,104,.15); border-radius: 12px; background: linear-gradient(145deg, rgba(89,68,35,.17), rgba(34,44,46,.2)); }
+    .force-top { display: flex; justify-content: space-between; gap: 12px; }
+    .force-metric { min-width: 0; }
+    .force-metric span { display: block; color: var(--quiet); font-size: 9px; letter-spacing: .08em; text-transform: uppercase; }
+    .force-metric strong { display: block; margin-top: 3px; color: #f1d99f; font-size: 17px; font-variant-numeric: tabular-nums; letter-spacing: -.03em; }
+    .force-metric:last-child { text-align: right; }
+    .meter { height: 6px; margin-top: 11px; overflow: hidden; border-radius: 99px; background: rgba(0,0,0,.28); }
+    .meter-fill { width: 0; height: 100%; border-radius: inherit; background: linear-gradient(90deg, #db9c55, #8ed8bc); box-shadow: 0 0 10px rgba(131,212,188,.28); transition: width .18s ease; }
+    .force-note { margin: 8px 0 0; color: #abb3b0; font-size: 9px; line-height: 1.5; }
+
+    .field-note { margin-top: auto; padding: 14px 13px 13px; border: 1px solid rgba(131,212,188,.13); border-radius: 13px; background: linear-gradient(145deg, rgba(48,87,75,.17), rgba(29,43,46,.22)); }
+    .field-note .micro-label { color: #8ed8bf; font-size: 9px; }
+    .field-note p { margin: 7px 0 0; color: #aeb9b5; font-size: 10px; line-height: 1.65; }
+    .field-note strong { color: #dbe8e1; font-weight: 660; }
+    .footer-note { display: flex; justify-content: space-between; gap: 14px; margin: 15px 3px 0; color: #74808c; font-size: 10px; letter-spacing: .025em; }
+    .footer-note span:last-child { text-align: right; }
+
+    @media (max-width: 980px) {
+      .lab-grid { grid-template-columns: minmax(0,1fr); }
+      .side-panel { display: grid; grid-template-columns: minmax(0,1fr) minmax(0,1fr); column-gap: 22px; row-gap: 17px; }
+      .side-panel .panel-section + .panel-section { margin-top: 0; padding-top: 0; border-top: 0; }
+      .rig-section { grid-column: 1; grid-row: 1; }
+      .load-section { grid-column: 1; grid-row: 2; }
+      .effort-section { grid-column: 2; grid-row: 1 / span 2; }
+      .side-panel .field-note { grid-column: 1 / -1; margin-top: 0; }
+    }
+    @media (max-width: 620px) {
+      .page { width: min(100% - 24px, 520px); padding: 18px 0 23px; }
+      .masthead { align-items: flex-start; margin-bottom: 16px; }
+      .brand { gap: 10px; }
+      .brand-mark { flex-basis: 40px; width: 40px; height: 40px; border-radius: 13px; }
+      .brand-mark svg { width: 24px; height: 24px; }
+      .intro { display: none; }
+      .stage-card { padding: 12px; border-radius: 16px; }
+      .stage-heading { min-height: 42px; margin-bottom: 9px; }
+      .stage-title h2 { font-size: 14px; }
+      .state-chip { padding: 7px 8px; font-size: 8px; }
+      .rig-stage { height: clamp(320px,52vh,500px); min-height: 320px; border-radius: 11px; }
+      .canvas-hud { inset: 9px 9px auto; }
+      .hud-chip { padding: 7px 8px; font-size: 8px; }
+      .hud-chip strong { font-size: 11px; }
+      .action-row { align-items: stretch; flex-direction: column; padding-top: 10px; }
+      .button-group { display: grid; grid-template-columns: 1fr 1fr; }
+      .button { min-height: 39px; }
+      .action-hint { font-size: 9px; }
+      .side-panel { display: flex; gap: 0; padding: 15px; border-radius: 16px; }
+      .side-panel .panel-section + .panel-section { margin-top: 18px; padding-top: 17px; border-top: 1px solid var(--line); }
+      .side-panel .field-note { margin-top: 18px; }
+      .footer-note { flex-direction: column; gap: 4px; margin-top: 12px; }
+      .footer-note span:last-child { text-align: left; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { scroll-behavior: auto !important; transition-duration: .01ms !important; }
+    }
+  </style>
+</head>
+<body>
+  <main class="page">
+    <header class="masthead">
+      <div class="brand">
+        <div class="brand-mark" aria-hidden="true">
+          <svg viewBox="0 0 36 36" fill="none">
+            <path d="M6 9h24M10 9v6m16-6v6" stroke="#d7bd82" stroke-width="1.6" stroke-linecap="round"/>
+            <circle cx="10" cy="19" r="5.2" stroke="#e5b968" stroke-width="1.4"/><circle cx="26" cy="19" r="5.2" stroke="#83d4bc" stroke-width="1.4"/>
+            <path d="M10 24v5h16v-5M18 29v3" stroke="#d7bd82" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/>
+            <circle cx="18" cy="32" r="1.5" fill="#e5b968"/>
+          </svg>
+        </div>
+        <div class="brand-copy">
+          <p class="eyebrow">A little machine shop</p>
+          <h1>Pulley Lab</h1>
+        </div>
+      </div>
+      <p class="intro">Trade distance for force.<br>Choose a rig, set a load, and try a pull.</p>
+    </header>
+
+    <div class="lab-grid">
+      <section class="card stage-card" aria-labelledby="stage-heading">
+        <div class="stage-heading">
+          <div class="stage-title">
+            <p class="micro-label">Mechanical advantage</p>
+            <h2 id="stage-heading">Every pull tells a story</h2>
+          </div>
+          <div class="state-chip" id="stateChip" aria-live="polite"><span class="state-dot" aria-hidden="true"></span><span id="stateLabel">Ready</span></div>
+        </div>
+        <div class="rig-stage" id="rigStage">
+          <canvas id="rigCanvas" aria-label="Interactive pulley diagram. Drag the hanging handle down to lift the load."></canvas>
+          <div class="canvas-hud" aria-hidden="true">
+            <div class="hud-chip"><span class="hud-dot"></span><span id="rigName">Single movable pulley</span></div>
+            <div class="hud-chip"><strong id="ratioLabel">2:1</strong><span>advantage</span></div>
+          </div>
+          <div class="canvas-caption" aria-hidden="true">RATCHET HOLDS BETWEEN PULLS</div>
+        </div>
+        <div class="action-row">
+          <div class="button-group">
+            <button class="button primary" id="pullButton" type="button" aria-label="Pull the rope one stroke">
+              <span class="button-icon" aria-hidden="true">↓</span>Pull rope
+            </button>
+            <button class="button" id="resetButton" type="button" aria-label="Reset the load to its starting position">
+              <span class="button-icon" aria-hidden="true">↺</span>Reset load
+            </button>
+          </div>
+        </div>
+        <p class="action-hint">Drag the hanging grip down to pull by hand, or press <kbd>Space</kbd> for one stroke. Release to regrip; the ratchet keeps the load from slipping back.</p>
+        <div class="operation-status" id="operationStatus" role="status" aria-live="polite">Ready to lift. Try the handle or take a powered pull.</div>
+      </section>
+
+      <aside class="card side-panel" aria-label="Pulley controls">
+        <section class="panel-section rig-section" aria-labelledby="rigs-heading">
+          <div class="section-head"><h2 id="rigs-heading">Choose a rig</h2><span>compare the ratios</span></div>
+          <div class="rig-options" role="group" aria-label="Pulley configurations">
+            <button class="rig-option" type="button" data-rig="fixed" aria-pressed="false" aria-label="Fixed pulley, 1 to 1 mechanical advantage">
+              <span class="rig-icon" aria-hidden="true"><svg viewBox="0 0 28 28" fill="none"><path d="M4 5h20M8 5v5m12-5v5" stroke="currentColor" stroke-width="1.2"/><circle cx="14" cy="12" r="5" stroke="currentColor" stroke-width="1.4"/><path d="M9 12H6v10h8m0 0v-3m0 3 2-2m-2 2-2-2m7-10h3v10" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+              <span class="rig-copy"><strong>Fixed pulley</strong><small>Changes direction, not force</small></span><span class="rig-ratio">1:1</span>
+            </button>
+            <button class="rig-option selected" type="button" data-rig="movable" aria-pressed="true" aria-label="Single movable pulley, 2 to 1 mechanical advantage">
+              <span class="rig-icon" aria-hidden="true"><svg viewBox="0 0 28 28" fill="none"><path d="M4 5h20M6 5v12m16-12v5" stroke="currentColor" stroke-width="1.2"/><circle cx="14" cy="17" r="5" stroke="currentColor" stroke-width="1.4"/><path d="M9 17H7v5h14v-5h-2M14 22v3m0 0-2-2m2 2 2-2m6-10v8" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+              <span class="rig-copy"><strong>Movable pulley</strong><small>Two strands share the load</small></span><span class="rig-ratio">2:1</span>
+            </button>
+            <button class="rig-option" type="button" data-rig="tackle" aria-pressed="false" aria-label="Block and tackle, 4 to 1 mechanical advantage">
+              <span class="rig-icon" aria-hidden="true"><svg viewBox="0 0 28 28" fill="none"><path d="M3 5h22M6 5v8m8-8v8m8-8v8" stroke="currentColor" stroke-width="1.2"/><circle cx="9" cy="15" r="3.5" stroke="currentColor" stroke-width="1.2"/><circle cx="19" cy="15" r="3.5" stroke="currentColor" stroke-width="1.2"/><path d="M5.5 15H4v7h18v-7h-1.5M9 18.5v5m0 0-2-2m2 2 2-2m10-10v9" stroke="currentColor" stroke-width="1.2" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+              <span class="rig-copy"><strong>Block &amp; tackle</strong><small>Four strands share the load</small></span><span class="rig-ratio">4:1</span>
+            </button>
+          </div>
+        </section>
+
+        <section class="panel-section load-section" aria-labelledby="load-heading">
+          <div class="section-head"><h2 id="load-heading">The load</h2><output id="massValue" for="mass">8 kg</output></div>
+          <div class="range-block">
+            <div class="range-title"><label for="mass">Mass</label><span id="massHint" class="range-help">A heavier load needs more effort.</span></div>
+            <input id="mass" type="range" min="2" max="20" step="1" value="8" aria-label="Load mass in kilograms">
+          </div>
+        </section>
+
+        <section class="panel-section effort-section" aria-labelledby="effort-heading">
+          <div class="section-head"><h2 id="effort-heading">Your effort</h2><output id="effortValue" for="effort">120 N</output></div>
+          <div class="range-block">
+            <div class="range-title"><label for="effort">Pulling force</label></div>
+            <input id="effort" type="range" min="20" max="220" step="5" value="120" aria-label="Applied pulling force in newtons">
+            <p class="range-help">Force you can apply to the free end.</p>
+          </div>
+          <div class="range-block">
+            <div class="range-title"><label for="stroke">Rope stroke</label><output id="strokeValue" for="stroke">100 cm</output></div>
+            <input id="stroke" type="range" min="50" max="160" step="10" value="100" aria-label="Rope travel per pull in centimeters">
+          </div>
+          <div class="force-card" aria-label="Force comparison">
+            <div class="force-top">
+              <div class="force-metric"><span>Needed</span><strong id="neededForce">88 N</strong></div>
+              <div class="force-metric"><span>Available</span><strong id="availableForce">120 N</strong></div>
+            </div>
+            <div class="meter" role="meter" aria-label="Effort compared with force needed" aria-valuemin="0" aria-valuemax="100" aria-valuenow="100"><div class="meter-fill" id="meterFill"></div></div>
+            <p class="force-note" id="forceNote">Enough effort to lift, including a little pulley friction.</p>
+          </div>
+        </section>
+
+        <div class="field-note">
+          <p class="micro-label">The useful trade-off</p>
+          <p>More supporting rope strands mean <strong>less force, but more rope to pull.</strong> The displayed force includes a small friction allowance.</p>
+        </div>
+      </aside>
+    </div>
+
+    <footer class="footer-note">
+      <span>A small experiment in force, distance, and a good ratchet.</span>
+      <span>Runs locally in your browser. No network or data collection.</span>
+    </footer>
+  </main>
+
+  <script>
+    (() => {
+      'use strict';
+
+      const RIGS = {
+        fixed: { title: 'Fixed pulley', advantage: 1, description: 'One fixed wheel changes the pull direction.' },
+        movable: { title: 'Single movable pulley', advantage: 2, description: 'Two rope strands share the load.' },
+        tackle: { title: 'Block & tackle', advantage: 4, description: 'Four supporting strands share the load.' }
+      };
+      const TAU = Math.PI * 2;
+      const canvas = document.getElementById('rigCanvas');
+      const stage = document.getElementById('rigStage');
+      const context = canvas.getContext('2d');
+      const stateChip = document.getElementById('stateChip');
+      const stateLabel = document.getElementById('stateLabel');
+      const operationStatus = document.getElementById('operationStatus');
+      const rigName = document.getElementById('rigName');
+      const ratioLabel = document.getElementById('ratioLabel');
+      const rigButtons = Array.from(document.querySelectorAll('[data-rig]'));
+      const pullButton = document.getElementById('pullButton');
+      const resetButton = document.getElementById('resetButton');
+      const mass = document.getElementById('mass');
+      const effort = document.getElementById('effort');
+      const stroke = document.getElementById('stroke');
+      const massValue = document.getElementById('massValue');
+      const effortValue = document.getElementById('effortValue');
+      const strokeValue = document.getElementById('strokeValue');
+      const neededForce = document.getElementById('neededForce');
+      const availableForce = document.getElementById('availableForce');
+      const forceNote = document.getElementById('forceNote');
+      const meter = document.querySelector('.meter');
+      const meterFill = document.getElementById('meterFill');
+
+      let width = 0;
+      let height = 0;
+      let dpr = 1;
+      let rig = 'movable';
+      let loadY = 0;
+      let initialLoadY = 0;
+      let handleY = 0;
+      let restHandleY = 0;
+      let slackAmount = 0;
+      let lastPullSucceeded = true;
+      let regrip = null;
+      let drag = null;
+      let pointerId = null;
+      let pointerInside = false;
+      let hoveredHandle = false;
+      let dirty = true;
+
+      const clamp = (value, min, max) => Math.max(min, Math.min(max, value));
+      const fmtN = value => `${Math.round(value)} N`;
+      const advantage = () => RIGS[rig].advantage;
+      const massKg = () => Number(mass.value);
+      const effortN = () => Number(effort.value);
+      const requiredN = () => massKg() * 9.81 / advantage() * 1.12;
+
+      function loadLimits() {
+        const beamY = height * .12;
+        const wheelR = clamp(width * .024, 14, 18);
+        const loadHeight = 62;
+        const min = beamY + 50 + wheelR * 2 + 38;
+        const max = height - loadHeight - 34;
+        return { min, max: Math.max(min + 10, max) };
+      }
+
+      function setStatus(message, tone = '') {
+        operationStatus.textContent = message;
+        operationStatus.classList.toggle('success', tone === 'success');
+        operationStatus.classList.toggle('warning', tone === 'warning');
+        stateChip.classList.toggle('success', tone === 'success');
+        stateChip.classList.toggle('warning', tone === 'warning');
+        stateLabel.textContent = tone === 'warning' ? 'Need more force' : tone === 'success' ? 'Ratchet holding' : 'Ready';
+      }
+
+      function updateForceReadout() {
+        const needed = requiredN();
+        const available = effortN();
+        const pct = needed > 0 ? clamp(available / needed * 100, 0, 100) : 100;
+        massValue.textContent = `${massKg()} kg`;
+        effortValue.textContent = fmtN(available);
+        strokeValue.textContent = `${stroke.value} cm`;
+        neededForce.textContent = fmtN(needed);
+        availableForce.textContent = fmtN(available);
+        meterFill.style.width = `${pct}%`;
+        meter.setAttribute('aria-valuenow', String(Math.round(pct)));
+        if (available + .01 >= needed) {
+          forceNote.textContent = 'Enough effort to lift, including a little pulley friction.';
+          forceNote.style.color = '#abd8ca';
+        } else {
+          forceNote.textContent = `Add ${Math.ceil(needed - available)} N or choose a rig with more strands.`;
+          forceNote.style.color = '#e7ae9d';
+        }
+      }
+
+      function updateRigUI() {
+        const config = RIGS[rig];
+        rigName.textContent = config.title;
+        ratioLabel.textContent = `${config.advantage}:1`;
+        for (const button of rigButtons) {
+          const selected = button.dataset.rig === rig;
+          button.classList.toggle('selected', selected);
+          button.setAttribute('aria-pressed', String(selected));
+        }
+      }
+
+      function geometry() {
+        const wheelR = clamp(width * .024, 14, 18);
+        const beamY = height * .12;
+        const fixedY = beamY + 50;
+        const loadW = clamp(width * .16, 70, 112);
+        const loadH = 62;
+        const loadCenterX = rig === 'fixed' ? width * .35 : rig === 'movable' ? width * .42 : width * .47;
+        const loadX = loadCenterX - loadW / 2;
+        const handleX = width * (rig === 'fixed' ? .81 : .82);
+        const movingY = loadY - 31;
+        const fixed = [];
+        const moving = [];
+        let anchor;
+        if (rig === 'fixed') {
+          fixed.push({ x: width * .67, y: fixedY });
+          anchor = { x: loadCenterX, y: loadY };
+        } else if (rig === 'movable') {
+          moving.push({ x: loadCenterX, y: movingY });
+          fixed.push({ x: width * .68, y: fixedY });
+          anchor = { x: width * .23, y: beamY };
+        } else {
+          moving.push({ x: width * .35, y: movingY }, { x: width * .56, y: movingY });
+          fixed.push({ x: width * .46, y: fixedY }, { x: width * .67, y: fixedY });
+          anchor = { x: width * .20, y: beamY };
+        }
+        return { wheelR, beamY, fixedY, loadW, loadH, loadX, loadCenterX, handleX, movingY, fixed, moving, anchor, floorY: height - 28 };
+      }
+
+      function resizeCanvas() {
+        const bounds = stage.getBoundingClientRect();
+        if (bounds.width < 80 || bounds.height < 80) return;
+        const previousHeight = height;
+        width = bounds.width;
+        height = bounds.height;
+        dpr = Math.min(window.devicePixelRatio || 1, 2);
+        canvas.width = Math.round(width * dpr);
+        canvas.height = Math.round(height * dpr);
+        context.setTransform(dpr, 0, 0, dpr, 0, 0);
+        const limits = loadLimits();
+        initialLoadY = clamp(height * .59, limits.min, limits.max);
+        if (previousHeight > 0 && loadY > 0) loadY = clamp(loadY * height / previousHeight, limits.min, limits.max);
+        else loadY = initialLoadY;
+        restHandleY = height * .38;
+        handleY = restHandleY;
+        slackAmount = 0;
+        regrip = null;
+        drag = null;
+        dirty = true;
+        drawScene();
+      }
+
+      function drawBackground(g) {
+        const gradient = context.createLinearGradient(0, 0, 0, height);
+        gradient.addColorStop(0, '#232522');
+        gradient.addColorStop(.55, '#1a2022');
+        gradient.addColorStop(1, '#171c20');
+        context.fillStyle = gradient;
+        context.fillRect(0, 0, width, height);
+        context.save();
+        context.strokeStyle = 'rgba(214, 204, 178, .035)';
+        context.lineWidth = 1;
+        const gap = 38;
+        context.beginPath();
+        for (let x = gap; x < width; x += gap) { context.moveTo(x, 0); context.lineTo(x, height); }
+        for (let y = gap; y < height; y += gap) { context.moveTo(0, y); context.lineTo(width, y); }
+        context.stroke();
+        context.restore();
+        context.fillStyle = 'rgba(228, 213, 181, .04)';
+        context.fillRect(0, g.floorY, width, height - g.floorY);
+        context.strokeStyle = 'rgba(220, 204, 167, .2)';
+        context.lineWidth = 1;
+        context.beginPath();
+        context.moveTo(0, g.floorY);
+        context.lineTo(width, g.floorY);
+        context.stroke();
+      }
+
+      function drawBeam(g) {
+        const left = width * .12;
+        const right = width * .88;
+        context.fillStyle = '#544c3e';
+        context.fillRect(left, g.beamY - 7, right - left, 14);
+        context.fillStyle = '#897456';
+        context.fillRect(left, g.beamY - 7, right - left, 3);
+        context.strokeStyle = 'rgba(240, 216, 166, .4)';
+        context.lineWidth = 1;
+        context.beginPath();
+        context.moveTo(left, g.beamY + 7);
+        context.lineTo(right, g.beamY + 7);
+        context.stroke();
+        for (let x = left + 13; x < right - 6; x += 32) {
+          context.fillStyle = 'rgba(31, 32, 31, .54)';
+          context.beginPath();
+          context.arc(x, g.beamY, 1.6, 0, TAU);
+          context.fill();
+        }
+        for (const pulley of g.fixed) {
+          context.strokeStyle = '#918268';
+          context.lineWidth = 3;
+          context.beginPath();
+          context.moveTo(pulley.x, g.beamY + 6);
+          context.lineTo(pulley.x, pulley.y - g.wheelR - 3);
+          context.stroke();
+          context.fillStyle = '#c5a974';
+          context.beginPath();
+          context.arc(pulley.x, g.beamY + 5, 3, 0, TAU);
+          context.fill();
+        }
+        if (g.anchor && rig !== 'fixed') {
+          context.fillStyle = '#c5a974';
+          context.beginPath();
+          context.arc(g.anchor.x, g.anchor.y, 4, 0, TAU);
+          context.fill();
+          context.strokeStyle = '#8d7c5b';
+          context.lineWidth = 2;
+          context.beginPath();
+          context.moveTo(g.anchor.x, g.anchor.y - 6);
+          context.lineTo(g.anchor.x, g.anchor.y + 2);
+          context.stroke();
+        }
+      }
+
+      function drawPulleyBody(pulley, radius, moving) {
+        context.save();
+        context.fillStyle = moving ? '#343c3a' : '#3c3c37';
+        context.strokeStyle = moving ? '#92a093' : '#b9a274';
+        context.lineWidth = 3;
+        context.beginPath();
+        context.arc(pulley.x, pulley.y, radius, 0, TAU);
+        context.fill();
+        context.stroke();
+        context.strokeStyle = 'rgba(225, 214, 183, .42)';
+        context.lineWidth = 1;
+        context.beginPath();
+        context.arc(pulley.x, pulley.y, radius - 4, 0, TAU);
+        context.stroke();
+        context.fillStyle = '#d0b77b';
+        context.beginPath();
+        context.arc(pulley.x, pulley.y, 3.3, 0, TAU);
+        context.fill();
+        context.restore();
+      }
+
+      function traceRope(g) {
+        context.save();
+        context.beginPath();
+        context.moveTo(g.anchor.x, g.anchor.y);
+        let freeX;
+        let freeY;
+        if (rig === 'fixed') {
+          const pulley = g.fixed[0];
+          context.lineTo(pulley.x - g.wheelR, pulley.y);
+          context.arc(pulley.x, pulley.y, g.wheelR, Math.PI, TAU, false);
+          freeX = pulley.x + g.wheelR;
+          freeY = pulley.y;
+        } else {
+          for (let i = 0; i < g.moving.length; i++) {
+            const lower = g.moving[i];
+            const upper = g.fixed[i];
+            context.lineTo(lower.x - g.wheelR, lower.y);
+            context.arc(lower.x, lower.y, g.wheelR, Math.PI, 0, true);
+            context.lineTo(upper.x - g.wheelR, upper.y);
+            context.arc(upper.x, upper.y, g.wheelR, Math.PI, TAU, false);
+          }
+          const last = g.fixed[g.fixed.length - 1];
+          freeX = last.x + g.wheelR;
+          freeY = last.y;
+        }
+        if (slackAmount > 1) {
+          const sag = Math.min(42, slackAmount * .35);
+          context.quadraticCurveTo((freeX + g.handleX) / 2, (freeY + handleY) / 2 + sag, g.handleX, handleY);
+        } else {
+          context.lineTo(g.handleX, handleY);
+        }
+        context.strokeStyle = 'rgba(0,0,0,.35)';
+        context.lineWidth = 7;
+        context.lineCap = 'round';
+        context.lineJoin = 'round';
+        context.stroke();
+        context.strokeStyle = '#c7a76a';
+        context.lineWidth = 3.4;
+        context.stroke();
+        context.restore();
+      }
+
+      function drawMovingFrame(g) {
+        if (!g.moving.length) return;
+        context.save();
+        context.strokeStyle = '#9e9b88';
+        context.lineWidth = 3;
+        context.beginPath();
+        for (const pulley of g.moving) {
+          context.moveTo(pulley.x, pulley.y + g.wheelR - 1);
+          context.lineTo(pulley.x, loadY - 3);
+        }
+        const left = Math.min(...g.moving.map(p => p.x)) - 11;
+        const right = Math.max(...g.moving.map(p => p.x)) + 11;
+        context.moveTo(left, loadY - 4);
+        context.lineTo(right, loadY - 4);
+        context.stroke();
+        context.fillStyle = '#d1b77b';
+        for (const pulley of g.moving) {
+          context.beginPath();
+          context.arc(pulley.x, loadY - 4, 3, 0, TAU);
+          context.fill();
+        }
+        context.restore();
+      }
+
+      function drawPulleyDetails(pulley, radius, moving) {
+        context.save();
+        context.strokeStyle = moving ? 'rgba(174, 199, 185, .72)' : 'rgba(234, 209, 158, .68)';
+        context.lineWidth = 1.1;
+        for (let i = 0; i < 6; i++) {
+          const angle = i * TAU / 6;
+          context.beginPath();
+          context.moveTo(pulley.x + Math.cos(angle) * 4, pulley.y + Math.sin(angle) * 4);
+          context.lineTo(pulley.x + Math.cos(angle) * (radius - 5), pulley.y + Math.sin(angle) * (radius - 5));
+          context.stroke();
+        }
+        context.fillStyle = '#e3c47d';
+        context.beginPath();
+        context.arc(pulley.x, pulley.y, 2, 0, TAU);
+        context.fill();
+        context.restore();
+      }
+
+      function drawLoad(g) {
+        const x = g.loadX;
+        const y = loadY;
+        const w = g.loadW;
+        const h = g.loadH;
+        const gradient = context.createLinearGradient(x, y, x + w, y + h);
+        gradient.addColorStop(0, '#896d4b');
+        gradient.addColorStop(.48, '#715a40');
+        gradient.addColorStop(1, '#594b3d');
+        context.fillStyle = 'rgba(0,0,0,.26)';
+        context.fillRect(x + 7, y + h + 3, w - 4, 7);
+        context.fillStyle = gradient;
+        context.fillRect(x, y, w, h);
+        context.strokeStyle = '#c1a374';
+        context.lineWidth = 2;
+        context.strokeRect(x + 1, y + 1, w - 2, h - 2);
+        context.fillStyle = 'rgba(36,31,25,.5)';
+        context.fillRect(x + 10, y + 9, 4, h - 18);
+        context.fillRect(x + w - 14, y + 9, 4, h - 18);
+        context.strokeStyle = 'rgba(230, 208, 168, .26)';
+        context.lineWidth = 1;
+        context.beginPath();
+        context.moveTo(x + 20, y + 12);
+        context.lineTo(x + w - 20, y + 12);
+        context.stroke();
+        context.fillStyle = '#f0ddb0';
+        context.font = '700 11px ui-sans-serif, system-ui, sans-serif';
+        context.textAlign = 'center';
+        context.textBaseline = 'middle';
+        context.fillText(`${massKg()} kg`, x + w / 2, y + h / 2 + 2);
+        context.textAlign = 'start';
+        context.textBaseline = 'alphabetic';
+
+        // A tiny one-way ratchet keeps the load at its new height between strokes.
+        const ratchetX = x + w + 15;
+        const ratchetY = y + h * .55;
+        context.strokeStyle = '#8da79b';
+        context.lineWidth = 2;
+        context.beginPath();
+        context.moveTo(ratchetX, ratchetY - 15);
+        context.lineTo(ratchetX, ratchetY + 15);
+        context.stroke();
+        context.fillStyle = '#83d4bc';
+        context.beginPath();
+        context.moveTo(ratchetX - 2, ratchetY - 5);
+        context.lineTo(ratchetX + 6, ratchetY);
+        context.lineTo(ratchetX - 2, ratchetY + 5);
+        context.closePath();
+        context.fill();
+      }
+
+      function drawHandle(g) {
+        context.save();
+        const gripW = 14;
+        const gripH = 27;
+        const top = handleY;
+        context.fillStyle = hoveredHandle || drag ? '#98d6c0' : '#dfc07e';
+        context.strokeStyle = '#362f25';
+        context.lineWidth = 2;
+        context.beginPath();
+        context.roundRect(g.handleX - gripW / 2, top, gripW, gripH, 5);
+        context.fill();
+        context.stroke();
+        context.strokeStyle = 'rgba(40,34,27,.65)';
+        context.lineWidth = 1;
+        for (let y = top + 7; y < top + gripH - 3; y += 5) {
+          context.beginPath();
+          context.moveTo(g.handleX - 4, y);
+          context.lineTo(g.handleX + 4, y);
+          context.stroke();
+        }
+        context.restore();
+      }
+
+      function drawArrow(x1, y1, x2, y2, color, widthValue = 2) {
+        const angle = Math.atan2(y2 - y1, x2 - x1);
+        context.save();
+        context.strokeStyle = color;
+        context.fillStyle = color;
+        context.lineWidth = widthValue;
+        context.lineCap = 'round';
+        context.beginPath();
+        context.moveTo(x1, y1);
+        context.lineTo(x2, y2);
+        context.stroke();
+        context.beginPath();
+        context.moveTo(x2, y2);
+        context.lineTo(x2 - 7 * Math.cos(angle - .48), y2 - 7 * Math.sin(angle - .48));
+        context.lineTo(x2 - 7 * Math.cos(angle + .48), y2 - 7 * Math.sin(angle + .48));
+        context.closePath();
+        context.fill();
+        context.restore();
+      }
+
+      function drawScene() {
+        if (!width || !height) return;
+        const g = geometry();
+        drawBackground(g);
+        drawBeam(g);
+        drawMovingFrame(g);
+        for (const pulley of g.fixed) drawPulleyBody(pulley, g.wheelR, false);
+        for (const pulley of g.moving) drawPulleyBody(pulley, g.wheelR, true);
+        traceRope(g);
+        for (const pulley of g.fixed) drawPulleyDetails(pulley, g.wheelR, false);
+        for (const pulley of g.moving) drawPulleyDetails(pulley, g.wheelR, true);
+        drawLoad(g);
+        drawHandle(g);
+        drawArrow(g.handleX + 29, handleY + 2, g.handleX + 29, handleY + 35, 'rgba(140,191,226,.75)', 1.5);
+        if (loadY > loadLimits().min + 4) drawArrow(g.loadCenterX + g.loadW * .65, loadY + 9, g.loadCenterX + g.loadW * .65, loadY - 16, 'rgba(131,212,188,.82)', 1.6);
+        context.fillStyle = 'rgba(229,215,185,.55)';
+        context.font = '650 9px ui-sans-serif, system-ui, sans-serif';
+        context.textAlign = 'center';
+        context.fillText(`${RIGS[rig].advantage} supporting strand${RIGS[rig].advantage === 1 ? '' : 's'}`, g.loadCenterX, g.floorY - 12);
+        context.textAlign = 'start';
+        dirty = false;
+      }
+
+      function updateMeters() {
+        updateForceReadout();
+        updateRigUI();
+      }
+
+      function beginRegrip(now = performance.now()) {
+        if (Math.abs(handleY - restHandleY) < 1) {
+          handleY = restHandleY;
+          slackAmount = 0;
+          regrip = null;
+          dirty = true;
+          return;
+        }
+        regrip = { start: now, fromY: handleY, fromSlack: slackAmount, duration: 380 };
+        dirty = true;
+      }
+
+      function updateRegrip(now) {
+        if (!regrip) return;
+        const t = clamp((now - regrip.start) / regrip.duration, 0, 1);
+        const eased = t * t * (3 - 2 * t);
+        handleY = regrip.fromY + (restHandleY - regrip.fromY) * eased;
+        slackAmount = regrip.fromSlack * (1 - eased);
+        dirty = true;
+        if (t >= 1) {
+          regrip = null;
+          handleY = restHandleY;
+          slackAmount = 0;
+          dirty = true;
+          if (lastPullSucceeded) setStatus('Ratchet engaged. The load stays up while you regrip.', 'success');
+          else setStatus('The rope went slack. Increase your effort or choose more supporting strands.', 'warning');
+        }
+      }
+
+      function performPull(distance = Number(stroke.value) * height / 400) {
+        if (drag || regrip) return;
+        const limits = loadLimits();
+        const startLoadY = loadY;
+        const available = effortN();
+        const needed = requiredN();
+        const maxHandleY = height - 48;
+        const pullDistance = clamp(distance, 0, maxHandleY - restHandleY);
+        handleY = restHandleY + pullDistance;
+        const canLift = available + .01 >= needed;
+        if (canLift) {
+          loadY = clamp(startLoadY - pullDistance / advantage(), limits.min, limits.max);
+          slackAmount = 0;
+          const lifted = loadY < startLoadY - .5;
+          lastPullSucceeded = true;
+          if (lifted) setStatus(`Load rising. ${advantage()}:1 advantage trades a longer rope pull for less force.`, 'success');
+          else setStatus('The load is at its upper stop. Reset it to run another lift.', 'success');
+        } else {
+          loadY = startLoadY;
+          slackAmount = pullDistance;
+          lastPullSucceeded = false;
+          setStatus(`Not enough effort yet. This load needs ${Math.ceil(needed)} N; you have ${Math.round(available)} N.`, 'warning');
+        }
+        dirty = true;
+        beginRegrip();
+      }
+
+      function resetLoad() {
+        drag = null;
+        pointerId = null;
+        regrip = null;
+        loadY = initialLoadY;
+        handleY = restHandleY;
+        slackAmount = 0;
+        lastPullSucceeded = true;
+        setStatus('Load returned to the starting mark. Ready for another experiment.');
+        dirty = true;
+      }
+
+      function setRig(key) {
+        if (!RIGS[key]) return;
+        rig = key;
+        updateRigUI();
+        resetLoad();
+        updateMeters();
+        dirty = true;
+      }
+
+      function pointFromEvent(event) {
+        const rect = canvas.getBoundingClientRect();
+        if (!rect.width || !rect.height) return null;
+        return { x: (event.clientX - rect.left) * width / rect.width, y: (event.clientY - rect.top) * height / rect.height };
+      }
+
+      function setHovered(point) {
+        const g = geometry();
+        const isOver = Math.abs(point.x - g.handleX) < 34 && Math.abs(point.y - handleY - 14) < 39;
+        if (hoveredHandle !== isOver) {
+          hoveredHandle = isOver;
+          canvas.style.cursor = isOver ? (drag ? 'grabbing' : 'grab') : 'default';
+          dirty = true;
+        }
+      }
+
+      function onDragMove(point) {
+        const delta = point.y - drag.pointerY;
+        const maxHandleY = height - 48;
+        handleY = clamp(drag.handleY + delta, restHandleY - 10, maxHandleY);
+        const pulled = Math.max(0, handleY - drag.handleY);
+        const needed = requiredN();
+        if (effortN() + .01 >= needed) {
+          const limits = loadLimits();
+          loadY = clamp(drag.loadY - pulled / advantage(), limits.min, limits.max);
+          slackAmount = 0;
+          const lifted = loadY < drag.loadY - .5;
+          lastPullSucceeded = true;
+          if (lifted) setStatus(`Raising the load. ${advantage()}:1 mechanical advantage.`, 'success');
+          else setStatus('The load reached its upper stop. Release and reset to lower it.', 'success');
+        } else {
+          loadY = drag.loadY;
+          slackAmount = pulled;
+          lastPullSucceeded = false;
+          setStatus(`The rope is slack. This load needs ${Math.ceil(needed)} N to move.`, 'warning');
+        }
+        dirty = true;
+      }
+
+      for (const button of rigButtons) button.addEventListener('click', () => setRig(button.dataset.rig));
+      pullButton.addEventListener('click', () => performPull());
+      resetButton.addEventListener('click', resetLoad);
+      mass.addEventListener('input', updateMeters);
+      effort.addEventListener('input', updateMeters);
+      stroke.addEventListener('input', updateMeters);
+
+      canvas.addEventListener('pointerenter', event => {
+        const point = pointFromEvent(event);
+        if (point) { pointerInside = true; setHovered(point); }
+      });
+      canvas.addEventListener('pointermove', event => {
+        const point = pointFromEvent(event);
+        if (!point) return;
+        pointerInside = true;
+        if (drag && pointerId === event.pointerId) onDragMove(point);
+        else setHovered(point);
+      });
+      canvas.addEventListener('pointerleave', () => {
+        if (pointerId === null) {
+          pointerInside = false;
+          hoveredHandle = false;
+          canvas.style.cursor = 'default';
+          dirty = true;
+        }
+      });
+      canvas.addEventListener('pointerdown', event => {
+        if (event.button !== 0) return;
+        const point = pointFromEvent(event);
+        if (!point) return;
+        const g = geometry();
+        if (Math.abs(point.x - g.handleX) > 36 || Math.abs(point.y - handleY - 14) > 42) return;
+        event.preventDefault();
+        regrip = null;
+        pointerId = event.pointerId;
+        drag = { pointerY: point.y, handleY, loadY };
+        hoveredHandle = true;
+        canvas.style.cursor = 'grabbing';
+        if (canvas.setPointerCapture) canvas.setPointerCapture(event.pointerId);
+        dirty = true;
+      });
+      const endDrag = event => {
+        if (pointerId !== event.pointerId) return;
+        pointerId = null;
+        if (drag) {
+          drag = null;
+          hoveredHandle = false;
+          canvas.style.cursor = 'default';
+          beginRegrip();
+        }
+        dirty = true;
+      };
+      canvas.addEventListener('pointerup', endDrag);
+      canvas.addEventListener('pointercancel', endDrag);
+      canvas.addEventListener('lostpointercapture', endDrag);
+
+      window.addEventListener('keydown', event => {
+        const target = event.target;
+        if (target instanceof HTMLElement && (target.isContentEditable || ['INPUT', 'TEXTAREA', 'SELECT'].includes(target.tagName))) return;
+        if (event.code === 'Space') {
+          event.preventDefault();
+          performPull();
+        } else if (event.key === '1') setRig('fixed');
+        else if (event.key === '2') setRig('movable');
+        else if (event.key === '3') setRig('tackle');
+      });
+
+      function frame(time) {
+        if (regrip) updateRegrip(time);
+        if (dirty) drawScene();
+        requestAnimationFrame(frame);
+      }
+
+      updateRigUI();
+      updateForceReadout();
+      if ('ResizeObserver' in window) new ResizeObserver(resizeCanvas).observe(stage);
+      else window.addEventListener('resize', resizeCanvas);
+      requestAnimationFrame(() => {
+        resizeCanvas();
+        dirty = true;
+        requestAnimationFrame(frame);
+      });
+    })();
+  </script>
+</body>
+</html>

@@ -1,0 +1,9 @@
+{
+  "name": "Pulley Lab",
+  "desc": "A hands-on rope-and-pulley sandbox. Compare fixed, movable, and block-and-tackle rigs as you trade pulling distance for lifting force.",
+  "controls": "Choose a pulley rig and set the load and effort. Drag the rope handle down or press Pull Rope; Space also pulls.",
+  "shelf": "Interactive Stories & Experiments",
+  "tags": ["simulation", "physics", "pulley", "mechanics", "experiments"],
+  "badge": "New",
+  "creator": "Dragon Gaming Platforms"
+}
