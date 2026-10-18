@@ -12,7 +12,12 @@ document.addEventListener('pointerup', (event) => {
 });
 document.addEventListener('click', (event) => {
   const button = event.target.closest?.('button');
-  if (button && event.isTrusted && event.pointerType === 'touch'
+  // Older pointer-capable browsers still expose the follow-up click as a
+  // MouseEvent. Its nonzero detail distinguishes it from keyboard/AT clicks.
+  const fromTouch = event.pointerType === 'touch'
+    || event.sourceCapabilities?.firesTouchEvents
+    || (!('pointerType' in event) && event.detail > 0);
+  if (button && event.isTrusted && fromTouch
       && performance.now() - (activated.get(button) ?? -Infinity) < 750) {
     event.preventDefault();
     event.stopImmediatePropagation();
