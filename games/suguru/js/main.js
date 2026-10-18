@@ -570,7 +570,9 @@ function clearSave() {
   el.stateLine.textContent = '存档已清空。';
 }
 
-$('#btn-reset').addEventListener('click', clearSave);
+$('#btn-reset').addEventListener('click', () => {
+  if (window.confirm('Clear all local Suguru saves and records? This cannot be undone.')) clearSave();
+});
 $('#btn-sound').addEventListener('click', () => {
   Store.setSetting('sound', Store.setting('sound') === false);
   applySettings();

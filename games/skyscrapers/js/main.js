@@ -816,6 +816,7 @@ $('#btn-motion').addEventListener('click', () => {
   applySettings();
 });
 $('#btn-reset').addEventListener('click', () => {
+  if (!window.confirm('Clear all local Skyscrapers saves and records? This cannot be undone.')) return;
   Store.reset();
   applySettings();
   game = null;

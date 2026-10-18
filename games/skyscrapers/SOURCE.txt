@@ -2,4 +2,4 @@ Source: https://github.com/z-biz-game/z-biz-game-skyscraper-cos
 Revision: 47aa936de9339f2b42ad14ee3f560b9bcf83ee50
 License: MIT (see LICENSE)
 Vendored: 2026-10-18
-Hosting adaptations: Standalone browser runtime including committed puzzle data only; Electron/build tooling and service-worker registration omitted; metadata image URLs made relative; browser storage namespaced; English help added.
+Hosting adaptations: Standalone browser runtime including committed puzzle data only; Electron/build tooling and service-worker registration omitted; metadata image URLs made relative; browser storage namespaced; English help added. Added confirmation before clearing this game’s local saves/records.
