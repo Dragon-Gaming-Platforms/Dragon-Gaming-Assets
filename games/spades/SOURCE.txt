@@ -1,0 +1,5 @@
+Source: https://github.com/grindocboy/trickster-ai
+Revision: b9e5276ed87967016f827331fce132ddc7b3e83b
+Vendored: 2026-10-18
+License: MIT (see LICENSE)
+Changes: Only standalone Spades included; unrelated launcher/Blackjack/Poker omitted. Cloudflare beacon removed and privacy text corrected. Local storage namespaced; stale delayed actions guarded across deals/resets; bidding range, Nil scoring, tied match endings and isolated coach explanation corrected. Contract-bar layout and sheet scrolling repaired.

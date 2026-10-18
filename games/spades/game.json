@@ -1,0 +1,15 @@
+{
+  "name": "Spades",
+  "desc": "Four-player partnership Spades with three computer players, bidding, coaching, trick replay and local performance statistics. Includes Standard, Joker-Joker and JJDD house-rule presets. Current matches restart on reload.",
+  "controls": "New Hand deals; choose a bid or Nil; tap a legal card twice to play; Coach explains rules; Menu offers presets, replay and Reset match",
+  "shelf": "Puzzle & Logic",
+  "tags": [
+    "games",
+    "html5",
+    "cards",
+    "spades",
+    "ai",
+    "trick-taking"
+  ],
+  "creator": "G5p3nc3r"
+}
