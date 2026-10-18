@@ -1,0 +1,15 @@
+{
+  "name": "Human Middleware",
+  "desc": "A dark-comedy office survival arcade: as Greta, chief accountant, print, retype, floppy-disk, and stamp every €8 invoice from your nephew's AI SaaS by hand — and survive as many days as you can.",
+  "controls": "Arrows/WASD to move, Shift to sprint, Space to act, 1-7 to buy upgrades, Y/N for calls, P to pause",
+  "shelf": "Arcade & Action",
+  "tags": [
+    "arcade",
+    "survival",
+    "comedy",
+    "single-file"
+  ],
+  "badge": "New",
+  "creator": "kamiljablonski",
+  "image": "title.png"
+}

@@ -1,0 +1,15 @@
+{
+  "name": "Kakurasu",
+  "desc": "Select cells to satisfy every weighted row and column sum. A cell contributes its column number to its row and its row number to its column. Campaign, daily puzzles and hints. Original Simplified Chinese interface; English help included.",
+  "controls": "Tap cells to toggle selection; N note mode, U undo, H hint, R restart. English help link above game.",
+  "shelf": "Puzzle & Logic",
+  "tags": [
+    "games",
+    "html5",
+    "puzzle",
+    "logic",
+    "kakurasu"
+  ],
+  "badge": "New",
+  "creator": "z-biz-game"
+}

@@ -1,0 +1,3525 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>NEON DRIFT — Open World Drive</title>
+<style>
+  :root{
+    --magenta:#ff2e92;
+    --cyan:#00f0ff;
+    --amber:#ffb347;
+    --chrome:#f5f3ff;
+    --panel:rgba(8,3,18,0.93);
+  }
+  *{box-sizing:border-box;-webkit-tap-highlight-color:transparent;}
+  html,body{margin:0;padding:0;width:100%;height:100%;overflow:hidden;background:#000;
+    font-family:'Rajdhani',sans-serif;color:var(--chrome);user-select:none;}
+  #game-canvas{position:fixed;inset:0;display:block;width:100%;height:100%;touch-action:none;outline:none;}
+  #fx-canvas{position:fixed;inset:0;display:block;width:100%;height:100%;pointer-events:none;z-index:5;mix-blend-mode:screen;}
+
+  #hud{position:fixed;inset:0;pointer-events:none;z-index:10;}
+  .panel{position:absolute;background:var(--panel);border:1px solid rgba(0,240,255,0.22);border-radius:12px;}
+
+  /* Score — top left */
+  #score-panel{top:14px;left:14px;padding:10px 14px 8px;min-width:136px;}
+  #score-label{font-size:9px;letter-spacing:2.5px;color:var(--cyan);opacity:0.65;margin-bottom:2px;}
+  #score-value{font-family:'Orbitron',sans-serif;font-size:28px;font-weight:900;color:var(--chrome);text-shadow:0 0 14px var(--magenta);line-height:1;}
+  #score-sub{display:flex;align-items:center;justify-content:space-between;margin-top:5px;}
+  #best-row{font-size:9px;letter-spacing:1px;color:rgba(245,243,255,0.4);}
+  #best-score-value{color:var(--amber);font-family:'Orbitron';font-size:9px;font-weight:700;}
+  #car-dots{display:flex;gap:4px;}
+  .cdot{width:8px;height:8px;border-radius:50%;opacity:0.35;border:1px solid rgba(255,255,255,0.15);transition:opacity .2s,box-shadow .2s;}
+  .cdot.unlocked{opacity:0.75;}
+  .cdot.active{opacity:1;box-shadow:0 0 6px currentColor;}
+  #share-btn{margin-top:7px;pointer-events:auto;cursor:pointer;font-size:10px;font-weight:700;letter-spacing:1px;
+    color:var(--chrome);background:rgba(0,240,255,0.07);border:1px solid rgba(0,240,255,0.3);border-radius:6px;
+    padding:4px 8px;text-align:center;transition:background .15s;user-select:none;}
+  #share-btn:active{background:rgba(0,240,255,0.22);}
+  #share-btn.copied{border-color:rgba(120,255,160,.7);color:#caffd8;}
+
+  /* Minimap — top right, slightly smaller */
+  #minimap-wrap{top:14px;right:14px;width:148px;height:148px;border-radius:50%;
+    border:1.5px solid rgba(0,240,255,0.35);box-shadow:0 0 14px rgba(0,240,255,0.25);
+    overflow:hidden;background:#060112;}
+  body.touch #minimap-wrap{top:52px;}
+  #minimap{width:100%;height:100%;display:block;}
+  #compass{position:absolute;top:4px;left:50%;transform:translateX(-50%);font-family:'Orbitron';font-size:9px;color:var(--amber);letter-spacing:2px;z-index:2;}
+
+  /* Wanted — below minimap */
+  #wanted-indicator{position:absolute;top:170px;right:14px;font-family:'Orbitron';font-size:11px;font-weight:700;
+    color:#ff5555;background:rgba(18,0,0,.7);border:1px solid rgba(255,60,60,.45);padding:3px 10px;border-radius:20px;
+    letter-spacing:1.5px;opacity:0;transition:opacity .2s;pointer-events:none;}
+  body.touch #wanted-indicator{top:208px;}
+  #wanted-indicator.show{opacity:1;animation:wPulse 1s infinite;}
+  @keyframes wPulse{0%,100%{box-shadow:0 0 5px rgba(255,40,40,.4);}50%{box-shadow:0 0 12px rgba(255,40,40,.8);}}
+
+  /* Status pills — top center */
+  .status-pill{position:absolute;left:50%;transform:translateX(-50%);font-family:'Orbitron';font-size:10px;font-weight:600;
+    padding:3px 12px;border-radius:20px;letter-spacing:1px;opacity:0;transition:opacity .3s;pointer-events:none;white-space:nowrap;}
+  #weather-indicator{top:14px;color:#7ec8ff;background:rgba(3,10,24,.75);border:1px solid rgba(100,180,255,.35);}
+  #weather-indicator.show{opacity:1;}
+  #night-indicator{top:44px;color:#c9b8ff;background:rgba(8,4,20,.75);border:1px solid rgba(160,120,255,.35);}
+  #night-indicator.show{opacity:1;}
+
+  /* Speed — bottom right, clean */
+  #speed-panel{bottom:14px;right:14px;padding:10px 14px;min-width:148px;}
+  #car-name-label{font-size:8px;letter-spacing:2px;color:rgba(245,243,255,0.3);display:block;text-align:right;margin-bottom:4px;}
+  #speed-main{display:flex;align-items:baseline;justify-content:flex-end;gap:3px;}
+  #speed-value{font-family:'Orbitron',sans-serif;font-size:44px;font-weight:900;line-height:1;color:var(--chrome);text-shadow:0 0 12px var(--cyan);}
+  #speed-unit{font-size:9px;letter-spacing:3px;color:var(--cyan);}
+  #gear{font-family:'Orbitron';font-size:10px;color:var(--amber);border:1px solid rgba(255,179,71,.45);border-radius:3px;padding:1px 5px;float:left;margin-top:2px;}
+  #speed-bar-track{clear:both;width:100%;height:4px;background:rgba(255,255,255,.07);border-radius:3px;margin-top:8px;overflow:hidden;position:relative;}
+  #speed-bar-fill{height:100%;width:0%;background:linear-gradient(90deg,var(--cyan),var(--magenta));border-radius:3px;transition:width .06s linear;}
+  #boost-bar-fill{position:absolute;top:0;left:0;height:100%;width:0%;background:var(--amber);border-radius:3px;opacity:0;transition:opacity .15s;}
+  #nitro-bar-fill{position:absolute;top:0;right:0;height:100%;width:0%;background:linear-gradient(90deg,#1a7a50,#3dffa0);border-radius:3px;transition:width .1s linear;}
+  #drift-bar-track{width:100%;height:3px;background:rgba(255,255,255,.06);border-radius:3px;margin-top:4px;overflow:hidden;opacity:0;transition:opacity .15s;}
+  #drift-meter-fill{height:100%;width:0%;background:linear-gradient(90deg,var(--magenta),var(--amber));border-radius:3px;}
+  #combo-mult{margin-top:3px;font-family:'Orbitron';font-size:11px;font-weight:700;color:var(--amber);text-align:right;opacity:0;transition:opacity .15s;}
+
+  /* Banners — mid-screen, stacked safely */
+  #toast{position:absolute;top:14%;left:50%;transform:translateX(-50%);font-family:'Orbitron';font-size:15px;
+    color:var(--chrome);text-shadow:0 0 12px var(--magenta);opacity:0;letter-spacing:3px;white-space:nowrap;transition:opacity .2s;}
+  #toast.show{opacity:1;}
+  #drift-banner{position:absolute;top:24%;left:50%;transform:translate(-50%,6px) scale(.88);font-family:'Orbitron';font-size:22px;font-weight:900;
+    color:var(--amber);text-shadow:0 0 14px rgba(255,179,71,.9);opacity:0;letter-spacing:2px;white-space:nowrap;pointer-events:none;
+    transition:opacity .16s,transform .16s;}
+  #drift-banner.show{opacity:1;transform:translate(-50%,0) scale(1);}
+  #drift-banner.tier2{font-size:26px;color:#ff9d3a;}
+  #drift-banner.tier3{font-size:32px;color:#ff2e92;text-shadow:0 0 20px rgba(255,46,146,1);}
+  #drift-banner.show.tier3{transform:translate(-50%,0) scale(1.05);}
+  #combo-chain{position:absolute;top:calc(24% + 32px);left:50%;transform:translateX(-50%);
+    font-family:'Rajdhani';font-weight:700;font-size:11px;letter-spacing:3px;color:rgba(245,243,255,.7);
+    opacity:0;transition:opacity .16s;pointer-events:none;white-space:nowrap;}
+  #combo-chain.show{opacity:1;}
+  #streak-banner{position:absolute;top:calc(24% + 56px);left:50%;transform:translateX(-50%);
+    font-family:'Orbitron';font-size:20px;font-weight:900;letter-spacing:1px;
+    opacity:0;transition:opacity .2s,color .15s;pointer-events:none;white-space:nowrap;}
+  #edge-flash{position:fixed;inset:0;pointer-events:none;z-index:6;opacity:0;transition:opacity .5s;
+    background:radial-gradient(ellipse at 50% 50%,rgba(255,46,146,0) 55%,rgba(255,46,146,.28) 100%);}
+  #edge-flash.show{opacity:1;transition:opacity .05s;}
+
+  /* Controls hint — bottom left, fully hides after 9s */
+  #controls-hint{bottom:14px;left:14px;padding:8px 12px;font-size:11px;line-height:1.65;max-width:190px;transition:opacity 1.5s;}
+  #controls-hint b{color:var(--cyan);}
+  #controls-hint.dim{opacity:0;}
+  body.touch #controls-hint{display:none;}
+
+  /* Touch controls */
+  #touch-controls{position:absolute;inset:0;display:none;pointer-events:none;}
+  body.touch #touch-controls{display:block;}
+  .tbtn{position:absolute;pointer-events:auto;border-radius:50%;display:flex;align-items:center;justify-content:center;
+    font-family:'Orbitron';color:var(--chrome);background:rgba(14,6,30,.7);border:1.5px solid rgba(0,240,255,.45);
+    user-select:none;-webkit-user-select:none;touch-action:none;font-size:11px;letter-spacing:.5px;}
+  .tbtn:active{background:rgba(0,240,255,.25);}
+  #btn-left{left:14px;bottom:30px;width:66px;height:66px;font-size:24px;}
+  #btn-right{left:92px;bottom:30px;width:66px;height:66px;font-size:24px;}
+  #btn-drift{right:110px;bottom:98px;width:56px;height:56px;border-color:rgba(255,179,71,.6);color:var(--amber);}
+  #btn-nitro{right:110px;bottom:30px;width:56px;height:56px;border-color:rgba(100,255,160,.35);color:rgba(160,255,200,.45);
+    background:rgba(8,24,16,.55);transition:border-color .2s,color .2s,box-shadow .2s;opacity:.6;}
+  #btn-nitro.ready{opacity:1;border-color:#78ffaa;color:#c0ffe0;box-shadow:0 0 12px rgba(90,255,150,.45);}
+  #btn-gas{right:14px;bottom:34px;width:86px;height:86px;border-color:rgba(255,46,146,.7);background:rgba(255,46,146,.12);}
+  #btn-brake{right:14px;bottom:132px;width:54px;height:54px;font-size:9px;}
+  #utility-row{position:absolute;top:8px;right:8px;display:flex;gap:5px;pointer-events:none;}
+  .tbtn-small{position:relative;width:36px;height:36px;font-size:8px;background:rgba(10,5,22,.65);border-color:rgba(245,243,255,.2);color:rgba(245,243,255,.7);}
+
+  /* Title */
+  #title-screen{position:fixed;inset:0;z-index:50;display:flex;align-items:center;justify-content:center;
+    flex-direction:column;background:radial-gradient(ellipse at 50% 28%,#200a38 0%,#0d0420 60%,#040110 100%);
+    text-align:center;padding:24px;}
+  #title-screen.hidden{display:none;}
+  #game-title{font-family:'Orbitron',sans-serif;font-weight:900;font-size:clamp(38px,9vw,82px);letter-spacing:6px;margin:0;
+    color:#fff;text-shadow:0 0 14px var(--magenta),0 0 40px var(--cyan),0 0 80px var(--magenta);
+    animation:flicker 3.2s infinite ease-in-out;}
+  @keyframes flicker{0%,100%{opacity:1;}48%{opacity:1;}50%{opacity:.85;}52%{opacity:1;}}
+  #game-subtitle{font-family:'Rajdhani';letter-spacing:5px;font-size:13px;color:var(--cyan);margin-top:6px;opacity:.8;}
+  #start-btn{margin-top:40px;font-family:'Orbitron';font-size:15px;letter-spacing:3px;padding:14px 42px;cursor:pointer;
+    background:linear-gradient(90deg,var(--magenta),var(--cyan));color:#060110;border:none;border-radius:30px;font-weight:700;
+    box-shadow:0 0 26px rgba(255,46,146,.5);transition:transform .15s;}
+  #start-btn:hover{transform:scale(1.05);}
+  #title-controls{margin-top:26px;font-size:12px;color:rgba(245,243,255,.55);line-height:1.9;max-width:360px;}
+  #title-controls b{color:var(--amber);}
+  #loading-line{margin-top:14px;font-size:11px;letter-spacing:2px;color:rgba(0,240,255,.6);}
+  #credit-line{margin-top:8px;font-size:11px;letter-spacing:2px;color:rgba(0,240,255,.6);font-weight:600;}
+</style>
+
+</head>
+<body>
+
+<canvas id="game-canvas"></canvas>
+<canvas id="fx-canvas"></canvas>
+
+<div id="hud">
+<div id="perf-hud" style="position:absolute;top:4px;left:4px;z-index:999;font:11px monospace;color:#0f0;background:rgba(0,0,0,.6);padding:4px 6px;border-radius:4px;pointer-events:none;white-space:pre;"></div>
+  <div id="score-panel" class="panel">
+    <div id="score-label">◆ SCORE</div>
+    <div id="score-value">0</div>
+    <div id="score-sub">
+      <div id="best-row">BEST <span id="best-score-value">0</span></div>
+      <div id="car-dots"></div>
+    </div>
+    <div id="share-btn">📤 SHARE</div>
+  </div>
+
+  <div id="minimap-wrap" class="panel" style="border-radius:50%;">
+    <div id="compass">N</div>
+    <canvas id="minimap" width="148" height="148"></canvas>
+  </div>
+
+  <div id="wanted-indicator"></div>
+
+  <div id="weather-indicator" class="status-pill"></div>
+  <div id="night-indicator" class="status-pill">🌙 NIGHT ×1.35</div>
+
+  <div id="speed-panel" class="panel">
+    <span id="car-name-label">VELOCITY</span>
+    <div id="speed-main">
+      <span id="speed-value">0</span><span id="speed-unit">KPH</span>
+    </div>
+    <div style="overflow:hidden;"><span id="gear">D</span></div>
+    <div id="speed-bar-track">
+      <div id="speed-bar-fill"></div>
+      <div id="boost-bar-fill"></div>
+      <div id="nitro-bar-fill"></div>
+    </div>
+    <div id="drift-bar-track"><div id="drift-meter-fill"></div></div>
+    <div id="combo-mult"></div>
+  </div>
+
+  <div id="controls-hint" class="panel">
+    <b>WASD</b> drive &nbsp;<b>SHIFT</b> drift &nbsp;<b>B</b> nitro<br>
+    <b>C</b> cam &nbsp;<b>V</b> car &nbsp;<b>R</b> reset
+  </div>
+
+  <div id="toast"></div>
+  <div id="drift-banner"></div>
+  <div id="combo-chain"></div>
+  <div id="streak-banner"></div>
+  <div id="edge-flash"></div>
+
+  <div id="touch-controls">
+    <div class="tbtn" id="btn-left">◀</div>
+    <div class="tbtn" id="btn-right">▶</div>
+    <div class="tbtn" id="btn-drift">DRIFT</div>
+    <div class="tbtn" id="btn-nitro">NITRO</div>
+    <div class="tbtn" id="btn-brake">BRAKE</div>
+    <div class="tbtn" id="btn-gas">GAS</div>
+    <div id="utility-row">
+      <div class="tbtn tbtn-small" id="btn-camera">CAM</div>
+      <div class="tbtn tbtn-small" id="btn-resetcar">RST</div>
+      <div class="tbtn tbtn-small" id="btn-switchcar">CAR</div>
+      <div class="tbtn tbtn-small" id="btn-night">🌙</div>
+    </div>
+  </div>
+</div>
+
+<div id="title-screen">
+  <h1 id="game-title">NEON DRIFT</h1>
+  <div id="game-subtitle">AN OPEN WORLD SUNSET DRIVE</div>
+  <button id="start-btn">START ENGINE</button>
+  <div id="title-controls">
+    <b>Desktop:</b> WASD / Arrows to drive, Shift to drift, B for nitro (once charged), C to change camera, V to switch car, R to reset.<br>
+    <b>Mobile:</b> use the on-screen pedals &amp; steering buttons.<br>
+    Collect glowing orbs, hit cyan boost rings, unlock new cars, and explore the whole city &amp; desert beyond it.<br>
+    Sideswipe traffic for bonus points, dodge the police, and race your own ghost — your best run replays as a translucent car once you've set one.
+  </div>
+  <div id="loading-line">tap start to ignite the engine &amp; sound</div>
+  <div id="credit-line">Developed by Bruta</div>
+</div>
+
+<script src="vendor/three.min.js"></script>
+<script src="vendor/shaders/CopyShader.js"></script>
+<script src="vendor/shaders/LuminosityHighPassShader.js"></script>
+<script src="vendor/postprocessing/EffectComposer.js"></script>
+<script src="vendor/postprocessing/RenderPass.js"></script>
+<script src="vendor/postprocessing/ShaderPass.js"></script>
+<script src="vendor/postprocessing/UnrealBloomPass.js"></script>
+<script>
+(function(){
+'use strict';
+
+/* =========================================================================
+   NEON DRIFT — single file open world arcade driving game
+   v2: realistic PBR materials, shadow-mapped lighting, procedural facade /
+   asphalt textures, live cube-camera reflections, refined low-poly car.
+   ========================================================================= */
+
+// ---------------------------------------------------------------------
+// Constants
+// ---------------------------------------------------------------------
+const CITY_SIZE   = 480;     // width/depth of the city plane
+const CITY_BLOCKS = 8;       // grid cells per side
+const BLOCK       = CITY_SIZE / CITY_BLOCKS;
+const WORLD_PLANE = 4200;    // outer terrain plane size
+const WORLD_LIMIT = 1900;    // soft drive boundary
+const TOTAL_ORBS  = 22;
+
+function lerp(a,b,t){ return a+(b-a)*t; }
+function clamp(v,a,b){ return Math.max(a,Math.min(b,v)); }
+function rand(a,b){ return a+Math.random()*(b-a); }
+function choice(arr){ return arr[Math.floor(Math.random()*arr.length)]; }
+
+// Smooth rolling height field outside the flat city. Used for both the
+// terrain mesh displacement and the car's runtime ground sampling, so the
+// car always tracks the visual ground exactly.
+function groundHeight(x,z){
+  const d = Math.sqrt(x*x+z*z);
+  const cityHalf = CITY_SIZE/2 + 14;
+  if(d < cityHalf) return 0;
+  const band = 140;
+  const t = clamp((d-cityHalf)/band, 0, 1);
+  const bumps = Math.sin(x*0.015)*Math.cos(z*0.015)*5
+              + Math.sin((x+z)*0.006)*9
+              + Math.sin(x*0.045+z*0.02)*1.4;
+  return bumps*t;
+}
+
+// Small reusable noise texture (procedural — no external assets needed)
+function makeNoiseTexture(size){
+  const c = document.createElement('canvas'); c.width=c.height=size;
+  const ctx = c.getContext('2d');
+  const id = ctx.createImageData(size,size);
+  for(let i=0;i<id.data.length;i+=4){
+    const v = 110+Math.random()*110;
+    id.data[i]=v; id.data[i+1]=v; id.data[i+2]=v; id.data[i+3]=255;
+  }
+  ctx.putImageData(id,0,0);
+  const tex = new THREE.CanvasTexture(c);
+  tex.wrapS = tex.wrapT = THREE.RepeatWrapping;
+  return tex;
+}
+function makeGrainPatternCanvas(size, alpha){
+  const c = document.createElement('canvas'); c.width=c.height=size;
+  const ctx = c.getContext('2d');
+  const id = ctx.createImageData(size,size);
+  for(let i=0;i<id.data.length;i+=4){
+    const v = Math.random()*255;
+    id.data[i]=v; id.data[i+1]=v; id.data[i+2]=v; id.data[i+3]=alpha;
+  }
+  ctx.putImageData(id,0,0);
+  return c;
+}
+
+// ---------------------------------------------------------------------
+// Renderer / Scene / Camera
+// ---------------------------------------------------------------------
+const canvas = document.getElementById('game-canvas');
+// Mobile GPUs are tile-based renderers: switching render targets (as the
+// cube-camera reflection does, 6x per update) forces a tile-memory flush
+// each time. That's cheap to ignore on desktop but reads as a hard stutter
+// on phones, so mobile skips live reflections entirely below.
+const IS_MOBILE = ('ontouchstart' in window || navigator.maxTouchPoints>0);
+const renderer = new THREE.WebGLRenderer({canvas, antialias:false});
+renderer.setPixelRatio(Math.min(window.devicePixelRatio||1, 1.25));
+renderer.setSize(window.innerWidth, window.innerHeight);
+renderer.shadowMap.enabled = true;
+// PCFSoftShadowMap multi-samples every shadowed pixel for soft edges,
+// which is noticeably more expensive than plain PCF — worth it for a
+// static architectural render, not for a fast-moving arcade racer where
+// shadow edges are barely visible at speed. Regular PCF reads almost
+// identically here and is meaningfully cheaper per frame.
+renderer.shadowMap.type = THREE.PCFShadowMap;
+renderer.outputEncoding = THREE.sRGBEncoding;
+renderer.toneMapping = THREE.ACESFilmicToneMapping;
+renderer.toneMappingExposure = 1.18;
+
+const scene = new THREE.Scene();
+scene.fog = new THREE.FogExp2(0x120820, 0.0008);
+
+const camera = new THREE.PerspectiveCamera(62, window.innerWidth/window.innerHeight, 0.1, 5000);
+camera.position.set(0, 6, -12);
+
+window.addEventListener('resize', ()=>{
+  renderer.setSize(window.innerWidth, window.innerHeight);
+  camera.aspect = window.innerWidth/window.innerHeight;
+  camera.updateProjectionMatrix();
+  if(composer) composer.setSize(window.innerWidth, window.innerHeight);
+  if(bloomPass) bloomPass.setSize(window.innerWidth*0.5, window.innerHeight*0.5);
+});
+
+// ---------------------------------------------------------------------
+// Post-processing — Unreal-style bloom so neon signage, headlights, the
+// boost rings and orb glow actually bleed light the way the art direction
+// wants. Falls back to direct rendering if the addon scripts didn't load
+// (e.g. blocked CDN), so the game is never broken by this.
+// ---------------------------------------------------------------------
+let composer = null;
+let bloomPass = null;
+try{
+  if(THREE.EffectComposer && THREE.RenderPass && THREE.UnrealBloomPass){
+    composer = new THREE.EffectComposer(renderer);
+    composer.addPass(new THREE.RenderPass(scene, camera));
+    // Bloom's internal blur chain is rendered at its own resolution —
+    // running it at full window size roughly quadruples its GPU cost for
+    // a difference that's invisible once it's blurred anyway. Half-res
+    // looks the same and is dramatically cheaper.
+    bloomPass = new THREE.UnrealBloomPass(
+      new THREE.Vector2(window.innerWidth*0.5, window.innerHeight*0.5), 0.5, 0.38, 0.84
+    );
+    bloomPass.threshold = 0.82;
+    bloomPass.strength = 0.5;
+    bloomPass.radius = 0.38;
+    composer.addPass(bloomPass);
+  }
+}catch(e){ composer = null; bloomPass = null; }
+function renderFrame(){
+  if(composer) composer.render();
+  else renderer.render(scene, camera);
+}
+
+// ---------------------------------------------------------------------
+// Lights — warm dusk sun with a shadow frustum that follows the car
+// ---------------------------------------------------------------------
+const hemiLight = new THREE.HemisphereLight(0xffb3d6, 0x2a2035, 0.75);
+scene.add(hemiLight);
+const ambientLight = new THREE.AmbientLight(0x6a5a8a, 0.22);
+scene.add(ambientLight);
+
+const sunLight = new THREE.DirectionalLight(0xffc28a, 2.4);
+sunLight.castShadow = true;
+sunLight.shadow.mapSize.set(1024,1024);
+sunLight.shadow.camera.left = -95;
+sunLight.shadow.camera.right = 95;
+sunLight.shadow.camera.top = 95;
+sunLight.shadow.camera.bottom = -95;
+sunLight.shadow.camera.near = 1;
+sunLight.shadow.camera.far = 420;
+sunLight.shadow.bias = -0.0012;
+sunLight.shadow.camera.updateProjectionMatrix();
+scene.add(sunLight);
+scene.add(sunLight.target);
+
+// Soft magenta fill light that travels with the car so it never goes flat
+// and dark when ducking through shadowed alleys between buildings — cheap
+// way to keep the neon-dusk mood readable everywhere on the map.
+const carFillLight = new THREE.PointLight(0xff5fb0, 1.1, 26, 2.0);
+scene.add(carFillLight);
+
+function updateSunFollow(){
+  sunLight.position.set(car.x-95, 150, car.z-120);
+  sunLight.target.position.set(car.x, car.y, car.z);
+  carFillLight.position.set(car.x, car.y+3.2, car.z);
+}
+
+// ---------------------------------------------------------------------
+// Sky dome, sun sprite, soft clouds, distant mountains
+// ---------------------------------------------------------------------
+function buildSky(){
+  const geo = new THREE.SphereGeometry(2400, 28, 18);
+  const pos = geo.attributes.position;
+  const colors = [];
+  const bottom = new THREE.Color('#ff9468');
+  const mid    = new THREE.Color('#7a5088');
+  const top    = new THREE.Color('#1c1230');
+  for(let i=0;i<pos.count;i++){
+    const y = pos.getY(i);
+    const t = clamp((y+2400)/4800, 0, 1);
+    const c = t < 0.45 ? bottom.clone().lerp(mid, t/0.45) : mid.clone().lerp(top, (t-0.45)/0.55);
+    colors.push(c.r,c.g,c.b);
+  }
+  geo.setAttribute('color', new THREE.Float32BufferAttribute(colors,3));
+  const mat = new THREE.MeshBasicMaterial({vertexColors:true, side:THREE.BackSide, fog:false, depthWrite:false, toneMapped:false});
+  return new THREE.Mesh(geo, mat);
+}
+scene.add(buildSky());
+
+function buildSun(){
+  const c = document.createElement('canvas'); c.width = c.height = 256;
+  const ctx = c.getContext('2d');
+  const g = ctx.createRadialGradient(128,128,0,128,128,128);
+  g.addColorStop(0,'rgba(255,250,230,1)');
+  g.addColorStop(0.25,'rgba(255,200,140,0.95)');
+  g.addColorStop(0.55,'rgba(255,140,120,0.35)');
+  g.addColorStop(1,'rgba(255,140,120,0)');
+  ctx.fillStyle = g; ctx.fillRect(0,0,256,256);
+  const tex = new THREE.CanvasTexture(c);
+  const mat = new THREE.SpriteMaterial({map:tex, blending:THREE.AdditiveBlending, depthWrite:false, fog:false, toneMapped:false});
+  const sprite = new THREE.Sprite(mat);
+  sprite.scale.set(820,820,1);
+  sprite.position.set(-160, 200, -1850);
+  return sprite;
+}
+scene.add(buildSun());
+
+function buildClouds(){
+  const group = new THREE.Group();
+  const c = document.createElement('canvas'); c.width=c.height=256;
+  const ctx = c.getContext('2d');
+  const g = ctx.createRadialGradient(128,128,0,128,128,128);
+  g.addColorStop(0,'rgba(255,236,225,0.55)');
+  g.addColorStop(0.6,'rgba(255,210,200,0.22)');
+  g.addColorStop(1,'rgba(255,210,200,0)');
+  ctx.fillStyle=g; ctx.fillRect(0,0,256,256);
+  const tex = new THREE.CanvasTexture(c);
+  const mat = new THREE.SpriteMaterial({map:tex, transparent:true, depthWrite:false, fog:false, toneMapped:false});
+  for(let i=0;i<7;i++){
+    const s = new THREE.Sprite(mat);
+    const a = rand(0,Math.PI*2);
+    const r = rand(900,1700);
+    s.position.set(Math.sin(a)*r, rand(180,420), Math.cos(a)*r);
+    const sc = rand(280,620);
+    s.scale.set(sc, sc*0.45, 1);
+    group.add(s);
+  }
+  return group;
+}
+scene.add(buildClouds());
+
+// Jagged, snow-capped mountain range with one prominent "Everest" peak —
+// built from displaced low-poly cones (irregular radial noise on each ring)
+// rather than smooth cones, since jaggedness is what actually sells real
+// mountains at a distance. Vertex colors fade from dark rock at the base to
+// white snow near the summit.
+function buildJaggedPeak(baseRadius, height, segments, snowLine){
+  const radialSegs = segments;
+  const heightSegs = 5;
+  const geo = new THREE.CylinderGeometry(0, baseRadius, height, radialSegs, heightSegs, true);
+  const pos = geo.attributes.position;
+  const rockColor = new THREE.Color('#3a3142');
+  const rockColor2 = new THREE.Color('#2a2436');
+  const snowColor = new THREE.Color('#eef0f6');
+  const colors = [];
+  for(let i=0;i<pos.count;i++){
+    const x = pos.getX(i), y = pos.getY(i), z = pos.getZ(i);
+    const t = clamp((y/height)+0.5, 0, 1); // 0 at base, 1 at peak
+    // Irregular radial jaggedness — perturb each vertex outward/inward based
+    // on angle + height so the silhouette reads as rocky, not a smooth cone.
+    const ang = Math.atan2(z,x);
+    const jag = Math.sin(ang*5.3+t*9)*0.14 + Math.sin(ang*11+t*4)*0.07;
+    const r = Math.hypot(x,z);
+    if(r>0.01){
+      const newR = r*(1+jag*(1-t*0.4));
+      pos.setX(i, Math.cos(ang)*newR);
+      pos.setZ(i, Math.sin(ang)*newR);
+    }
+    const snowT = clamp((t-snowLine)/(1-snowLine), 0, 1);
+    const rockMix = (i%3===0) ? rockColor2 : rockColor;
+    const c = rockMix.clone().lerp(snowColor, Math.pow(snowT,1.4));
+    colors.push(c.r,c.g,c.b);
+  }
+  geo.setAttribute('color', new THREE.Float32BufferAttribute(colors,3));
+  geo.computeVertexNormals();
+  const mat = new THREE.MeshStandardMaterial({
+    vertexColors:true, flatShading:true, roughness:0.95, metalness:0, fog:true,
+  });
+  return new THREE.Mesh(geo, mat);
+}
+
+function buildMountains(){
+  const group = new THREE.Group();
+  const n = 40;
+  for(let i=0;i<n;i++){
+    const a = (i/n)*Math.PI*2 + rand(-0.05,0.05);
+    const r = 1980 + rand(-60,140);
+    const h = rand(110,300);
+    const peak = buildJaggedPeak(rand(170,330), h, Math.floor(rand(6,9)), rand(0.55,0.72));
+    peak.position.set(Math.sin(a)*r, h/2 - 14, Math.cos(a)*r);
+    peak.rotation.y = rand(0, Math.PI*2);
+    group.add(peak);
+  }
+  // One unmistakable Everest-style summit — taller, sharper, and pushed
+  // slightly forward of the rest of the range so it reads as a landmark
+  // rather than blending into the skyline.
+  const everest = buildJaggedPeak(420, 520, 11, 0.62);
+  const ea = Math.PI*0.18;
+  everest.position.set(Math.sin(ea)*2150, 520/2 - 18, Math.cos(ea)*2150);
+  everest.rotation.y = rand(0, Math.PI*2);
+  group.add(everest);
+  return group;
+}
+scene.add(buildMountains());
+
+// ---------------------------------------------------------------------
+// Terrain (outer rolling ground) — earthy tones + fine bump detail
+// ---------------------------------------------------------------------
+const terrainBump = makeNoiseTexture(256);
+terrainBump.repeat.set(90,90);
+
+function buildTerrain(){
+  const seg = 130;
+  const geo = new THREE.PlaneGeometry(WORLD_PLANE, WORLD_PLANE, seg, seg);
+  const pos = geo.attributes.position;
+  const colors = [];
+  const low  = new THREE.Color('#3a3526');
+  const high = new THREE.Color('#46563a');
+  const blend = new THREE.Color('#3d3b38');
+  for(let i=0;i<pos.count;i++){
+    const x = pos.getX(i);
+    const yLocal = pos.getY(i);
+    const wx = x, wz = -yLocal;
+    const h = groundHeight(wx, wz);
+    pos.setZ(i, h);
+    const t = clamp((h+1)/14, 0, 1);
+    let c = low.clone().lerp(high, t);
+    const d = Math.sqrt(wx*wx+wz*wz);
+    const distT = clamp(1-(d-(CITY_SIZE/2+14))/220, 0, 1);
+    if(distT>0) c = c.lerp(blend, distT*0.55);
+    colors.push(c.r,c.g,c.b);
+  }
+  geo.setAttribute('color', new THREE.Float32BufferAttribute(colors,3));
+  geo.computeVertexNormals();
+  geo.rotateX(-Math.PI/2);
+  const mat = new THREE.MeshStandardMaterial({
+    vertexColors:true, flatShading:true, roughness:1, metalness:0,
+    bumpMap:terrainBump, bumpScale:0.18
+  });
+  const mesh = new THREE.Mesh(geo, mat);
+  mesh.position.y = -0.02;
+  mesh.receiveShadow = true;
+  return mesh;
+}
+scene.add(buildTerrain());
+
+// ---------------------------------------------------------------------
+// Grass tufts — cheap cross-billboard blades scattered around the city
+// edge and rolling terrain. This is what makes the ground read as alive
+// up close instead of just a painted plane.
+// ---------------------------------------------------------------------
+function makeGrassBladeTexture(){
+  const w=128, h=128;
+  const c = document.createElement('canvas'); c.width=w; c.height=h;
+  const ctx = c.getContext('2d');
+  ctx.clearRect(0,0,w,h);
+
+  // Soft dark contact-shadow ellipse at the base so the tuft doesn't look
+  // like it's floating, then a cluster of filled, tapered blades on top —
+  // filled polygons (not thin strokes) so it reads as foliage, not lines.
+  ctx.fillStyle = 'rgba(10,20,8,0.35)';
+  ctx.beginPath();
+  ctx.ellipse(w/2, h-8, w*0.34, 8, 0, 0, Math.PI*2);
+  ctx.fill();
+
+  const BLADES = 9;
+  for(let i=0;i<BLADES;i++){
+    const baseX = w*0.18 + (w*0.64)*(i/(BLADES-1)) + rand(-5,5);
+    const baseY = h-6;
+    const tipX  = baseX + rand(-16,16);
+    const tipY  = h*rand(0.08,0.28);
+    const widthBase = rand(7,12);
+    const bend = rand(-14,14);
+    const midX = (baseX+tipX)/2 + bend;
+    const midY = (baseY+tipY)/2;
+
+    const tones = ['#3d7a3a','#4f8f48','#5fa356','#6cae5c','#3a6b39','#2f5c30'];
+    const hue = choice(tones);
+    const grad = ctx.createLinearGradient(baseX,baseY,tipX,tipY);
+    grad.addColorStop(0, '#23451f');
+    grad.addColorStop(0.55, hue);
+    grad.addColorStop(1, hue);
+    ctx.fillStyle = grad;
+
+    // Build a tapered blade as a filled path: wide at the base, narrowing
+    // to a point at the tip, gently curved through a control point.
+    ctx.beginPath();
+    ctx.moveTo(baseX-widthBase/2, baseY);
+    ctx.quadraticCurveTo(midX-widthBase/5, midY, tipX, tipY);
+    ctx.quadraticCurveTo(midX+widthBase/5, midY, baseX+widthBase/2, baseY);
+    ctx.closePath();
+    ctx.fill();
+  }
+  const tex = new THREE.CanvasTexture(c);
+  tex.encoding = THREE.sRGBEncoding;
+  return tex;
+}
+function buildGrassField(){
+  const tex = makeGrassBladeTexture();
+  const mat = new THREE.MeshBasicMaterial({
+    map:tex, transparent:true, alphaTest:0.35, side:THREE.DoubleSide, toneMapped:true
+  });
+  const geo = new THREE.PlaneGeometry(2.2, 2.2);
+  geo.translate(0,1.1,0);
+  const geo2 = geo.clone(); geo2.rotateY(Math.PI/2);
+  const geo3 = geo.clone(); geo3.rotateY(Math.PI/4);
+  const merged = mergeThreePlanes(geo, geo2, geo3);
+  const GRASS_COUNT = 1800;
+  const mesh = new THREE.InstancedMesh(merged, mat, GRASS_COUNT);
+  const dummy = new THREE.Object3D();
+  let placed=0, attempts=0;
+  const innerR = CITY_SIZE/2 - 6;
+  while(placed < GRASS_COUNT && attempts < GRASS_COUNT*6){
+    attempts++;
+    const a = rand(0, Math.PI*2);
+    // Favor a lush band just outside the city plus light scatter further out.
+    const r = Math.random()<0.7 ? rand(innerR, innerR+260) : rand(innerR, WORLD_LIMIT-30);
+    const x = Math.sin(a)*r, z = Math.cos(a)*r;
+    if(Math.abs(x)<CITY_SIZE/2+4 && Math.abs(z)<CITY_SIZE/2+4) continue;
+    const h = groundHeight(x,z);
+    const s = rand(0.8,1.7);
+    dummy.position.set(x,h,z);
+    dummy.scale.set(s,s*rand(0.85,1.25),s);
+    dummy.rotation.y = rand(0,Math.PI*2);
+    dummy.updateMatrix();
+    mesh.setMatrixAt(placed, dummy.matrix);
+    placed++;
+  }
+  mesh.count = placed;
+  mesh.frustumCulled = true;
+  return mesh;
+}
+// Merge two crossed planes into one geometry so each instance draws both
+// faces of the cross in a single draw call.
+function mergeTwoPlanes(a,b){
+  const geo = new THREE.BufferGeometry();
+  const pa = a.attributes.position.array, pb = b.attributes.position.array;
+  const na = a.attributes.normal.array, nb = b.attributes.normal.array;
+  const ua = a.attributes.uv.array, ub = b.attributes.uv.array;
+  const ia = a.index.array, ib = b.index.array;
+  const positions = new Float32Array(pa.length+pb.length);
+  positions.set(pa,0); positions.set(pb,pa.length);
+  const normals = new Float32Array(na.length+nb.length);
+  normals.set(na,0); normals.set(nb,na.length);
+  const uvs = new Float32Array(ua.length+ub.length);
+  uvs.set(ua,0); uvs.set(ub,ua.length);
+  const vertCountA = pa.length/3;
+  const indices = new Uint16Array(ia.length+ib.length);
+  indices.set(ia,0);
+  for(let i=0;i<ib.length;i++) indices[ia.length+i] = ib[i]+vertCountA;
+  geo.setAttribute('position', new THREE.BufferAttribute(positions,3));
+  geo.setAttribute('normal', new THREE.BufferAttribute(normals,3));
+  geo.setAttribute('uv', new THREE.BufferAttribute(uvs,2));
+  geo.setIndex(new THREE.BufferAttribute(indices,1));
+  return geo;
+}
+// Three-plane star cross — fuller silhouette than a 2-plane cross when
+// viewed from oblique driving angles, still a single draw call per instance.
+function mergeThreePlanes(a,b,c){
+  const ab = mergeTwoPlanes(a,b);
+  return mergeTwoPlanes(ab, c);
+}
+scene.add(buildGrassField());
+
+// ---------------------------------------------------------------------
+// City ground — procedural asphalt, sidewalks, lane markings, crosswalks
+// ---------------------------------------------------------------------
+function buildCityColorTexture(){
+  const res = 1024;
+  const c = document.createElement('canvas'); c.width = c.height = res;
+  const ctx = c.getContext('2d');
+  const cell = res/CITY_BLOCKS;
+  const roadPx = cell*0.34;
+  const sidewalkPx = roadPx*0.24;
+
+  ctx.fillStyle = '#3a3a3f'; ctx.fillRect(0,0,res,res);
+
+  for(let i=0;i<CITY_BLOCKS;i++){
+    for(let j=0;j<CITY_BLOCKS;j++){
+      const bx=i*cell, by=j*cell;
+      ctx.fillStyle = '#58554f';
+      ctx.fillRect(bx+roadPx/2, by+roadPx/2, cell-roadPx, cell-roadPx);
+      ctx.fillStyle = (i+j)%2===0 ? '#3e3c38' : '#423f3b';
+      ctx.fillRect(bx+roadPx/2+sidewalkPx, by+roadPx/2+sidewalkPx, cell-roadPx-sidewalkPx*2, cell-roadPx-sidewalkPx*2);
+    }
+  }
+
+  for(let i=0;i<=CITY_BLOCKS;i++){
+    ctx.fillStyle = '#2d2d30';
+    ctx.fillRect(i*cell-roadPx/2, 0, roadPx, res);
+    ctx.fillRect(0, i*cell-roadPx/2, res, roadPx);
+  }
+
+  ctx.strokeStyle='rgba(235,230,210,0.8)';
+  ctx.lineWidth = res*0.0035;
+  ctx.setLineDash([res*0.018, res*0.018]);
+  for(let i=0;i<=CITY_BLOCKS;i++){
+    ctx.beginPath(); ctx.moveTo(i*cell,0); ctx.lineTo(i*cell,res); ctx.stroke();
+    ctx.beginPath(); ctx.moveTo(0,i*cell); ctx.lineTo(res,i*cell); ctx.stroke();
+  }
+  ctx.setLineDash([]);
+
+  ctx.fillStyle='rgba(230,225,210,0.5)';
+  const stripeLen = roadPx*0.78, stripeW = roadPx*0.085;
+  for(let i=0;i<=CITY_BLOCKS;i++){
+    for(let j=0;j<=CITY_BLOCKS;j++){
+      const cx=i*cell, cy=j*cell;
+      for(let s=-2;s<=2;s++){
+        ctx.fillRect(cx-stripeLen/2, cy+roadPx/2+s*stripeW*1.7, stripeLen, stripeW);
+        ctx.fillRect(cx+roadPx/2+s*stripeW*1.7, cy-stripeLen/2, stripeW, stripeLen);
+      }
+    }
+  }
+
+  const grain = makeGrainPatternCanvas(96, 22);
+  const pattern = ctx.createPattern(grain,'repeat');
+  ctx.fillStyle = pattern;
+  ctx.fillRect(0,0,res,res);
+
+  const tex = new THREE.CanvasTexture(c);
+  tex.encoding = THREE.sRGBEncoding;
+  tex.anisotropy = Math.min(8, renderer.capabilities.getMaxAnisotropy());
+  return tex;
+}
+function buildCityGround(){
+  const geo = new THREE.PlaneGeometry(CITY_SIZE, CITY_SIZE, 1, 1);
+  geo.rotateX(-Math.PI/2);
+  const cityBump = makeNoiseTexture(256);
+  cityBump.repeat.set(48,48);
+  const mat = new THREE.MeshStandardMaterial({
+    map: buildCityColorTexture(), bumpMap: cityBump, bumpScale:0.025,
+    roughness:0.92, metalness:0.04
+  });
+  const mesh = new THREE.Mesh(geo, mat);
+  mesh.position.y = 0.03;
+  mesh.receiveShadow = true;
+  return mesh;
+}
+scene.add(buildCityGround());
+
+// ---------------------------------------------------------------------
+// Soft contact-shadow decal helper (cheap AO under buildings / props)
+// ---------------------------------------------------------------------
+function makeAOTexture(){
+  const c = document.createElement('canvas'); c.width=c.height=128;
+  const ctx = c.getContext('2d');
+  const g = ctx.createRadialGradient(64,64,0,64,64,64);
+  g.addColorStop(0,'rgba(0,0,0,0.5)');
+  g.addColorStop(0.7,'rgba(0,0,0,0.22)');
+  g.addColorStop(1,'rgba(0,0,0,0)');
+  ctx.fillStyle = g; ctx.fillRect(0,0,128,128);
+  return new THREE.CanvasTexture(c);
+}
+const aoTex = makeAOTexture();
+const aoMat = new THREE.MeshBasicMaterial({map:aoTex, transparent:true, depthWrite:false, toneMapped:false});
+function makeAOBlob(radius){
+  const geo = new THREE.PlaneGeometry(radius*2, radius*2);
+  const mesh = new THREE.Mesh(geo, aoMat);
+  mesh.rotation.x = -Math.PI/2;
+  return mesh;
+}
+
+// ---------------------------------------------------------------------
+// Buildings — textured facades (lit windows glow), shadows, AO footprint
+// ---------------------------------------------------------------------
+function makeFacadePair(palette){
+  const w=256, h=512, cols=6, rows=16;
+  const colorCanvas = document.createElement('canvas'); colorCanvas.width=w; colorCanvas.height=h;
+  const emisCanvas = document.createElement('canvas'); emisCanvas.width=w; emisCanvas.height=h;
+  const cctx = colorCanvas.getContext('2d');
+  const ectx = emisCanvas.getContext('2d');
+  cctx.fillStyle = palette.base; cctx.fillRect(0,0,w,h);
+  ectx.fillStyle = '#000000'; ectx.fillRect(0,0,w,h);
+  const cw=w/cols, rh=h/rows;
+  for(let r=0;r<rows;r++){
+    for(let i=0;i<cols;i++){
+      const lit = Math.random()<0.24;
+      cctx.fillStyle = lit ? palette.lit : palette.glass;
+      cctx.fillRect(i*cw+cw*0.14, r*rh+rh*0.18, cw*0.72, rh*0.64);
+      if(lit){
+        ectx.fillStyle = palette.lit;
+        ectx.fillRect(i*cw+cw*0.14, r*rh+rh*0.18, cw*0.72, rh*0.64);
+      }
+    }
+  }
+  cctx.strokeStyle = palette.frame; cctx.lineWidth = 3;
+  for(let r=0;r<=rows;r++){ cctx.beginPath(); cctx.moveTo(0,r*rh); cctx.lineTo(w,r*rh); cctx.stroke(); }
+  for(let i=0;i<=cols;i++){ cctx.beginPath(); cctx.moveTo(i*cw,0); cctx.lineTo(i*cw,h); cctx.stroke(); }
+  return {colorCanvas, emisCanvas};
+}
+const FACADE_PALETTES = [
+  {base:'#101c2c', glass:'#21344a', lit:'#ffd98a', frame:'#070d16'},
+  {base:'#2a201d', glass:'#3f2f2a', lit:'#ffcf7a', frame:'#150f0d'},
+  {base:'#16161d', glass:'#2a2a38', lit:'#bfe9ff', frame:'#0a0a10'}
+];
+const facadePairs = FACADE_PALETTES.map(makeFacadePair);
+
+// Neon rooftop/wall signs — a handful of buildings get a glowing sign so
+// the city reads as a specific place rather than a generic skyline.
+const SIGN_TEXTS = [
+  {text:'KATHMANDU DRIFT', color:'#ff2e6a', sub:'काठमाडौं'},
+  {text:'SAGARMATHA MOTORS', color:'#ffb347', sub:null},
+  {text:'THAMEL NIGHTS', color:'#2fd6c8', sub:null},
+  {text:'NEON DRIFT', color:'#00f0ff', sub:null},
+];
+function makeSignTexture(entry){
+  const w=512, h=160;
+  const c = document.createElement('canvas'); c.width=w; c.height=h;
+  const ctx = c.getContext('2d');
+  ctx.clearRect(0,0,w,h);
+  ctx.font = '700 64px Orbitron, sans-serif';
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  const cy = entry.sub ? h*0.4 : h*0.5;
+  // Layered glow: a few blurred passes underneath the crisp text on top,
+  // since canvas text doesn't bloom on its own the way real neon tubing does.
+  ctx.shadowColor = entry.color;
+  ctx.shadowBlur = 28;
+  ctx.fillStyle = entry.color;
+  for(let i=0;i<3;i++) ctx.fillText(entry.text, w/2, cy);
+  ctx.shadowBlur = 6;
+  ctx.fillStyle = '#ffffff';
+  ctx.fillText(entry.text, w/2, cy);
+  if(entry.sub){
+    // Deliberately not Orbitron here — it's a Latin/Cyrillic/Greek display
+    // font and very likely has no Devanagari glyphs, which would render as
+    // missing-glyph boxes. Plain sans-serif resolves to a system font with
+    // real Devanagari coverage on essentially every platform.
+    ctx.font = '600 34px sans-serif';
+    ctx.shadowBlur = 16;
+    ctx.fillStyle = entry.color;
+    ctx.fillText(entry.sub, w/2, h*0.78);
+    ctx.shadowBlur = 4;
+    ctx.fillStyle = '#ffffff';
+    ctx.fillText(entry.sub, w/2, h*0.78);
+  }
+  const tex = new THREE.CanvasTexture(c);
+  tex.encoding = THREE.sRGBEncoding;
+  return tex;
+}
+const signTextures = SIGN_TEXTS.map(makeSignTexture);
+// Canvas text can render before the Orbitron webfont finishes loading,
+// silently falling back to the system sans-serif. Once the font is
+// confirmed ready, redraw the sign textures so they pick it up — the
+// signs already on buildings update in place since they share the same
+// CanvasTexture objects.
+if(document.fonts && document.fonts.ready){
+  document.fonts.load('700 64px Orbitron').catch(()=>{});
+  document.fonts.ready.then(()=>{
+    SIGN_TEXTS.forEach((entry, i)=>{
+      const freshCanvasTex = makeSignTexture(entry);
+      signTextures[i].image = freshCanvasTex.image;
+      signTextures[i].needsUpdate = true;
+    });
+  });
+}
+function attachSign(targetMesh, w, h, d){
+  const idx = Math.floor(rand(0, signTextures.length));
+  const tex = signTextures[idx];
+  const aspect = 512/160;
+  const signW = Math.min(w, d)*0.92;
+  const signH = signW/aspect;
+  const mat = new THREE.MeshBasicMaterial({map:tex, transparent:true, toneMapped:false, depthWrite:false});
+  const sign = new THREE.Mesh(new THREE.PlaneGeometry(signW, signH), mat);
+  // Mount on whichever face is wider so the sign reads cleanly, sitting a
+  // hair off the wall to avoid z-fighting, near the top of the building.
+  sign.position.set(0, h*0.5 - signH*0.7, d/2 + 0.05);
+  targetMesh.add(sign);
+  const signBack = sign.clone();
+  signBack.position.z = -(d/2 + 0.05);
+  signBack.rotation.y = Math.PI;
+  targetMesh.add(signBack);
+}
+
+const buildingBoxes = []; // collision AABBs {minX,maxX,minZ,maxZ}
+const treeColliders = []; // trunk collision circles {x,z,radius} for all trees (city + outer world)
+const openBlocks = [];    // block centers with no building — used for park/street trees
+function buildCity(){
+  const group = new THREE.Group();
+  const centerSkip = Math.floor(CITY_BLOCKS/2);
+
+  for(let i=0;i<CITY_BLOCKS;i++){
+    for(let j=0;j<CITY_BLOCKS;j++){
+      const bx = -CITY_SIZE/2 + BLOCK*(i+0.5);
+      const bz = -CITY_SIZE/2 + BLOCK*(j+0.5);
+      const nearSpawn = Math.abs(i-centerSkip)<=1 && Math.abs(j-centerSkip)<=1;
+      if(nearSpawn){ openBlocks.push({bx,bz}); continue; }
+      if(Math.random() > 0.58){ openBlocks.push({bx,bz}); continue; }
+
+      const isLandmark = Math.random() > 0.88;
+      const w = BLOCK*rand(0.5,0.66);
+      const d = BLOCK*rand(0.5,0.66);
+      const h = isLandmark ? rand(70,120) : rand(9,46);
+
+      const fp = choice(facadePairs);
+      const colorTex = new THREE.CanvasTexture(fp.colorCanvas);
+      const emisTex = new THREE.CanvasTexture(fp.emisCanvas);
+      colorTex.wrapS = colorTex.wrapT = THREE.RepeatWrapping;
+      emisTex.wrapS = emisTex.wrapT = THREE.RepeatWrapping;
+      colorTex.encoding = THREE.sRGBEncoding;
+      const rx = Math.max(1, Math.round(w/8));
+      const ry = Math.max(2, Math.round(h/9));
+      colorTex.repeat.set(rx, ry);
+      emisTex.repeat.set(rx, ry);
+
+      const geo = new THREE.BoxGeometry(w,h,d);
+      const mat = new THREE.MeshStandardMaterial({
+        map: colorTex, emissiveMap: emisTex, emissive: 0xffffff, emissiveIntensity:1.3,
+        roughness:0.6, metalness:0.25
+      });
+      const mesh = new THREE.Mesh(geo, mat);
+      mesh.position.set(bx, h/2, bz);
+      mesh.castShadow = true;
+      mesh.receiveShadow = true;
+      group.add(mesh);
+
+      // Landmark towers always get a sign (they're the tallest, most
+      // visible buildings); a sampling of regular buildings get one too
+      // so the city doesn't feel sign-less between landmarks.
+      if(isLandmark || Math.random() < 0.16){
+        attachSign(mesh, w, h, d);
+      }
+
+      const blob = makeAOBlob(Math.max(w,d)*0.62);
+      blob.position.set(bx, 0.05, bz);
+      group.add(blob);
+
+      buildingBoxes.push({minX:bx-w/2, maxX:bx+w/2, minZ:bz-d/2, maxZ:bz+d/2});
+    }
+  }
+  return group;
+}
+scene.add(buildCity());
+
+// ---------------------------------------------------------------------
+// City greenery — open lots get a simple grass mat (trees, bushes, and
+// flowers have all been removed per request). Built from an instanced
+// mesh so block count doesn't cost anything meaningful at render time.
+// ---------------------------------------------------------------------
+function makeGrassPatchTexture(seed){
+  const res = 256;
+  const c = document.createElement('canvas'); c.width=c.height=res;
+  const ctx = c.getContext('2d');
+  const g = ctx.createLinearGradient(0,0,0,res);
+  g.addColorStop(0,'#4f8a4a');
+  g.addColorStop(1,'#3a6e3c');
+  ctx.fillStyle = g; ctx.fillRect(0,0,res,res);
+  for(let i=0;i<900;i++){
+    const x = Math.random()*res, y = Math.random()*res;
+    const v = Math.random();
+    ctx.fillStyle = v<0.5 ? 'rgba(120,180,90,0.35)' : 'rgba(40,70,45,0.3)';
+    const len = 3+Math.random()*5;
+    ctx.fillRect(x, y, 1.4, len);
+  }
+  const tex = new THREE.CanvasTexture(c);
+  tex.encoding = THREE.sRGBEncoding;
+  tex.wrapS = tex.wrapT = THREE.RepeatWrapping;
+  return tex;
+}
+const grassPatchTex = makeGrassPatchTexture();
+const grassMat = new THREE.MeshStandardMaterial({map:grassPatchTex, roughness:0.95, metalness:0});
+
+function buildCityGreenery(blocks){
+  const group = new THREE.Group();
+
+  // ---- Open lots become little parks: just a grass mat now (bushes and
+  // flowers removed entirely per request). ----
+  const parkGrassGeo = new THREE.PlaneGeometry(1,1);
+  const parkCount = Math.min(blocks.length, 60);
+  const parkMesh = new THREE.InstancedMesh(parkGrassGeo, grassMat, parkCount);
+  parkMesh.receiveShadow = true;
+  const dummy = new THREE.Object3D();
+  let pgPlaced = 0;
+  blocks.forEach(b=>{
+    if(pgPlaced < parkCount){
+      const size = BLOCK*0.82;
+      dummy.position.set(b.bx, 0.025, b.bz);
+      dummy.rotation.set(-Math.PI/2, 0, rand(0,Math.PI*0.5));
+      dummy.scale.set(size,size,1);
+      dummy.updateMatrix();
+      parkMesh.setMatrixAt(pgPlaced, dummy.matrix);
+      pgPlaced++;
+    }
+  });
+  parkMesh.count = pgPlaced;
+
+  group.add(parkMesh);
+  return group;
+}
+scene.add(buildCityGreenery(openBlocks));
+
+// ---------------------------------------------------------------------
+// Boost pads (kept as bright game elements — vivid on purpose)
+// ---------------------------------------------------------------------
+const boostPads = [];
+function buildBoostPads(){
+  const group = new THREE.Group();
+  const positions = [];
+  for(let i=2;i<CITY_BLOCKS-1;i+=2){
+    for(let j=2;j<CITY_BLOCKS-1;j+=2){
+      if(Math.random()>0.6) continue;
+      positions.push([-CITY_SIZE/2+BLOCK*i, -CITY_SIZE/2+BLOCK*j]);
+    }
+  }
+  positions.slice(0,10).forEach(([x,z])=>{
+    const geo = new THREE.TorusGeometry(3.4, 0.35, 8, 24);
+    const mat = new THREE.MeshBasicMaterial({color:0x00f0ff, transparent:true, opacity:0.85, toneMapped:false});
+    const mesh = new THREE.Mesh(geo, mat);
+    mesh.rotation.x = Math.PI/2;
+    mesh.position.set(x, 0.5, z);
+    group.add(mesh);
+    boostPads.push({x,z,mesh,radius:3.6,flash:0});
+  });
+  return group;
+}
+scene.add(buildBoostPads());
+
+// ---------------------------------------------------------------------
+// Props outside the city: rocks (instanced for performance)
+// ---------------------------------------------------------------------
+function scatterProps(){
+  const group = new THREE.Group();
+  const dummy = new THREE.Object3D();
+
+  const rockGeo = new THREE.IcosahedronGeometry(1.4, 0);
+  const rockMat = new THREE.MeshStandardMaterial({color:0x5a5249, flatShading:true, roughness:0.95});
+  const ROCK_COUNT = 90;
+  const rockMesh = new THREE.InstancedMesh(rockGeo, rockMat, ROCK_COUNT);
+  rockMesh.castShadow = true;
+  for(let i=0;i<ROCK_COUNT;i++){
+    const a = rand(0, Math.PI*2);
+    const r = rand(CITY_SIZE/2+30, WORLD_LIMIT-20);
+    const x = Math.sin(a)*r, z = Math.cos(a)*r;
+    const h = groundHeight(x,z);
+    const s = rand(0.6,2.0);
+    dummy.position.set(x,h+0.6*s,z);
+    dummy.scale.set(s,s*0.8,s);
+    dummy.rotation.set(rand(0,Math.PI),rand(0,Math.PI),rand(0,Math.PI));
+    dummy.updateMatrix();
+    rockMesh.setMatrixAt(i, dummy.matrix);
+  }
+  group.add(rockMesh);
+
+  return group;
+}
+scene.add(scatterProps());
+
+// ---------------------------------------------------------------------
+// Pedestrians — simple low-poly people who stroll the sidewalks and
+// startle (turn to watch / step back) when the car gets close.
+// ---------------------------------------------------------------------
+const pedestrians = [];
+
+const pedLegGeo = new THREE.BoxGeometry(0.12,0.85,0.14);
+pedLegGeo.translate(0,-0.425,0);
+const pedArmGeo = new THREE.BoxGeometry(0.1,0.55,0.12);
+pedArmGeo.translate(0,-0.275,0);
+const pedTorsoGeo = new THREE.BoxGeometry(0.36,0.5,0.2);
+const pedHeadGeo = new THREE.SphereGeometry(0.16,8,8);
+
+const SKIN_TONES = [0xffd9b3,0xe8b48a,0xc68642,0x8d5524,0x6b4226];
+const OUTFIT_TONES = [0xff6b6b,0x4d96ff,0xffd93d,0x6bcf7f,0x9b5de5,0x2ec4b6,0xff8fab,0x778da9];
+const PANT_TONES = [0x2b2d42,0x495057,0x343a40,0x6c757d];
+
+// Materials are cached per color instead of created fresh per pedestrian —
+// there are only 5/8/4 skin/outfit/pant tones total, so every pedestrian
+// can share one of a small pool of materials instead of the renderer
+// juggling ~70 near-identical one-off materials.
+const pedMatCache = new Map();
+function getPedMat(color, roughness){
+  const key = color+'|'+roughness;
+  let m = pedMatCache.get(key);
+  if(!m){ m = new THREE.MeshStandardMaterial({color, roughness}); pedMatCache.set(key, m); }
+  return m;
+}
+function buildPedestrian(){
+  const group = new THREE.Group();
+  const skin = choice(SKIN_TONES);
+  const pantsMat = getPedMat(choice(PANT_TONES), 0.85);
+  const shirtMat = getPedMat(choice(OUTFIT_TONES), 0.8);
+  const skinMat  = getPedMat(skin, 0.75);
+
+  // Shadow casting is off per-limb: at racing speed nobody registers
+  // individual pedestrian shadows, but the shadow pass still has to draw
+  // all 6 limb meshes per pedestrian every frame to produce them (~144
+  // extra draw calls across a full pedestrian scatter). The AO blob under
+  // each pedestrian already grounds them visually for a fraction of the cost.
+  const legL = new THREE.Mesh(pedLegGeo, pantsMat); legL.position.set(-0.09,0.85,0);
+  const legR = new THREE.Mesh(pedLegGeo, pantsMat); legR.position.set(0.09,0.85,0);
+  const torso = new THREE.Mesh(pedTorsoGeo, shirtMat); torso.position.set(0,1.10,0);
+  const head = new THREE.Mesh(pedHeadGeo, skinMat); head.position.set(0,1.43,0);
+  const armL = new THREE.Mesh(pedArmGeo, skinMat); armL.position.set(-0.24,1.31,0);
+  const armR = new THREE.Mesh(pedArmGeo, skinMat); armR.position.set(0.24,1.31,0);
+  group.add(legL,legR,torso,head,armL,armR);
+
+  const blob = makeAOBlob(0.7);
+  blob.position.y = 0.03;
+  group.add(blob);
+
+  return {group, legL, legR, armL, armR};
+}
+
+function scatterPedestrians(){
+  const group = new THREE.Group();
+  for(let i=0;i<CITY_BLOCKS;i++){
+    for(let j=0;j<CITY_BLOCKS;j++){
+      if(Math.random() > 0.38) continue;
+      const bx = -CITY_SIZE/2 + BLOCK*(i+0.5);
+      const bz = -CITY_SIZE/2 + BLOCK*(j+0.5);
+      const side = choice(['+x','-x','+z','-z']);
+      const off = BLOCK*0.33, half = BLOCK*0.24;
+      let baseX=bx, baseZ=bz, axisX=0, axisZ=0;
+      if(side==='+x'){ baseX=bx+off; axisZ=1; }
+      else if(side==='-x'){ baseX=bx-off; axisZ=1; }
+      else if(side==='+z'){ baseZ=bz+off; axisX=1; }
+      else { baseZ=bz-off; axisX=1; }
+
+      const ped = buildPedestrian();
+      const t0 = rand(-half,half);
+      const dir = Math.random()<0.5 ? 1 : -1;
+      ped.group.position.set(baseX+axisX*t0, 0, baseZ+axisZ*t0);
+      group.add(ped.group);
+      pedestrians.push({
+        ...ped, baseX, baseZ, axisX, axisZ, half, t:t0, dir,
+        speed: rand(1.0,1.9), walkT: rand(0,10), startled:0
+      });
+    }
+  }
+  return group;
+}
+scene.add(scatterPedestrians());
+
+function updatePedestrians(dt){
+  for(const p of pedestrians){
+    const x = p.baseX + p.axisX*p.t;
+    const z = p.baseZ + p.axisZ*p.t;
+    const dx = car.x-x, dz = car.z-z;
+    const distSq = dx*dx+dz*dz;
+
+    if(distSq < 25){ p.startled = 0.9; }
+    if(p.startled>0) p.startled -= dt;
+
+    let swingAmp;
+    if(p.startled>0){
+      swingAmp = lerp(Math.abs(Math.sin(p.walkT*6))*0.5, 0, 0.15);
+      const faceAngle = Math.atan2(dx,dz);
+      p.group.rotation.y = lerp(p.group.rotation.y, faceAngle, 0.15);
+      if(distSq < 3.2){
+        const push = 1/Math.sqrt(distSq+0.001);
+        p.group.position.x -= dx*push*0.4*dt*6;
+        p.group.position.z -= dz*push*0.4*dt*6;
+      }
+    } else {
+      p.t += p.dir*p.speed*dt;
+      if(p.t > p.half){ p.t = p.half; p.dir = -1; }
+      if(p.t < -p.half){ p.t = -p.half; p.dir = 1; }
+      p.walkT += dt;
+      const nx = p.baseX + p.axisX*p.t, nz = p.baseZ + p.axisZ*p.t;
+      const faceAngle = Math.atan2(p.axisX*p.dir, p.axisZ*p.dir);
+      p.group.rotation.y = faceAngle;
+      p.group.position.x = nx; p.group.position.z = nz;
+      swingAmp = Math.sin(p.walkT*6)*0.5;
+    }
+
+    p.legL.rotation.x = swingAmp;
+    p.legR.rotation.x = -swingAmp;
+    p.armL.rotation.x = -swingAmp*0.8;
+    p.armR.rotation.x = swingAmp*0.8;
+    p.group.position.y = groundHeight(p.group.position.x, p.group.position.z) + Math.abs(swingAmp)*0.05;
+  }
+}
+
+// ---------------------------------------------------------------------
+// Collectible orbs
+// ---------------------------------------------------------------------
+const collectibles = [];
+function validOrbSpot(x,z){
+  for(const b of buildingBoxes){
+    if(x>b.minX-3 && x<b.maxX+3 && z>b.minZ-3 && z<b.maxZ+3) return false;
+  }
+  return true;
+}
+function randomOrbSpot(){
+  let x,z,tries=0;
+  do{
+    const a = rand(0,Math.PI*2);
+    const r = rand(20, WORLD_LIMIT-60);
+    x = Math.sin(a)*r; z = Math.cos(a)*r;
+    tries++;
+  } while(!validOrbSpot(x,z) && tries<30);
+  return [x,z];
+}
+function makeGlowSpriteMaterial(hex){
+  const c = document.createElement('canvas'); c.width=c.height=128;
+  const ctx = c.getContext('2d');
+  const col = new THREE.Color(hex);
+  const r=Math.round(col.r*255), g=Math.round(col.g*255), b=Math.round(col.b*255);
+  const grad = ctx.createRadialGradient(64,64,0,64,64,64);
+  grad.addColorStop(0, `rgba(${r},${g},${b},0.9)`);
+  grad.addColorStop(0.5, `rgba(${r},${g},${b},0.32)`);
+  grad.addColorStop(1, `rgba(${r},${g},${b},0)`);
+  ctx.fillStyle = grad; ctx.fillRect(0,0,128,128);
+  const tex = new THREE.CanvasTexture(c);
+  return new THREE.SpriteMaterial({map:tex, blending:THREE.AdditiveBlending, depthWrite:false, transparent:true, toneMapped:false});
+}
+const orbGlowMat = makeGlowSpriteMaterial(0xffe066);
+function buildCollectibles(){
+  const group = new THREE.Group();
+  const geo = new THREE.IcosahedronGeometry(1.1, 0);
+  const mat = new THREE.MeshBasicMaterial({color:0xffe066, toneMapped:false});
+  for(let i=0;i<TOTAL_ORBS;i++){
+    const [x,z] = randomOrbSpot();
+    const h = groundHeight(x,z);
+    const mesh = new THREE.Mesh(geo, mat.clone());
+    mesh.position.set(x, h+2.6, z);
+    const glowSprite = new THREE.Sprite(orbGlowMat);
+    glowSprite.scale.set(5.5,5.5,1);
+    mesh.add(glowSprite);
+    group.add(mesh);
+    collectibles.push({mesh, collected:false, respawnAt:0, baseY:h+2.6});
+  }
+  return group;
+}
+scene.add(buildCollectibles());
+
+// ---------------------------------------------------------------------
+// Car — refined low-poly sports car with PBR paint, glass & metal trim
+// ---------------------------------------------------------------------
+let cubeRenderTarget=null, cubeCamera=null;
+if(!IS_MOBILE){
+try{
+  // Far plane only needs to be big enough to catch nearby buildings for a
+  // plausible paint reflection — 1200 was rendering the *entire* city on
+  // all 6 cube faces every update, which is the single biggest source of
+  // the periodic stutter (a full extra 6x scene render). 180 keeps the
+  // reflection looking the same while rendering a fraction of the geometry.
+  cubeRenderTarget = new THREE.WebGLCubeRenderTarget(96, {generateMipmaps:true, minFilter:THREE.LinearMipmapLinearFilter});
+  cubeCamera = new THREE.CubeCamera(0.5, 180, cubeRenderTarget);
+  scene.add(cubeCamera);
+}catch(e){ cubeCamera = null; }
+}
+
+// ---------------------------------------------------------------------
+// Car profiles — defined here, before buildCar/the player car are built,
+// since the player car's initial paint color reads CAR_PROFILES[0] right
+// away (not inside a function call), so it must already exist by then.
+// ---------------------------------------------------------------------
+const CAR_PROFILES = [
+  { name:'Velocity', color:0xc41e3a, unlockOrbs:0,
+    maxSpeed:46, reverseMax:20, accel:30, reverseAccel:18, brakeDecel:55, friction:16, baseTurn:2.5,
+    latGripBase:5.2, latGripDrift:1.7 },
+  { name:'Phantom', color:0x2fd6c8, unlockOrbs:8,
+    maxSpeed:52, reverseMax:20, accel:26, reverseAccel:17, brakeDecel:50, friction:14, baseTurn:2.7,
+    latGripBase:4.4, latGripDrift:1.35 }, // looser tail, higher top speed — more drift-prone
+  { name:'Sagarmatha', color:0xff8a1e, unlockOrbs:16,
+    maxSpeed:44, reverseMax:22, accel:36, reverseAccel:20, brakeDecel:60, friction:18, baseTurn:2.9,
+    latGripBase:6.4, latGripDrift:2.1, isNepalCar:true }, // grippiest, sharpest turn-in
+  { name:'Juggernaut', color:0x3a3f4a, unlockOrbs:26,
+    maxSpeed:58, reverseMax:18, accel:20, reverseAccel:14, brakeDecel:42, friction:11, baseTurn:2.0,
+    latGripBase:3.6, latGripDrift:1.05 }, // heavy & fast but slow to spin up, very loose — momentum car
+  { name:'Wasp', color:0xd6ff3a, unlockOrbs:36,
+    maxSpeed:39, reverseMax:24, accel:42, reverseAccel:24, brakeDecel:58, friction:20, baseTurn:3.4,
+    latGripBase:7.4, latGripDrift:2.6 }, // tiny, snappy, built for tight technical drift chains
+];
+
+function buildCar(opts){
+  opts = opts || {};
+  const isPolice = !!opts.isPolice;
+  // Real SpotLight headlights are expensive in a broader way than most
+  // per-car costs: lights aren't frustum-culled, so every lit surface on
+  // screen shades against ALL active lights all the time, everywhere —
+  // including lights on cars nobody's looking at. With up to 9 pooled cars
+  // (player + 4 traffic + 4 police + ghost) that's up to 18 SpotLights
+  // permanently live. Only the player's own car gets a real light; every
+  // other car keeps its emissive headlight lens mesh (still glows nicely
+  // under bloom) without the per-pixel light-loop cost.
+  const dynamicHeadlights = !!opts.dynamicHeadlights;
+  const paintColor = opts.paintColor != null ? opts.paintColor : 0xc41e3a;
+  // NPC cars (traffic/ghost) skip shadow-casting by default — with up to a
+  // dozen cars on screen at once now, shadow-casting every one of them was
+  // a real frame-cost multiplier on top of the already-expensive soft
+  // shadow map. The player's own car and police cruisers keep shadows
+  // since those are the ones you're actually looking at/judging distance
+  // from; background traffic doesn't need to be shadow-accurate.
+  const castShadows = opts.castShadows !== false;
+  const car = new THREE.Group();
+
+  const paintMat = new THREE.MeshPhysicalMaterial({
+    color:paintColor, roughness:0.32, metalness:0.55, clearcoat:1, clearcoatRoughness:0.12
+  });
+  const darkTrimMat = new THREE.MeshStandardMaterial({color:0x0c0a12, roughness:0.4, metalness:0.6});
+  const glassMat = new THREE.MeshPhysicalMaterial({
+    color:0x0c1822, roughness:0.08, metalness:0.2, transparent:true, opacity:0.62, clearcoat:0.6
+  });
+  if(cubeRenderTarget){
+    paintMat.envMap = cubeRenderTarget.texture; paintMat.envMapIntensity = 0.85;
+    glassMat.envMap = cubeRenderTarget.texture; glassMat.envMapIntensity = 1.2;
+  }
+
+  const chassisGeo = new THREE.BoxGeometry(2.0, 0.55, 4.3);
+  const chassis = new THREE.Mesh(chassisGeo, paintMat);
+  chassis.position.y = 0.45;
+  chassis.castShadow = castShadows;
+  car.add(chassis);
+
+  // Police door panel — flat white slab so the livery reads at a glance
+  // even at speed, without needing a decal texture.
+  if(isPolice){
+    const doorMat = new THREE.MeshStandardMaterial({color:0xf2f2f2, roughness:0.45, metalness:0.2});
+    [-1.01,1.01].forEach(sx=>{
+      const panel = new THREE.Mesh(new THREE.BoxGeometry(0.02,0.34,2.6), doorMat);
+      panel.position.set(sx, 0.5, 0.1);
+      car.add(panel);
+    });
+  }
+
+  const cabinGeo = new THREE.BoxGeometry(1.45, 0.5, 1.9);
+  const cabin = new THREE.Mesh(cabinGeo, glassMat);
+  cabin.position.set(0, 0.97, -0.25);
+  car.add(cabin);
+
+  const noseGeo = new THREE.BoxGeometry(1.9, 0.32, 0.9);
+  const nose = new THREE.Mesh(noseGeo, paintMat);
+  nose.position.set(0, 0.42, 1.95);
+  nose.castShadow = castShadows;
+  car.add(nose);
+
+  // mirrors
+  [-1.02,1.02].forEach(sx=>{
+    const mirror = new THREE.Mesh(new THREE.BoxGeometry(0.14,0.14,0.32), darkTrimMat);
+    mirror.position.set(sx, 0.85, 0.55);
+    car.add(mirror);
+  });
+
+  // spoiler
+  const wingMat = darkTrimMat;
+  const wing = new THREE.Mesh(new THREE.BoxGeometry(1.7,0.1,0.45), wingMat);
+  wing.position.set(0, 1.05, -2.05);
+  car.add(wing);
+  [-0.7,0.7].forEach(sx=>{
+    const strut = new THREE.Mesh(new THREE.BoxGeometry(0.1,0.4,0.1), wingMat);
+    strut.position.set(sx, 0.82, -2.05);
+    car.add(strut);
+  });
+
+  // headlights — real spotlights + visible lenses
+  const lensMat = new THREE.MeshStandardMaterial({color:0xfff7d6, emissive:0xfff2c0, emissiveIntensity:1.4});
+  const tailMat = new THREE.MeshBasicMaterial({color:0xff2e6a, toneMapped:false});
+  const headGeo = new THREE.BoxGeometry(0.3,0.16,0.12);
+  const tailGeo = new THREE.BoxGeometry(0.3,0.16,0.1);
+  const headL = new THREE.Mesh(headGeo, lensMat); headL.position.set(-0.6,0.5,2.16); car.add(headL);
+  const headR = new THREE.Mesh(headGeo, lensMat); headR.position.set(0.6,0.5,2.16); car.add(headR);
+  const tailL = new THREE.Mesh(tailGeo, tailMat.clone()); tailL.position.set(-0.75,0.55,-2.16); car.add(tailL);
+  const tailR = new THREE.Mesh(tailGeo, tailMat.clone()); tailR.position.set(0.75,0.55,-2.16); car.add(tailR);
+
+  if(dynamicHeadlights){
+    [-0.6,0.6].forEach(sx=>{
+      const spot = new THREE.SpotLight(0xfff0d0, 6, 60, Math.PI/7, 0.5, 1.2);
+      spot.position.set(sx, 0.55, 2.1);
+      const target = new THREE.Object3D();
+      target.position.set(sx*0.4, 0.2, 30);
+      car.add(target);
+      spot.target = target;
+      car.add(spot);
+    });
+  }
+
+  // underglow accent (subtle — many real tuner cars have this)
+  const glowGeo = new THREE.PlaneGeometry(2.6, 4.6);
+  const glowMat = new THREE.MeshBasicMaterial({color:0x00d9ff, transparent:true, opacity:0.4, blending:THREE.AdditiveBlending, depthWrite:false, toneMapped:false});
+  const underglow = new THREE.Mesh(glowGeo, glowMat);
+  underglow.rotation.x = -Math.PI/2;
+  underglow.position.y = 0.04;
+  car.add(underglow);
+
+  // wheels: dark rubber tire + metallic rim, mounted on steering pivots
+  const tireGeo = new THREE.CylinderGeometry(0.46,0.46,0.32,18);
+  tireGeo.rotateZ(Math.PI/2);
+  const tireMat = new THREE.MeshStandardMaterial({color:0x111114, roughness:0.85, metalness:0.1});
+  const rimGeo = new THREE.CylinderGeometry(0.27,0.27,0.34,18);
+  rimGeo.rotateZ(Math.PI/2);
+  const rimMat = new THREE.MeshStandardMaterial({color:0xd6dade, roughness:0.3, metalness:0.85});
+  const wheels = [];
+  const wheelPositions = [
+    {x:-0.98,z:1.45,front:true}, {x:0.98,z:1.45,front:true},
+    {x:-0.98,z:-1.4,front:false}, {x:0.98,z:-1.4,front:false}
+  ];
+  wheelPositions.forEach(wp=>{
+    const pivot = new THREE.Group();
+    pivot.position.set(wp.x, 0.46, wp.z);
+    const tire = new THREE.Mesh(tireGeo, tireMat);
+    tire.castShadow = castShadows;
+    const rim = new THREE.Mesh(rimGeo, rimMat);
+    pivot.add(tire, rim);
+    car.add(pivot);
+    wheels.push({pivot, mesh:tire, front:wp.front, spin:0});
+  });
+
+  let lightBar = null;
+  if(isPolice){
+    // Roof light bar: small red/blue emissive blocks that alternate flash,
+    // plus a low-intensity point light so the glow actually tints nearby
+    // surfaces — this is the single biggest "that's a cop car" visual cue.
+    const barBaseMat = new THREE.MeshStandardMaterial({color:0x111114, roughness:0.6, metalness:0.4});
+    const barBase = new THREE.Mesh(new THREE.BoxGeometry(0.9,0.12,0.36), barBaseMat);
+    barBase.position.set(0, 1.28, -0.2);
+    car.add(barBase);
+    const redMat = new THREE.MeshBasicMaterial({color:0xff2222, toneMapped:false});
+    const blueMat = new THREE.MeshBasicMaterial({color:0x2266ff, toneMapped:false});
+    const redLamp = new THREE.Mesh(new THREE.BoxGeometry(0.4,0.13,0.3), redMat);
+    redLamp.position.set(-0.24, 1.28, -0.2);
+    const blueLamp = new THREE.Mesh(new THREE.BoxGeometry(0.4,0.13,0.3), blueMat);
+    blueLamp.position.set(0.24, 1.28, -0.2);
+    car.add(redLamp, blueLamp);
+    const beacon = new THREE.PointLight(0xff3333, 0, 14, 2);
+    beacon.position.set(0, 1.3, -0.2);
+    car.add(beacon);
+    lightBar = {redLamp, blueLamp, beacon, redMat, blueMat};
+  }
+
+  if(opts.nepalFlag){
+    // Nepal's flag is the one national flag that isn't a simple rectangle —
+    // a stacked double-pennant — so it's instantly recognizable even as a
+    // small hood decal. Drawn with its crimson field, blue border, and the
+    // white sun/moon emblems, simplified for legibility at this scale.
+    const c = document.createElement('canvas'); c.width=128; c.height=160;
+    const ctx = c.getContext('2d');
+    ctx.clearRect(0,0,128,160);
+    ctx.fillStyle = '#cf2436';
+    ctx.beginPath();
+    ctx.moveTo(4,4); ctx.lineTo(124,54); ctx.lineTo(4,84); ctx.closePath();
+    ctx.moveTo(4,84); ctx.lineTo(124,54); ctx.lineTo(110,150); ctx.lineTo(4,150); ctx.closePath();
+    ctx.fill();
+    ctx.strokeStyle = '#06318f'; ctx.lineWidth = 6; ctx.lineJoin='round';
+    ctx.beginPath();
+    ctx.moveTo(4,4); ctx.lineTo(124,54); ctx.lineTo(4,84); ctx.closePath();
+    ctx.moveTo(4,84); ctx.lineTo(124,54); ctx.lineTo(110,150); ctx.lineTo(4,150); ctx.closePath();
+    ctx.stroke();
+    ctx.fillStyle = '#fff';
+    ctx.beginPath(); ctx.arc(40,42,11,0,Math.PI*2); ctx.fill();
+    ctx.fillStyle = '#cf2436';
+    ctx.beginPath(); ctx.arc(44,42,9,0,Math.PI*2); ctx.fill();
+    ctx.fillStyle = '#fff';
+    ctx.beginPath(); ctx.arc(48,110,10,0,Math.PI*2); ctx.fill();
+    for(let i=0;i<12;i++){
+      const a = (i/12)*Math.PI*2;
+      ctx.beginPath();
+      ctx.moveTo(48+Math.cos(a)*10, 110+Math.sin(a)*10);
+      ctx.lineTo(48+Math.cos(a)*15, 110+Math.sin(a)*15);
+      ctx.strokeStyle = '#fff'; ctx.lineWidth=2.5; ctx.stroke();
+    }
+    const tex = new THREE.CanvasTexture(c);
+    tex.encoding = THREE.sRGBEncoding;
+    const flagMat = new THREE.MeshBasicMaterial({map:tex, transparent:true, toneMapped:true});
+    const flagDecal = new THREE.Mesh(new THREE.PlaneGeometry(0.7,0.9), flagMat);
+    flagDecal.rotation.x = -Math.PI/2 + 0.05;
+    flagDecal.position.set(0, 0.59, 1.7);
+    car.add(flagDecal);
+  }
+
+  return {group:car, tailL, tailR, underglow, wheels, lightBar};
+}
+let carParts = buildCar({paintColor:CAR_PROFILES[0].color, dynamicHeadlights:true});
+scene.add(carParts.group);
+
+// ---------------------------------------------------------------------
+// Drift FX — tire smoke particles + persistent skid-mark decal trail.
+// Both are pooled/instanced so they're cheap even with hundreds of marks.
+// ---------------------------------------------------------------------
+const REAR_WHEEL_LOCAL = [
+  new THREE.Vector3(-0.98, 0.1, -1.4),
+  new THREE.Vector3(0.98, 0.1, -1.4),
+];
+
+// -- Smoke: instanced billboard sprites recycled round-robin --
+const SMOKE_MAX = 140;
+function makeSmokeTexture(){
+  const c = document.createElement('canvas'); c.width=c.height=64;
+  const ctx = c.getContext('2d');
+  const g = ctx.createRadialGradient(32,32,0,32,32,32);
+  g.addColorStop(0,'rgba(255,255,255,0.55)');
+  g.addColorStop(0.5,'rgba(220,210,225,0.28)');
+  g.addColorStop(1,'rgba(220,210,225,0)');
+  ctx.fillStyle = g; ctx.fillRect(0,0,64,64);
+  return new THREE.CanvasTexture(c);
+}
+const smokeTex = makeSmokeTexture();
+const smokeMat = new THREE.SpriteMaterial({map:smokeTex, transparent:true, depthWrite:false, fog:true, toneMapped:false});
+const smokeSprites = [];
+const smokeGroup = new THREE.Group();
+for(let i=0;i<SMOKE_MAX;i++){
+  const s = new THREE.Sprite(smokeMat.clone());
+  s.visible = false;
+  s.userData = {life:0, maxLife:1, vx:0, vy:0, vz:0};
+  smokeGroup.add(s);
+  smokeSprites.push(s);
+}
+scene.add(smokeGroup);
+let smokeCursor = 0;
+function spawnSmoke(x,y,z, strength){
+  const s = smokeSprites[smokeCursor];
+  smokeCursor = (smokeCursor+1)%SMOKE_MAX;
+  s.visible = true;
+  s.position.set(x + rand(-0.15,0.15), y, z + rand(-0.15,0.15));
+  const sc = rand(0.7,1.1)*(0.7+strength*0.6);
+  s.scale.set(sc,sc,1);
+  s.material.opacity = clamp(0.35+strength*0.3, 0.2, 0.6);
+  s.material.rotation = rand(0,Math.PI*2);
+  s.userData.life = 0;
+  s.userData.maxLife = rand(0.5,0.9);
+  s.userData.vx = rand(-0.4,0.4);
+  s.userData.vy = rand(0.5,1.0);
+  s.userData.vz = rand(-0.4,0.4);
+}
+function updateSmoke(dt){
+  for(const s of smokeSprites){
+    if(!s.visible) continue;
+    s.userData.life += dt;
+    const t = s.userData.life/s.userData.maxLife;
+    if(t>=1){ s.visible=false; continue; }
+    s.position.x += s.userData.vx*dt;
+    s.position.y += s.userData.vy*dt;
+    s.position.z += s.userData.vz*dt;
+    const sc = s.scale.x + dt*1.4;
+    s.scale.set(sc,sc,1);
+    s.material.opacity = lerp(s.material.opacity, 0, dt*1.8);
+  }
+}
+
+// -- Skid marks: a fixed-size ribbon mesh per rear wheel, updated as a
+// scrolling vertex buffer so marks persist on the road without growing
+// the scene graph (classic trail-mesh technique). --
+const SKID_SEGMENTS = 220;
+function buildSkidRibbon(){
+  const geo = new THREE.BufferGeometry();
+  const positions = new Float32Array(SKID_SEGMENTS*2*3);
+  const uvs = new Float32Array(SKID_SEGMENTS*2*2);
+  const indices = [];
+  for(let i=0;i<SKID_SEGMENTS-1;i++){
+    const a=i*2,b=i*2+1,c=(i+1)*2,d=(i+1)*2+1;
+    indices.push(a,b,c, b,d,c);
+  }
+  geo.setAttribute('position', new THREE.BufferAttribute(positions,3));
+  geo.setAttribute('uv', new THREE.BufferAttribute(uvs,2));
+  geo.setIndex(indices);
+  geo.setDrawRange(0,0);
+  const mat = new THREE.MeshBasicMaterial({
+    color:0x0a0a0c, transparent:true, opacity:0.55, depthWrite:false, polygonOffset:true, polygonOffsetFactor:-4
+  });
+  const mesh = new THREE.Mesh(geo, mat);
+  mesh.frustumCulled = false;
+  scene.add(mesh);
+  return {mesh, positions, head:0, filled:0, lastPoint:null};
+}
+const skidRibbons = [buildSkidRibbon(), buildSkidRibbon()];
+
+function updateSkidRibbon(ribbon, worldX, worldZ, worldY, active){
+  if(!active){ ribbon.lastPoint = null; return; }
+  const last = ribbon.lastPoint;
+  if(last){
+    const dx = worldX-last[0], dz = worldZ-last[1];
+    if(dx*dx+dz*dz < 0.06) return; // throttle point density
+  }
+  ribbon.lastPoint = [worldX, worldZ];
+  const i = ribbon.head;
+  const halfW = 0.13;
+  // perpendicular from heading so the ribbon has width across the tire track
+  const px = Math.cos(car.heading)*halfW, pz = -Math.sin(car.heading)*halfW;
+  const base = i*2*3;
+  const y = worldY + 0.035;
+  ribbon.positions[base+0] = worldX-px; ribbon.positions[base+1] = y; ribbon.positions[base+2] = worldZ-pz;
+  ribbon.positions[base+3] = worldX+px; ribbon.positions[base+4] = y; ribbon.positions[base+5] = worldZ+pz;
+  ribbon.head = (ribbon.head+1)%SKID_SEGMENTS;
+  ribbon.filled = Math.min(ribbon.filled+1, SKID_SEGMENTS);
+  ribbon.mesh.geometry.attributes.position.needsUpdate = true;
+  ribbon.mesh.geometry.setDrawRange(0, Math.max(0,(ribbon.filled-1))*6);
+}
+
+const _wheelWorld = new THREE.Vector3();
+function updateTireFX(dt, driftingNow, curSpeed2D){
+  const strength = clamp(Math.abs(car.slipSmoothed)/0.9, 0, 1) * clamp(curSpeed2D/30,0.3,1);
+  for(let i=0;i<2;i++){
+    _wheelWorld.copy(REAR_WHEEL_LOCAL[i]);
+    carParts.group.localToWorld(_wheelWorld);
+    if(driftingNow){
+      if(Math.random() < 0.85) spawnSmoke(_wheelWorld.x, _wheelWorld.y, _wheelWorld.z, strength);
+    }
+    updateSkidRibbon(skidRibbons[i], _wheelWorld.x, _wheelWorld.z, _wheelWorld.y - 0.07, driftingNow);
+  }
+}
+
+// ---------------------------------------------------------------------
+// Nitro FX — twin exhaust flame sprites that flare while boosted, plus a
+// one-shot radial particle burst fired the instant a boost pad triggers.
+// Built on the same pooled-sprite approach as the tire smoke above.
+// ---------------------------------------------------------------------
+function makeFireTexture(){
+  const c = document.createElement('canvas'); c.width=c.height=64;
+  const ctx = c.getContext('2d');
+  const g = ctx.createRadialGradient(32,32,0,32,32,32);
+  g.addColorStop(0,'rgba(255,255,255,0.95)');
+  g.addColorStop(0.25,'rgba(255,210,120,0.9)');
+  g.addColorStop(0.55,'rgba(255,120,40,0.55)');
+  g.addColorStop(1,'rgba(255,46,146,0)');
+  ctx.fillStyle = g; ctx.fillRect(0,0,64,64);
+  return new THREE.CanvasTexture(c);
+}
+const fireTex = makeFireTexture();
+const fireMat = new THREE.SpriteMaterial({map:fireTex, transparent:true, depthWrite:false, fog:true, toneMapped:false, blending:THREE.AdditiveBlending});
+
+// Twin continuous exhaust flames, parented directly to the car so they
+// track its rotation without per-frame matrix math.
+const EXHAUST_LOCAL = [
+  new THREE.Vector3(-0.55, 0.32, -2.25),
+  new THREE.Vector3(0.55, 0.32, -2.25),
+];
+const exhaustFlames = EXHAUST_LOCAL.map(pos=>{
+  const s = new THREE.Sprite(fireMat.clone());
+  s.position.copy(pos);
+  s.scale.set(0.01,0.01,1);
+  s.visible = false;
+  carParts.group.add(s);
+  return s;
+});
+function rebindExhaustFlames(){
+  // Called after switchCar() rebuilds carParts — re-parent the existing
+  // flame sprites onto the new car group rather than recreating them.
+  for(const s of exhaustFlames) carParts.group.add(s);
+}
+
+// One-shot radial burst pool — pooled sprites recycled round-robin, same
+// pattern as the smoke pool.
+const BURST_MAX = 36;
+const burstSprites = [];
+const burstGroup = new THREE.Group();
+for(let i=0;i<BURST_MAX;i++){
+  const s = new THREE.Sprite(fireMat.clone());
+  s.visible = false;
+  s.userData = {life:0, maxLife:1, vx:0, vy:0, vz:0};
+  burstGroup.add(s);
+  burstSprites.push(s);
+}
+scene.add(burstGroup);
+let burstCursor = 0;
+function spawnNitroBurst(x,y,z){
+  // Radial fan of fire-colored sprites exploding outward from the boost pad.
+  const count = 22;
+  for(let i=0;i<count;i++){
+    const s = burstSprites[burstCursor];
+    burstCursor = (burstCursor+1)%BURST_MAX;
+    const a = (i/count)*Math.PI*2 + rand(-0.2,0.2);
+    const speed = rand(4,9);
+    s.visible = true;
+    s.position.set(x,y+rand(0.1,0.6),z);
+    s.scale.set(0.01,0.01,1);
+    s.material.opacity = 1;
+    s.material.rotation = rand(0,Math.PI*2);
+    s.userData.life = 0;
+    s.userData.maxLife = rand(0.35,0.6);
+    s.userData.vx = Math.cos(a)*speed;
+    s.userData.vy = rand(2,5);
+    s.userData.vz = Math.sin(a)*speed;
+  }
+}
+function updateNitroFX(dt, boosted){
+  // Continuous exhaust flicker while boosting.
+  for(const s of exhaustFlames){
+    if(boosted){
+      s.visible = true;
+      const flicker = 0.75 + Math.random()*0.5;
+      const sc = 0.55*flicker;
+      s.scale.set(sc, sc*1.6, 1);
+      s.material.opacity = 0.85;
+    } else {
+      s.visible = false;
+    }
+  }
+  // Burst particle integration.
+  for(const s of burstSprites){
+    if(!s.visible) continue;
+    s.userData.life += dt;
+    const t = s.userData.life/s.userData.maxLife;
+    if(t>=1){ s.visible=false; continue; }
+    s.position.x += s.userData.vx*dt;
+    s.position.y += s.userData.vy*dt;
+    s.position.z += s.userData.vz*dt;
+    s.userData.vy -= dt*9; // gravity
+    const sc = lerp(0.9, 0.15, t);
+    s.scale.set(sc,sc,1);
+    s.material.opacity = lerp(1, 0, t);
+  }
+}
+
+// -- Drift score banner (separate from the pickup toast so they don't fight) --
+const driftBannerEl = document.getElementById('drift-banner');
+const comboChainEl = document.getElementById('combo-chain');
+const edgeFlashEl = document.getElementById('edge-flash');
+let driftBannerTimer = null;
+let comboChainTimer2 = null;
+function driftBanner(bonus, multiplier, chainCount){
+  if(bonus < 8) return;
+  const tier = multiplier >= 3 ? 3 : (multiplier >= 2 ? 2 : 1);
+  driftBannerEl.textContent = multiplier && multiplier > 1.05
+    ? `DRIFT ×${multiplier.toFixed(1)}! +${bonus}`
+    : `DRIFT! +${bonus}`;
+  driftBannerEl.classList.remove('tier2','tier3');
+  if(tier===2) driftBannerEl.classList.add('tier2');
+  if(tier===3) driftBannerEl.classList.add('tier3');
+  driftBannerEl.classList.add('show');
+  clearTimeout(driftBannerTimer);
+  driftBannerTimer = setTimeout(()=>driftBannerEl.classList.remove('show'), tier===3?1500:1100);
+
+  if(chainCount > 1 && comboChainEl){
+    comboChainEl.textContent = `${chainCount}-CHAIN COMBO`;
+    comboChainEl.classList.add('show');
+    clearTimeout(comboChainTimer2);
+    comboChainTimer2 = setTimeout(()=>comboChainEl.classList.remove('show'), tier===3?1500:1100);
+  }
+
+  // Big chains/multipliers get a screen-edge flash for extra punch.
+  if(tier>=2 && edgeFlashEl){
+    edgeFlashEl.classList.add('show');
+    setTimeout(()=>edgeFlashEl.classList.remove('show'), tier===3?180:110);
+  }
+
+  playTone(620,0.12,'triangle',0.18);
+  setTimeout(()=>playTone(900,0.14,'triangle',0.16), 70);
+  if(tier>=2) setTimeout(()=>playTone(1180,0.16,'triangle',tier===3?0.2:0.14), 140);
+  if(tier>=3) setTimeout(()=>playTone(1480,0.18,'triangle',0.18), 220);
+}
+
+// Banks the accumulated drift score (scaled by the combo multiplier built
+// up over the chain, plus the independent streak multiplier) into the
+// real score, then resets the combo state. Called either when the chain
+// window expires or the run ends/resets.
+function bankDriftCombo(){
+  if(car.driftScore > 0){
+    const streakMult = Math.max(1, Math.floor(car.streak)*0.35 + 1);
+    const bonus = Math.round(car.driftScore * car.driftCombo * streakMult * nightDriftMultBonus() * weatherDriftMultBonus());
+    if(bonus > 0){
+      score += bonus;
+      refreshScoreHUD();
+      driftBanner(bonus, car.driftCombo*streakMult, car.chainCount);
+    }
+  }
+  car.driftScore = 0;
+  car.driftCombo = 1;
+  car.comboChainTimer = 0;
+  car.driftTime = 0;
+  car.chainCount = 0;
+  car.streak = 0;
+}
+
+// ---------------------------------------------------------------------
+// Streak meter — a separate, slower-decaying counter that rewards
+// sustained drifting at real speed (not just tapping into a drift).
+// Builds while drifting above a minimum speed; once you drop below that
+// or stop drifting, it decays gradually rather than vanishing instantly.
+// Banked into score via the streak multiplier above whenever a drift
+// combo banks, and separately tracks a persisted personal-best peak.
+// ---------------------------------------------------------------------
+const STREAK_DECAY_GRACE = 2.8;
+const MAX_STREAK = 30;
+const streakBannerEl = document.getElementById('streak-banner');
+function updateStreak(dt, driftingNow, curSpeed2D){
+  const buildingStreak = driftingNow && curSpeed2D > 12;
+  if(buildingStreak){
+    car.streakTimer = STREAK_DECAY_GRACE;
+    car.streak = Math.min(MAX_STREAK, car.streak + dt*1.8);
+  } else {
+    car.streakTimer -= dt;
+    if(car.streakTimer <= 0){
+      car.streak = Math.max(0, car.streak - dt*0.6);
+    }
+  }
+
+  if(Math.floor(car.streak) > highStreak){
+    highStreak = Math.floor(car.streak);
+    try{ localStorage.setItem(HIGH_STREAK_KEY, String(highStreak)); }catch(e){}
+  }
+
+  if(streakBannerEl){
+    if(car.streak > 1.5){
+      streakBannerEl.style.opacity = 1;
+      streakBannerEl.textContent = Math.floor(car.streak) + 'x STREAK';
+      streakBannerEl.style.color = car.streak>20 ? '#ffffff' : (car.streak>8 ? '#ff2e92' : (car.streak>5 ? '#ffb347' : '#00f0ff'));
+    } else {
+      streakBannerEl.style.opacity = 0;
+    }
+  }
+}
+
+// ---------------------------------------------------------------------
+// Police chase — once the player has racked up some orbs, police cruisers
+// start spawning and chasing. Ramming one scores a bonus and knocks it
+// out of the chase for a few seconds (it respawns elsewhere rather than
+// the chase just ending, so the pressure stays on). Wanted level escalates
+// with score: more cruisers can be active at once, they spawn more often,
+// and they get a little faster/more aggressive — mirrors the classic
+// GTA-style star system without needing crime-tracking, since score here
+// already stands in for "how much trouble you've caused."
+// ---------------------------------------------------------------------
+const WANTED_THRESHOLDS = [15, 80, 200, 400]; // score needed for ★1..★4
+const police = [];
+
+function wantedLevel(){
+  let level = 0;
+  for(const t of WANTED_THRESHOLDS){ if(score >= t) level++; else break; }
+  return level;
+}
+function maxPoliceForLevel(level){
+  return level<=0 ? 0 : Math.min(level+1, 4); // ★1→2 cars, ★4→4 cars
+}
+function spawnChanceForLevel(level){
+  return [0, 0.15, 0.25, 0.38, 0.55][level] || 0;
+}
+
+// ---------------------------------------------------------------------
+// Police car pool — all meshes built once at load time so spawn events
+// never call buildCar() mid-frame. Spawning is just a position reset
+// and visibility toggle; zero geometry/material allocation at runtime.
+// ---------------------------------------------------------------------
+const POLICE_POOL_SIZE = 4; // max wanted level allows 4 active at once
+const policePool = [];
+
+// Every car (headlights) and every police car (beacon) carries real
+// THREE.Light objects. Three.js bakes the *count* of active lights into
+// each material's shader as a compile-time define — so toggling a pooled
+// car's group.visible on spawn/despawn adds or removes its lights from the
+// scene, forcing every lit material in the whole scene to recompile its
+// shader on that frame. That's the actual cause of the spawn-spikes.
+// Fix: pooled cars stay visible=true permanently (lights stay in the
+// active set forever, light count never changes) and "despawning" just
+// parks them far below the ground, out of camera and light range, instead
+// of hiding them.
+const PARKED_Y = -400;
+function parkCarGroup(group){ group.position.y = PARKED_Y; }
+
+(function buildPolicePool(){
+  for(let i=0;i<POLICE_POOL_SIZE;i++){
+    const parts = buildCar({isPolice:true, paintColor:0x141414});
+    parkCarGroup(parts.group);
+    scene.add(parts.group);
+    policePool.push({parts, inUse:false});
+  }
+})();
+
+function spawnPoliceCar(){
+  const slot = policePool.find(s=>!s.inUse);
+  if(!slot) return null; // pool exhausted (shouldn't happen with correct cap)
+  slot.inUse = true;
+  const unit = {
+    parts: slot.parts,
+    poolSlot: slot,
+    x:0, z:0, heading:0, speed:0,
+    state:'spawning', respawnAt:0,
+    flashT:Math.random()*2,
+    sirenPhase:Math.random()*10,
+  };
+  respawnPoliceUnit(unit);
+  police.push(unit);
+  return unit;
+}
+
+function despawnPoliceUnit(unit){
+  parkCarGroup(unit.parts.group);
+  if(unit.poolSlot) unit.poolSlot.inUse = false;
+}
+
+function findPoliceSpawnPoint(){
+  // Try a handful of random points on the road ring at a fair distance
+  // from the player, rejecting any that land inside a building.
+  for(let attempt=0; attempt<12; attempt++){
+    const a = rand(0, Math.PI*2);
+    const dist = rand(45, 90);
+    const x = car.x + Math.sin(a)*dist;
+    const z = car.z + Math.cos(a)*dist;
+    let blocked = false;
+    for(const b of buildingBoxes){
+      if(x>b.minX-4 && x<b.maxX+4 && z>b.minZ-4 && z<b.maxZ+4){ blocked=true; break; }
+    }
+    if(!blocked) return [x,z];
+  }
+  // Fallback: straight behind the player, still usually fine since roads
+  // are the majority of city area.
+  return [car.x - Math.sin(car.heading)*60, car.z - Math.cos(car.heading)*60];
+}
+
+function respawnPoliceUnit(unit){
+  const [x,z] = findPoliceSpawnPoint();
+  unit.x = x; unit.z = z;
+  unit.heading = Math.atan2(car.x-x, car.z-z);
+  unit.speed = 0;
+  unit.parts.group.position.set(x, groundHeight(x,z)+0.05, z);
+  unit.parts.group.rotation.y = unit.heading;
+  unit.state = 'active';
+}
+
+let policeSpawnCooldown = 0;
+function updatePolice(dt, now){
+  policeSpawnCooldown -= dt;
+  const level = wantedLevel();
+  const maxPolice = maxPoliceForLevel(level);
+  if(level > 0 && police.length < maxPolice && policeSpawnCooldown <= 0 && Math.random() < dt*spawnChanceForLevel(level)){
+    spawnPoliceCar();
+    showToast(level >= 3 ? `WANTED ${'★'.repeat(level)}!` : 'WANTED!');
+    policeSpawnCooldown = 2.5;
+  }
+  let anyNearby = false;
+  for(const unit of police){
+    const dx = car.x-unit.x, dz = car.z-unit.z;
+    const distToPlayer = Math.hypot(dx,dz);
+    if(distToPlayer < 70) anyNearby = true;
+
+    // Simple chase AI: steer heading toward the player, accelerate, and
+    // cap speed a little below the player's max so a good drift can pull
+    // away — the threat should feel real but escapable. Higher wanted
+    // levels turn and close in a bit faster, same shape as the GTA-style
+    // escalation: more cars AND each one is a little sharper.
+    const desiredHeading = Math.atan2(dx,dz);
+    let diff = desiredHeading - unit.heading;
+    while(diff > Math.PI) diff -= Math.PI*2;
+    while(diff < -Math.PI) diff += Math.PI*2;
+    const turnRate = 2.0 + level*0.18;
+    unit.heading += clamp(diff, -turnRate*dt, turnRate*dt);
+
+    const maxPoliceSpeed = PARAMS.maxSpeed*(0.86 + level*0.025);
+    const targetSpeed = distToPlayer > 8 ? maxPoliceSpeed : maxPoliceSpeed*0.5;
+    unit.speed = lerp(unit.speed, targetSpeed, clamp(dt*1.6,0,1));
+
+    const fx = Math.sin(unit.heading), fz = Math.cos(unit.heading);
+    unit.x += fx*unit.speed*dt;
+    unit.z += fz*unit.speed*dt;
+
+    // Mild building avoidance so cruisers don't just grind against walls —
+    // not full physics, just enough push-out to keep them looking competent.
+    for(const b of buildingBoxes){
+      const r = 1.6;
+      if(unit.x > b.minX-r && unit.x < b.maxX+r && unit.z > b.minZ-r && unit.z < b.maxZ+r){
+        const overlapLeft   = unit.x-(b.minX-r);
+        const overlapRight  = (b.maxX+r)-unit.x;
+        const overlapTop    = unit.z-(b.minZ-r);
+        const overlapBottom = (b.maxZ+r)-unit.z;
+        const m = Math.min(overlapLeft, overlapRight, overlapTop, overlapBottom);
+        if(m===overlapLeft) unit.x = b.minX-r;
+        else if(m===overlapRight) unit.x = b.maxX+r;
+        else if(m===overlapTop) unit.z = b.minZ-r;
+        else unit.z = b.maxZ+r;
+        unit.speed *= 0.4;
+      }
+    }
+
+    const h = groundHeight(unit.x, unit.z);
+    unit.parts.group.position.set(unit.x, h+0.05, unit.z);
+    unit.parts.group.rotation.y = unit.heading;
+
+    // Flashing light bar
+    unit.flashT += dt*7;
+    const onRed = Math.floor(unit.flashT)%2===0;
+    if(unit.parts.lightBar){
+      const lb = unit.parts.lightBar;
+      lb.redMat.color.setHex(onRed?0xff2222:0x550000);
+      lb.blueMat.color.setHex(onRed?0x224488:0x2266ff);
+      lb.beacon.color.setHex(onRed?0xff3333:0x3366ff);
+      lb.beacon.intensity = 2.6;
+    }
+
+    // Player gets caught by a cruiser: knockback, big score penalty, and
+    // the cruiser ducks out and reappears elsewhere shortly after rather
+    // than vanishing for good (keeps the chase pressure consistent). The
+    // brief immunity window stops a cluster of cruisers from all landing
+    // a hit in the same frame or two.
+    const carR = 1.6;
+    if(distToPlayer < carR*2 + 0.6 && car.bustImmunity<=0){
+      const nx = dx/Math.max(distToPlayer,0.01), nz = dz/Math.max(distToPlayer,0.01);
+      car.x += nx*0.4; car.z += nz*0.4;
+      car.speed *= -0.4; car.vx*=0.3; car.vz*=0.3;
+      triggerImpact();
+      score = Math.max(0, score - 40);
+      refreshScoreHUD();
+      showToast('BUSTED! -40');
+      playTone(140,0.3,'sawtooth',0.28);
+      car.bustImmunity = 1.2;
+      unit.x -= nx*8; unit.z -= nz*8;
+      unit.speed = 0;
+      unit.state = 'cooldown';
+      unit.respawnAt = now + 3;
+    }
+  }
+
+  for(let i=police.length-1; i>=0; i--){
+    const unit = police[i];
+    if(unit.state==='cooldown' && now >= unit.respawnAt){
+      if(i < maxPolice){
+        respawnPoliceUnit(unit);
+      } else {
+        despawnPoliceUnit(unit);
+        police.splice(i,1);
+      }
+    }
+  }
+
+  updateSirenSound(anyNearby, dt);
+}
+
+// Siren: two alternating tones, faded in only when a cruiser is nearby so
+// it doesn't drone constantly once chases start.
+let sirenOsc=null, sirenGain=null;
+function initSiren(){
+  if(!audioCtx) return;
+  sirenOsc = audioCtx.createOscillator(); sirenOsc.type='sine';
+  sirenGain = audioCtx.createGain(); sirenGain.gain.value = 0;
+  sirenOsc.connect(sirenGain).connect(audioCtx.destination);
+  sirenOsc.frequency.value = 700;
+  sirenOsc.start();
+}
+function updateSirenSound(active, dt){
+  if(!audioCtx) return;
+  if(!sirenOsc) initSiren();
+  if(!sirenOsc) return;
+  const now = audioCtx.currentTime;
+  sirenGain.gain.setTargetAtTime(active?0.05:0, now, 0.25);
+  const t = clock.elapsedTime;
+  sirenOsc.frequency.setTargetAtTime(700 + Math.sin(t*6)*220, now, 0.03);
+}
+
+function updateWantedHUD(){
+  const el = document.getElementById('wanted-indicator');
+  if(!el) return;
+  const level = wantedLevel();
+  if(level>0){
+    el.classList.add('show');
+    el.textContent = '🚨 ' + '★'.repeat(level) + '☆'.repeat(4-level);
+  } else {
+    el.classList.remove('show');
+  }
+}
+
+// ---------------------------------------------------------------------
+// Traffic — slow, dumb civilian cars that wander the city on grid-aligned
+// headings (this city has no actual road-spline data, just a block grid,
+// so "driving on the road" here means picking one of the 4 axis-aligned
+// directions and re-rolling at intervals or when blocked). Sideswiping
+// one is a small score bonus and a satisfying knock, not a penalty —
+// they're chaos toys, not a hazard.
+// ---------------------------------------------------------------------
+// Traffic car pool — same pattern as police: all meshes built at load,
+// spawn/despawn is just show/hide + reposition, never buildCar().
+// ---------------------------------------------------------------------
+const MAX_TRAFFIC = 4;
+const traffic = [];
+const TRAFFIC_COLORS = [0x8a93a6, 0xb8a98c, 0x5f6b73, 0x9c7a5a, 0x6f7d8c, 0xa3a89c];
+const trafficPool = [];
+(function buildTrafficPool(){
+  for(let i=0;i<MAX_TRAFFIC;i++){
+    const parts = buildCar({paintColor:TRAFFIC_COLORS[i%TRAFFIC_COLORS.length], castShadows:false});
+    parkCarGroup(parts.group);
+    scene.add(parts.group);
+    trafficPool.push({parts, inUse:false});
+  }
+})();
+
+function spawnTrafficCar(){
+  const slot = trafficPool.find(s=>!s.inUse);
+  if(!slot) return null;
+  slot.inUse = true;
+  const unit = {
+    parts: slot.parts,
+    poolSlot: slot,
+    x:0, z:0, heading:0, speed:0,
+    targetSpeed: rand(8,14),
+    turnCooldown: rand(1.5,4),
+  };
+  respawnTrafficUnit(unit);
+  traffic.push(unit);
+  return unit;
+}
+
+function despawnTrafficUnit(unit){
+  parkCarGroup(unit.parts.group);
+  if(unit.poolSlot) unit.poolSlot.inUse = false;
+}
+
+function findTrafficSpawnPoint(){
+  // Prefer open blocks near the player so traffic is actually encountered,
+  // not just simulated somewhere off in the city the player never visits.
+  const nearby = openBlocks.filter(b=>{
+    const dx=b.bx-car.x, dz=b.bz-car.z;
+    return dx*dx+dz*dz < 130*130 && dx*dx+dz*dz > 25*25;
+  });
+  if(nearby.length>0){
+    const b = choice(nearby);
+    return [b.bx + rand(-8,8), b.bz + rand(-8,8)];
+  }
+  // Fallback: same ring-around-player approach police use.
+  const a = rand(0, Math.PI*2), dist = rand(40,90);
+  return [car.x + Math.sin(a)*dist, car.z + Math.cos(a)*dist];
+}
+
+function respawnTrafficUnit(unit){
+  const [x,z] = findTrafficSpawnPoint();
+  unit.x = x; unit.z = z;
+  // Snap heading to one of the 4 grid-aligned directions so traffic reads
+  // as "driving down a street" rather than facing a random angle.
+  unit.heading = choice([0, Math.PI/2, Math.PI, -Math.PI/2]);
+  unit.speed = unit.targetSpeed*0.5;
+  unit.parts.group.position.set(x, groundHeight(x,z)+0.05, z);
+  unit.parts.group.rotation.y = unit.heading;
+}
+
+let trafficSpawnCooldown = 0;
+function updateTraffic(dt, now){
+  trafficSpawnCooldown -= dt;
+  // Rate-limit to one spawn every 2s minimum — prevents a burst of
+  // back-to-back visible-mesh activations spiking the GPU command buffer
+  // at game start when the traffic array is empty.
+  if(traffic.length < MAX_TRAFFIC && trafficSpawnCooldown <= 0 && Math.random() < dt*0.5){
+    spawnTrafficCar();
+    trafficSpawnCooldown = 2.0;
+  }
+
+  for(const unit of traffic){
+    const dx = car.x-unit.x, dz = car.z-unit.z;
+    const distToPlayer = Math.hypot(dx,dz);
+
+    unit.turnCooldown -= dt;
+    if(unit.turnCooldown <= 0){
+      unit.turnCooldown = rand(2.5,5);
+      // Occasionally pick a new grid direction — biased to keep roughly
+      // the same heading most of the time so traffic doesn't look erratic.
+      if(Math.random() < 0.4){
+        unit.heading += choice([Math.PI/2, -Math.PI/2, Math.PI]);
+      }
+    }
+
+    unit.speed = lerp(unit.speed, unit.targetSpeed, clamp(dt*1.2,0,1));
+    const fx = Math.sin(unit.heading), fz = Math.cos(unit.heading);
+    const nx = unit.x + fx*unit.speed*dt;
+    const nz = unit.z + fz*unit.speed*dt;
+
+    // Building avoidance: if the next step would clip a building, turn
+    // 90° instead of pushing through it — reads as "stopped at the block"
+    // rather than the wall-shoving behavior that's fine for police chases
+    // but would look broken for ordinary traffic.
+    let blocked = false;
+    for(const b of buildingBoxes){
+      const r = 1.8;
+      if(nx > b.minX-r && nx < b.maxX+r && nz > b.minZ-r && nz < b.maxZ+r){ blocked=true; break; }
+    }
+    if(blocked){
+      unit.heading += choice([Math.PI/2, -Math.PI/2]);
+      unit.speed *= 0.3;
+    } else {
+      unit.x = nx; unit.z = nz;
+    }
+
+    const h = groundHeight(unit.x, unit.z);
+    unit.parts.group.position.set(unit.x, h+0.05, unit.z);
+    unit.parts.group.rotation.y = unit.heading;
+
+    // Player sideswipes a traffic car: small bonus, both cars get knocked
+    // apart for a satisfying chaos moment, and the traffic car just keeps
+    // driving afterward rather than vanishing.
+    const carR = 1.6;
+    if(distToPlayer < carR*2 + 0.5 && car.trafficImmunity<=0){
+      const ux = dx/Math.max(distToPlayer,0.01), uz = dz/Math.max(distToPlayer,0.01);
+      car.vx -= ux*4; car.vz -= uz*4;
+      unit.x += ux*3; unit.z += uz*3;
+      unit.speed *= 0.4;
+      triggerImpact();
+      score += 5;
+      refreshScoreHUD();
+      showToast('SIDESWIPE! +5');
+      car.trafficImmunity = 0.5;
+    }
+
+    // Despawn + respawn anything that's wandered far from the player so
+    // the live population always stays where it'll actually be seen.
+    if(distToPlayer > 180){
+      respawnTrafficUnit(unit);
+    }
+  }
+}
+
+
+// ---------------------------------------------------------------------
+// Weather — rain cycles in/out automatically. While raining the road is
+// slippery (lower base grip, easier to break traction even without the
+// handbrake), the sky darkens, and a particle rain system plus a wet
+// screen tint sell the visual. Grip is applied as a multiplier each frame
+// rather than mutating PARAMS, so it always layers cleanly on top of
+// whichever car is currently equipped.
+// ---------------------------------------------------------------------
+const weather = {
+  isRaining:false,
+  intensity:0,       // 0..1, smoothed transition for visuals + grip
+  nextChangeAt:30,   // first chance to start raining
+};
+const RAIN_GRIP_MULT = 0.62; // lower = more slippery
+
+// Night mode — manually toggled (N key), independent of the automatic rain
+// cycle. nightFactor is smoothed so the transition fades in/out rather than
+// snapping, and combines additively with rain so a rainy night is darker
+// than either alone. Lighting/fog/bloom are driven from ONE place
+// (updateAtmosphere, below) so night and rain never fight over the same
+// properties on the same frame.
+const nightMode = { active:false, factor:0 };
+function toggleNightMode(){
+  nightMode.active = !nightMode.active;
+  showToast(nightMode.active ? 'NIGHT MODE ON' : 'NIGHT MODE OFF');
+}
+
+const RAIN_COUNT = 900;
+let rainMesh, rainVelocities, rainX, rainY, rainZ;
+function buildRain(){
+  const geo = new THREE.CylinderGeometry(0.012,0.012,0.9,3);
+  const mat = new THREE.MeshBasicMaterial({color:0xbfe0ff, transparent:true, opacity:0.0, toneMapped:false});
+  rainMesh = new THREE.InstancedMesh(geo, mat, RAIN_COUNT);
+  rainMesh.frustumCulled = false;
+  const dummy = new THREE.Object3D();
+  rainVelocities = new Float32Array(RAIN_COUNT);
+  rainX = new Float32Array(RAIN_COUNT);
+  rainY = new Float32Array(RAIN_COUNT);
+  rainZ = new Float32Array(RAIN_COUNT);
+  dummy.rotation.x = 0.18;
+  for(let i=0;i<RAIN_COUNT;i++){
+    rainX[i] = rand(-90,90); rainY[i] = rand(0,40); rainZ[i] = rand(-90,90);
+    dummy.position.set(rainX[i], rainY[i], rainZ[i]);
+    dummy.updateMatrix();
+    rainMesh.setMatrixAt(i, dummy.matrix);
+    rainVelocities[i] = rand(28,40);
+  }
+  scene.add(rainMesh);
+}
+buildRain();
+
+const _rainDummy = new THREE.Object3D();
+_rainDummy.rotation.x = 0.18;
+function updateWeather(dt, now){
+  if(now >= weather.nextChangeAt){
+    weather.isRaining = !weather.isRaining;
+    weather.nextChangeAt = now + (weather.isRaining ? rand(18,32) : rand(35,60));
+    showToast(weather.isRaining ? 'RAIN INCOMING' : 'SKIES CLEARING');
+  }
+  const target = weather.isRaining ? 1 : 0;
+  weather.intensity = lerp(weather.intensity, target, clamp(dt*0.6,0,1));
+
+  rainMesh.material.opacity = weather.intensity*0.55;
+  if(weather.intensity > 0.01){
+    for(let i=0;i<RAIN_COUNT;i++){
+      rainY[i] -= rainVelocities[i]*dt;
+      rainX[i] += car.vx*dt*0.04;
+      rainZ[i] += car.vz*dt*0.04;
+      if(rainY[i] < -2){
+        rainX[i] = car.x+rand(-90,90); rainY[i] = rand(35,45); rainZ[i] = car.z+rand(-90,90);
+      }
+      // Keep the rain volume centered around the player as they drive so
+      // it never thins out or drifts away from view.
+      if(Math.abs(rainX[i]-car.x) > 95) rainX[i] = car.x+rand(-90,90);
+      if(Math.abs(rainZ[i]-car.z) > 95) rainZ[i] = car.z+rand(-90,90);
+      _rainDummy.position.set(rainX[i], rainY[i], rainZ[i]);
+      _rainDummy.updateMatrix();
+      rainMesh.setMatrixAt(i, _rainDummy.matrix);
+    }
+    rainMesh.instanceMatrix.needsUpdate = true;
+  }
+
+  nightMode.factor = lerp(nightMode.factor, nightMode.active?1:0, clamp(dt*1.2,0,1));
+  updateAtmosphere();
+
+  const el = document.getElementById('weather-indicator');
+  if(el){
+    if(weather.intensity > 0.05){
+      el.classList.add('show');
+      el.textContent = '🌧 WET ROADS — DRIFT BONUS ×' + weatherDriftMultBonus().toFixed(1);
+    } else {
+      el.classList.remove('show');
+    }
+  }
+}
+// Single source of truth for lighting/fog/bloom so rain and night mode
+// blend together instead of fighting over the same properties each frame.
+// Both are 0..1 factors; their effects stack (a rainy night is darker and
+// glowier than either alone).
+function updateAtmosphere(){
+  const rain = weather.intensity;
+  const night = nightMode.factor;
+
+  // Base (clear day) values, dimmed by rain, then dimmed further by night.
+  const dayHemi = 0.75, rainHemi = 0.42, nightHemi = 0.16;
+  const dayAmb = 0.22, rainAmb = 0.16, nightAmb = 0.07;
+  const daySun = 2.4, rainSun = 1.3, nightSun = 0.35;
+
+  const hemiAfterRain = lerp(dayHemi, rainHemi, rain);
+  hemiLight.intensity = lerp(hemiAfterRain, nightHemi, night);
+  const ambAfterRain = lerp(dayAmb, rainAmb, rain);
+  ambientLight.intensity = lerp(ambAfterRain, nightAmb, night);
+  const sunAfterRain = lerp(daySun, rainSun, rain);
+  sunLight.intensity = lerp(sunAfterRain, nightSun, night);
+
+  const dayFog = new THREE.Color(0x120820);
+  const rainFog = new THREE.Color(0x1a1a28);
+  const nightFog = new THREE.Color(0x06030e);
+  const fogAfterRain = dayFog.clone().lerp(rainFog, rain);
+  scene.fog.color.copy(fogAfterRain.lerp(nightFog, night));
+  const densAfterRain = lerp(0.0008, 0.0014, rain);
+  scene.fog.density = lerp(densAfterRain, 0.001, night);
+
+  if(bloomPass){
+    bloomPass.strength = lerp(0.55, 1.0, night);
+    bloomPass.threshold = lerp(0.82, 0.62, night);
+  }
+
+  const nightEl = document.getElementById('night-indicator');
+  if(nightEl) nightEl.classList.toggle('show', night > 0.4);
+}
+
+function currentGripMultiplier(){
+  const rainMult = lerp(1, RAIN_GRIP_MULT, weather.intensity);
+  // Night doesn't change tire grip itself (that would feel like an
+  // invisible difficulty penalty), but the scoring reward for drifting is
+  // higher to compensate for the harder visibility — see bankDriftCombo.
+  return rainMult;
+}
+function nightDriftMultBonus(){
+  return lerp(1, 1.35, nightMode.factor);
+}
+function weatherDriftMultBonus(){
+  // Wet roads loosen the rear end (see currentGripMultiplier), which makes
+  // a slide easier to start but harder to control — reward that risk with
+  // a bigger drift score bonus the harder it's raining, same shape as the
+  // night-mode bonus above so the two stack naturally.
+  return lerp(1, 1.5, weather.intensity);
+}
+
+
+const keys = {};
+window.addEventListener('keydown', e=>{
+  keys[e.code] = true;
+  if(['ArrowUp','ArrowDown','ArrowLeft','ArrowRight','Space'].includes(e.code)) e.preventDefault();
+  if(e.code==='KeyC') cycleCamera();
+  if(e.code==='KeyR') resetCar();
+  if(e.code==='KeyV') switchCar();
+  if(e.code==='KeyB') activateNitro();
+  if(e.code==='KeyN') toggleNightMode();
+});
+window.addEventListener('keyup', e=>{ keys[e.code] = false; });
+
+const touchInput = {forward:false, backward:false, left:false, right:false, handbrake:false};
+function bindHold(id, key){
+  const el = document.getElementById(id);
+  if(!el) return;
+  const set = v => { touchInput[key] = v; };
+  el.addEventListener('pointerdown', e=>{ e.preventDefault(); set(true); });
+  ['pointerup','pointerleave','pointercancel'].forEach(ev=> el.addEventListener(ev, ()=>set(false)) );
+}
+bindHold('btn-gas','forward');
+bindHold('btn-brake','backward');
+bindHold('btn-left','left');
+bindHold('btn-right','right');
+bindHold('btn-drift','handbrake');
+
+// One-shot tap buttons (not held) for actions that already have keyboard
+// shortcuts on desktop — phones have no keyboard, so these are the only
+// way to reach camera-cycle, reset, and car-switching on touch.
+function bindTap(id, fn){
+  const el = document.getElementById(id);
+  if(!el) return;
+  el.addEventListener('pointerdown', e=>{ e.preventDefault(); fn(); });
+}
+bindTap('btn-camera', cycleCamera);
+bindTap('btn-resetcar', resetCar);
+bindTap('btn-switchcar', switchCar);
+bindTap('btn-night', toggleNightMode);
+bindTap('btn-nitro', activateNitro);
+
+// Share button — copies a ready-to-paste caption (current run + best score)
+// to the clipboard so it's a one-tap drop into TikTok/Instagram captions.
+function buildShareText(){
+  const carName = CAR_PROFILES[currentCarIdx] ? CAR_PROFILES[currentCarIdx].name : 'Velocity';
+  const lines = [
+    `🏎️ NEON DRIFT — scored ${score} drifting the ${carName} 🔥`,
+    bestScore > score ? `Best run: ${bestScore}` : `New personal best: ${bestScore}!`,
+    `Peak streak: ${highStreak}x`,
+    `Can you beat it? #NeonDrift #DriftGame`,
+  ];
+  return lines.join('\n');
+}
+async function shareScore(){
+  const btn = document.getElementById('share-btn');
+  const text = buildShareText();
+  let copied = false;
+  try{
+    if(navigator.clipboard && navigator.clipboard.writeText){
+      await navigator.clipboard.writeText(text);
+      copied = true;
+    }
+  }catch(e){ copied = false; }
+  if(!copied){
+    // Fallback for browsers/contexts without clipboard permission: a hidden
+    // textarea + execCommand still works almost everywhere.
+    try{
+      const ta = document.createElement('textarea');
+      ta.value = text;
+      ta.style.position = 'fixed';
+      ta.style.opacity = '0';
+      document.body.appendChild(ta);
+      ta.select();
+      document.execCommand('copy');
+      document.body.removeChild(ta);
+      copied = true;
+    }catch(e){ copied = false; }
+  }
+  if(btn){
+    btn.textContent = copied ? '✅ COPIED!' : '⚠️ COPY FAILED';
+    btn.classList.toggle('copied', copied);
+    setTimeout(()=>{ btn.textContent = '📤 SHARE'; btn.classList.remove('copied'); }, 1800);
+  }
+  showToast(copied ? 'SCORE COPIED' : 'COPY FAILED');
+}
+const shareBtnEl = document.getElementById('share-btn');
+if(shareBtnEl){
+  shareBtnEl.addEventListener('pointerdown', e=>{ e.preventDefault(); shareScore(); });
+}
+
+if(IS_MOBILE){
+  document.body.classList.add('touch');
+}
+
+function getInput(){
+  return {
+    forward:  !!(keys['KeyW']||keys['ArrowUp']||touchInput.forward),
+    backward: !!(keys['KeyS']||keys['ArrowDown']||touchInput.backward),
+    left:     !!(keys['KeyA']||keys['ArrowLeft']||touchInput.left),
+    right:    !!(keys['KeyD']||keys['ArrowRight']||touchInput.right),
+    handbrake:!!(keys['ShiftLeft']||keys['ShiftRight']||keys['Space']||touchInput.handbrake),
+  };
+}
+
+// ---------------------------------------------------------------------
+// Audio (fully synthesized — no external files)
+// ---------------------------------------------------------------------
+let audioCtx=null, engineOsc1=null, engineGain1=null, engineOsc2=null, engineGain2=null;
+let engineSubOsc=null, engineSubGain=null;
+let engineNoiseSrc=null, engineNoiseGain=null, engineNoiseFilter=null;
+let engineBus=null;
+let screechOsc=null, screechGain=null, screechFilter=null;
+
+// Builds a short loopable white-noise buffer once, reused by both the
+// engine "grit" layer here and the tire-screech texture isn't needed
+// since that one's a tonal whine — this buffer is engine-exhaust specific.
+function makeNoiseBuffer(ctx){
+  const len = ctx.sampleRate*1; // 1 second, looped
+  const buf = ctx.createBuffer(1, len, ctx.sampleRate);
+  const data = buf.getChannelData(0);
+  for(let i=0;i<len;i++) data[i] = Math.random()*2-1;
+  return buf;
+}
+
+function initAudio(){
+  try{
+    audioCtx = new (window.AudioContext||window.webkitAudioContext)();
+
+    // Shared bus so overall engine volume / tone is adjustable in one
+    // place, with a gentle lowpass to take the edge off raw oscillators —
+    // this single filter is most of why this sounds like an engine instead
+    // of a buzzer.
+    engineBus = audioCtx.createGain();
+    engineBus.gain.value = 1.0;
+    const engineBusFilter = audioCtx.createBiquadFilter();
+    engineBusFilter.type = 'lowpass';
+    engineBusFilter.frequency.value = 2200;
+    engineBus.connect(engineBusFilter).connect(audioCtx.destination);
+
+    // Fundamental + first overtone — the "tonal" body of the engine note.
+    engineOsc1 = audioCtx.createOscillator(); engineOsc1.type='sawtooth';
+    engineGain1 = audioCtx.createGain(); engineGain1.gain.value=0.0;
+    engineOsc1.connect(engineGain1).connect(engineBus);
+    engineOsc1.frequency.value=55; engineOsc1.start();
+
+    engineOsc2 = audioCtx.createOscillator(); engineOsc2.type='square';
+    engineGain2 = audioCtx.createGain(); engineGain2.gain.value=0.0;
+    engineOsc2.connect(engineGain2).connect(engineBus);
+    engineOsc2.frequency.value=110; engineOsc2.start();
+
+    // Sub-bass layer — tracks throttle more than speed, giving acceleration
+    // a felt "weight" under the tonal whine rather than just a pitch rise.
+    engineSubOsc = audioCtx.createOscillator(); engineSubOsc.type='triangle';
+    engineSubGain = audioCtx.createGain(); engineSubGain.gain.value=0.0;
+    engineSubOsc.connect(engineSubGain).connect(engineBus);
+    engineSubOsc.frequency.value=38; engineSubOsc.start();
+
+    // Filtered noise — the gritty exhaust texture that's the difference
+    // between "pure tone" and "actually sounds like a motor."
+    engineNoiseSrc = audioCtx.createBufferSource();
+    engineNoiseSrc.buffer = makeNoiseBuffer(audioCtx);
+    engineNoiseSrc.loop = true;
+    engineNoiseFilter = audioCtx.createBiquadFilter();
+    engineNoiseFilter.type = 'bandpass';
+    engineNoiseFilter.frequency.value = 700;
+    engineNoiseFilter.Q.value = 0.7;
+    engineNoiseGain = audioCtx.createGain();
+    engineNoiseGain.gain.value = 0.0;
+    engineNoiseSrc.connect(engineNoiseFilter).connect(engineNoiseGain).connect(engineBus);
+    engineNoiseSrc.start();
+
+    screechOsc = audioCtx.createOscillator(); screechOsc.type='sawtooth';
+    screechFilter = audioCtx.createBiquadFilter(); screechFilter.type='bandpass'; screechFilter.frequency.value=1800; screechFilter.Q.value=4;
+    screechGain = audioCtx.createGain(); screechGain.gain.value=0.0;
+    screechOsc.connect(screechFilter).connect(screechGain).connect(audioCtx.destination);
+    screechOsc.frequency.value=1400; screechOsc.start();
+  }catch(e){ /* audio unavailable — game still works silently */ }
+}
+function updateDriftSound(driftingNow, dt){
+  if(!audioCtx || !screechGain) return;
+  const now = audioCtx.currentTime;
+  const targetGain = driftingNow ? clamp(0.05+clamp(Math.abs(car.slipSmoothed)/0.9,0,1)*0.07,0,0.12) : 0;
+  screechGain.gain.setTargetAtTime(targetGain, now, 0.08);
+  screechOsc.frequency.setTargetAtTime(1300+rand(-60,60), now, 0.1);
+}
+// Maps a 0..1 speed ratio through a gear-like stepped curve — real engines
+// climb in pitch within a gear then drop on the upshift, rather than
+// sliding smoothly from idle to top speed. Purely a sound-design touch,
+// doesn't affect actual car physics/gearing (this game has none).
+function gearStepFreq(speedRatio, baseFreq, span){
+  const gears = 4;
+  const gearSpan = 1/gears;
+  const gearIdx = Math.min(gears-1, Math.floor(speedRatio/gearSpan));
+  const withinGear = (speedRatio - gearIdx*gearSpan)/gearSpan; // 0..1 climbing within this gear
+  const gearLift = gearIdx*0.12; // each successive gear sits a bit higher overall, like real RPM bands
+  return baseFreq + span*(withinGear*0.85+gearLift);
+}
+function updateEngineSound(speedRatio, throttle){
+  if(!audioCtx) return;
+  const now = audioCtx.currentTime;
+  const sr = clamp(Math.abs(speedRatio), 0, 1.6);
+  const freq = gearStepFreq(Math.min(sr,1), 60, 260) + Math.max(0, sr-1)*120; // boosted overspeed keeps climbing past gear 4
+  engineOsc1.frequency.setTargetAtTime(freq, now, 0.05);
+  engineGain1.gain.setTargetAtTime(0.032+throttle*0.045, now, 0.1);
+  engineOsc2.frequency.setTargetAtTime(freq*1.5, now, 0.05);
+  engineGain2.gain.setTargetAtTime(0.01+throttle*0.018, now, 0.1);
+
+  // Sub-bass tracks throttle directly (not just speed) so flooring it from
+  // a stop has real weight even before speed builds up.
+  engineSubOsc.frequency.setTargetAtTime(34 + sr*22, now, 0.08);
+  engineSubGain.gain.setTargetAtTime(0.05 + throttle*0.07, now, 0.1);
+
+  // Noise grit scales with both speed and throttle, brightening (filter
+  // sweeping up) as revs climb, like exhaust note opening up.
+  engineNoiseGain.gain.setTargetAtTime(0.015 + sr*0.02 + throttle*0.012, now, 0.12);
+  engineNoiseFilter.frequency.setTargetAtTime(500 + sr*1400, now, 0.1);
+}
+function playTone(freq,duration,type,vol){
+  if(!audioCtx) return;
+  const o=audioCtx.createOscillator(); o.type=type||'sine'; o.frequency.value=freq;
+  const g=audioCtx.createGain(); g.gain.value=vol||0.2;
+  o.connect(g).connect(audioCtx.destination);
+  o.start();
+  g.gain.exponentialRampToValueAtTime(0.0001, audioCtx.currentTime+duration);
+  o.stop(audioCtx.currentTime+duration+0.03);
+}
+function playThud(){ playTone(85,0.25,'square',0.3); }
+function triggerImpact(){
+  car.shakeTime = 0.3;
+  if(car.thudCooldown<=0){
+    playThud();
+    car.thudCooldown = 0.22;
+  }
+}
+function playPickup(){ playTone(880,0.1,'sine',0.22); setTimeout(()=>playTone(1320,0.12,'sine',0.18),55); }
+function playBoost(){ playTone(180,0.45,'sawtooth',0.22); }
+
+// Manual nitro activation — spends the full charge meter in one go and
+// triggers the exact same boostTimer the ground pads use, so all the
+// existing boost visuals (gauge color, exhaust flames, underglow) just work.
+function activateNitro(){
+  if(car.nitroCharge < 1 || car.boostTimer > 0.2) return;
+  car.boostTimer = 2.2;
+  car.nitroCharge = 0;
+  playBoost();
+  showToast('NITRO!');
+  spawnNitroBurst(car.x, car.y+0.5, car.z);
+}
+
+// ---------------------------------------------------------------------
+// Car physics state
+// ---------------------------------------------------------------------
+const car = {
+  x:0, z:0, y:0, heading:0,
+  speed:0, vx:0, vz:0,
+  boostTimer:0,
+  nitroCharge:0,    // 0..1 manual-boost meter; fills passively and faster while drifting, spent in one go on activation
+  shakeTime:0,
+  thudCooldown:0,
+  bustImmunity:0,   // brief grace window after a bust so overlapping police units can't all hit at once
+  trafficImmunity:0, // same idea for traffic sideswipes, so one pass through a cluster isn't 5 separate dings
+  slipAngle:0,      // signed angle between heading and actual velocity direction
+  slipSmoothed:0,   // smoothed for visuals so it doesn't pop
+  isDrifting:false,
+  driftTime:0,
+  driftScore:0,
+  driftCombo:1,      // current score multiplier; grows the longer you chain drifts
+  comboChainTimer:0, // seconds left to start drifting again before the combo resets
+  chainCount:0,      // number of distinct drift segments banked into the current chain
+  wasDrifting:false, // edge-detect helper for counting chain segments
+  streak:0,          // builds while drifting at speed; independent of the chain window, decays slower
+  streakTimer:0,     // grace period before streak starts decaying once you're not drifting-at-speed
+};
+let currentCarIdx = 0;
+let unlockedCars = [0];
+const PARAMS = {
+  maxSpeed: 46, reverseMax: 20,
+  accel: 30, reverseAccel: 18, brakeDecel: 55, friction: 16,
+  baseTurn: 2.5, latGripBase:5.2, latGripDrift:1.7,
+};
+function applyCarProfile(idx){
+  const p = CAR_PROFILES[idx];
+  Object.assign(PARAMS, {
+    maxSpeed:p.maxSpeed, reverseMax:p.reverseMax, accel:p.accel, reverseAccel:p.reverseAccel,
+    brakeDecel:p.brakeDecel, friction:p.friction, baseTurn:p.baseTurn,
+    latGripBase:p.latGripBase, latGripDrift:p.latGripDrift,
+  });
+}
+
+function resetCar(){
+  const newGhost = finalizeRun();
+  car.x=0; car.z=0; car.heading=0; car.speed=0; car.vx=0; car.vz=0; car.boostTimer=0;
+  car.slipAngle=0; car.slipSmoothed=0; car.isDrifting=false; car.driftTime=0; car.driftCombo=1;
+  car.comboChainTimer=0; car.chainCount=0; car.wasDrifting=false;
+  car.streak=0; car.streakTimer=0;
+  car.shakeTime=0; car.thudCooldown=0; car.bustImmunity=0; car.trafficImmunity=0;
+  startNewRun();
+  showToast(newGhost ? 'RESET — NEW GHOST RECORDED!' : 'RESET');
+}
+
+function resolveBuildingCollisions(){
+  const r = 1.5;
+  for(let i=0;i<buildingBoxes.length;i++){
+    const b = buildingBoxes[i];
+    if(car.x > b.minX-r && car.x < b.maxX+r && car.z > b.minZ-r && car.z < b.maxZ+r){
+      const overlapLeft   = car.x-(b.minX-r);
+      const overlapRight  = (b.maxX+r)-car.x;
+      const overlapTop    = car.z-(b.minZ-r);
+      const overlapBottom = (b.maxZ+r)-car.z;
+      const m = Math.min(overlapLeft, overlapRight, overlapTop, overlapBottom);
+      if(m===overlapLeft) car.x = b.minX-r;
+      else if(m===overlapRight) car.x = b.maxX+r;
+      else if(m===overlapTop) car.z = b.minZ-r;
+      else car.z = b.maxZ+r;
+      car.speed *= -0.32;
+      car.vx *= 0.25; car.vz *= 0.25;
+      triggerImpact();
+    }
+  }
+}
+
+function resolveTreeCollisions(){
+  const carR = 1.4;
+  for(let i=0;i<treeColliders.length;i++){
+    const t = treeColliders[i];
+    const dx = car.x-t.x, dz = car.z-t.z;
+    const minDist = carR + t.radius;
+    const distSq = dx*dx+dz*dz;
+    if(distSq < minDist*minDist && distSq > 0.0001){
+      const dist = Math.sqrt(distSq);
+      const push = (minDist-dist);
+      const nx = dx/dist, nz = dz/dist;
+      car.x += nx*push;
+      car.z += nz*push;
+      car.speed *= -0.32;
+      car.vx *= 0.25; car.vz *= 0.25;
+      triggerImpact();
+    }
+  }
+}
+
+function updateCollectibles(dt, now){
+  for(const c of collectibles){
+    if(c.collected){
+      if(now >= c.respawnAt){
+        const [x,z] = randomOrbSpot();
+        const h = groundHeight(x,z);
+        c.mesh.position.set(x,h+2.6,z);
+        c.baseY = h+2.6;
+        c.collected = false;
+        c.mesh.scale.set(1,1,1);
+        c.mesh.visible = true;
+      }
+      continue;
+    }
+    c.mesh.rotation.y += dt*1.8;
+    c.mesh.position.y = c.baseY + Math.sin(now*2 + c.mesh.position.x)*0.4;
+    const dx = c.mesh.position.x-car.x, dz = c.mesh.position.z-car.z;
+    if(dx*dx+dz*dz < 16){
+      c.collected = true;
+      c.mesh.visible = false;
+      c.respawnAt = now + 5;
+      score++;
+      refreshScoreHUD();
+      playPickup();
+      showToast('+1 ORB');
+    }
+  }
+}
+
+function updateBoostPads(dt, now){
+  for(const p of boostPads){
+    const dx = p.x-car.x, dz = p.z-car.z;
+    if(dx*dx+dz*dz < p.radius*p.radius && p.flash<=0 && car.boostTimer<=0.2){
+      car.boostTimer = 2.2;
+      p.flash = 0.6;
+      playBoost();
+      showToast('BOOST!');
+      spawnNitroBurst(car.x, car.y+0.5, car.z);
+    }
+    if(p.flash>0){ p.flash -= dt; }
+    const s = 1 + Math.max(0,p.flash)*1.6;
+    p.mesh.scale.set(s,1,s);
+    p.mesh.rotation.z += dt*1.5;
+    p.mesh.material.opacity = 0.6 + Math.sin(now*4)*0.2 + Math.max(0,p.flash);
+  }
+}
+
+let score = 0;
+const HIGH_SCORE_KEY = 'neonDrift.highScore';
+let bestScore = 0;
+try{ bestScore = parseInt(localStorage.getItem(HIGH_SCORE_KEY), 10) || 0; }catch(e){ bestScore = 0; }
+
+const HIGH_STREAK_KEY = 'neonDrift.highStreak';
+let highStreak = 0;
+try{ highStreak = parseInt(localStorage.getItem(HIGH_STREAK_KEY), 10) || 0; }catch(e){ highStreak = 0; }
+
+// ---------------------------------------------------------------------
+// Ghost replay — records the player's path during each run (the window
+// between one resetCar() and the next, since that's the only well-defined
+// "run boundary" this open-world game has, and resetCar always returns to
+// the same spawn point/heading). If a run earns more score than the best
+// one on file, its recording replaces the saved ghost. A translucent car
+// then plays back the saved ghost on a loop so there's always something
+// to race against once one full run has completed.
+// ---------------------------------------------------------------------
+const GHOST_KEY = 'neonDrift.bestGhost';
+const GHOST_SAMPLE_INTERVAL = 0.1;  // seconds between recorded samples
+const GHOST_MAX_DURATION = 90;      // cap so storage/memory can't grow unbounded
+let ghostBest = null;     // {value, samples:[{t,x,z,heading}]} loaded from storage, or null if none yet
+try{
+  const raw = localStorage.getItem(GHOST_KEY);
+  if(raw) ghostBest = JSON.parse(raw);
+}catch(e){ ghostBest = null; }
+
+let ghostRecording = [];   // samples for the run currently in progress
+let ghostRecordTimer = 0;
+let runStartScore = score; // score at the moment the current run began
+let ghostPlaybackT = 0;    // elapsed time into the ghost's looped playback
+
+function startNewRun(){
+  ghostRecording = [];
+  ghostRecordTimer = 0;
+  runStartScore = score;
+}
+
+function recordGhostFrame(dt, now){
+  ghostRecordTimer -= dt;
+  if(ghostRecordTimer > 0) return;
+  ghostRecordTimer = GHOST_SAMPLE_INTERVAL;
+  if(ghostRecording.length > 0 && ghostRecording[ghostRecording.length-1].t > GHOST_MAX_DURATION) return;
+  const t = ghostRecording.length>0 ? ghostRecording[ghostRecording.length-1].t + GHOST_SAMPLE_INTERVAL : 0;
+  ghostRecording.push({t, x:Math.round(car.x*10)/10, z:Math.round(car.z*10)/10, heading:Math.round(car.heading*100)/100});
+}
+
+// Called whenever a run ends (currently: only resetCar, since that's the
+// sole run-boundary event). Banks the just-finished run's recording as
+// the new best ghost if it out-scored whatever was saved before. Returns
+// true if a new ghost was recorded, so the caller can fold that into
+// whatever toast it's already about to show instead of the two messages
+// clobbering each other.
+function finalizeRun(){
+  const runValue = score - runStartScore;
+  if(runValue > 0 && ghostRecording.length > 4 && (!ghostBest || runValue > ghostBest.value)){
+    ghostBest = {value: runValue, samples: ghostRecording};
+    try{ localStorage.setItem(GHOST_KEY, JSON.stringify(ghostBest)); }catch(e){ /* storage unavailable or full — ghost just won't persist */ }
+    return true;
+  }
+  return false;
+}
+
+// Translucent playback car for the best saved ghost. Built lazily at
+// game start rather than at module load, purely so it doesn't add to
+// the title-screen's initial scene setup cost; stays hidden until
+// there's an actual ghost on file to show.
+// Ghost car is also built at module load (zero runtime cost at spawn).
+const ghostCarParts = (()=>{
+  const parts = buildCar({paintColor:0x00f0ff, castShadows:false});
+  parts.group.traverse(obj=>{
+    if(obj.isMesh && obj.material){
+      const mats = Array.isArray(obj.material) ? obj.material : [obj.material];
+      for(const m of mats){ m.transparent=true; m.opacity=0.38; m.depthWrite=false; }
+    }
+  });
+  parts.group.visible = false;
+  scene.add(parts.group);
+  return parts;
+})();
+function initGhostCar(){ /* already built above — no-op kept for call-site compatibility */ }
+
+// Interpolates the ghost's position/heading from the saved sample array
+// based on elapsed loop time, and loops back to the start once the
+// recording runs out. Does nothing if no ghost has been recorded yet.
+function updateGhostPlayback(dt){
+  if(!ghostCarParts || !ghostBest || !ghostBest.samples || ghostBest.samples.length < 2){
+    if(ghostCarParts) ghostCarParts.group.visible = false;
+    return;
+  }
+  const samples = ghostBest.samples;
+  const duration = samples[samples.length-1].t;
+  if(duration <= 0) return;
+
+  ghostPlaybackT += dt;
+  if(ghostPlaybackT > duration) ghostPlaybackT -= duration; // loop
+
+  // A plain linear scan from the start is plenty fast here — at most a
+  // few hundred samples for a 90s run — so there's no need to remember
+  // last frame's index or binary-search for it.
+  let i = 0;
+  for(; i < samples.length-1; i++){
+    if(samples[i+1].t >= ghostPlaybackT) break;
+  }
+  const a = samples[i], b = samples[Math.min(i+1, samples.length-1)];
+  const span = Math.max(0.0001, b.t - a.t);
+  const frac = clamp((ghostPlaybackT - a.t)/span, 0, 1);
+  const x = lerp(a.x, b.x, frac);
+  const z = lerp(a.z, b.z, frac);
+  // Headings wrap around ±π, so interpolate via the shortest angular path
+  // rather than a plain numeric lerp (which would spin the wrong way
+  // whenever a turn crosses the wrap point).
+  let dh = b.heading - a.heading;
+  while(dh > Math.PI) dh -= Math.PI*2;
+  while(dh < -Math.PI) dh += Math.PI*2;
+  const heading = a.heading + dh*frac;
+
+  const h = groundHeight(x,z);
+  ghostCarParts.group.position.set(x, h+0.05, z);
+  ghostCarParts.group.rotation.y = heading;
+  ghostCarParts.group.visible = true;
+}
+
+const carDotsEl = document.getElementById('car-dots');
+let prevUnlockedCount = 1;
+
+// Single place that keeps the score HUD and the persisted high score in
+// sync — every score mutation should call this instead of touching the
+// DOM directly, so a new best is never missed.
+function refreshScoreHUD(){
+  const el = document.getElementById('score-value');
+  if(el) el.textContent = score;
+  if(score > bestScore){
+    bestScore = score;
+    try{ localStorage.setItem(HIGH_SCORE_KEY, String(bestScore)); }catch(e){ /* storage unavailable — best score just won't persist */ }
+  }
+  const bestEl = document.getElementById('best-score-value');
+  if(bestEl) bestEl.textContent = bestScore;
+  renderCarRoster();
+}
+refreshScoreHUD();
+
+function updateCar(dt, input){
+  const boosted = car.boostTimer > 0;
+  if(boosted) car.boostTimer -= dt;
+  const maxFwd = PARAMS.maxSpeed * (boosted?1.55:1);
+  const accel  = PARAMS.accel * (boosted?1.4:1);
+
+  if(input.forward){
+    car.speed += accel*dt;
+  } else if(input.backward){
+    if(car.speed > 0.4) car.speed -= PARAMS.brakeDecel*dt;
+    else car.speed -= PARAMS.reverseAccel*dt;
+  } else {
+    if(Math.abs(car.speed) < PARAMS.friction*dt) car.speed = 0;
+    else car.speed -= Math.sign(car.speed)*PARAMS.friction*dt;
+  }
+  car.speed = clamp(car.speed, -PARAMS.reverseMax, maxFwd);
+
+  let steer = 0;
+  if(input.left) steer += 1;
+  if(input.right) steer -= 1;
+  const speedFactor = clamp(0.3+Math.abs(car.speed)/16, 0.3, 1);
+  // Handbrake loosens the rear and lets the front bite harder into the turn —
+  // this is what lets the car rotate past its velocity vector instead of just
+  // tracing a tighter circle.
+  const turnRate = PARAMS.baseTurn * speedFactor * (input.handbrake?1.55:1);
+  const dirSign = car.speed < 0 ? -1 : 1;
+  car.heading += steer*turnRate*dt*dirSign;
+
+  // ---- Slip-angle lateral physics -------------------------------------
+  // Decompose current velocity into a forward (heading-aligned) component
+  // and a lateral (sideways) component. Forward grip recovers fast (tires
+  // roll), lateral grip recovers slowly unless the handbrake is held, in
+  // which case it's deliberately loosened so the rear end steps out.
+  const fx = Math.sin(car.heading), fz = Math.cos(car.heading);
+  const rx = fz, rz = -fx; // right-vector, perpendicular to heading
+
+  const curSpeed2D = Math.hypot(car.vx, car.vz);
+  const fwdVel = car.vx*fx + car.vz*fz;     // signed speed along heading
+  const latVel = car.vx*rx + car.vz*rz;     // signed sideways speed
+
+  const speedRatio01 = clamp(curSpeed2D/PARAMS.maxSpeed, 0, 1.4);
+  // Engine/road grip on the longitudinal axis — let target speed catch up.
+  const targetFwd = car.speed;
+  const fwdGrip = 9.0;
+  const newFwdVel = lerp(fwdVel, targetFwd, clamp(fwdGrip*dt,0,1));
+
+  // Lateral grip: low baseline so a sharp turn at speed naturally breaks
+  // traction a little (that's what makes the car feel alive), dropping
+  // hard under handbrake so the rear genuinely slides, and a counter-steer
+  // term so steering into the slide can catch it, like a real car.
+  const steerInputLat = -steer*curSpeed2D*0.55; // steering tries to redirect lateral vel
+  const baseLatGrip = (input.handbrake ? PARAMS.latGripDrift : PARAMS.latGripBase) * currentGripMultiplier();
+  const latGrip = baseLatGrip + Math.abs(steer)*1.1;
+  const newLatVel = lerp(latVel, steerInputLat*0.18, clamp(latGrip*dt,0,1));
+
+  car.vx = newFwdVel*fx + newLatVel*rx;
+  car.vz = newFwdVel*fz + newLatVel*rz;
+
+  // Slip angle: angle between where the car is pointed and where it's
+  // actually travelling. This drives smoke, drift scoring and camera kick.
+  const rawSlip = Math.atan2(newLatVel, Math.max(Math.abs(newFwdVel),0.6));
+  car.slipAngle = rawSlip;
+  car.slipSmoothed = lerp(car.slipSmoothed, rawSlip, clamp(dt*10,0,1));
+
+  const slipDeg = Math.abs(car.slipAngle)*57.2958;
+  const driftingNow = slipDeg > 9 && curSpeed2D > 6;
+  car.isDrifting = driftingNow;
+  const COMBO_CHAIN_WINDOW = 1.4; // seconds you have to start drifting again before the combo banks
+  const MAX_COMBO = 4;
+  if(driftingNow){
+    if(!car.wasDrifting) car.chainCount++; // a new segment started within the chain window
+    car.driftTime += dt;
+    car.driftScore += (slipDeg*0.06 + curSpeed2D*0.05) * dt * 10;
+    // The longer a single drift runs, the higher the multiplier climbs —
+    // this rewards committing to a long slide, not just tapping in and out.
+    car.driftCombo = Math.min(MAX_COMBO, car.driftCombo + dt*0.18);
+    car.comboChainTimer = COMBO_CHAIN_WINDOW; // keep the chain window topped up
+  } else if(car.comboChainTimer > 0){
+    // Grace period: the combo survives briefly between drifts (catching a
+    // slide, lining up the next corner) so a skilled chain of drifts keeps
+    // building instead of resetting on every tiny gap.
+    car.comboChainTimer -= dt;
+    if(car.comboChainTimer <= 0){
+      bankDriftCombo();
+    }
+  } else if(car.driftTime>0){
+    car.driftTime = 0;
+  }
+  car.wasDrifting = driftingNow;
+  updateStreak(dt, driftingNow, curSpeed2D);
+
+  // Nitro charges passively while moving at speed, and noticeably faster
+  // while drifting — gives drifting a second reason to matter beyond
+  // score, and means skilled play earns boosts rather than just waiting.
+  if(!boosted){
+    const chargeRate = driftingNow ? 0.16 : (curSpeed2D > 8 ? 0.045 : 0);
+    car.nitroCharge = Math.min(1, car.nitroCharge + chargeRate*dt);
+  }
+
+  car.x += car.vx*dt;
+  car.z += car.vz*dt;
+
+  resolveBuildingCollisions();
+  resolveTreeCollisions();
+
+  const dist = Math.hypot(car.x, car.z);
+  if(dist > WORLD_LIMIT){
+    const ang = Math.atan2(car.x, car.z);
+    car.x = Math.sin(ang)*WORLD_LIMIT;
+    car.z = Math.cos(ang)*WORLD_LIMIT;
+    // Hard boundary — the world edge stops the car like a wall rather than
+    // just slowing it down, matching how buildings/trees feel.
+    car.speed *= -0.32;
+    car.vx *= 0.2; car.vz *= 0.2;
+    triggerImpact();
+  }
+
+  const targetY = groundHeight(car.x, car.z);
+  // Track the ground height fast enough that the car can't visibly sink
+  // below the road/terrain when it changes quickly (e.g. crossing from the
+  // flat city onto the rolling outer terrain at speed, or after a big
+  // frame-time spike on a slower device). A small amount of smoothing is
+  // kept so it doesn't look robotic on the tiny bump-map noise, but the
+  // result is hard-clamped so it can never end up below the true surface.
+  car.y = lerp(car.y, targetY, clamp(dt*18,0,1));
+  if(car.y < targetY) car.y = targetY;
+
+  const sd = 2.2;
+  const hF = groundHeight(car.x+fx*sd, car.z+fz*sd);
+  const hB = groundHeight(car.x-fx*sd, car.z-fz*sd);
+  const pitch = Math.atan2(hB-hF, sd*2);
+  const hR = groundHeight(car.x+rx*sd, car.z+rz*sd);
+  const hL = groundHeight(car.x-rx*sd, car.z-rz*sd);
+  const slopeRoll = Math.atan2(hL-hR, sd*2);
+  // Visual lean now driven by actual slip angle rather than just steer input,
+  // so the body roll matches what the tires are really doing.
+  const driftLean = clamp(-car.slipSmoothed*0.5, -0.22, 0.22);
+
+  carParts.group.position.set(car.x, car.y+0.05, car.z);
+  carParts.group.rotation.y = car.heading;
+  carParts.group.rotation.x = lerp(carParts.group.rotation.x, pitch, 0.2);
+  carParts.group.rotation.z = lerp(carParts.group.rotation.z, slopeRoll+driftLean, 0.2);
+
+  const wheelRadius = 0.46;
+  const spinSpeed = car.speed/wheelRadius;
+  carParts.wheels.forEach(w=>{
+    w.spin += spinSpeed*dt;
+    w.mesh.rotation.x = w.spin;
+    w.pivot.rotation.y = w.front ? steer*0.5 : 0;
+  });
+
+  const braking = input.backward && car.speed>0.4;
+  carParts.tailL.material.color.setHex(braking?0xffffff:0xff2e6a);
+  carParts.tailR.material.color.setHex(braking?0xffffff:0xff2e6a);
+  carParts.underglow.material.color.setHex(boosted?0xffb347:0x00d9ff);
+  carParts.underglow.material.opacity = boosted?0.75:0.4;
+
+  if(car.shakeTime>0) car.shakeTime -= dt;
+  if(car.thudCooldown>0) car.thudCooldown -= dt;
+  if(car.bustImmunity>0) car.bustImmunity -= dt;
+  if(car.trafficImmunity>0) car.trafficImmunity -= dt;
+
+  updateTireFX(dt, driftingNow, curSpeed2D);
+
+  return {boosted, driftingNow, slipDeg};
+}
+
+// ---------------------------------------------------------------------
+// Camera
+// ---------------------------------------------------------------------
+const camModes = ['chase','close','hood'];
+let camModeIdx = 0;
+function cycleCamera(){ camModeIdx = (camModeIdx+1)%camModes.length; showToast(camModes[camModeIdx].toUpperCase()+' CAM'); }
+
+function refreshUnlockedCars(){
+  unlockedCars = CAR_PROFILES
+    .map((p,i)=>({p,i}))
+    .filter(({p})=> score >= p.unlockOrbs)
+    .map(({i})=>i);
+}
+
+// Car dots — 5 tiny colored circles in the score panel. Much cheaper
+// than rebuilding a full panel of DOM slots on every score change.
+function renderCarRoster(){
+  if(!carDotsEl) return;
+  refreshUnlockedCars();
+  const freshlyUnlocked = unlockedCars.length > prevUnlockedCount;
+  if(freshlyUnlocked) showToast('CAR UNLOCKED!');
+  carDotsEl.innerHTML = '';
+  CAR_PROFILES.forEach((p,i)=>{
+    const unlocked = score >= p.unlockOrbs;
+    const dot = document.createElement('div');
+    const hex = '#'+p.color.toString(16).padStart(6,'0');
+    dot.className = 'cdot' + (unlocked?' unlocked':'') + (i===currentCarIdx?' active':'');
+    dot.style.background = hex;
+    dot.style.color = hex;
+    carDotsEl.appendChild(dot);
+  });
+  prevUnlockedCount = unlockedCars.length;
+}
+
+function switchToCarIdx(idx){
+  currentCarIdx = idx;
+  const profile = CAR_PROFILES[currentCarIdx];
+  const prevPos = carParts.group.position.clone();
+  const prevRot = carParts.group.rotation.y;
+  scene.remove(carParts.group);
+  carParts = buildCar({paintColor:profile.color, nepalFlag:!!profile.isNepalCar, dynamicHeadlights:true});
+  carParts.group.position.copy(prevPos);
+  carParts.group.rotation.y = prevRot;
+  scene.add(carParts.group);
+  rebindExhaustFlames();
+  applyCarProfile(currentCarIdx);
+  document.getElementById('car-name-label').textContent = profile.name.toUpperCase();
+  showToast(profile.name.toUpperCase());
+  renderCarRoster();
+}
+
+function switchCar(){
+  refreshUnlockedCars();
+  if(unlockedCars.length<=1){
+    const next = CAR_PROFILES.find(p=>p.unlockOrbs>score);
+    if(next) showToast(`LOCKED — ${next.unlockOrbs} ORBS NEEDED`);
+    return;
+  }
+  const pos = unlockedCars.indexOf(currentCarIdx);
+  const nextIdx = unlockedCars[(pos+1)%unlockedCars.length];
+  switchToCarIdx(nextIdx);
+}
+
+const _fwd = new THREE.Vector3();
+const _right = new THREE.Vector3();
+const _carPos = new THREE.Vector3();
+const _desired = new THREE.Vector3();
+const _look = new THREE.Vector3();
+
+function updateCamera(dt){
+  const mode = camModes[camModeIdx];
+  _fwd.set(Math.sin(car.heading),0,Math.cos(car.heading));
+  _carPos.set(car.x, car.y+0.6, car.z);
+
+  if(mode==='hood'){
+    _desired.copy(_carPos).addScaledVector(_fwd,1.7); _desired.y += 0.95;
+    _look.copy(_desired).addScaledVector(_fwd,12);
+    camera.position.lerp(_desired, 0.45);
+  } else {
+    const cfg = mode==='close' ? {d:5.5,h:2.5,la:1.5} : {d:9.5,h:4.0,la:2.2};
+    // While drifting, ease the camera out and around the slide a touch so
+    // the player can see where the car is actually heading, not just where
+    // it's pointed — the classic arcade "drift cam" swing.
+    const slideKick = clamp(car.slipSmoothed*4.5, -2.4, 2.4);
+    _right.set(Math.cos(car.heading),0,-Math.sin(car.heading));
+    _desired.copy(_carPos).addScaledVector(_fwd,-cfg.d).addScaledVector(_right, slideKick*0.5);
+    _desired.y += cfg.h;
+    _look.copy(_carPos).addScaledVector(_fwd,cfg.la).addScaledVector(_right, -slideKick*0.8);
+    const t = 1-Math.pow(0.0008, dt);
+    camera.position.lerp(_desired, t);
+  }
+
+  if(car.shakeTime>0){
+    camera.position.x += rand(-0.12,0.12);
+    camera.position.y += rand(-0.08,0.08);
+  }
+
+  camera.lookAt(_look);
+  const speedRatio = clamp(Math.abs(car.speed)/PARAMS.maxSpeed,0,1.6);
+  const driftKick = car.isDrifting ? 5 : 0;
+  camera.fov = lerp(camera.fov, 60+speedRatio*12+driftKick, 0.08);
+  camera.updateProjectionMatrix();
+}
+
+// ---------------------------------------------------------------------
+// HUD + minimap
+// ---------------------------------------------------------------------
+const speedValueEl = document.getElementById('speed-value');
+const speedFillEl  = document.getElementById('speed-bar-fill');
+const boostBarFillEl = document.getElementById('boost-bar-fill');
+const nitroBarFillEl = document.getElementById('nitro-bar-fill');
+const driftBarTrackEl = document.getElementById('drift-bar-track');
+const driftMeterFillEl  = document.getElementById('drift-meter-fill');
+const comboMultEl = document.getElementById('combo-mult');
+const btnNitroEl = document.getElementById('btn-nitro');
+const gearEl       = document.getElementById('gear');
+const toastEl      = document.getElementById('toast');
+let toastTimer = null;
+function showToast(text){
+  toastEl.textContent = text;
+  toastEl.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(()=>toastEl.classList.remove('show'), 1300);
+}
+
+function updateHUD(){
+  const kph = Math.round(Math.abs(car.speed)*3.4);
+  speedValueEl.textContent = kph;
+  const sr = clamp(Math.abs(car.speed)/PARAMS.maxSpeed,0,1);
+  speedFillEl.style.width = sr*100+'%';
+  speedFillEl.style.background = sr>0.8
+    ? 'linear-gradient(90deg,var(--cyan),var(--magenta))'
+    : 'linear-gradient(90deg,var(--cyan),rgba(0,210,230,0.9))';
+  gearEl.textContent = car.speed < -0.2 ? 'R' : 'D';
+  if(boostBarFillEl){
+    const bf = car.boostTimer>0 ? clamp(car.boostTimer/2.2,0,1) : 0;
+    boostBarFillEl.style.width = bf*100+'%';
+    boostBarFillEl.style.opacity = bf>0 ? '1' : '0';
+  }
+  if(nitroBarFillEl){
+    nitroBarFillEl.style.width = clamp(car.nitroCharge,0,1)*100+'%';
+    if(btnNitroEl) btnNitroEl.classList.toggle('ready', car.nitroCharge>=1 && car.boostTimer<=0.2);
+  }
+  if(driftBarTrackEl){
+    const drifting = car.isDrifting || car.comboChainTimer>0;
+    driftBarTrackEl.style.opacity = drifting ? '1' : '0';
+    driftMeterFillEl.style.width = clamp(car.driftScore/120,0,1)*100+'%';
+  }
+  if(comboMultEl){
+    if(car.driftCombo>1.05){ comboMultEl.textContent='×'+car.driftCombo.toFixed(1); comboMultEl.style.opacity=1; }
+    else { comboMultEl.style.opacity=0; }
+  }
+}
+
+// ---------------------------------------------------------------------
+// Speed-line FX overlay — radial streaks from screen edges that intensify
+// with speed/boost, plus a soft chromatic vignette punch on drift.
+// ---------------------------------------------------------------------
+const fxCanvas = document.getElementById('fx-canvas');
+const fctx = fxCanvas.getContext('2d');
+let fxLines = [];
+function resizeFx(){
+  fxCanvas.width = window.innerWidth;
+  fxCanvas.height = window.innerHeight;
+}
+resizeFx();
+window.addEventListener('resize', resizeFx);
+function initFxLines(){
+  fxLines = [];
+  for(let i=0;i<46;i++){
+    fxLines.push({a:rand(0,Math.PI*2), r0:rand(0.08,0.3), len:rand(0.12,0.32), speed:rand(0.7,1.4)});
+  }
+}
+initFxLines();
+function updateSpeedLines(dt){
+  const w = fxCanvas.width, h = fxCanvas.height;
+  fctx.clearRect(0,0,w,h);
+  const speedRatio = clamp(Math.abs(car.speed)/PARAMS.maxSpeed, 0, 1.6);
+  const boosted = car.boostTimer>0;
+  const intensity = clamp((speedRatio-0.45)/0.7, 0, 1) * (boosted?1:0.8) + (boosted?0.35:0);
+  if(intensity > 0.02){
+    const cx = w/2, cy = h/2;
+    const maxR = Math.hypot(cx,cy);
+    fctx.lineCap = 'round';
+    for(const L of fxLines){
+      L.a += dt*0.02;
+      const r0 = (L.r0 + (clock.elapsedTime*L.speed*0.18)%0.5) % 0.9;
+      const r1 = Math.min(r0+L.len, 0.96);
+      const x0 = cx+Math.cos(L.a)*r0*maxR, y0 = cy+Math.sin(L.a)*r0*maxR;
+      const x1 = cx+Math.cos(L.a)*r1*maxR, y1 = cy+Math.sin(L.a)*r1*maxR;
+      const grad = fctx.createLinearGradient(x0,y0,x1,y1);
+      const alpha = intensity*0.5;
+      grad.addColorStop(0, `rgba(180,230,255,0)`);
+      grad.addColorStop(1, `rgba(180,230,255,${alpha})`);
+      fctx.strokeStyle = grad;
+      fctx.lineWidth = 1.2+intensity*1.6;
+      fctx.beginPath(); fctx.moveTo(x0,y0); fctx.lineTo(x1,y1); fctx.stroke();
+    }
+  }
+  // Drift vignette: warm magenta/amber glow creeping in from the edges while
+  // sliding, reinforcing the "on the edge of control" feeling.
+  if(car.isDrifting){
+    const dIntensity = clamp(Math.abs(car.slipSmoothed)/0.9,0,1)*0.4;
+    const grad = fctx.createRadialGradient(w/2,h/2, Math.min(w,h)*0.32, w/2,h/2, Math.max(w,h)*0.62);
+    grad.addColorStop(0,'rgba(255,46,146,0)');
+    grad.addColorStop(1,`rgba(255,150,60,${dIntensity})`);
+    fctx.fillStyle = grad;
+    fctx.fillRect(0,0,w,h);
+  }
+}
+// Minimap canvas setup
+const mmCanvas = document.getElementById('minimap');
+const mctx = mmCanvas.getContext('2d');
+const MM_SIZE = 148;
+const MM_RANGE = 620;
+const compassEl = document.getElementById('compass');
+
+function drawMinimap(){
+  mctx.save();
+  mctx.clearRect(0,0,MM_SIZE,MM_SIZE);
+  mctx.fillStyle = 'rgba(10,6,20,0.92)';
+  mctx.fillRect(0,0,MM_SIZE,MM_SIZE);
+
+  const cx = MM_SIZE/2, cy = MM_SIZE/2;
+  const mapR = MM_SIZE/2-6;
+  // Circular clip so nothing spills past the round bezel.
+  mctx.beginPath(); mctx.arc(cx,cy,MM_SIZE/2-1,0,Math.PI*2); mctx.clip();
+
+  const scale = mapR/MM_RANGE;
+  const toMM = (x,z)=>[cx + (x-car.x)*scale, cy + (z-car.z)*scale];
+
+  // Range rings — fixed, concentric, centered on the player.
+  mctx.strokeStyle = 'rgba(0,240,255,0.15)'; mctx.lineWidth = 1;
+  for(const r of [0.33,0.66,1]){
+    mctx.beginPath(); mctx.arc(cx, cy, mapR*r, 0, Math.PI*2);
+    mctx.stroke();
+  }
+  // Faint cross-hairs through the player's position read as "north/east/
+  // south/west from here" at a glance, reinforcing the fixed-north frame.
+  mctx.strokeStyle = 'rgba(0,240,255,0.1)';
+  mctx.beginPath(); mctx.moveTo(cx,cy-mapR); mctx.lineTo(cx,cy+mapR);
+  mctx.moveTo(cx-mapR,cy); mctx.lineTo(cx+mapR,cy); mctx.stroke();
+
+  // City boundary + buildings, fixed world-space (no rotation — north
+  // always points up on this map, which is what makes it easy to read
+  // at a glance while driving instead of having to mentally re-orient
+  // every time you turn).
+  mctx.strokeStyle = 'rgba(0,240,255,0.45)'; mctx.lineWidth = 1;
+  const half = CITY_SIZE/2;
+  const [rx,rz] = toMM(-half,-half);
+  mctx.strokeRect(rx,rz, CITY_SIZE*scale, CITY_SIZE*scale);
+
+  mctx.fillStyle = 'rgba(255,46,146,0.5)';
+  mctx.strokeStyle = 'rgba(255,46,146,0.8)'; mctx.lineWidth = 0.6;
+  for(const b of buildingBoxes){
+    const [bx,bz] = toMM(b.minX,b.minZ);
+    const w = (b.maxX-b.minX)*scale, h = (b.maxZ-b.minZ)*scale;
+    if(bx+w<0||bx>MM_SIZE||bz+h<0||bz>MM_SIZE) continue;
+    mctx.fillRect(bx,bz,w,h);
+    mctx.strokeRect(bx,bz,w,h);
+  }
+
+  const pulse = 0.7 + Math.sin(clock.elapsedTime*4)*0.3;
+
+  mctx.fillStyle = '#00f0ff';
+  for(const p of boostPads){
+    const [px,pz] = toMM(p.x,p.z);
+    if(px<-4||px>MM_SIZE+4||pz<-4||pz>MM_SIZE+4) continue;
+    mctx.beginPath(); mctx.arc(px,pz,2.6,0,Math.PI*2); mctx.fill();
+  }
+
+  mctx.fillStyle = '#ffe066';
+  for(const c of collectibles){
+    if(c.collected) continue;
+    const [px,pz] = toMM(c.mesh.position.x, c.mesh.position.z);
+    if(px<-4||px>MM_SIZE+4||pz<-4||pz>MM_SIZE+4) continue;
+    const r = 2.2*pulse;
+    mctx.beginPath(); mctx.arc(px,pz,r,0,Math.PI*2); mctx.fill();
+  }
+
+  mctx.fillStyle = 'rgba(180,185,200,0.8)';
+  for(const unit of traffic){
+    const [px,pz] = toMM(unit.x, unit.z);
+    if(px<-4||px>MM_SIZE+4||pz<-4||pz>MM_SIZE+4) continue;
+    mctx.beginPath(); mctx.arc(px,pz,1.8,0,Math.PI*2); mctx.fill();
+  }
+
+  if(ghostCarParts && ghostCarParts.group.visible){
+    const [px,pz] = toMM(ghostCarParts.group.position.x, ghostCarParts.group.position.z);
+    if(px>=-5&&px<=MM_SIZE+5&&pz>=-5&&pz<=MM_SIZE+5){
+      mctx.strokeStyle = 'rgba(0,240,255,0.85)'; mctx.lineWidth = 1.4;
+      mctx.beginPath();
+      mctx.moveTo(px,pz-3.5); mctx.lineTo(px+3.5,pz); mctx.lineTo(px,pz+3.5); mctx.lineTo(px-3.5,pz);
+      mctx.closePath(); mctx.stroke();
+    }
+  }
+
+  for(const unit of police){
+    const [px,pz] = toMM(unit.x, unit.z);
+    if(px<-6||px>MM_SIZE+6||pz<-6||pz>MM_SIZE+6) continue;
+    const flashing = Math.floor(unit.flashT)%2===0;
+    mctx.fillStyle = flashing ? '#ff3333' : '#3366ff';
+    mctx.save();
+    mctx.translate(px,pz);
+    mctx.rotate(unit.heading + Math.PI);
+    mctx.beginPath();
+    mctx.moveTo(0,-4); mctx.lineTo(3,3.5); mctx.lineTo(-3,3.5); mctx.closePath();
+    mctx.fill();
+    mctx.restore();
+  }
+
+  // Player marker: a directional cone (showing field-of-view-ish spread)
+  // plus a solid arrow on top, both rotated to the player's actual
+  // heading — since the map itself is fixed north-up, this arrow is what
+  // visibly spins as you turn, which is the whole point of a north-up
+  // radar (rotate the pointer, not the world).
+  mctx.save();
+  mctx.translate(cx,cy);
+  mctx.rotate(car.heading);
+  const coneGrad = mctx.createRadialGradient(0,0,0,0,0,22);
+  coneGrad.addColorStop(0,'rgba(0,240,255,0.32)');
+  coneGrad.addColorStop(1,'rgba(0,240,255,0)');
+  mctx.fillStyle = coneGrad;
+  mctx.beginPath();
+  mctx.moveTo(0,0); mctx.arc(0,0,22,-Math.PI/2-0.55,-Math.PI/2+0.55); mctx.closePath();
+  mctx.fill();
+  mctx.fillStyle = '#ffffff';
+  mctx.beginPath();
+  mctx.moveTo(0,-7); mctx.lineTo(5,6); mctx.lineTo(0,3); mctx.lineTo(-5,6); mctx.closePath();
+  mctx.fill();
+  mctx.restore();
+
+  mctx.restore();
+
+  // Compass label always reads N — the map never rotates, so north is
+  // always straight up on the dial.
+  if(compassEl) compassEl.textContent = 'N';
+}
+
+setTimeout(()=>{ document.getElementById('controls-hint').classList.add('dim'); }, 9000);
+
+// ---------------------------------------------------------------------
+// Main loop
+// ---------------------------------------------------------------------
+let gameStarted = false;
+let frameCount = 0;
+const clock = new THREE.Clock();
+
+// --- Perf instrumentation ------------------------------------------------
+// Real numbers instead of guessing: tracks per-frame time, worst frame in
+// the last window, and draw-call/triangle counts so we can tell whether a
+// spike is CPU-side (game logic) or GPU-side (rendering) when it happens.
+const perfHud = document.getElementById('perf-hud');
+let perfLastNow = performance.now();
+let perfWorstMs = 0;
+let perfFrames = 0, perfTotalMs = 0;
+let perfWindowStart = performance.now();
+
+function updatePerfHud(){
+  const now = performance.now();
+  const frameMs = now - perfLastNow;
+  perfLastNow = now;
+  perfFrames++;
+  perfTotalMs += frameMs;
+  if(frameMs > perfWorstMs) perfWorstMs = frameMs;
+  if(now - perfWindowStart > 1000){
+    const avgMs = perfTotalMs / perfFrames;
+    const info = renderer.info;
+    perfHud.textContent =
+      `fps ${Math.round(1000/avgMs)}  avg ${avgMs.toFixed(1)}ms  worst ${perfWorstMs.toFixed(1)}ms\n`+
+      `calls ${info.render.calls}  tris ${(info.render.triangles/1000).toFixed(1)}k\n`+
+      `geo ${info.memory.geometries}  tex ${info.memory.textures}  progs ${info.programs?info.programs.length:'?'}`;
+    perfWorstMs = 0; perfFrames = 0; perfTotalMs = 0; perfWindowStart = now;
+  }
+}
+
+function animate(){
+  requestAnimationFrame(animate);
+  let dt = clock.getDelta();
+  dt = Math.min(dt, 0.05);
+
+  if(gameStarted){
+    frameCount++;
+    const input = getInput();
+    const {driftingNow} = updateCar(dt, input);
+    const now = clock.elapsedTime;
+    updateCollectibles(dt, now);
+    updateBoostPads(dt, now);
+    updatePedestrians(dt);
+    updatePolice(dt, now);
+    updateTraffic(dt, now);
+    recordGhostFrame(dt, now);
+    updateGhostPlayback(dt);
+    updateWantedHUD();
+    updateWeather(dt, now);
+    updateSunFollow();
+    updateCamera(dt);
+    updateHUD();
+    updateSmoke(dt);
+    updateNitroFX(dt, car.boostTimer>0);
+    updateSpeedLines(dt);
+    drawMinimap();
+    const speedRatio = car.speed/PARAMS.maxSpeed;
+    const throttle = input.forward ? 1 : 0;
+    updateEngineSound(speedRatio, throttle);
+    updateDriftSound(driftingNow, dt);
+
+    if(cubeCamera && frameCount%24===0){
+      carParts.group.visible = false;
+      cubeCamera.position.set(car.x, car.y+1.2, car.z);
+      cubeCamera.update(renderer, scene);
+      carParts.group.visible = true;
+    }
+  }
+
+  renderFrame();
+  updatePerfHud();
+}
+
+// Force all shaders to compile NOW, while the title screen is visible,
+// so the player never hits a compile stutter during gameplay. Every car
+// pool slot, building, pedestrian, ghost car, and particle system is
+// already in the scene (just hidden) at this point — so this single
+// compile call warms up every shader the game will ever need.
+renderer.compile(scene, camera);
+
+// compile() only builds shader *programs* — it never touches textures.
+// Texture upload to the GPU is lazy and only happens the first time an
+// object is actually drawn, so every pooled traffic car, police car,
+// smoke puff, and pickup effect (all currently hidden) still has an
+// unpaid texture-upload cost sitting on its *first* spawn. Flash
+// everything visible for one throwaway render behind the title screen,
+// then restore hidden state, so that cost is paid now instead of in-game.
+(function warmUpTextures(){
+  const hidden = [];
+  scene.traverse(obj=>{
+    if(obj.visible === false){ hidden.push(obj); obj.visible = true; }
+  });
+  renderer.render(scene, camera);
+  for(const obj of hidden) obj.visible = false;
+})();
+
+animate();
+
+// ---------------------------------------------------------------------
+// Title screen / start
+// ---------------------------------------------------------------------
+document.getElementById('start-btn').addEventListener('click', ()=>{
+  // Visual response first, always — the title screen hides and the game
+  // state flips to started immediately, so the tap feels instant no matter
+  // how long AudioContext setup takes underneath. initAudio() creates a
+  // fresh AudioContext and wires up ~6 oscillator/gain/buffer nodes for the
+  // first time on this click (has to be a user gesture) — on mobile that
+  // can take a real, felt moment, and it was previously blocking the title
+  // screen from disappearing at all until it finished.
+  document.getElementById('title-screen').classList.add('hidden');
+  gameStarted = true;
+  clock.start();
+  startNewRun();
+  initGhostCar();
+  setTimeout(initAudio, 0);
+});
+
+})();
+</script>
+</body>
+</html>

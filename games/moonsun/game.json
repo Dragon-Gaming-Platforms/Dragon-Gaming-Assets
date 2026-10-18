@@ -1,0 +1,15 @@
+{
+  "name": "Moon-or-Sun",
+  "desc": "Make one loop through every room, choosing either all its moons or all its suns. Visited rooms must alternate between moon and sun. Three sizes with logical hints. Original Simplified Chinese interface; English help included.",
+  "controls": "Tap a cell to cycle its line shape; right-click cycles backward. Arrow keys move; Enter cycles; 0–6 select a shape, H hint, Z undo. English help link above game.",
+  "shelf": "Puzzle & Logic",
+  "tags": [
+    "games",
+    "html5",
+    "puzzle",
+    "logic",
+    "moonsun"
+  ],
+  "badge": "New",
+  "creator": "z-biz-game"
+}
