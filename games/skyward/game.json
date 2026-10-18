@@ -1,0 +1,14 @@
+{
+  "name": "Skyward",
+  "desc": "A one-file procedural arcade flight simulator: take off from a runway, fly a gate course to your landing field, and build a career logbook of routes, weather, and grades.",
+  "controls": "W/S pitch, A/D roll, Q/E rudder, arrows for throttle, C camera, R respawn, B new mission, N free flight",
+  "shelf": "Arcade & Action",
+  "tags": [
+    "arcade",
+    "flight-sim",
+    "procedural"
+  ],
+  "badge": "New",
+  "creator": "arjunemindandani",
+  "image": "title.png"
+}

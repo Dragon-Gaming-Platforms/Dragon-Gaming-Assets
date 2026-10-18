@@ -406,3 +406,5 @@ never invent a license.
 | Boids Lab | `games/boids-lab/` | Original build (Dragon Gaming Platforms) | Original work — MIT (custom flocking simulation and code-drawn visuals; no third-party assets) | 2026-10-17 |
 | Airplane Battle | `games/airplane-battle/` | [albertime-th/air-war-game](https://github.com/albertime-th/air-war-game) | MIT — unmodified | 2026-10-17 |
 | Particle Life Lab | `games/particle-life-lab/` | Original build (Dragon Gaming Platforms) | Original work — MIT (custom particle chemistry simulation and code-drawn visuals; no third-party assets) | 2026-10-17 |
+| Skyward | `games/skyward/` | [arjunemirchandani/skyward-flight-simulator](https://github.com/arjunemirchandani/skyward-flight-simulator) | MIT — unmodified (README screenshot folder omitted) | 2026-10-17 |
+| Space-Jam | `games/space-jam/` | [DanMat/Space-Jam](https://github.com/DanMat/Space-Jam) | MIT — Retroix 1.3.0 CSS+JS vendored locally (was jsdelivr CDN); Google Fonts link removed (Courier New/monospace fallback); Cloudflare leaderboard API disabled — local per-browser board (supported offline mode) | 2026-10-17 |
