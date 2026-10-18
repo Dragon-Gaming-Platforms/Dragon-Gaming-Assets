@@ -1,0 +1,8 @@
+{
+  "name": "ZX Spectrum 48K Emulator",
+  "desc": "A 48K-only browser emulator with the freely licensed Open82 replacement system ROM. No commercial games or original Sinclair ROMs are bundled; open a compatible snapshot or tape file from your device.",
+  "controls": "Use the emulator's File menu to open a 48K .SNA, .Z80, .SZX, .TAP or .TZX file. Keyboard controls are handled by the emulator; use LOAD \"\" for tapes.",
+  "shelf": "Emulators",
+  "tags": ["emulator", "zx-spectrum", "48k", "open-firmware", "local-files"],
+  "creator": "JSSpeccy contributors and Open82 contributors"
+}
