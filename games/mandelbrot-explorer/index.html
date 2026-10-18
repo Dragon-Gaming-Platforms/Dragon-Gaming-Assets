@@ -1,0 +1,235 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#0a0e14">
+  <meta name="description" content="Explore the Mandelbrot and Julia sets with local, interactive fractal rendering.">
+  <title>Mandelbrot Explorer</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #0a0e14;
+      --surface: #111822;
+      --surface-2: #161f2b;
+      --line: #2b3848;
+      --ink: #edf3fa;
+      --muted: #9aabba;
+      --dim: #718295;
+      --mint: #81e0c4;
+      --blue: #82b6ff;
+      --gold: #f0c56a;
+      --shadow: 0 24px 80px #0008;
+    }
+    * { box-sizing: border-box; }
+    html { min-width: 320px; background: var(--bg); }
+    body {
+      min-width: 320px;
+      margin: 0;
+      color: var(--ink);
+      background: radial-gradient(ellipse at 62% -14%, #1b2b3a 0, var(--bg) 57%);
+      font: 14px/1.5 system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+    button, select, input { font: inherit; }
+    button { color: inherit; }
+    .shell { width: min(1420px, calc(100% - 32px)); margin: 0 auto; padding: 24px 0 34px; }
+    .header { display: flex; align-items: center; justify-content: space-between; gap: 18px; margin-bottom: 20px; }
+    .title-group { display: flex; align-items: center; gap: 14px; }
+    .logo {
+      display: grid; width: 48px; height: 48px; place-items: center; flex: none;
+      border: 1px solid #476c81; border-radius: 15px;
+      background: linear-gradient(145deg, #19394b, #1a2538 65%, #43244a);
+      color: var(--mint); font: 900 24px/1 Georgia, serif; box-shadow: 0 8px 28px #0005;
+    }
+    .eyebrow { margin: 0 0 3px; color: var(--mint); font-size: 10px; font-weight: 850; letter-spacing: .16em; text-transform: uppercase; }
+    h1 { margin: 0; font-size: clamp(23px, 3vw, 32px); line-height: 1.1; letter-spacing: -.04em; }
+    .tagline { margin: 6px 0 0; color: var(--muted); font-size: 13px; }
+    .local-badge { flex: none; padding: 7px 11px; border: 1px solid #315548; border-radius: 999px; background: #10221e; color: var(--mint); font-size: 11px; font-weight: 750; }
+    .layout { display: grid; grid-template-columns: 285px minmax(0, 1fr); grid-template-areas: "controls stage"; gap: 15px; align-items: start; }
+    .controls { grid-area: controls; overflow: hidden; border: 1px solid var(--line); border-radius: 16px; background: linear-gradient(155deg, #131d28, #0f151e); box-shadow: var(--shadow); }
+    .controls-head { padding: 16px 17px 12px; border-bottom: 1px solid var(--line); }
+    .controls-head h2 { margin: 0; font-size: 13px; letter-spacing: .04em; }
+    .controls-head p { margin: 4px 0 0; color: var(--muted); font-size: 11px; }
+    .control-body { display: grid; gap: 15px; padding: 15px 17px 17px; }
+    .field { display: grid; gap: 6px; }
+    .field-label { display: flex; align-items: center; justify-content: space-between; gap: 8px; color: #dbe5ef; font-size: 12px; font-weight: 720; }
+    .value { color: var(--mint); font: 11px/1.3 ui-monospace, SFMono-Regular, Menlo, monospace; }
+    select, input[type="number"] {
+      width: 100%; min-height: 38px; padding: 7px 9px; border: 1px solid #37475a; border-radius: 8px;
+      outline: none; background: #0c131c; color: var(--ink);
+    }
+    select:focus, input:focus, button:focus-visible { outline: 2px solid var(--blue); outline-offset: 2px; }
+    input[type="range"] { width: 100%; accent-color: var(--mint); }
+    .preset-row { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 7px; }
+    .preset, .action {
+      min-height: 35px; padding: 7px 9px; border: 1px solid #344457; border-radius: 8px;
+      background: #182330; color: #dce8f4; cursor: pointer; font-size: 11px; font-weight: 700;
+      transition: border-color .15s ease, background .15s ease, transform .15s ease;
+    }
+    .preset:hover, .action:hover { transform: translateY(-1px); border-color: #5a7c96; background: #202f3d; }
+    .preset[aria-pressed="true"] { border-color: #39836d; background: #17332e; color: #aaf0d9; }
+    .action.primary { border-color: #317562; background: #16362f; color: #b4f0dc; }
+    .action.warm { border-color: #7b6031; background: #2c2416; color: #f1d28e; }
+    .action:disabled { opacity: .4; cursor: not-allowed; transform: none; }
+    .zoom-row { display: grid; grid-template-columns: 1fr 1fr; gap: 7px; }
+    .action-row { display: grid; grid-template-columns: 1fr 1.2fr; gap: 7px; }
+    .complex-row { display: grid; grid-template-columns: 1fr 1fr; gap: 7px; }
+    .julia-fields[hidden], .preset-section[hidden], #share-fallback[hidden] { display: none; }
+    .shortcuts { margin: 0; padding: 11px 12px; border: 1px solid #2d3c4c; border-radius: 10px; background: #0c131b; color: var(--muted); font-size: 10px; }
+    .shortcuts b { color: #d7e7f4; }
+    kbd { padding: 1px 4px; border: 1px solid #465566; border-radius: 4px; background: #1b2633; color: #dce9f3; font: 10px ui-monospace, monospace; }
+    .stage { grid-area: stage; min-width: 0; overflow: hidden; border: 1px solid var(--line); border-radius: 16px; background: #0c1219; box-shadow: var(--shadow); }
+    .stage-top { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 12px 15px; border-bottom: 1px solid var(--line); background: #111a24; }
+    .stage-title { min-width: 0; }
+    .stage-title strong { display: block; font-size: 12px; }
+    .stage-title span { display: block; color: var(--muted); font: 10px ui-monospace, SFMono-Regular, Menlo, monospace; word-break: break-word; }
+    .render-state { flex: none; display: flex; align-items: center; gap: 8px; color: var(--muted); font-size: 10px; }
+    .dot { width: 7px; height: 7px; border-radius: 50%; background: var(--mint); box-shadow: 0 0 12px #81e0c488; }
+    .dot.busy { background: var(--gold); box-shadow: 0 0 12px #f0c56a88; animation: pulse 1s infinite alternate; }
+    @keyframes pulse { to { opacity: .35; } }
+    .canvas-wrap { position: relative; overflow: hidden; background: #04070b; }
+    canvas { display: block; width: 100%; height: auto; aspect-ratio: 8 / 5; cursor: crosshair; touch-action: none; image-rendering: pixelated; }
+    .canvas-note { position: absolute; right: 12px; bottom: 10px; padding: 5px 8px; border: 1px solid #52616c77; border-radius: 7px; background: #05090dcc; color: #b6c4ce; font-size: 10px; pointer-events: none; }
+    .progress-track { height: 3px; background: #1b2834; }
+    progress { display: block; width: 100%; height: 3px; border: 0; appearance: none; }
+    progress::-webkit-progress-bar { background: #1b2834; }
+    progress::-webkit-progress-value { background: linear-gradient(90deg, #4ba58d, #9ae5bd); transition: width .12s linear; }
+    progress::-moz-progress-bar { background: linear-gradient(90deg, #4ba58d, #9ae5bd); }
+    .stage-footer { display: flex; justify-content: space-between; gap: 10px; padding: 9px 14px; color: var(--muted); font-size: 10px; }
+    .stage-footer span:last-child { text-align: right; }
+    .status { min-height: 16px; color: var(--muted); font-size: 10px; }
+    .help { margin-top: 14px; padding: 13px 15px; border: 1px solid var(--line); border-radius: 12px; background: #111923; color: var(--muted); font-size: 11px; }
+    .help strong { color: var(--ink); }
+    .help p { margin: 0; }
+    footer { margin-top: 17px; color: #718091; font-size: 10px; text-align: center; }
+    @media (max-width: 880px) {
+      .layout { grid-template-columns: minmax(0, 1fr); grid-template-areas: "stage" "controls"; }
+      .control-body { grid-template-columns: repeat(2, minmax(0, 1fr)); align-items: start; }
+      .controls-head { padding-bottom: 10px; }
+      .shortcuts { grid-column: 1 / -1; }
+    }
+    @media (max-width: 560px) {
+      .shell { width: min(100% - 18px, 1420px); padding-top: 16px; }
+      .header { align-items: flex-start; }
+      .logo { width: 41px; height: 41px; border-radius: 13px; font-size: 20px; }
+      .local-badge { max-width: 98px; padding: 6px 8px; text-align: center; font-size: 9px; }
+      .tagline { font-size: 11px; }
+      .control-body { grid-template-columns: 1fr 1fr; gap: 12px; padding: 12px; }
+      .control-body .field:first-child, .preset-section, .julia-fields, .shortcuts { grid-column: 1 / -1; }
+      .stage-top { padding: 10px 11px; }
+      .stage-footer { flex-direction: column; gap: 2px; padding: 8px 11px; }
+      .stage-footer span:last-child { text-align: left; }
+      .canvas-note { right: 6px; bottom: 6px; font-size: 9px; }
+    }
+    @media (prefers-reduced-motion: reduce) { *, *::before, *::after { scroll-behavior: auto !important; animation-duration: .01ms !important; transition-duration: .01ms !important; } }
+  </style>
+</head>
+<body>
+  <main class="shell">
+    <header class="header">
+      <div class="title-group">
+        <div class="logo" aria-hidden="true">∞</div>
+        <div>
+          <p class="eyebrow">A local mathematics playground</p>
+          <h1>Mandelbrot Explorer</h1>
+          <p class="tagline">Zoom into a boundary where simple rules create infinite detail.</p>
+        </div>
+      </div>
+      <span class="local-badge">No uploads · no APIs</span>
+    </header>
+
+    <div class="layout">
+      <aside class="controls" aria-label="Fractal controls">
+        <div class="controls-head">
+          <h2>EXPLORE THE COMPLEX PLANE</h2>
+          <p>Every view is rendered locally in a browser worker.</p>
+        </div>
+        <div class="control-body">
+          <label class="field">
+            <span class="field-label">Fractal</span>
+            <select id="mode" aria-label="Choose fractal type">
+              <option value="mandelbrot">Mandelbrot set</option>
+              <option value="julia">Julia set</option>
+            </select>
+          </label>
+
+          <div class="field preset-section">
+            <span class="field-label">Mandelbrot landmarks</span>
+            <div class="preset-row" role="group" aria-label="Mandelbrot presets">
+              <button class="preset" type="button" data-preset="classic" aria-pressed="true">Classic view</button>
+              <button class="preset" type="button" data-preset="seahorse" aria-pressed="false">Seahorse valley</button>
+              <button class="preset" type="button" data-preset="elephant" aria-pressed="false">Elephant valley</button>
+              <button class="preset" type="button" data-preset="spiral" aria-pressed="false">Spiral detail</button>
+            </div>
+          </div>
+
+          <label class="field">
+            <span class="field-label"><span>Detail</span><output class="value" id="iteration-value">220</output></span>
+            <input id="iterations" type="range" min="80" max="800" step="20" value="220" aria-label="Maximum iterations">
+          </label>
+
+          <label class="field">
+            <span class="field-label">Color palette</span>
+            <select id="palette" aria-label="Choose color palette">
+              <option value="ember">Solar ember</option>
+              <option value="ocean">Glacial ocean</option>
+              <option value="orchid">Orchid dusk</option>
+              <option value="mono">Monochrome</option>
+            </select>
+          </label>
+
+          <div id="julia-fields" class="field julia-fields" hidden>
+            <span class="field-label">Julia constant c</span>
+            <div class="complex-row">
+              <label><span class="value">real</span><input id="julia-x" type="number" step="0.01" value="-0.745" aria-label="Julia constant real part"></label>
+              <label><span class="value">imaginary</span><input id="julia-y" type="number" step="0.01" value="0.186" aria-label="Julia constant imaginary part"></label>
+            </div>
+          </div>
+
+          <div class="field">
+            <span class="field-label">Zoom</span>
+            <div class="zoom-row">
+              <button class="action" id="zoom-out" type="button" aria-label="Zoom out">− Zoom out</button>
+              <button class="action" id="zoom-in" type="button" aria-label="Zoom in">＋ Zoom in</button>
+            </div>
+          </div>
+
+          <div class="action-row">
+            <button class="action" id="back" type="button" disabled>← Back</button>
+            <button class="action warm" id="reset" type="button">Reset view</button>
+          </div>
+          <button class="action primary" id="share" type="button">Copy shareable view link</button>
+          <div id="share-fallback" class="field" hidden>
+            <label class="field-label" for="share-url">Share URL · select and copy</label>
+            <input id="share-url" type="text" readonly aria-label="Shareable view URL">
+          </div>
+          <div class="status" id="status" role="status" aria-live="polite">Ready to explore.</div>
+
+          <p class="shortcuts"><b>Explore:</b> click to zoom in · scroll to zoom around cursor · drag to pan · use <kbd>+</kbd>/<kbd>−</kbd> to zoom · arrow keys to pan · <kbd>R</kbd> to reset.</p>
+        </div>
+      </aside>
+
+      <section class="stage" aria-label="Fractal rendering area">
+        <div class="stage-top">
+          <div class="stage-title">
+            <strong id="stage-name">Mandelbrot set</strong>
+            <span id="coordinates">center −0.500000, 0.000000 · span 2.800000</span>
+          </div>
+          <div class="render-state"><span class="dot" id="render-dot" aria-hidden="true"></span><span id="render-label">Ready</span></div>
+        </div>
+        <div class="canvas-wrap">
+          <canvas id="fractal" width="800" height="500" tabindex="0" role="img" aria-label="Interactive fractal image. Click to zoom, drag to pan, or use the mouse wheel to zoom around the pointer."></canvas>
+          <div class="canvas-note">CLICK TO ZOOM · DRAG TO PAN</div>
+        </div>
+        <div class="progress-track"><progress id="progress" max="1" value="0" aria-label="Render progress"></progress></div>
+        <div class="stage-footer"><span id="render-time">Rendering locally in your browser</span><span id="cursor-position">Move over the image to inspect a coordinate</span></div>
+      </section>
+    </div>
+
+    <section class="help"><p><strong>What you're seeing:</strong> the Mandelbrot set marks points whose repeated complex-number sequence stays bounded. Zooming toward its edge reveals intricate miniature patterns. Switch to Julia mode to explore a related family of sets; changing its constant changes the shape.</p></section>
+    <footer>Original local-first interactive tool · Canvas renderer runs in a Web Worker · MIT License</footer>
+  </main>
+
+  <script src="explorer.js"></script>
+</body>
+</html>

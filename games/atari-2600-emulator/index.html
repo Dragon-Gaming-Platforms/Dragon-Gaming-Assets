@@ -1,0 +1,107 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#111318">
+  <meta name="description" content="A self-hosted Atari 2600 emulator. Load a local cartridge image; no game ROMs are included.">
+  <title>Atari 2600 Emulator</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --page: #111318;
+      --panel: #1a1e25;
+      --panel-2: #202630;
+      --ink: #f4f2ec;
+      --muted: #a8b0be;
+      --line: #394250;
+      --accent: #f1a83b;
+      --mint: #73d8c1;
+    }
+    * { box-sizing: border-box; }
+    body {
+      min-width: 320px;
+      margin: 0;
+      background: radial-gradient(ellipse at 50% -20%, #28303a 0, var(--page) 60%);
+      color: var(--ink);
+      font: 15px/1.55 system-ui, -apple-system, "Segoe UI", sans-serif;
+    }
+    .page { width: min(1100px, calc(100% - 28px)); margin: 0 auto; padding: 26px 0 38px; }
+    .topline { display: flex; align-items: center; justify-content: space-between; gap: 14px; margin-bottom: 20px; }
+    .brand { display: flex; align-items: center; gap: 12px; }
+    .mark {
+      display: grid; width: 42px; height: 42px; place-items: center; border: 1px solid #7b582d;
+      border-radius: 12px; background: #352819; color: var(--accent); font-size: 20px; font-weight: 900;
+    }
+    h1 { margin: 0; font-size: clamp(21px, 3vw, 30px); letter-spacing: -.035em; line-height: 1.15; }
+    .eyebrow { margin: 0 0 4px; color: var(--mint); font-size: 11px; font-weight: 800; letter-spacing: .13em; text-transform: uppercase; }
+    .offline { flex: none; padding: 6px 10px; border: 1px solid #31564f; border-radius: 999px; color: var(--mint); font-size: 12px; font-weight: 700; }
+    .intro { max-width: 730px; margin: 0 0 18px; color: var(--muted); }
+    .notice {
+      display: flex; align-items: flex-start; gap: 11px; margin: 0 0 16px; padding: 12px 14px;
+      border: 1px solid #594323; border-radius: 12px; background: #211b13; color: #e5d4b5;
+    }
+    .notice strong { color: #ffd891; }
+    .notice .icon { color: var(--accent); font-weight: 900; }
+    .emulator-card { overflow: hidden; border: 1px solid var(--line); border-radius: 18px; background: #0d0f13; box-shadow: 0 24px 70px #0007; }
+    #javatari { min-height: 380px; padding: 18px 12px 14px; text-align: center; }
+    #javatari-screen { width: min(100%, 840px); margin: 0 auto; }
+    .help-row { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; margin-top: 14px; }
+    .help-card { padding: 12px 14px; border: 1px solid var(--line); border-radius: 12px; background: var(--panel); }
+    .help-card b { display: block; margin-bottom: 3px; color: var(--ink); font-size: 13px; }
+    .help-card span { color: var(--muted); font-size: 12px; }
+    footer { margin-top: 18px; color: #8993a2; font-size: 11px; text-align: center; }
+    @media (max-width: 660px) {
+      .page { width: min(100% - 20px, 1100px); padding-top: 18px; }
+      .topline { align-items: flex-start; }
+      .offline { margin-top: 5px; }
+      .help-row { grid-template-columns: 1fr; }
+      #javatari { min-height: 300px; padding: 12px 4px; }
+    }
+  </style>
+</head>
+<body>
+  <main class="page">
+    <header class="topline">
+      <div class="brand">
+        <div class="mark" aria-hidden="true">2600</div>
+        <div>
+          <p class="eyebrow">Local browser emulator</p>
+          <h1>Atari 2600</h1>
+        </div>
+      </div>
+      <span class="offline">No account · no ROMs bundled</span>
+    </header>
+
+    <p class="intro">Power on the virtual console, then open a cartridge image you have the right to use. Javatari reads selected files in this browser; this hosted build does not include game cartridges.</p>
+
+    <div class="notice" role="note">
+      <span class="icon" aria-hidden="true">ⓘ</span>
+      <div><strong>Bring your own cartridge image.</strong> Use the emulator's menu to open a local <code>.bin</code>, <code>.a26</code> or <code>.rom</code> file, or drag one onto the console. Local play works without NetPlay.</div>
+    </div>
+
+    <section class="emulator-card" aria-label="Atari 2600 emulator">
+      <div id="javatari">
+        <div id="javatari-screen" aria-label="Virtual console screen"></div>
+      </div>
+    </section>
+
+    <section class="help-row" aria-label="Quick help">
+      <div class="help-card"><b>Load a game</b><span>Open the console's file menu, choose a local cartridge file, and wait for it to start.</span></div>
+      <div class="help-card"><b>Play</b><span>Use the on-screen joystick, keyboard controls or a standard gamepad. Touch controls appear on supported phones.</span></div>
+      <div class="help-card"><b>Privacy</b><span>No cartridges are supplied. Files you choose remain in this browser; no upload is used for local play.</span></div>
+    </section>
+
+    <footer>Javatari 5.0.4 · AGPL-3.0 · Atari and related marks belong to their respective owners.</footer>
+  </main>
+
+  <script src="javatari.js"></script>
+  <script>
+    // Keep the hosted build local-first: no URL-driven remote media or background keep-alive.
+    Javatari.ALLOW_URL_PARAMETERS = false;
+    Javatari.SERVER_KEEPALIVE = 0;
+    Javatari.CARTRIDGE_SHOW_RECENT = false;
+    Javatari.AUTO_POWER_ON_DELAY = 0;
+  </script>
+</body>
+</html>

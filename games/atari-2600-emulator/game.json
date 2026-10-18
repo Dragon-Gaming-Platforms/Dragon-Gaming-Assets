@@ -1,0 +1,8 @@
+{
+  "name": "Atari 2600 Emulator",
+  "desc": "A locally hosted Javatari emulator for the Atari 2600. It contains no cartridge ROMs; load a game file you are entitled to use from your device. Local play works without an account or server.",
+  "controls": "Use the built-in on-screen controls, keyboard or a gamepad. Open a local .bin, .a26 or .rom file from the emulator menu, or drag it onto the screen.",
+  "shelf": "Emulators",
+  "tags": ["emulator", "atari-2600", "local-files", "offline"],
+  "creator": "Paulo Augusto Peccin"
+}

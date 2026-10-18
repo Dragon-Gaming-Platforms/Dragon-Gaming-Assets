@@ -1,0 +1,9 @@
+{
+  "name": "Mega Drive / Genesis Emulator",
+  "desc": "An experimental, browser-based Mega Drive / Genesis emulator. Choose a ROM you are entitled to use; it is read locally and never uploaded. Only Sonic 1 and Sonic 2 have been tested by the core authors.",
+  "controls": "Arrow keys: D-pad; Z/X/C or A/S/D: A/B/C; Q/W/E: X/Y/Z; Enter: Start; Right Shift: Mode; standard gamepads are detected.",
+  "shelf": "Emulators",
+  "tags": ["emulator", "genesis", "megadrive", "webassembly", "local-files"],
+  "badge": "Experimental",
+  "creator": "mdcore contributors"
+}

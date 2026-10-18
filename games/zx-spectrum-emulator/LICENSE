@@ -1,0 +1,7 @@
+This folder contains separately licensed components; it is not relicensed as a single work.
+
+- JSSpeccy 3.2.0 emulator and application code: GNU General Public License, version 3 only. See `LICENSE-JSSPECCY3` and the corresponding source in `source/jsspeccy3/`.
+- Open82 replacement 48K system ROM: GNU General Public License, version 2 only. See `LICENSE-OPEN82` and the corresponding assembly source in `source/open82/`.
+- Bundled JavaScript dependencies and the AssemblyScript toolchain retain their own terms; see the `LICENSES-*` notices. The JSZip MIT option is used.
+
+The Open82 firmware is loaded as emulated system data and is not linked into the JSSpeccy program. No commercial game ROMs or original Sinclair ROMs are included.

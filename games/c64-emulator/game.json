@@ -1,0 +1,8 @@
+{
+  "name": "Commodore 64 Emulator",
+  "desc": "A self-contained Commodore 64 emulator with keyboard, touch and gamepad controls. It intentionally includes no copyrighted C64 system ROMs or commercial programs; add files you have the right to use from your device.",
+  "controls": "Use the on-screen keyboard or your keyboard/gamepad. Add BASIC, KERNAL and character-generator ROMs, then open a local PRG, D64 or ZIP file.",
+  "shelf": "Emulators",
+  "tags": ["emulator", "commodore-64", "c64", "local-files", "offline"],
+  "creator": "John Werner Enoksen"
+}

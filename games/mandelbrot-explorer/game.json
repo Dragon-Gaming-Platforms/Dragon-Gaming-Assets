@@ -1,0 +1,14 @@
+{
+  "name": "Mandelbrot Explorer",
+  "desc": "Explore the Mandelbrot and Julia sets with an interactive, locally rendered complex-plane explorer. Zoom, pan, tune iteration detail, change palettes and copy a shareable view link.",
+  "controls": "Click to zoom in; scroll to zoom around the pointer; drag to pan. Use +/− to zoom, arrow keys to pan and R to reset. Presets, iteration count, palettes and Julia constants are adjustable.",
+  "shelf": "Tools & Utilities",
+  "tags": [
+    "math",
+    "fractals",
+    "interactive",
+    "offline",
+    "canvas"
+  ],
+  "creator": "Dragon Gaming Assets contributors"
+}

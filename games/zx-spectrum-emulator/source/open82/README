@@ -1,0 +1,128 @@
+Open82 - A freely licenced replacement firmware for the ZX Spectrum
+http://sourceforge.net/projects/open82/
+===================================================================
+
+        "No disrespect to Mr. Altwasser but it is the ROM, not the
+        hardware, that make the Spectrum great. It's an incomplete work
+        of genius."
+                - Geoff Wearmouth, comp.sys.sinclair
+                <8te+ZzDmVI1DFw7K@wearmouth.demon.co.uk>
+
+Open82 is a ROM image for the Sinclair ZX Spectrum computer, created with the
+aim of being as compatible as possible with Sinclair's original 16/48K ROM while
+containing none of the original copyrighted code. It is released under the GNU
+General Public License.
+
+* Why?
+
+Amstrad, the current copyright holders of the Spectrum ROMs, have informally
+given permission for the ROMs to be distributed for emulation purposes subject
+to certain conditions, such as not charging a fee for distributing them. This
+grant of permission has been welcomed by the Spectrum community, and has allowed
+Spectrum emulation projects to flourish without legal shadows hanging over them.
+However, Amstrad's permission stops short of being a full Open Source licence,
+which has impacted on two areas of development in particular:-
+
+1) Hardware re-implementations of the Spectrum are explicitly excluded from
+   Amstrad's statement of permission;
+2) Software collections such as the Debian project, which adhere to a strict
+   Open Source only policy, are currently unable to include Spectrum emulators,
+   as the ROM image is an integral part of any emulator.
+
+For these reasons, and perhaps others yet to be identified, there is a clear
+demand for a freely licenced ROM image that can serve in some capacity as a
+substitute for the original Sinclair ROM.
+
+* How compatible can we get?
+
+Certainly not 100%... the pathological case would be a program which performs a
+cryptographic hash function over the ROM and deliberately fails if it doesn't
+match. Nevertheless, by implementing a full (or nearly-full) interpreter for
+Sinclair Basic and ensuring that we match the most common entry points called by
+machine-code software - such as text printing, keyboard scanning and floating
+point maths - we can hope to be compatible with the majority of software -
+eventually. See the STATUS document for the current list of supported features;
+additionally, a list of compatible games is maintained at:
+http://scratchpad.wikia.com/wiki/OpenZXRom
+
+Of course, the real Sinclair ROMs will continue to be readily downloadable under
+Amstrad's not-free-but-usually-good-enough licence for the forseeable future, so
+this will always be an option for troublesome programs, even for people who
+receive their emulator without those ROMs bundled.
+
+* Is this a clean-room implementation?
+
+Not really. I (and doubtless anyone else likely to be working on this project)
+have a fair bit of experience working with the original ROM routines, and access
+to Logan & O'Hara's "The Complete Spectrum ROM Disassembly", which I've made
+frequent use of on this project. I've generally concentrated on the commentary
+though, only consulting the actual ROM code when absolutely necessary, and
+certainly not in order to figure out the best way of doing things. I'd advise
+any other contributors to take the same approach.
+
+* Build instructions
+
+The Pasmo assembler is required: http://www.arrakis.es/~ninsesabe/pasmo/
+To build, simply run:
+
+  make
+
+The build process has been tested with Pasmo 0.5.3 and GNU Make 3.81.
+See Makefile for additional configuration options.
+
+* How do I use it?
+
+This will vary from one emulator to another. In Fuse, you can go to Options ->
+Select ROMs -> Spectrum 48K and select the file, or start it with the command
+line:
+
+fuse --rom-48 open82.bin --machine 48
+
+Running 'make fuse' from the Open82 build directory will have the same effect,
+provided the path to the Fuse executable is correctly specified in Makefile
+or config.mk.
+
+On a 128K machine, you'll get best results from placing the same ROM image in
+both slots, so that it's always available regardless of the current paging:
+
+fuse --rom-128-0 open82.bin --rom-128-1 open82.bin --machine 128
+
+
+* Error messages
+
+Some programs may stop with diagnostic error messages, indicated by a striped
+red and yellow border. These are more likely to indicate missing features of
+the ROM rather than errors in the running program:
+"Here be dragons: 0xnnnn"
+- The running program has made a call to an empty area of the ROM, at the
+  address shown. Most likely, this is a call to a routine that hasn't been
+  implemented yet.
+"Unsupported BASIC command: 0xnn"
+- The Basic interpreter has encountered an unimplemented Basic command. The
+  hex code is the ASCII code of the offending keyword token.
+"Unsupported function: 0xnn"
+- As above, but for a function call within a Basic line.
+"Syntax error at: 0xnnnn"
+- An unexpected character was encountered while interpreting a Basic command.
+  This may be a genuine syntax error, or a variant of a partly-implemented
+  language feature which is not yet supported (e.g. the LOAD "" DATA form of
+  LOAD ""). The address indicates the portion of ROM code which encountered the
+  syntax error.
+"Unprintable character: 0xnn"
+- The text printing routine has encountered a character for which printing is
+  not yet implemented; this currently includes keyword tokens and block
+  graphics. The hex code is the ASCII code of the offending character.
+"Unsupported calculator op: 0xnn"
+- The floating point calculator routine (RST 0x0028) was invoked with an
+  instruction code (indicated by the hex code) which is not yet implemented.
+
+
+* History
+
+The present codebase was originally developed as the OpenZXRom project, led by
+Matthew Westcott and taking games software compatibility as its original goal.
+This was merged with the Open82 project led by Andrew Owen (which focused on a
+working BASIC interpreter as a priority, and secured permission for ROM code
+from the ZX80, ZX81, Jupiter Ace and SAM Coupe to be incorporated under the
+terms of the GPL), and adopted the latter name in response to possible trademark
+issues over the 'ZX' name. See AUTHORS for a full list of contributors.

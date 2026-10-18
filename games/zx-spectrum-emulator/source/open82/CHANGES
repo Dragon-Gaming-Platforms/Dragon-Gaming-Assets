@@ -1,0 +1,105 @@
+Open82 xxxx-xx-xx
+- Project renamed to Open82
+- Calculator routines from the ZX81 ROM are incorporated. All pure numeric
+  calculator operations and functions are now supported
+- Low-level beeper routine ('beeper')
+- Filled historical free space above 0x386e with 0xff, for programs which use
+  this as a vector table
+- CIRCLE command implemented ('cmd_circle' / 'circle')
+- Default font is now zx81_ace.asm, a hybrid of the ZX81 and Jupiter Ace system
+  fonts
+
+OpenZXRom 2008-01-07
+- Additional keyboard scanning / decoding routines: 'key_test' @ 0x031e and
+  'key_code' @ 0x0333. Called from interrupt routine, so programs which poll
+  'last_key' system variable will now respond to keypresses
+- PRINT command implemented ('cmd_print')
+- 'cmd_ink', 'cmd_paper' and 'putchar' routines support INK/PAPER 8
+  (transparent) and 9 (contrast)
+- FLASH and BRIGHT commands implemented ('cmd_flash' / 'cmd_bright'), and
+  'putchar' updated to support FLASH/BRIGHT 8 (transparent)
+- PAUSE command implemented ('cmd_pause')
+- Tape loader outputs an extra newline when the matching block is found
+- Workspace / calculator stack is garbage-collected before each statement
+- Added 0x053f as an alternate entry point to load_bytes_exit
+- Bugfix: PRINT TAB x no longer moves to the next line if cursor is already at
+  position x. (Also affected PRINT AT y,0)
+- Bugfix: 'clear_screen' leaves temporary attributes unchanged
+- Bugfix: White border on startup is set as a permanent border colour (via
+  'set_border')
+
+OpenZXRom 2007-12-31
+- Routine to allocate arbitrary space in memory ('alloc_space')
+- LOAD command implemented ('cmd_load') (except DATA)
+- 'cmd_border' moved to 0x2298 to provide 'set_border' entry point at 0x229b
+  (used by various Jonathan Cauldwell games)
+- Character printing supports comma control (CHR$ 6)
+- Character printing supports flash / bright controls (CHR$ 18 and 19)
+- Character printing supports user-defined graphics
+- Implemented 'border_colour' system variable to preserve border colour after
+  tape loading
+- Fatal errors now output diagnostic messages
+- Bugfix: parameter to CLEAR is not lost during call to clear_screen
+- Bugfix: 'consume' (RST 0x0020) no longer wraps interp_ptr at 256b boundaries
+- Bugfix: 'skip_whitespace' now gets parameterless and one-parameter control
+  codes the right way round
+- Bugfix: IM1 interrupt service routine doesn't screw with flags
+- Bugfix: 'get_string_expr' logic reversed to not reject string expressions
+- Bugfix: 'skip_whitespace' does not skip over byte 0x0e (allowing a
+  parameterless BIN to be consumed)
+
+OpenZXRom 2007-10-15
+- calc_pop_bc and calc_pop_a now handle floating point values
+- RPN calculator mode put in place ('calc' @ 0x0028), although only a limited
+  number of commands are supported at present
+- Expression parser (was 'get_num_expr', now 'get_expr') extended to work with
+  both string and numeric expressions
+- PEEK and IN functions implemented ('func_peek' / 'func_in')
+- POKE and OUT commands implemented ('cmd_poke' / 'cmd_out')
+- USR (numeric) function implemeted ('func_usr')
+- PLOT command implemented ('cmd_plot', plus entry points 'pixel_addr'
+  and 'plot_bc')
+- Changed system font to Clairsys by Paul van der Laan
+  <http://www.type-invaders.com/>
+- Source now split into multiple files for easier maintenance
+
+OpenZXRom 2006-06-18
+- Basic interpreter core ('interp')
+- Numeric expression parsing ('get_num_expr'); can process nearly all syntax
+  (with the sole exception of string comparisons), although only literal
+  numerics can actually be evaluated at the moment
+- Rudimentary calculator stack operations ('calc_pop_aedcb' @ 0x2bf1,
+  'calc_pop_a' @ 0x2dd5)
+- INK and PAPER commands implemented ('cmd_ink' / 'cmd_paper')
+- BORDER command implemented ('cmd_border')
+- NEW command implemented ('cmd_new')
+- CLS command implemented ('cmd_cls')
+- REM command implemented ('cmd_rem')
+- GO TO command implemented ('cmd_goto')
+- RUN command implemented ('cmd_run')
+- STOP command implemented ('cmd_stop')
+- RANDOMIZE command implemented ('cmd_randomize')
+- CLEAR command implemented ('cmd_clear')
+- Auto-running programs on LOAD
+- Error reporting framework ('error' @ 0x0008)
+- System variables vars_addr, calc_stack_end (was spare_mem_addr) moved to
+  correct ZX ROM compatible locations
+
+OpenZXRom 2006-06-03
+- Tape loading (0x0556)
+- Slightly redesigned splash screen, and moved to separate file for easier
+  version number bumping
+
+OpenZXRom 2006-05-17
+- Key scanning routine (0x028e)
+- IM1 interrupt service routine updates FRAMES system variable
+- Print-string routine now ZX ROM compatible (0x203c)
+- Character printing now respects setting of font system variable
+- Character printing preserves registers
+- perm_attribute and temp_attribute system variables moved to match ZX ROM
+- New entry point for clear_screen (0x0daf)
+
+OpenZXRom 2006-04-10
+- Initial release
+- Character printing, splash screen, screen clearing, font
+- Not much else...
