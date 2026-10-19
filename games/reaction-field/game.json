@@ -1,0 +1,8 @@
+{
+  "name": "Reaction Field",
+  "desc": "Explore a self-organizing reaction-diffusion field. Seed reagent B, tune feed and kill rates, and watch spots, branches, mazes, and waves emerge in a local Gray–Scott simulation.",
+  "controls": "Mouse or touch: drag to seed reagent B; Shift-drag to erase. Space: run or pause. Use Step once, Reset pattern, presets, feed/kill sliders, and color maps.",
+  "shelf": "Interactive Stories & Experiments",
+  "tags": ["simulation", "chemistry", "patterns", "reaction-diffusion", "offline"],
+  "creator": "Dragon Gaming Assets contributors"
+}
