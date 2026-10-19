@@ -1,0 +1,186 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#0b1017">
+  <meta name="description" content="Explore self-organizing reaction-diffusion patterns in a local interactive chemistry field.">
+  <title>Reaction Field</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #0a0e14;
+      --panel: #121923;
+      --panel-raised: #182230;
+      --line: #2c3a49;
+      --ink: #eff6f2;
+      --muted: #a3b1bd;
+      --mint: #8fe6ca;
+      --blue: #81c6ee;
+      --gold: #f3c779;
+      font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+    }
+    * { box-sizing: border-box; }
+    body { min-width: 320px; margin: 0; color: var(--ink); background: radial-gradient(ellipse at 72% -15%, #203a42 0, #111b25 43%, var(--bg) 78%); font-size: 14px; line-height: 1.5; }
+    button, input, select { font: inherit; }
+    button:focus-visible, input:focus-visible, select:focus-visible { outline: 2px solid var(--mint); outline-offset: 2px; }
+    .shell { width: min(1160px, calc(100% - 28px)); margin: auto; padding: 25px 0 36px; }
+    .masthead { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; margin-bottom: 19px; }
+    .identity { display: flex; align-items: center; gap: 13px; }
+    .logo { width: 48px; height: 48px; display: grid; place-items: center; border: 1px solid #47746c; border-radius: 15px; background: linear-gradient(145deg, #1e4947, #1c3443); color: var(--mint); font-size: 28px; font-weight: 900; box-shadow: 0 12px 30px #0003; }
+    .eyebrow { margin: 0 0 3px; color: var(--mint); font-size: 10px; font-weight: 850; letter-spacing: .16em; text-transform: uppercase; }
+    h1 { margin: 0; font-size: clamp(25px, 4vw, 36px); line-height: 1.08; letter-spacing: -.05em; }
+    .subtitle { margin: 6px 0 0; color: var(--muted); font-size: 12px; }
+    .local-badge { flex: none; padding: 7px 10px; border: 1px solid #3a645e; border-radius: 999px; background: #112822; color: #a8eed9; font-size: 9px; font-weight: 850; letter-spacing: .05em; }
+    .intro { display: flex; align-items: center; justify-content: space-between; gap: 18px; margin-bottom: 14px; padding: 13px 16px; border: 1px solid #354c57; border-radius: 13px; background: linear-gradient(105deg, #172a32ee, #17212cdd); }
+    .intro strong { display: block; margin-bottom: 3px; color: #e4f7f0; font-size: 11px; letter-spacing: .06em; text-transform: uppercase; }
+    .intro p { max-width: 790px; margin: 0; color: #b4c4ca; font-size: 10px; }
+    .model-tag { flex: none; padding: 7px 9px; border: 1px solid #4a6370; border-radius: 8px; background: #13212a; color: var(--blue); font: 9px ui-monospace, SFMono-Regular, Menlo, monospace; }
+    .workspace { display: grid; grid-template-columns: minmax(0, 1.25fr) minmax(300px, .75fr); gap: 14px; align-items: start; }
+    .panel { overflow: hidden; border: 1px solid var(--line); border-radius: 15px; background: linear-gradient(145deg, #151e29, #101720); box-shadow: 0 20px 52px #0003; }
+    .panel-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; padding: 14px 16px 12px; border-bottom: 1px solid var(--line); }
+    .panel-head h2 { margin: 0; font-size: 12px; letter-spacing: .08em; text-transform: uppercase; }
+    .panel-head p { margin: 3px 0 0; color: var(--muted); font-size: 10px; }
+    .chip { flex: none; padding: 4px 8px; border: 1px solid #3b655d; border-radius: 999px; color: var(--mint); font: 9px ui-monospace, SFMono-Regular, Menlo, monospace; }
+    .canvas-wrap { position: relative; padding: 14px; }
+    .field { display: block; width: 100%; aspect-ratio: 180 / 128; border: 1px solid #344651; border-radius: 10px; background: #08111a; image-rendering: pixelated; touch-action: none; cursor: crosshair; box-shadow: inset 0 0 45px #0008; }
+    .canvas-labels { display: flex; justify-content: space-between; gap: 12px; margin-top: 8px; color: #94a9b4; font: 9px ui-monospace, SFMono-Regular, Menlo, monospace; }
+    .toolbar { display: flex; flex-wrap: wrap; gap: 7px; padding: 0 14px 13px; }
+    .btn { min-height: 35px; padding: 7px 11px; border: 1px solid #3c4e5d; border-radius: 8px; background: #1a2734; color: var(--ink); cursor: pointer; font-size: 10px; font-weight: 800; transition: border-color .13s ease, background .13s ease; }
+    .btn:hover:not(:disabled) { border-color: var(--mint); background: #203a40; }
+    .btn:disabled { cursor: not-allowed; opacity: .45; }
+    .btn.primary { border-color: #4d8575; background: linear-gradient(135deg, #286452, #234b50); color: #f1fff9; }
+    .btn.warm { color: #f1c786; }
+    .control-body { display: grid; gap: 13px; padding: 14px 16px 16px; }
+    .field-control { display: grid; gap: 6px; }
+    .label-row { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; color: #dce8e7; font-size: 10px; font-weight: 800; }
+    output { color: var(--mint); font: 10px ui-monospace, SFMono-Regular, Menlo, monospace; }
+    select { width: 100%; min-height: 36px; padding: 6px 9px; border: 1px solid #3b4a57; border-radius: 8px; background: #0d141c; color: var(--ink); font-size: 10px; }
+    input[type="range"] { width: 100%; accent-color: var(--mint); }
+    .range-hints { display: flex; justify-content: space-between; margin-top: -4px; color: #8495a1; font: 8px ui-monospace, SFMono-Regular, Menlo, monospace; }
+    .stats { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 7px; padding-top: 11px; border-top: 1px solid #2a3843; }
+    .stat { min-width: 0; padding: 8px; border: 1px solid #2c4048; border-radius: 8px; background: #101b23; }
+    .stat span { display: block; color: #91a5ad; font-size: 8px; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; }
+    .stat strong { display: block; margin-top: 2px; color: #e8f5f0; font: 14px ui-monospace, SFMono-Regular, Menlo, monospace; }
+    .status { min-height: 34px; margin: 0 14px 14px; padding: 8px 9px; border-left: 2px solid var(--mint); border-radius: 0 7px 7px 0; background: #0d1a21; color: #a8bdc1; font-size: 9px; }
+    .notes { display: grid; gap: 10px; padding: 13px 15px 15px; }
+    .note { padding: 10px; border: 1px solid #2c4149; border-radius: 9px; background: #111c24; }
+    .note b { display: block; margin-bottom: 3px; color: #def2e9; font-size: 10px; }
+    .note p { margin: 0; color: #9fb2b8; font-size: 9px; }
+    .keycap { padding: 1px 5px; border: 1px solid #50616c; border-radius: 4px; background: #182530; color: #e4efec; font: 8px ui-monospace, SFMono-Regular, Menlo, monospace; }
+    .footer { margin: 15px 3px 0; color: #7b8e99; font-size: 9px; text-align: center; }
+    @media (max-width: 800px) { .workspace { grid-template-columns: 1fr; } }
+    @media (max-width: 540px) {
+      .shell { width: min(100% - 18px, 1160px); padding-top: 16px; }
+      .masthead { align-items: flex-start; }
+      .identity { gap: 9px; }
+      .logo { width: 40px; height: 40px; border-radius: 12px; }
+      .subtitle { max-width: 235px; font-size: 10px; }
+      .local-badge { max-width: 90px; font-size: 8px; text-align: center; }
+      .intro { align-items: flex-start; gap: 9px; padding: 11px; }
+      .model-tag { max-width: 92px; font-size: 8px; text-align: center; }
+      .canvas-wrap { padding: 9px; }
+      .field { border-radius: 7px; }
+      .control-body { padding: 12px; }
+    }
+    @media (prefers-reduced-motion: reduce) { *, *::before, *::after { transition-duration: .01ms !important; } }
+  </style>
+</head>
+<body>
+  <main class="shell">
+    <header class="masthead">
+      <div class="identity">
+        <div class="logo" aria-hidden="true">∿</div>
+        <div>
+          <p class="eyebrow">An interactive chemistry field</p>
+          <h1>Reaction Field</h1>
+          <p class="subtitle">Seed a spot. Tune the balance. Watch a pattern find its own shape.</p>
+        </div>
+      </div>
+      <span class="local-badge">100% LOCAL · NO API</span>
+    </header>
+
+    <section class="intro" aria-label="About the simulation">
+      <div>
+        <strong>Self-organizing patterns, one small field</strong>
+        <p>A Gray–Scott reaction-diffusion toy: two abstract chemicals spread and react on a grid. Change the feed/kill balance, seed the field by hand, or try a preset. It is an exploratory visual model, not a biological forecast.</p>
+      </div>
+      <span class="model-tag">A + 2B → 3B</span>
+    </section>
+
+    <div class="workspace">
+      <section class="panel" aria-label="Reaction field canvas">
+        <div class="panel-head">
+          <div><h2>Live field</h2><p>Drag to add reagent B; shift-drag to rinse a patch back to A.</p></div>
+          <span class="chip" id="run-state">PAUSED</span>
+        </div>
+        <div class="canvas-wrap">
+          <canvas id="field" class="field" width="180" height="128" aria-label="Interactive reaction-diffusion pattern. Drag to seed reagent B; shift-drag to erase a patch."></canvas>
+          <div class="canvas-labels"><span>Periodic edge · 180 × 128 cells</span><span id="palette-label">Tidepool palette</span></div>
+        </div>
+        <div class="toolbar">
+          <button class="btn primary" id="play" type="button">▶ Run field</button>
+          <button class="btn" id="step" type="button">Step once</button>
+          <button class="btn warm" id="reset" type="button">Reset pattern</button>
+        </div>
+        <p class="status" id="status" role="status" aria-live="polite">Paused. Seed the field with a pointer, then run it or step through the chemistry.</p>
+      </section>
+
+      <aside class="panel" aria-label="Simulation controls and notes">
+        <div class="panel-head">
+          <div><h2>Field controls</h2><p>Presets reset the field and set the model constants.</p></div>
+          <span class="chip">LOCAL MODEL</span>
+        </div>
+        <div class="control-body">
+          <label class="field-control">
+            <span class="label-row">Pattern recipe</span>
+            <select id="preset">
+              <option value="spots">Spots & islands</option>
+              <option value="mitosis">Mitosis</option>
+              <option value="coral">Coral branches</option>
+              <option value="maze">Maze channels</option>
+              <option value="waves">Traveling waves</option>
+            </select>
+          </label>
+          <label class="field-control">
+            <span class="label-row">Feed rate <output id="feed-value">0.0350</output></span>
+            <input id="feed" type="range" min="0.0100" max="0.0700" step="0.0001" value="0.0350">
+            <span class="range-hints"><span>slower supply</span><span>faster supply</span></span>
+          </label>
+          <label class="field-control">
+            <span class="label-row">Kill rate <output id="kill-value">0.0620</output></span>
+            <input id="kill" type="range" min="0.0300" max="0.0700" step="0.0001" value="0.0620">
+            <span class="range-hints"><span>longer-lived B</span><span>shorter-lived B</span></span>
+          </label>
+          <label class="field-control">
+            <span class="label-row">Simulation speed <output id="speed-value">3×</output></span>
+            <input id="speed" type="range" min="1" max="8" step="1" value="3">
+            <span class="range-hints"><span>slow drift</span><span>fast evolution</span></span>
+          </label>
+          <label class="field-control">
+            <span class="label-row">Color map</span>
+            <select id="palette">
+              <option value="tide">Tidepool</option>
+              <option value="ember">Ember</option>
+              <option value="moss">Moss</option>
+              <option value="mono">Monochrome</option>
+            </select>
+          </label>
+          <div class="stats" aria-label="Simulation readouts">
+            <div class="stat"><span>Steps</span><strong id="step-count">000000</strong></div>
+            <div class="stat"><span>B density</span><strong id="density">0%</strong></div>
+            <div class="stat"><span>Seeds</span><strong id="seed-count">0</strong></div>
+          </div>
+        </div>
+        <div class="notes">
+          <div class="note"><b>Quick controls</b><p>Click or drag to seed B. Hold <kbd class="keycap">Shift</kbd> while dragging to erase. Press <kbd class="keycap">Space</kbd> to run or pause.</p></div>
+          <div class="note"><b>What to explore</b><p>Small changes in feed and kill rates can flip the field between isolated spots, branching fronts, and traveling waves. Pause, adjust a slider, then step forward.</p></div>
+        </div>
+      </aside>
+    </div>
+
+    <p class="footer">Original educational visual toy · all computation and drawing happen in this browser · no data is uploaded or saved.</p>
+  </main>
+  <script src="./app.js" defer></script>
+</body>
+</html>
