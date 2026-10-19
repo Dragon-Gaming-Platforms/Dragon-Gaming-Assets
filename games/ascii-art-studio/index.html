@@ -1,0 +1,87 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#101511">
+  <meta name="description" content="Convert a local image into copyable monochrome ASCII art in your browser.">
+  <title>ASCII Art Studio</title>
+  <style>
+    :root { color-scheme: dark; --bg:#0b100d; --panel:#131b16; --panel2:#19231d; --line:#304239; --ink:#edf6ef; --muted:#a4b8aa; --mint:#9de5b7; --lime:#d7f184; font-family:system-ui,-apple-system,"Segoe UI",sans-serif; }
+    * { box-sizing:border-box; }
+    body { min-width:320px; margin:0; color:var(--ink); background:radial-gradient(ellipse at 70% -15%,#1b3b2b 0,var(--bg) 58%); font-size:14px; line-height:1.5; }
+    button,input,select { font:inherit; }
+    .shell { width:min(1220px,calc(100% - 30px)); margin:auto; padding:24px 0 38px; }
+    header { display:flex; justify-content:space-between; align-items:flex-start; gap:16px; margin-bottom:18px; }
+    .brand { display:flex; gap:13px; align-items:center; }
+    .logo { display:grid; place-items:center; width:46px; height:46px; flex:none; border:1px solid #4a7659; border-radius:14px; background:#203a2a; color:var(--lime); font:900 17px ui-monospace,monospace; }
+    .eyebrow { margin:0 0 3px; color:var(--mint); font-size:10px; font-weight:850; letter-spacing:.15em; text-transform:uppercase; }
+    h1 { margin:0; font-size:clamp(23px,4vw,32px); line-height:1.1; letter-spacing:-.04em; }
+    .subtitle { margin:6px 0 0; color:var(--muted); font-size:12px; }
+    .local { padding:6px 10px; border:1px solid #315642; border-radius:999px; background:#122219; color:var(--mint); font-size:10px; font-weight:800; }
+    .layout { display:grid; grid-template-columns:300px minmax(0,1fr); gap:14px; align-items:start; }
+    .panel { overflow:hidden; border:1px solid var(--line); border-radius:15px; background:linear-gradient(150deg,#17221b,#101712); box-shadow:0 18px 55px #0006; }
+    .panel-head { padding:14px 16px 11px; border-bottom:1px solid var(--line); }
+    .panel-head h2 { margin:0; font-size:12px; letter-spacing:.06em; }
+    .panel-head p { margin:4px 0 0; color:var(--muted); font-size:10px; }
+    .controls { display:grid; gap:13px; padding:15px 16px 17px; }
+    .field { display:grid; gap:6px; }
+    .label-row { display:flex; justify-content:space-between; align-items:baseline; gap:8px; font-size:11px; font-weight:750; }
+    output { color:var(--mint); font:10px ui-monospace,monospace; }
+    input[type="range"] { width:100%; accent-color:var(--mint); }
+    select { width:100%; min-height:36px; padding:6px 8px; border:1px solid #3c5145; border-radius:8px; background:#0c130e; color:var(--ink); }
+    input[type="checkbox"] { accent-color:var(--mint); }
+    .check { display:flex; align-items:center; gap:8px; color:var(--muted); font-size:11px; }
+    .buttons { display:flex; flex-wrap:wrap; gap:7px; }
+    .btn { min-height:35px; padding:7px 10px; border:1px solid #405b48; border-radius:8px; background:#1c2b21; color:var(--ink); cursor:pointer; font-size:10px; font-weight:800; }
+    .btn:hover { border-color:var(--mint); background:#24382a; }
+    .btn.primary { border-color:#4d805c; background:#24492f; color:#d7fbe0; }
+    .btn:disabled { opacity:.45; cursor:not-allowed; }
+    .drop { display:grid; place-items:center; min-height:90px; padding:14px; border:1px dashed #4a6b53; border-radius:10px; background:#101a13; color:var(--muted); text-align:center; font-size:11px; }
+    .drop.drag { border-color:var(--lime); background:#1a2a1a; color:var(--ink); }
+    .drop strong { color:var(--mint); }
+    .drop input { display:block; width:100%; margin-top:8px; color:var(--muted); font-size:10px; }
+    .status { min-height:16px; color:var(--muted); font-size:10px; }
+    .result-head { display:flex; justify-content:space-between; align-items:center; gap:10px; padding:11px 14px; border-bottom:1px solid var(--line); background:#162019; }
+    .result-head strong { font-size:11px; }
+    .result-head span { color:var(--muted); font:10px ui-monospace,monospace; }
+    .output-wrap { min-height:460px; max-height:72vh; overflow:auto; padding:18px; background:#090d0a; }
+    pre { margin:0; color:#d5f1dc; font:10px/1.02 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace; white-space:pre; tab-size:2; }
+    .empty { display:grid; min-height:420px; place-items:center; color:#73887a; text-align:center; font-size:12px; }
+    .empty div { max-width:280px; }
+    footer { margin-top:16px; color:#7f9185; font-size:10px; text-align:center; }
+    @media(max-width:850px) { .layout { grid-template-columns:1fr; } .controls { grid-template-columns:repeat(2,minmax(0,1fr)); align-items:start; } .drop,.status { grid-column:1/-1; } .output-wrap { min-height:340px; } }
+    @media(max-width:520px) { .shell { width:calc(100% - 18px); padding-top:16px; } .controls { grid-template-columns:1fr 1fr; gap:10px; padding:12px; } .controls .field:first-child,.drop,.buttons,.status { grid-column:1/-1; } .output-wrap { padding:12px; } .local { max-width:90px; text-align:center; font-size:9px; } }
+  </style>
+</head>
+<body>
+  <main class="shell">
+    <header>
+      <div class="brand"><div class="logo" aria-hidden="true">TXT</div><div><p class="eyebrow">Image → characters</p><h1>ASCII Art Studio</h1><p class="subtitle">Turn a picture into a text portrait, entirely in this tab.</p></div></div>
+      <span class="local">Local image · no upload</span>
+    </header>
+    <div class="layout">
+      <section class="panel" aria-label="Conversion settings">
+        <div class="panel-head"><h2>IMAGE & STYLE</h2><p>Your image is decoded locally and never sent anywhere.</p></div>
+        <div class="controls">
+          <div id="drop" class="drop"><div><strong>Drop an image here</strong><br>or select a file from this device<input id="file" type="file" accept="image/png,image/jpeg,image/webp,image/gif"></div></div>
+          <button id="sample" class="btn primary" type="button">Use code-drawn sample</button>
+          <label class="field"><span class="label-row">Output width <output id="width-value">88 columns</output></span><input id="width" type="range" min="32" max="160" step="4" value="88"></label>
+          <label class="field"><span class="label-row">Character set</span><select id="charset"><option value="classic">Classic · @%#*+=-:.</option><option value="blocks">Block shading · █▓▒░ </option><option value="simple">Simple · #*+=:. </option><option value="binary">Binary · 10</option></select></label>
+          <label class="field"><span class="label-row">Contrast <output id="contrast-value">100%</output></span><input id="contrast" type="range" min="50" max="180" step="5" value="100"></label>
+          <label class="field"><span class="label-row">Brightness <output id="brightness-value">0</output></span><input id="brightness" type="range" min="-80" max="80" step="4" value="0"></label>
+          <label class="check"><input id="invert" type="checkbox"> Invert light and dark</label>
+          <div class="buttons"><button id="copy" class="btn" type="button" disabled>Copy ASCII</button><button id="download" class="btn" type="button" disabled>Download .txt</button></div>
+          <div id="status" class="status" role="status" aria-live="polite">Choose an image or start with the built-in sample.</div>
+        </div>
+      </section>
+      <section class="panel" aria-label="ASCII result">
+        <div class="result-head"><strong>TEXT OUTPUT</strong><span id="dimensions">Awaiting an image</span></div>
+        <div class="output-wrap"><div id="empty" class="empty"><div>Upload or drop a picture to make a text-only rendition.<br><br>Try the built-in sample to see the converter.</div></div><pre id="output" hidden></pre></div>
+      </section>
+    </div>
+    <footer>ASCII Art Studio · Original MIT tool · Local file processing only · No external libraries</footer>
+  </main>
+  <script src="app.js" defer></script>
+</body>
+</html>

@@ -1,0 +1,8 @@
+{
+  "name": "Signal Dash",
+  "desc": "A quick, original one-screen arcade game with a pocket-sized pixel display. Collect clean signal cells, dodge static, and use pulse charges to clear a lane. All graphics are drawn in code.",
+  "controls": "Move with ←/→ or A/D. Press Space to spend a pulse charge. On touch screens, use the on-screen arrows and Pulse button.",
+  "shelf": "Arcade & Action",
+  "tags": ["arcade", "action", "pixel", "handheld", "offline"],
+  "creator": "Dragon Gaming Assets contributors"
+}

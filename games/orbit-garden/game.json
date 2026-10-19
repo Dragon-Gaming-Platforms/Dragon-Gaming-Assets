@@ -1,0 +1,8 @@
+{
+  "name": "Orbit Garden",
+  "desc": "An interactive gravity sandbox for arranging small orbital systems. Choose a preset, pause the motion, or drag on the canvas to launch a new body. Uses a local softened Newtonian simulation with no external assets.",
+  "controls": "Pick a preset and press Play/Pause. Drag on the space canvas to place a body; the drag direction and length set its launch velocity. Adjust gravity and time scale locally.",
+  "shelf": "Interactive Stories & Experiments",
+  "tags": ["simulation", "gravity", "space", "physics", "offline"],
+  "creator": "Dragon Gaming Assets contributors"
+}

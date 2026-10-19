@@ -1,0 +1,88 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#11101b">
+  <meta name="description" content="Create and download QR codes locally in your browser. No API or upload.">
+  <title>QR Code Studio</title>
+  <style>
+    :root { color-scheme:dark; --bg:#0c0d14; --panel:#151724; --panel2:#1d2030; --line:#36394e; --ink:#f4f2fc; --muted:#a9a8bb; --violet:#c6a9ff; --cyan:#85e3d6; font-family:system-ui,-apple-system,"Segoe UI",sans-serif; }
+    * { box-sizing:border-box; }
+    body { min-width:320px; margin:0; color:var(--ink); background:radial-gradient(ellipse at 65% -15%,#302447 0,var(--bg) 58%); font-size:14px; line-height:1.5; }
+    button,input,select,textarea { font:inherit; }
+    .shell { width:min(1120px,calc(100% - 28px)); margin:auto; padding:24px 0 36px; }
+    header { display:flex; justify-content:space-between; align-items:flex-start; gap:16px; margin-bottom:18px; }
+    .brand { display:flex; gap:13px; align-items:center; }
+    .logo { width:46px; height:46px; display:grid; place-items:center; border:1px solid #645183; border-radius:14px; background:#302746; color:var(--cyan); font-size:23px; font-weight:900; }
+    .eyebrow { margin:0 0 3px; color:var(--cyan); font-size:10px; font-weight:850; letter-spacing:.15em; text-transform:uppercase; }
+    h1 { margin:0; font-size:clamp(23px,4vw,32px); letter-spacing:-.04em; line-height:1.1; }
+    .subtitle { margin:6px 0 0; color:var(--muted); font-size:12px; }
+    .badge { padding:6px 10px; border:1px solid #3c5c55; border-radius:999px; background:#13221f; color:var(--cyan); font-size:10px; font-weight:800; }
+    .layout { display:grid; grid-template-columns:minmax(0,1.15fr) minmax(300px,.85fr); gap:14px; align-items:start; }
+    .panel { overflow:hidden; border:1px solid var(--line); border-radius:15px; background:linear-gradient(145deg,#191c2a,#11131c); box-shadow:0 20px 60px #0006; }
+    .head { padding:14px 16px 11px; border-bottom:1px solid var(--line); }
+    .head h2 { margin:0; font-size:12px; letter-spacing:.06em; }
+    .head p { margin:4px 0 0; color:var(--muted); font-size:10px; }
+    .controls { display:grid; gap:13px; padding:15px 16px 17px; }
+    .field { display:grid; gap:6px; }
+    .label-row { display:flex; justify-content:space-between; gap:8px; font-size:11px; font-weight:750; }
+    output { color:var(--cyan); font:10px ui-monospace,monospace; }
+    textarea,select { width:100%; padding:9px 10px; border:1px solid #40435a; border-radius:9px; background:#0d1018; color:var(--ink); }
+    textarea { min-height:116px; resize:vertical; font:12px/1.45 ui-monospace,monospace; }
+    select { min-height:37px; }
+    input[type=range] { width:100%; accent-color:var(--violet); }
+    input[type=color] { width:40px; height:30px; padding:2px; border:1px solid #41445a; border-radius:6px; background:#0d1018; }
+    input:focus-visible,textarea:focus-visible,select:focus-visible,button:focus-visible { outline:2px solid var(--cyan); outline-offset:2px; }
+    .settings { display:grid; grid-template-columns:1fr 1fr; gap:11px; }
+    .color-row { display:flex; align-items:center; justify-content:space-between; gap:12px; }
+    .buttons { display:flex; flex-wrap:wrap; gap:8px; }
+    .btn { min-height:36px; padding:7px 11px; border:1px solid #4c4266; border-radius:8px; background:#29243a; color:var(--ink); cursor:pointer; font-size:10px; font-weight:800; }
+    .btn:hover { border-color:var(--violet); background:#352d4b; }
+    .btn.primary { border-color:#65528a; background:#46345f; color:#f2eaff; }
+    .preview { display:grid; justify-items:center; gap:12px; padding:18px; }
+    .qr-frame { width:min(100%,480px); min-height:310px; display:grid; place-items:center; padding:12px; border:1px solid #3a3c50; border-radius:12px; background:#0c0d13; }
+    canvas { display:block; width:auto; max-width:100%; height:auto; max-height:460px; image-rendering:pixelated; background:#fff; }
+    .info { width:100%; display:flex; justify-content:space-between; gap:12px; color:var(--muted); font:10px ui-monospace,monospace; }
+    .status { min-height:17px; color:var(--muted); font-size:10px; }
+    .note { margin-top:14px; padding:11px 13px; border:1px solid #35364b; border-radius:10px; background:#141620; color:var(--muted); font-size:10px; }
+    .note strong { color:var(--ink); }
+    footer { margin-top:15px; color:#7e8194; font-size:10px; text-align:center; }
+    @media(max-width:800px) { .layout { grid-template-columns:1fr; } .preview { order:-1; } .qr-frame { min-height:250px; } }
+    @media(max-width:520px) { .shell { width:calc(100% - 18px); padding-top:16px; } .badge { max-width:88px; text-align:center; font-size:9px; } .controls { padding:12px; } .settings { gap:8px; } .qr-frame { padding:8px; } }
+  </style>
+</head>
+<body>
+  <main class="shell">
+    <header>
+      <div class="brand"><div class="logo" aria-hidden="true">▦</div><div><p class="eyebrow">Offline code maker</p><h1>QR Code Studio</h1><p class="subtitle">Turn a link, note, or contact detail into a downloadable QR code.</p></div></div>
+      <span class="badge">No API · no upload</span>
+    </header>
+    <div class="layout">
+      <section class="panel" aria-label="QR code settings">
+        <div class="head"><h2>CONTENT & STYLE</h2><p>Text is encoded in your browser. Nothing is sent to a service.</p></div>
+        <div class="controls">
+          <label class="field"><span class="label-row">Text to encode <output id="length">0 characters</output></span><textarea id="content" maxlength="4000" spellcheck="false">https://example.com</textarea></label>
+          <div class="settings">
+            <label class="field"><span class="label-row">Error correction</span><select id="correction"><option value="L">Low · L</option><option value="M" selected>Medium · M</option><option value="Q">Quartile · Q</option><option value="H">High · H</option></select></label>
+            <label class="field"><span class="label-row">Module size <output id="cell-output">6 px</output></span><input id="cell" type="range" min="3" max="12" step="1" value="6"></label>
+            <label class="field"><span class="label-row">Quiet zone <output id="margin-output">4 modules</output></span><input id="margin" type="range" min="2" max="10" step="1" value="4"></label>
+            <div class="field"><span class="label-row">Colors</span><div class="color-row"><label>Ink <input id="ink" type="color" value="#10131b" aria-label="QR code foreground color"></label><label>Paper <input id="paper" type="color" value="#ffffff" aria-label="QR code background color"></label></div></div>
+          </div>
+          <div class="buttons"><button id="png" class="btn primary" type="button">↓ Download PNG</button><button id="svg" class="btn" type="button">↓ Download SVG</button><button id="copy" class="btn" type="button">Copy encoded text</button></div>
+          <div id="status" class="status" role="status" aria-live="polite">Ready to make a local QR code.</div>
+        </div>
+      </section>
+      <section class="panel" aria-label="QR code preview">
+        <div class="head"><h2>LIVE PREVIEW</h2><p>Keep a clear contrast and an unobstructed quiet zone when printing.</p></div>
+        <div class="preview"><div class="qr-frame"><canvas id="qr" width="360" height="360" aria-label="Generated QR code preview"></canvas></div><div class="info"><span id="version">QR version —</span><span id="dimensions">— × — modules</span></div></div>
+      </section>
+    </div>
+    <div class="note"><strong>Privacy:</strong> content is encoded locally by a vendored JavaScript QR library. This page does not fetch content, resolve URLs, or call a QR API. Check the code with your device before sharing or printing.</div>
+    <footer>QR Code Studio · Original MIT interface + qrcode-generator MIT library · “QR Code” is a registered trademark of DENSO WAVE.</footer>
+  </main>
+  <script src="vendor/qrcode-generator.js"></script>
+  <script src="vendor/qrcode-utf8.js"></script>
+  <script src="app.js" defer></script>
+</body>
+</html>

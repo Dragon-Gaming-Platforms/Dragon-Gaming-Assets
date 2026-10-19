@@ -1,0 +1,15 @@
+{
+  "name": "Pip & the Pocket Kingdom",
+  "desc": "A tiny original pixel platformer inside POCKETLEAF, a handheld console in your browser: guide sprout Pip across three hand-made levels — stomp Mossbugs, dodge Snappers, collect Glimmers, and reach the Beacon before the clock runs out.",
+  "controls": "Arrows or WASD to move, Z/K to jump, X/J to run (touch d-pad and gamepad supported)",
+  "shelf": "Arcade & Action",
+  "tags": [
+    "arcade",
+    "platformer",
+    "pixel",
+    "console"
+  ],
+  "badge": "New",
+  "creator": "ysohaarsh",
+  "image": "title.png"
+}

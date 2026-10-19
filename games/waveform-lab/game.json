@@ -1,0 +1,8 @@
+{
+  "name": "Waveform Lab",
+  "desc": "Design and play single synthesized tones. Shape square, triangle, sawtooth, or sine waves with an ADSR envelope and low-pass filter, then export a local WAV. This is a sound-design instrument, not a song sequencer.",
+  "controls": "Press Play tone or hold piano keys / A-W-S-E-D-F-T-G-Y-H-U-J-K. Adjust waveform, frequency, ADSR, filter and note length; Export WAV saves locally.",
+  "shelf": "Tools & Utilities",
+  "tags": ["audio", "synthesizer", "waveform", "music", "offline"],
+  "creator": "Dragon Gaming Assets contributors"
+}
