@@ -1,0 +1,15 @@
+{
+  "name": "Aether Clash",
+  "desc": "A 2D arcade fighting game — Mecha vs Demi-Human: twelve chibi fighters with distinct move sets, cinematic ultimates, and a CPU that reads your moves. First to two rounds wins.",
+  "controls": "A/D to move, W to jump, Space for the 3-hit attack chain, I/O skills, P ultimate, Esc to pause (touch + mobile shell supported)",
+  "shelf": "Arcade & Action",
+  "tags": [
+    "arcade",
+    "fighter",
+    "2d",
+    "versus"
+  ],
+  "badge": "New",
+  "creator": "bangtutorial",
+  "image": "title.png"
+}
