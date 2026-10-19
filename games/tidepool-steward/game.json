@@ -1,0 +1,8 @@
+{
+  "name": "Tidepool Steward",
+  "desc": "Guide a tiny intertidal reserve through a changing season. Restore kelp and eelgrass, clear debris, protect habitat, and balance a simplified coastal food web over twelve weeks.",
+  "controls": "Mouse or touch: select a habitat tile and choose one of four stewardship actions. Use Advance to resolve the week; Restart begins a fresh season.",
+  "shelf": "Interactive Stories & Experiments",
+  "tags": ["strategy", "ecosystem", "simulation", "coastal", "offline"],
+  "creator": "Dragon Gaming Assets contributors"
+}
