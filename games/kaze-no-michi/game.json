@@ -1,0 +1,15 @@
+{
+  "name": "Kaze no Michi",
+  "desc": "An open-world samurai journey across a procedurally generated autumn island in the browser: explore shrines, ginkgo valleys and cliffside pagodas, ride a horse, and duel enemies with combos, parries and dodges. Every texture, mesh, animation and sound is generated in code at runtime — the game ships no asset files at all.",
+  "controls": "WASD/arrows move, mouse look, left-click 3-hit combo, right-click/F heavy attack, Q block (parry on impact), Space/C dodge, R heal, E interact, H whistle for the horse, Esc pause (gamepad supported; UI Italian/English with a language setting)",
+  "shelf": "RPG & Adventure",
+  "tags": [
+    "action",
+    "open-world",
+    "samurai",
+    "adventure"
+  ],
+  "badge": "New",
+  "creator": "cryptosecco",
+  "image": "title.png"
+}
