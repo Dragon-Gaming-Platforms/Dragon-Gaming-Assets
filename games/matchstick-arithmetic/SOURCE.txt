@@ -1,0 +1,12 @@
+Matchstick Arithmetic
+Source: https://github.com/z-biz-game/z-biz-game-matchwork-cos
+Revision: c93be01c0c2785857009a48766bd62778796bd09
+License: MIT (see LICENSE).
+Retrieved: 2026-10-18
+
+Static runtime and local icons/puzzle data only. Tooling, test fixtures, desktop
+wrappers, manifests and service-worker registration omitted. No CDN/backend needed.
+Browser storage namespaced; metadata images made relative; English help added.
+Phone header controls wrap. Original Chinese UI retained except noted below.
+Move storage-acquisition guards inside try/catch so denied storage does not prevent play.
+Touch buttons activate on release with duplicate-click suppression after captured drags.

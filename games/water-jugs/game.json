@@ -1,0 +1,15 @@
+{
+  "name": "Water Jugs",
+  "desc": "Measure a target volume with unmarked jugs using only full fills, emptying and transfers. Includes 63 baked puzzles and daily/seeded challenges. Original Simplified Chinese interface; English help included.",
+  "controls": "Drag jugs to the faucet, drain or another jug. U undo, H hint, R restart.",
+  "shelf": "Puzzle & Logic",
+  "tags": [
+    "games",
+    "html5",
+    "puzzle",
+    "logic",
+    "water-jugs"
+  ],
+  "badge": "New",
+  "creator": "z-biz-game"
+}

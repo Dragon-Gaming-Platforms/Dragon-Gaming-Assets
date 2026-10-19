@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#101217">
+<meta name="description" content="倒水量：用几只没刻度的桶量出指定的数。每一关的最少次数都是广度优先搜索量出来的，可解性由数论定理独立判定。"><meta property="og:type" content="website"><meta property="og:title" content="倒水量 · POUR"><meta property="og:description" content="倒水量：用几只没刻度的桶量出指定的数。每一关的最少次数都是广度优先搜索量出来的，可解性由数论定理独立判定。"><meta name="twitter:card" content="summary"><meta name="twitter:title" content="倒水量 · POUR"><meta name="twitter:description" content="倒水量：用几只没刻度的桶量出指定的数。每一关的最少次数都是广度优先搜索量出来的，可解性由数论定理独立判定。">
+<link rel="icon" href="data:,">
+<title>Water Jugs</title>
+<link rel="stylesheet" href="css/game.css">
+
+
+</head>
+<body>
+<header class="topbar">
+  <h1 class="brand"><span class="brand-mark">◺</span>倒水量<small>POUR</small></h1>
+  <nav class="modes" id="modes" aria-label="模式">
+    <button type="button" data-mode="campaign">闯关</button>
+    <button type="button" data-mode="daily">每日</button>
+    <button type="button" data-mode="random">随机</button>
+  </nav>
+  <p class="totals" id="totals"></p>
+</header>
+
+<main class="stage">
+  <section class="board">
+    <canvas id="bench" aria-label="倒水操作台"></canvas>
+    <p class="hint-line" id="hintline"></p>
+    <div class="curtain" id="curtain" hidden>
+      <div class="curtain-card">
+        <p class="stars" id="stars"></p>
+        <h2 id="verdict"></h2>
+        <p class="tally" id="tally"></p>
+        <div class="curtain-actions">
+          <button type="button" id="again">再来一次</button>
+          <button type="button" id="next" class="primary">下一题</button>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <aside class="panel">
+<section id="hosting-info" class="hosting-info" lang="en"></section>
+<a class="hosting-guide" href="help.html" lang="en">English rules &amp; controls</a>
+    <p class="crumbs" id="crumbs"></p>
+    <dl class="readout" id="readout"></dl>
+    <table class="caps" id="caps">
+      <thead><tr><th>桶</th><th>容量</th><th>当前</th><th>目标</th></tr></thead>
+      <tbody></tbody>
+    </table>
+
+    <!--
+      玩法说明。引擎里没有规则文字表可复用（js/core/jug.js 只导出 describe()，那是"这一手
+      动作怎么说"的短句，不是规则），所以下面每一条都对着代码写，出处点名到行：
+        · 目标＝把目标桶恰好装到 need（=== 不是 >=）  → jug.js isGoal() 145-150
+        · 三个动作与三个拖放落点                      → jug.js 23-25 / apply() 100-115；
+                                                        view.js actionOf() 160-171
+        · 互倒倒到"源空"或"目标满"为止               → jug.js apply() 109 的 Math.min
+        · 没有半倒                                    → jug.js 9-14（桶无刻度，"一半"不是状态）
+        · 不变水不计步                                → jug.js effective() 121-125 + game.js act() 52
+        · 星级三档                                    → game.js grade() 101-105（只读 moves 与 par）
+        · 提示只走烘焙路线、离开路线不重搜            → game.js hint() 90-97
+        · 快捷键 u/h/r/F/Esc                          → main.js 391-398 与 519-527
+    -->
+    <details class="about">
+      <summary>玩法</summary>
+      <p><b>目标</b>：把容量表里高亮的那只桶——<b>目标</b>列写着要量的数——恰好装到那个数，就算量出来了。</p>
+      <p><b>三个落点、三个动作</b>：桶拖到顶部<b>龙头</b>＝接满，拖到右下<b>下水道</b>＝倒掉，拖到<b>另一只桶</b>＝互倒。互倒会一直倒到<b>源桶见底</b>或<b>目标桶见满</b>为止；桶上没有刻度，所以没有"倒一半"这个动作。</p>
+      <p><b>不变水不计步</b>：满桶再接满、空桶再倒掉、往已经满的桶里倒，都不算一步、也不改一滴水——画布下方的提示行会直说"什么也没变，不计步"。</p>
+      <p><b>星级</b>：步数正好等于面板上的<b>最少</b>是 ★★★，多 1–3 步 ★★，再多 ★。</p>
+      <p><b>快捷键</b>：<code>u</code> 撤销、<code>h</code> 提示、<code>r</code> 重开、<code>F</code> 全屏、<code>Esc</code> 关掉通关卡。提示只沿构建期量好的那条路线给下一步；一旦走出那条路线，它会照实说"不在认证路线上"，<b>不会</b>现场重搜——撤销回去，或者重开。</p>
+    </details>
+
+    <p class="theorem" id="theorem"></p>
+    <div class="controls">
+      <button type="button" id="undo">撤销</button>
+      <button type="button" id="hint">提示</button>
+      <button type="button" id="restart">重开</button>
+      <button type="button" id="share">分享</button>
+      <button id="btn-fullscreen" type="button" aria-pressed="false" title="全屏（F）">全屏</button>
+    </div>
+    <p class="linkline" id="linkline"></p>
+    <div class="log" id="log"></div>
+    <div class="shelf" id="shelf"></div>
+    <details class="about">
+      <summary>这一关的数字从哪来</summary>
+      <p>每一题的<b>最少次数</b>都由 <code>js/core/solve.js</code> 的广度优先搜索在 ∏(cᵢ+1) 状态图上量出：一次拖动不论倒多少水都算一步。<b>有没有解</b>则由 <code>js/core/theorem.js</code> 的数论定理（Bézout）独立判定——两者相互印证，谁也不给谁打分。关卡来自 <code>tools/bake.mjs</code>：构建期跑 <code>js/core/make.js</code> 出题并复验，浏览器本身既不生成也不搜索。</p>
+      <p class="save">成绩只存在这台设备的浏览器里。<button type="button" id="wipe">清空存档</button></p>
+    </details>
+  </aside>
+</main>
+
+<p class="toast" id="toast" hidden></p>
+<script type="module" src="js/touch-controls.js"></script>
+<script type="module" src="js/main.js"></script>
+
+</body>
+</html>

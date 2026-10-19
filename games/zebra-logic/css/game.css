@@ -1,0 +1,197 @@
+/* 谁养鱼 · 纸笔口径：一张纸、一行一句话、格子够大够点。
+   两条被本组织踩过的坑写死在这里：
+     ① 带 display 的 section 必须自带 [hidden] 规则 —— UA 那条 [hidden]{display:none} 会被
+        作者写的 display:grid/flex 覆盖，于是"藏起来"的面板照样能被 elementFromPoint 命中，
+        指针闸会去怪控件（本仓 reject/verdict/answer 三段都是这种情况，各自补了一条）。
+     ② 390×844 起不许出现横向滚动条：控件行用 flex-wrap，画布尺寸由 JS 按容器宽度算。 */
+:root {
+  --ink: #1b1a18;
+  --ink-soft: #5c564d;
+  --paper: #fbf8f2;
+  --paper-alt: #f2ede4;
+  --line: #cfc7b8;
+  --accent: #8a5a2b;
+  --good: #2f6b40;
+  --bad: #b23a30;
+  --focus: #2b6cb0;
+  --cell-max: 68px;
+}
+* { box-sizing: border-box; }
+html, body { max-width: 100%; }
+body {
+  margin: 0;
+  padding: 18px 14px 40px;
+  background: var(--paper);
+  color: var(--ink);
+  font: 15px/1.6 ui-sans-serif, system-ui, "PingFang SC", "Hiragino Sans GB", sans-serif;
+  overflow-x: hidden;
+}
+header { max-width: 900px; margin: 0 auto 12px; }
+h1 { margin: 0; font-size: 23px; letter-spacing: .04em; }
+h1 small { font-size: 13px; color: var(--ink-soft); font-weight: 400; letter-spacing: .12em; }
+.stage { margin: 6px 0 0; color: var(--ink-soft); font-size: 13px; }
+.stage b { color: var(--accent); }
+main { max-width: 900px; margin: 0 auto; display: block; }
+main[hidden] { display: none; }
+
+h2 { font-size: 14px; margin: 0 0 6px; letter-spacing: .08em; color: var(--ink-soft); }
+p { margin: 6px 0; }
+code { font: 12px/1.5 ui-monospace, SFMono-Regular, Menlo, monospace; }
+
+/* ── 控件条 ─────────────────────────────────────────────────────────────── */
+.controls {
+  display: flex; flex-wrap: wrap; align-items: center; gap: 8px 10px;
+  padding: 10px 12px; margin-bottom: 12px;
+  border: 1px solid var(--line); border-radius: 6px; background: var(--paper-alt);
+  font-size: 14px;
+}
+.controls[hidden] { display: none; }
+.controls label { display: flex; align-items: center; gap: 6px; }
+.controls select, .controls input {
+  font: inherit; padding: 4px 6px; min-height: 32px;
+  border: 1px solid var(--line); border-radius: 4px; background: #fff; color: var(--ink);
+}
+.controls input { width: 9ch; }
+.controls button, .answer button {
+  font: inherit; padding: 6px 14px; min-height: 36px; cursor: pointer;
+  border: 1px solid var(--accent); border-radius: 4px;
+  background: #fff; color: var(--accent);
+}
+.controls button:hover, .answer button:hover { background: var(--accent); color: #fff; }
+.readouts { display: flex; gap: 10px; color: var(--ink-soft); font-size: 13px; flex-wrap: wrap; }
+.stat { white-space: nowrap; }
+#stat-conflict.bad { color: var(--bad); font-weight: 600; }
+.status { color: var(--ink-soft); font-size: 13px; flex-basis: 100%; }
+
+/* ── 盘面 ───────────────────────────────────────────────────────────────── */
+.board-wrap { display: block; margin-bottom: 14px; }
+.board-wrap[hidden] { display: none; }
+.pairs { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 8px; }
+.pairs[hidden] { display: none; }
+.pairs button {
+  font: 13px/1.4 inherit; padding: 5px 10px; min-height: 32px; cursor: pointer;
+  border: 1px solid var(--line); border-radius: 999px; background: #fff; color: var(--ink-soft);
+}
+.pairs button[aria-current="true"] { border-color: var(--accent); color: var(--accent); background: #fff7ee; font-weight: 600; }
+.canvas-wrap { display: block; }
+canvas {
+  display: block; margin: 0 auto; background: #fff;
+  border: 1px solid var(--line); border-radius: 6px; touch-action: manipulation;
+}
+canvas:focus-visible, canvas:focus { outline: 3px solid var(--focus); outline-offset: 2px; }
+button:focus-visible, select:focus-visible, input:focus-visible { outline: 3px solid var(--focus); outline-offset: 1px; }
+.kbd { color: var(--ink-soft); font-size: 12px; }
+.kbd kbd { border: 1px solid var(--line); border-radius: 3px; padding: 0 4px; background: #fff; font: 11px ui-monospace, monospace; }
+.hint { min-height: 1.6em; font-size: 14px; color: var(--accent); }
+.hint:empty { color: var(--ink-soft); }
+
+/* ── 题面 / 回执 ────────────────────────────────────────────────────────── */
+.side { display: block; margin-bottom: 16px; }
+.side[hidden] { display: none; }
+.side ol { margin: 0 0 10px; padding-left: 24px; }
+.side li { margin: 2px 0; }
+.question { font-weight: 600; color: var(--accent); }
+pre {
+  margin: 0; padding: 10px 12px; overflow-x: auto; max-width: 100%;
+  border: 1px solid var(--line); border-radius: 6px; background: #fff;
+  font: 12px/1.7 ui-monospace, SFMono-Regular, Menlo, monospace;
+  white-space: pre-wrap; overflow-wrap: anywhere;
+}
+
+/* ── 答案面板 ───────────────────────────────────────────────────────────── */
+.answer { display: block; margin-bottom: 16px; padding: 10px 12px; border: 1px solid var(--line); border-radius: 6px; background: #fff; }
+.answer[hidden] { display: none; }
+.answer .note { color: var(--ink-soft); font-size: 12px; }
+#answer-grid { display: grid; gap: 6px; margin: 8px 0; }
+.answer-row { display: grid; grid-template-columns: 3.5em repeat(var(--house-cols, 5), minmax(0, 1fr)); gap: 6px; align-items: center; }
+.answer-row .cat { font-size: 13px; color: var(--ink-soft); }
+.answer-row select { font: inherit; min-height: 34px; padding: 3px 4px; border: 1px solid var(--line); border-radius: 4px; background: #fff; color: var(--ink); width: 100%; }
+.answer-head { display: grid; grid-template-columns: 3.5em repeat(var(--house-cols, 5), minmax(0, 1fr)); gap: 6px; font-size: 12px; color: var(--ink-soft); }
+.verdict { font-size: 14px; }
+.verdict[hidden] { display: none; }
+.verdict.ok { color: var(--good); font-weight: 600; }
+.verdict.bad { color: var(--bad); }
+
+/* ── 未通过验收 ─────────────────────────────────────────────────────────── */
+.reject { display: grid; gap: 6px; margin-bottom: 16px; padding: 10px 12px; border: 2px solid var(--bad); border-radius: 6px; background: #fff5f3; }
+.reject[hidden] { display: none; }
+.reject h2 { color: var(--bad); }
+
+.save-note { color: var(--ink-soft); font-size: 12px; }
+
+@media (max-width: 520px) {
+  body { padding: 12px 8px 32px; }
+  h1 { font-size: 20px; }
+  .controls { padding: 8px; gap: 6px 8px; }
+  .controls button, .answer button { padding: 6px 10px; }
+  .answer-row, .answer-head { grid-template-columns: 2.8em repeat(var(--house-cols, 5), minmax(0, 1fr)); }
+}
+
+/* 中央分发：safe-area 兜底 */
+
+/* ---------- safe-area：刘海与主屏条不吃掉按钮（中央分发，akari-cos 同口径） ---------- */
+:root {
+  --sat: env(safe-area-inset-top, 0px);
+  --sar: env(safe-area-inset-right, 0px);
+  --sab: env(safe-area-inset-bottom, 0px);
+  --sal: env(safe-area-inset-left, 0px);
+}
+html, body {
+  padding-left: var(--sal);
+  padding-right: var(--sar);
+}
+body {
+  padding-top: var(--sat);
+  padding-bottom: var(--sab);
+  min-height: 100vh;
+  min-height: 100dvh;
+}
+/* 贴边的固定/吸底元素自己让开主屏条，别让 home indicator 压住按钮 */
+.fixed-bottom, .bottom-bar, .hud-bottom, footer.app-footer {
+  padding-bottom: calc(var(--sab) + env(safe-area-inset-bottom, 0px));
+}
+
+
+/* ============================================================
+   44px 触摸命中下限（Apple HIG 手机可用性底线）
+   每个真正可点的元素都要有 ≥44×44 CSS px 的命中盒。
+   min-height / min-width 是**硬下限**：只会把过小的盒子撑到 44px，
+   本来就够大的控件（宽药丸、整行列表项、大数字键）外形一点不变。
+
+   两处非平凡之处：
+   1) 需要 !important —— 各组件自己有 `.shelf button { min-width: 34px }`
+      这类更"贴身"的规则，类选择器的优先级高于任何标签堆叠，
+      不加的话这条底线会被组件规则逐个抵消。
+   2) 先把 --touch-min 定死：tapa / nurikabe 早就写了
+      `min-height: var(--touch-min)`，但全仓没有任何地方定义过这个变量，
+      无 fallback 的 var() 在计算值阶段整条作废 —— 那是个看着像 44px、
+      实际什么都不保证的死规则。这里补上定义，让它们原本的意图真正成立。
+   ============================================================ */
+:root { --touch-min: 44px; }
+button,
+select,
+input,
+textarea,
+a[href],
+[role="button"] {
+  min-height: 44px !important;
+  min-width: 44px !important;
+}
+
+/* ---------- 减弱动效（prefers-reduced-motion）---------- */
+/* 本仓当前**没有**可减的装饰性动效：只有 .controls button:hover / .answer button:hover 的背景色瞬切，无 transition / @keyframes
+   剩下的 :hover 颜色瞬切与 focus 轮廓是状态反馈，不是动效，动了反而更难用。 */
+@media (prefers-reduced-motion: reduce) {
+  /* 当下这三条不命中任何东西；写在这里是为了将来有人加动画/过渡时自动被归零，
+     而不必再想起来补这一段。颜色、透明度、命中区、focus 轮廓一律不动。 */
+  *, *::before, *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
+}
+
+/* Host adaptation: local English guidance and wrapping phone controls. */
+.hosting-guide { display:block; color:#90d7ff; background:#162333; padding:10px; border-radius:6px; font:14px/1.4 system-ui; }
+.hosting-info { font:13px/1.55 system-ui; color:#e5edf5; background:#162333; padding:10px; border-radius:6px; }
+@media(max-width:860px) { .topbar { flex-wrap:wrap; } }
