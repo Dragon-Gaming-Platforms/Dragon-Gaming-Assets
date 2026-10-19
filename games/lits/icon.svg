@@ -1,0 +1,61 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" width="100%" height="100%">
+  <defs>
+    <radialGradient id="bgGrad" cx="50%" cy="50%" r="50%">
+      <stop offset="0%" stop-color="#2c2a29" />
+      <stop offset="100%" stop-color="#181716" />
+    </radialGradient>
+    <linearGradient id="woodGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#d4a373" />
+      <stop offset="50%" stop-color="#c58a55" />
+      <stop offset="100%" stop-color="#a46d3e" />
+    </linearGradient>
+    <linearGradient id="jadeGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#52b788" />
+      <stop offset="100%" stop-color="#2d6a4f" />
+    </linearGradient>
+    <filter id="shadow" x="-10%" y="-10%" width="130%" height="130%">
+      <feDropShadow dx="0" dy="8" stdDeviation="12" flood-color="#000" flood-opacity="0.45" />
+    </filter>
+  </defs>
+
+  <!-- Background Circle / Rounded Mat -->
+  <rect width="512" height="512" rx="108" fill="url(#bgGrad)" />
+
+  <!-- Outer Chamber Screen Rim -->
+  <rect x="56" y="56" width="400" height="400" rx="28" fill="none" stroke="#443f3b" stroke-width="6" />
+
+  <!-- Japanese Shoji Lattice Inner Grid -->
+  <line x1="156" y1="56" x2="156" y2="456" stroke="#383431" stroke-width="2" />
+  <line x1="256" y1="56" x2="256" y2="456" stroke="#383431" stroke-width="2" />
+  <line x1="356" y1="56" x2="356" y2="456" stroke="#383431" stroke-width="2" />
+  <line x1="56" y1="156" x2="456" y2="156" stroke="#383431" stroke-width="2" />
+  <line x1="56" y1="256" x2="456" y2="256" stroke="#383431" stroke-width="2" />
+  <line x1="56" y1="356" x2="456" y2="356" stroke="#383431" stroke-width="2" />
+
+  <!-- L-Tetromino (Warm Hinoki Wood) -->
+  <g filter="url(#shadow)">
+    <rect x="76" y="76" width="80" height="80" rx="14" fill="url(#woodGrad)" />
+    <rect x="76" y="176" width="80" height="80" rx="14" fill="url(#woodGrad)" />
+    <rect x="76" y="276" width="80" height="80" rx="14" fill="url(#woodGrad)" />
+    <rect x="176" y="276" width="80" height="80" rx="14" fill="url(#woodGrad)" />
+  </g>
+
+  <!-- T-Tetromino (Serene Jade Green) -->
+  <g filter="url(#shadow)">
+    <rect x="276" y="176" width="80" height="80" rx="14" fill="url(#jadeGrad)" />
+    <rect x="376" y="176" width="80" height="80" rx="14" fill="url(#jadeGrad)" />
+    <rect x="176" y="176" width="80" height="80" rx="14" fill="url(#jadeGrad)" />
+    <rect x="276" y="276" width="80" height="80" rx="14" fill="url(#jadeGrad)" />
+  </g>
+
+  <!-- Tactile Tatami Floor Dots -->
+  <circle cx="316" cy="116" r="10" fill="#665f5a" opacity="0.8" />
+  <circle cx="416" cy="116" r="10" fill="#665f5a" opacity="0.8" />
+  <circle cx="416" cy="316" r="10" fill="#665f5a" opacity="0.8" />
+  <circle cx="116" cy="416" r="10" fill="#665f5a" opacity="0.8" />
+  <circle cx="216" cy="416" r="10" fill="#665f5a" opacity="0.8" />
+  <circle cx="316" cy="416" r="10" fill="#665f5a" opacity="0.8" />
+
+  <!-- Central Kigumi Inscription / Kanji Glyphs -->
+  <text x="256" y="482" text-anchor="middle" font-family="'Noto Serif JP', 'Cinzel', serif" font-size="28" font-weight="600" fill="#d4a373" letter-spacing="6">木組み • ＬＩＴＳ</text>
+</svg>

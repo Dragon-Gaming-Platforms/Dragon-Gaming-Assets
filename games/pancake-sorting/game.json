@@ -1,0 +1,15 @@
+{
+  "name": "Pancake Sorting",
+  "desc": "Sort a stack using prefix reversals: flip the top k pancakes together. Includes burnt-side puzzles and exact shortest-path targets. Original Simplified Chinese interface; English help included.",
+  "controls": "Tap below a pancake to flip the prefix; focus the canvas for arrows and Enter, or keys 1\u20139. U undo, H hint, R restart.",
+  "shelf": "Puzzle & Logic",
+  "tags": [
+    "games",
+    "html5",
+    "puzzle",
+    "logic",
+    "pancake-sorting"
+  ],
+  "badge": "New",
+  "creator": "z-biz-game"
+}

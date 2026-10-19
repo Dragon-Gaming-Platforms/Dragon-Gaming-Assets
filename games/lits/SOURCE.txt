@@ -1,0 +1,15 @@
+LITS
+Source: https://github.com/OfferPk/zenlits
+Revision: f900861d447350f79168ca1ea0e595bb3d324fab
+License: MIT (see LICENSE).
+Retrieved: 2026-10-18
+
+Hosted subset: static browser runtime, local icons/art and authored puzzle data.
+No package dependencies, external servers, accounts or CDNs required.
+No build/Electron/server tools, test/reference fixtures, asset generators, manifests
+or service-worker registration shipped. Browser storage keys namespaced.
+The interface is English.
+
+Hosting fixes: Guard browser storage with a memory fallback; validate every restored row/cell; cancel delayed victory when navigating away.
+Match modal CSS to the active class used by Rules, level selection and victory.
+Resize the board without losing progress and include actual container padding in narrow-screen sizing.

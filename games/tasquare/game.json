@@ -1,0 +1,15 @@
+{
+  "name": "Tasquare",
+  "desc": "Shade separate solid squares so each clue matches the combined area of its neighboring black regions; keep all white cells connected. Original Simplified Chinese interface; English help included.",
+  "controls": "Tap to cycle unknown, black and white; right-click toggles black; arrows move, Enter marks, R restarts.",
+  "shelf": "Puzzle & Logic",
+  "tags": [
+    "games",
+    "html5",
+    "puzzle",
+    "logic",
+    "tasquare"
+  ],
+  "badge": "New",
+  "creator": "z-biz-game"
+}

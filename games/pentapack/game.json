@@ -1,0 +1,15 @@
+{
+  "name": "Pentapack",
+  "desc": "Fit pentomino pieces into shaped trays without gaps or overlaps. Thirty campaign puzzles plus date-based and seeded challenges, with hints and local records. Original Simplified Chinese interface; English help included.",
+  "controls": "Drag pieces into the tray; double-tap/click a piece to rotate; right-click or long-press mirrors it. U undo, H hint, R restart.",
+  "shelf": "Puzzle & Logic",
+  "tags": [
+    "games",
+    "html5",
+    "puzzle",
+    "logic",
+    "pentapack"
+  ],
+  "badge": "New",
+  "creator": "z-biz-game"
+}

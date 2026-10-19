@@ -1,0 +1,15 @@
+{
+  "name": "Herugolf",
+  "desc": "Guide every numbered ball to a different hole using strokes that shorten by one cell each time. Routes cannot cross; water may be crossed but not landed on. Original Simplified Chinese interface; English help included.",
+  "controls": "Select a ball and tap each stroke endpoint; arrow keys play a full stroke, Space selects another ball, Z undo, H hint, R restart.",
+  "shelf": "Puzzle & Logic",
+  "tags": [
+    "games",
+    "html5",
+    "puzzle",
+    "logic",
+    "herugolf"
+  ],
+  "badge": "New",
+  "creator": "z-biz-game"
+}

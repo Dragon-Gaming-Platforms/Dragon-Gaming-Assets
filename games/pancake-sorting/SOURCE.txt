@@ -1,0 +1,11 @@
+Pancake Sorting
+Source: https://github.com/z-biz-game/z-biz-game-pancake-cos
+Revision: 2ae8fadb8a2afbe79ab5a8e82ca871bba8ab8c66
+License: MIT (see LICENSE).
+Retrieved: 2026-10-18
+
+Hosted subset: static browser runtime, local icons/art and authored puzzle data.
+No package dependencies, external servers, accounts or CDNs required.
+No build/Electron/server tools, test/reference fixtures, asset generators, manifests
+or service-worker registration shipped. Browser storage keys namespaced.
+Metadata images made relative; English help added; original Chinese UI retained.
