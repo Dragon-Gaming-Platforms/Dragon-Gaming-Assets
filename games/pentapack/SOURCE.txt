@@ -1,0 +1,15 @@
+Pentapack
+Source: https://github.com/z-biz-game/pentapack-cos
+Revision: 69fa7813df9d0a1cdff2590008011dbe405c6ad5
+License: MIT (see LICENSE).
+Retrieved: 2026-10-18
+
+Hosted subset: static browser runtime, local icons/art and authored puzzle data.
+No package dependencies, external servers, accounts or CDNs required.
+No build/Electron/server tools, test/reference fixtures, asset generators, manifests
+or service-worker registration shipped. Browser storage keys namespaced.
+Metadata images made relative; English help added; original Chinese UI retained.
+
+Hosting fix: wrap narrow-screen header controls rather than widening the viewport.
+Reliable pointer-based touch double-tap rotation; suppress duplicate native touch transforms; guarded touch control activation after captured drags.
+Clear pending taps and the last-piece selection when changing puzzles.

@@ -1,0 +1,214 @@
+/* [hidden] 必须带着 !important 站在这张表的最前面。
+   #play / #reject 平时是 display:grid，按层叠顺序它会盖掉 UA 的 [hidden]{display:none}，
+   于是"拒盘"那块面板会在能玩的那块盘底下继续画着 —— 一个页面同时说出两种结论，
+   而这正是本仓唯一不许发生的事（出货与没证完必须互斥地显示）。
+   这条不是风格问题，是命中测试的问题：藏起来的网格还在吃点击。 */
+[hidden] { display: none !important; }
+
+:root {
+  --paper: #f6f4ee;
+  --panel: #fffefb;
+  --ink: #14130f;
+  --ink-quiet: #6d6a5f;
+  --line: #14130f;
+  --accent: #1d63c9;
+  --bad: #b4232a;
+  --won: #1c7a44;
+  --cell: clamp(30px, 9vw, 52px);
+  --radius: 10px;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  background: var(--paper);
+  color: var(--ink);
+  font: 15px/1.6 ui-sans-serif, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", system-ui, sans-serif;
+}
+
+.bar { padding: 20px 20px 0; }
+h1 { margin: 0; font-size: 22px; letter-spacing: .04em; }
+h1 small { color: var(--ink-quiet); font-weight: 400; font-size: 14px; letter-spacing: .12em; }
+.tag { margin: 6px 0 0; max-width: 62ch; color: var(--ink-quiet); }
+h2 { font-size: 17px; margin: 0 0 10px; }
+
+main { display: grid; gap: 22px; padding: 20px; max-width: 1080px; }
+
+/* ---- 档位导航：文案由 TIERS 现读，这里只管排 */
+.tiers { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 16px; }
+.tier {
+  display: grid; gap: 2px; text-align: left;
+  font: inherit; color: var(--ink); cursor: pointer;
+  background: var(--panel);
+  border: 1px solid color-mix(in srgb, var(--ink-quiet) 40%, transparent);
+  border-radius: var(--radius); padding: 8px 12px;
+}
+.tier b { font-size: 15px; }
+.tier span { font-size: 12px; color: var(--ink-quiet); }
+.tier.on { border-color: var(--accent); box-shadow: inset 0 0 0 1px var(--accent); }
+.tier.on b { color: var(--accent); }
+
+/* ---- 盘面 */
+.play { display: grid; gap: 20px; grid-template-columns: minmax(0, max-content) minmax(260px, 1fr); align-items: start; }
+
+.board {
+  display: grid;
+  grid-template-columns: repeat(var(--cols, 6), var(--cell));
+  /* nikoli 的边框语言：外粗内细。这里靠"网格自身的上下边框 + 每格的左右边框"叠出来，
+     外边 3px 走 border，内边 1px 走单元格 —— 比给每格四边都画一遍少一半的重画，
+     也不会因为相邻两格各画一条而变成 2px。 */
+  border-top: 3px solid var(--line);
+  border-bottom: 3px solid var(--line);
+  background: var(--panel);
+}
+.cell {
+  position: relative;
+  width: var(--cell); height: var(--cell);
+  border-left: 1px solid var(--line);
+  border-right: 1px solid var(--line);
+  display: grid; place-items: center;
+  background: var(--panel);
+}
+.cell.free {
+  cursor: pointer;
+  /* 触摸：这一格是「按下去就落子」的地方，不该被浏览器当成滚动区或双击缩放的目标。
+     没有 touch-action 时手指落在格上，浏览器要先判断这是滚动还是点击——手指稍有
+     偏移就变成滚页面，这一下就没落上；连点两下还会触发页面缩放。
+     manipulation 明确告诉浏览器「这里只处理平移与捏合，别管双击缩放」，
+     同时去掉那约 300ms 的点击等待。 */
+  touch-action: manipulation;
+  /* 长按是本仓「右键涂黑」在触摸上的唯一入口：不禁掉选择与长按菜单的话，
+     手指停在格上会先弹出系统的文本选择/调用菜单，contextmenu 未必到得了。 */
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-touch-callout: none;
+}
+.cell.free:hover { background: color-mix(in srgb, var(--accent) 8%, var(--panel)); }
+.cell:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
+
+/* 圈内数字：一个真正的圆，直径压到格子的六成，数字居中 */
+.cell.clue span {
+  display: grid; place-items: center;
+  width: 62%; height: 62%;
+  border: 2px solid var(--line); border-radius: 50%;
+  font-weight: 700; font-size: calc(var(--cell) * .38);
+  background: var(--panel);
+}
+/* 问号按源文本就不带圈，且比数字写意一点 */
+.cell.clue.q span { border: none; font-size: calc(var(--cell) * .52); font-weight: 600; }
+
+.cell.blk { background: var(--line); }
+.cell.wht::after {
+  content: ""; width: 22%; height: 22%; border-radius: 50%; background: var(--line);
+}
+
+.side { display: grid; gap: 12px; }
+.seed { margin: 0; font-size: 12px; color: var(--ink-quiet); word-break: break-all; }
+.status { margin: 0; }
+.controls { display: flex; flex-wrap: wrap; gap: 8px; }
+
+button {
+  font: inherit; color: var(--ink); cursor: pointer;
+  background: var(--panel);
+  border: 1px solid color-mix(in srgb, var(--ink-quiet) 45%, transparent);
+  border-radius: calc(var(--radius) - 4px);
+  padding: 7px 12px;
+}
+button:hover { border-color: var(--accent); }
+button.ghost { color: var(--ink-quiet); }
+
+.hint { margin: 0; color: var(--accent); min-height: 1.6em; }
+.result { margin: 0; font-weight: 600; }
+.result.won { color: var(--won); }
+.result.bad { color: var(--bad); }
+.violations { margin: 0; padding-left: 0; list-style: none; display: grid; gap: 6px; }
+.violations li { display: grid; gap: 2px; border-left: 3px solid var(--bad); padding-left: 10px; }
+.violations code { font-size: 12px; color: var(--ink-quiet); }
+.cert { margin: 0; font-size: 12px; color: var(--ink-quiet); }
+.howto { margin: 0; font-size: 12px; color: var(--ink-quiet); max-width: 48ch; }
+
+.reject { background: var(--panel); border: 1px solid var(--bad); border-radius: var(--radius); padding: 16px; max-width: 68ch; }
+.reject h2 { color: var(--bad); }
+
+.rules { max-width: 74ch; }
+.clauses { margin: 0; padding-left: 22px; display: grid; gap: 4px; }
+details { margin-top: 14px; }
+summary { cursor: pointer; color: var(--ink-quiet); }
+.quote { margin: 10px 0; padding: 12px; background: var(--panel); border-left: 3px solid var(--ink-quiet); overflow-x: auto; font: 12px/1.55 ui-monospace, SFMono-Regular, Menlo, monospace; }
+.knobs { margin: 12px 0 0; font-size: 12px; color: var(--ink-quiet); }
+
+.foot { padding: 20px; border-top: 1px solid color-mix(in srgb, var(--ink-quiet) 30%, transparent); font-size: 12px; color: var(--ink-quiet); max-width: 74ch; }
+.foot code { font-size: 11px; }
+
+/* 窄屏：两栏收成上下。指针目标（格子）不许小于 30px（--cell 的下限已经保证），
+   并且把盘放在下面这块的顺序里排第一，手指先到的是盘而不是说明。 */
+@media (max-width: 720px) {
+  .play { grid-template-columns: minmax(0, 1fr); }
+  .board { order: -1; justify-content: center; }
+  main { padding: 14px; gap: 16px; }
+}
+
+/* 中央分发：safe-area 兜底 */
+
+/* ---------- safe-area：刘海与主屏条不吃掉按钮（中央分发，akari-cos 同口径） ---------- */
+:root {
+  --sat: env(safe-area-inset-top, 0px);
+  --sar: env(safe-area-inset-right, 0px);
+  --sab: env(safe-area-inset-bottom, 0px);
+  --sal: env(safe-area-inset-left, 0px);
+}
+html, body {
+  padding-left: var(--sal);
+  padding-right: var(--sar);
+}
+body {
+  padding-top: var(--sat);
+  padding-bottom: var(--sab);
+  min-height: 100vh;
+  min-height: 100dvh;
+}
+/* 贴边的固定/吸底元素自己让开主屏条，别让 home indicator 压住按钮 */
+.fixed-bottom, .bottom-bar, .hud-bottom, footer.app-footer {
+  padding-bottom: calc(var(--sab) + env(safe-area-inset-bottom, 0px));
+}
+
+
+/* ============================================================
+   44px 触摸命中下限（Apple HIG 手机可用性底线）
+   每个真正可点的元素都要有 ≥44×44 CSS px 的命中盒。
+   min-height / min-width 是**硬下限**：只会把过小的盒子撑到 44px，
+   本来就够大的控件（宽药丸、整行列表项、大数字键）外形一点不变。
+
+   两处非平凡之处：
+   1) 需要 !important —— 各组件自己有 `.shelf button { min-width: 34px }`
+      这类更"贴身"的规则，类选择器的优先级高于任何标签堆叠，
+      不加的话这条底线会被组件规则逐个抵消。
+   2) 先把 --touch-min 定死：tapa / nurikabe 早就写了
+      `min-height: var(--touch-min)`，但全仓没有任何地方定义过这个变量，
+      无 fallback 的 var() 在计算值阶段整条作废 —— 那是个看着像 44px、
+      实际什么都不保证的死规则。这里补上定义，让它们原本的意图真正成立。
+   ============================================================ */
+:root { --touch-min: 44px; }
+button,
+select,
+input,
+textarea,
+a[href],
+[role="button"] {
+  min-height: 44px !important;
+  min-width: 44px !important;
+}
+
+/* ---------- 减弱动效（prefers-reduced-motion）---------- */
+/* 本仓当前**没有**可减的装饰性动效：只有 .cell.free:hover 与 button:hover 的背景/边框色瞬切，无 transition / @keyframes
+   剩下的 :hover 颜色瞬切与 focus 轮廓是状态反馈，不是动效，动了反而更难用。 */
+@media (prefers-reduced-motion: reduce) {
+  /* 当下这三条不命中任何东西；写在这里是为了将来有人加动画/过渡时自动被归零，
+     而不必再想起来补这一段。颜色、透明度、命中区、focus 轮廓一律不动。 */
+  *, *::before, *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
+}

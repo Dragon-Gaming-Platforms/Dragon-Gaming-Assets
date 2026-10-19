@@ -1,0 +1,15 @@
+{
+  "name": "LITS",
+  "desc": "Shade one L, I, T or S tetromino in every room. Keep all shaded cells connected, avoid 2\u00d72 blocks, and never let identical tetromino types touch across rooms.",
+  "controls": "Click or tap to cycle cells; use Shade or Dot tools to paint; Undo, Hint, Reset and level selection are on screen.",
+  "shelf": "Puzzle & Logic",
+  "tags": [
+    "games",
+    "html5",
+    "puzzle",
+    "logic",
+    "lits"
+  ],
+  "badge": "New",
+  "creator": "OfferPk"
+}

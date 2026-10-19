@@ -1,0 +1,14 @@
+Tasquare
+Source: https://github.com/z-biz-game/z-biz-game-tasquare-cos
+Revision: deeed8a14b0a2933fd9f4601a41a342297baf590
+License: MIT (see LICENSE).
+Retrieved: 2026-10-18
+
+Hosted subset: static browser runtime, local icons/art and authored puzzle data.
+No package dependencies, external servers, accounts or CDNs required.
+No build/Electron/server tools, test/reference fixtures, asset generators, manifests
+or service-worker registration shipped. Browser storage keys namespaced.
+Metadata images made relative; English help added; original Chinese UI retained.
+
+Hosting fixes: Guard storage acquisition, reads and quota-failing writes; fall back to memory.
+Handle right-click once rather than cycling on pointerdown before contextmenu.

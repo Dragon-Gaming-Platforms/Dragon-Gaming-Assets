@@ -1,0 +1,14 @@
+Herugolf
+Source: https://github.com/z-biz-game/z-biz-game-herugolf-cos
+Revision: 05f524976fc27a33c31692575548357383864193
+License: MIT (see LICENSE).
+Retrieved: 2026-10-18
+
+Hosted subset: static browser runtime, local icons/art and authored puzzle data.
+No package dependencies, external servers, accounts or CDNs required.
+No build/Electron/server tools, test/reference fixtures, asset generators, manifests
+or service-worker registration shipped. Browser storage keys namespaced.
+Metadata images made relative; English help added; original Chinese UI retained.
+
+Hosting fixes: Guard storage acquisition in the Store constructor when access is denied.
+Namespace the separate audio mute preference as well as the main save.

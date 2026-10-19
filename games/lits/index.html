@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>LITS</title>
+  <meta name="description" content="Serene Japanese LITS tetromino logic puzzle with procedural acoustics.">
+  <meta name="theme-color" content="#2c2a29">
+
+  <link rel="icon" type="image/svg+xml" href="icon.svg">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <!-- Top App Header -->
+  <header class="app-header">
+    <div class="logo-container">
+      <span class="logo-kanji">木組</span>
+      <span class="logo-title">ZenLITS</span>
+    </div>
+    <div class="header-actions">
+      <button id="btnLevels" class="icon-btn" title="Level Select" aria-label="Level Select">⛩️</button>
+      <button id="btnRules" class="icon-btn" title="How to Play" aria-label="How to Play">📖</button>
+      <button id="btnAudio" class="icon-btn" title="Toggle Sound" aria-label="Toggle Sound">🔊</button>
+      <button id="btnTheme" class="icon-btn" title="Toggle Theme" aria-label="Toggle Theme">🌓</button>
+    </div>
+  </header>
+
+  <!-- Level Info Banner -->
+  <section class="level-banner">
+    <div class="level-meta">
+      <span id="levelPack" class="level-pack">Engawa • Novice</span>
+      <div class="level-name-wrap">
+        <h2 id="levelTitle" class="level-title">Morning Sunlight</h2>
+        <span id="levelSize" class="level-size-tag">6×6</span>
+      </div>
+    </div>
+    <div class="stats-container">
+      <div class="stat-item">
+        <span class="stat-label">TIMBER</span>
+        <span id="shadedCount" class="stat-val">0 / 24</span>
+      </div>
+    </div>
+  </section>
+
+  <!-- Status / Alert Message Bar -->
+  <section class="status-bar">
+    <div id="statusBadge" class="status-badge normal">
+      <span id="statusIcon">🌸</span>
+      <span id="statusText">Place one tetromino (L, I, T, S) in each chamber.</span>
+    </div>
+  </section>
+
+  <!-- Board Wrapper -->
+  <main class="board-wrapper">
+    <div class="board-container">
+      <div id="grid" class="grid"></div>
+    </div>
+  </main>
+
+  <!-- Bottom Toolbar Controls -->
+  <footer class="controls-wrapper">
+    <div class="tools-bar">
+      <button id="toolCycle" class="tool-btn active">🔄 Cycle</button>
+      <button id="toolShaded" class="tool-btn">● Timber</button>
+      <button id="toolDot" class="tool-btn">· Floor</button>
+    </div>
+    <div class="actions-bar">
+      <button id="btnUndo" class="action-btn">↩ Undo</button>
+      <button id="btnHint" class="action-btn">💡 Hint</button>
+      <button id="btnReset" class="action-btn">↺ Reset</button>
+      <button id="btnNext" class="action-btn">⏭️ Next</button>
+    </div>
+  </footer>
+
+  <!-- Level Select Modal -->
+  <div id="modalLevels" class="modal-overlay">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3 class="modal-title">Select Temple Room</h3>
+        <button id="btnCloseLevels" class="icon-btn">✕</button>
+      </div>
+      <div class="modal-body">
+        <div id="packTabs" class="pack-tabs"></div>
+        <div id="levelGrid" class="level-grid"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Rules / How to Play Modal -->
+  <div id="modalRules" class="modal-overlay">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3 class="modal-title">Rules of ZenLITS (ＬＩＴＳ)</h3>
+        <button id="btnCloseRules" class="icon-btn">✕</button>
+      </div>
+      <div class="modal-body">
+        <p>In Japanese timber joinery (<em>Kigumi</em> 木組み), craft harmonious balance by partitioning every chamber of the temple:</p>
+
+        <h4>1. One Tetromino Per Chamber</h4>
+        <p>Every outlined room must contain exactly 4 shaded timber blocks forming a valid tetromino.</p>
+
+        <h4>2. Four Sacred Shapes (L, I, T, S)</h4>
+        <p>The 4 shaded blocks must form an <strong>L</strong>, <strong>I</strong>, <strong>T</strong>, or <strong>S</strong> (rotations and reflections allowed). Solid 2×2 "O" blocks are strictly forbidden!</p>
+
+        <h4>3. No Touching Identical Shapes</h4>
+        <p>If two tetrominoes in adjacent rooms touch orthogonally (sharing an edge), they <strong>cannot be of the same type</strong> (e.g. an L cannot touch another L). Diagonal contact is allowed.</p>
+
+        <h4>4. No 2×2 Solid Squares</h4>
+        <p>Shaded blocks cannot form a 2×2 solid square anywhere across the temple floor.</p>
+
+        <h4>5. Single Connected Network</h4>
+        <p>All shaded blocks across the entire temple must connect orthogonally into a single unbroken structure.</p>
+
+        <h4>Controls & Tips</h4>
+        <ul>
+          <li><strong>Tap or Drag</strong> across cells to paint timber blocks or mark empty floor dots.</li>
+          <li>Use <strong>💡 Hint</strong> for deductive guidance whenever you need insight into forced placements or 2×2 avoidance.</li>
+          <li>Chamber glyphs automatically glow serene green when their tetromino is valid and conflict-free!</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- Victory Modal -->
+  <div id="modalVictory" class="modal-overlay">
+    <div class="modal-card victory-card">
+      <div class="bell-icon">🔔</div>
+      <h3 class="victory-title">Temple Harmonized</h3>
+      <p id="victoryDesc" class="victory-desc">You crafted perfect architectural joinery for this chamber.</p>
+      <button id="btnVictoryNext" class="btn-primary">Next Chamber ⏭️</button>
+    </div>
+  </div>
+
+  <!-- Scripts -->
+  <script src="lits-engine.js"></script>
+  <script src="levels.js"></script>
+  <script src="storage.js"></script>
+  <script src="audio.js"></script>
+  <script src="app.js"></script>
+
+</body>
+</html>
