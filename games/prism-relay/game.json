@@ -1,0 +1,8 @@
+{
+  "name": "Prism Relay",
+  "desc": "A code-drawn beam-routing puzzle. Rotate mirrors to guide a light pulse around blockers and into the receiver across five original circuits.",
+  "controls": "Click or tap a mirror to rotate it. Route the beam from the emitter to the receiver; Reset Mirrors restores the current circuit.",
+  "shelf": "Puzzle & Logic",
+  "tags": ["puzzle", "logic", "optics", "light", "offline"],
+  "creator": "Dragon Gaming Assets contributors"
+}

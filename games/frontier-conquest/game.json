@@ -1,0 +1,8 @@
+{
+  "name": "Frontier Conquest",
+  "desc": "A compact, original territory-control strategy game. Reinforce your borders, roll tactical battles against a local rival, and claim enough of the map to win. Includes no external map or game assets.",
+  "controls": "During Reinforce, click one of your territories to place an army. During Attack, click a friendly territory, then an adjacent rival or neutral territory. End Turn to let the rival move.",
+  "shelf": "Strategy & Idle",
+  "tags": ["strategy", "territory", "turn-based", "offline", "original"],
+  "creator": "Dragon Gaming Assets contributors"
+}

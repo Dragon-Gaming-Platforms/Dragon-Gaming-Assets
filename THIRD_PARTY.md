@@ -442,3 +442,8 @@ never invent a license.
 | JS Playground | `games/js-playground/` | Original build (Dragon Gaming Assets) | Original work — MIT (sandboxed JavaScript editor and preview; no third-party assets or libraries) | 2026-10-18 |
 | Pac-Man | `games/pacman/` | [hammadshakeelai/pacman](https://github.com/hammadshakeelai/pacman) | MIT — unmodified (dev test folder omitted) | 2026-10-18 |
 | Pip & the Pocket Kingdom | `games/pocketleaf-pip/` | [ysohaarsh/pocketleaf-pip](https://github.com/ysohaarsh/pocketleaf-pip) | MIT — built from source with Vite (production bundle committed); React/TS dev tooling omitted | 2026-10-18 |
+| Frontier Conquest | `games/frontier-conquest/` | Original build (Dragon Gaming Assets) | Original work — MIT (custom territory-control rules, local rival AI, map and code-drawn interface; no third-party assets or libraries) | 2026-10-18 |
+| Signal Dash | `games/signal-dash/` | Original build (Dragon Gaming Assets) | Original work — MIT (original single-screen pixel arcade game and code-drawn visuals; no licensed characters, console artwork, ROMs or third-party libraries) | 2026-10-18 |
+| Orbit Garden | `games/orbit-garden/` | Original build (Dragon Gaming Assets) | Original work — MIT (custom local N-body simulation and code-drawn visuals; no third-party assets or libraries) | 2026-10-18 |
+| Prism Relay | `games/prism-relay/` | Original build (Dragon Gaming Assets) | Original work — MIT (custom mirror-routing puzzle, circuits and code-drawn interface; no third-party assets or libraries) | 2026-10-18 |
+| Weather Forge | `games/weather-forge/` | Original build (Dragon Gaming Assets) | Original work — MIT (custom procedural weather sandbox and visuals; no external data, assets or libraries) | 2026-10-18 |
