@@ -1,0 +1,15 @@
+{
+  "name": "Triplets",
+  "desc": "Fill three-cell regions with three equal symbols or three different symbols; touching cells across region borders must differ. Seven generated board sizes. Original interface partly Simplified Chinese; English help included.",
+  "controls": "Choose square/circle/triangle and tap cells. 1/2/3 select symbols, H hint, Z undo, P pause.",
+  "shelf": "Puzzle & Logic",
+  "tags": [
+    "games",
+    "html5",
+    "puzzle",
+    "logic",
+    "triplets"
+  ],
+  "badge": "New",
+  "creator": "z-biz-game"
+}

@@ -1,0 +1,13 @@
+Ulam Liar Game
+Source: https://github.com/z-biz-game/z-biz-game-ulam-cos
+Revision: 3f1880af8d1e7716fc00f04c6c3b33a334770562
+License: MIT (see LICENSE).
+Retrieved: 2026-10-19
+
+Static runtime, local icons and authored puzzle data only; build/test/desktop tools,
+manifest and service-worker registration omitted. No CDN or backend required.
+Game-scoped storage, relative images, wrapping headers and English help added.
+Original Simplified Chinese interface retained except hosting adaptations below.
+Guard denied storage reads in the save loader.
+English live budget/answer/candidate/phase panel and essential control labels.
+Revive serialized campaign/daily policies before creating games, not only on direct lot routes.

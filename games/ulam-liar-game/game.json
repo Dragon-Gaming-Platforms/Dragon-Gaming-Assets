@@ -1,0 +1,15 @@
+{
+  "name": "Ulam Liar Game",
+  "desc": "Find a hidden number by asking subset questions against an opponent allowed a limited number of lies. Baked policies show the difference between bounds and exact question budgets. Original interface partly Simplified Chinese; English help included.",
+  "controls": "Tap or brush cells to select a question, then Ask. In accusation phase tap the secret number. U undo, H hint, R restart.",
+  "shelf": "Puzzle & Logic",
+  "tags": [
+    "games",
+    "html5",
+    "puzzle",
+    "logic",
+    "ulam-liar-game"
+  ],
+  "badge": "New",
+  "creator": "z-biz-game"
+}

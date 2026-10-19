@@ -1,0 +1,15 @@
+{
+  "name": "Euclid Game",
+  "desc": "Cut squares from a gold rectangle in a two-player Euclidean subtraction game against a perfect opponent. Baked strategy tables, campaign and daily/seeded boards. Original interface partly Simplified Chinese; English help included.",
+  "controls": "Tap a block boundary or a k button to cut k squares. U undo, H hint, R restart.",
+  "shelf": "Puzzle & Logic",
+  "tags": [
+    "games",
+    "html5",
+    "puzzle",
+    "logic",
+    "euclid-game"
+  ],
+  "badge": "New",
+  "creator": "z-biz-game"
+}
