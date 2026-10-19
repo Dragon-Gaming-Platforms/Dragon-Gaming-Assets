@@ -1,0 +1,15 @@
+{
+  "name": "Star Switch",
+  "desc": "A two-player local platformer for sharing one keyboard: cyan and orange set off together to collect stars, stomp enemies, and flip the glowing switch that opens the rainbow exit. One-player touch mode on phones and iPads, with Easy/Medium/Hard difficulty and all sound synthesized in the browser.",
+  "controls": "Player 1: A/D move, W jump, S action · Player 2: arrows (Up jump, Down action) · phone/iPad: on-screen buttons",
+  "shelf": "Arcade & Action",
+  "tags": [
+    "platformer",
+    "2p",
+    "co-op",
+    "local"
+  ],
+  "badge": "New",
+  "creator": "Jsingh-26",
+  "image": "title.png"
+}

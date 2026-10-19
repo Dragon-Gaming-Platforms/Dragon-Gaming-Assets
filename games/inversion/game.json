@@ -1,0 +1,15 @@
+{
+  "name": "Inversion",
+  "desc": "A two-player co-op puzzle platformer built on the theme of duality: you steer one of two factory workers at a time — Space or I flips to the other worker and mirrors their movement, so you must juggle the pair through pipes, crates and spikes until they collide to clear the level.",
+  "controls": "WASD or arrow keys: move & jump (controls the active worker) · Space/I: switch active worker & mirror movement · R: restart",
+  "shelf": "Arcade & Action",
+  "tags": [
+    "puzzle",
+    "platformer",
+    "co-op",
+    "2p"
+  ],
+  "badge": "New",
+  "creator": "remarkablegames",
+  "image": "title.png"
+}
