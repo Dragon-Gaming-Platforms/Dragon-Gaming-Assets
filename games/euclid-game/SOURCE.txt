@@ -1,0 +1,13 @@
+Euclid Game
+Source: https://github.com/z-biz-game/z-biz-game-euclid-cos
+Revision: 7468d598615f37deeb4f1bf6d2abda1a77e295ce
+License: MIT (see LICENSE).
+Retrieved: 2026-10-19
+
+Static runtime, local icons and authored puzzle data only; build/test/desktop tools,
+manifest and service-worker registration omitted. No CDN or backend required.
+Game-scoped storage, relative images, wrapping headers and English help added.
+Original Simplified Chinese interface retained except hosting adaptations below.
+Guard denied storage reads in the save loader.
+English live dimensions/turn/result and essential control labels.
+Solver demonstrations count as assisted rather than awarding a clean victory.

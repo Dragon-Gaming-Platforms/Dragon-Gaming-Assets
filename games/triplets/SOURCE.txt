@@ -1,0 +1,11 @@
+Triplets
+Source: https://github.com/z-biz-game/z-biz-game-triplets-cos
+Revision: 04854be74c2de81cf48f4f1ad7b2ac5114fa7ac6
+License: MIT (see LICENSE).
+Retrieved: 2026-10-19
+
+Static runtime, local icons and authored puzzle data only; build/test/desktop tools,
+manifest and service-worker registration omitted. No CDN or backend required.
+Game-scoped storage, relative images, wrapping headers and English help added.
+Original Simplified Chinese interface retained except hosting adaptations below.
+Preserve hint costs and solve-award flag across resume; avoid re-awarding a completed board on reload.

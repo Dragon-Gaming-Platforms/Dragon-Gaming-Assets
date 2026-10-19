@@ -1,0 +1,14 @@
+Euler Trails
+Source: https://github.com/z-biz-game/z-biz-game-eulertrail-cos
+Revision: 20155b67c009d835ea8b9292e39badd6fe9764c2
+License: MIT (see LICENSE).
+Retrieved: 2026-10-19
+
+Static runtime, local icons and authored puzzle data only; build/test/desktop tools,
+manifest and service-worker registration omitted. No CDN or backend required.
+Game-scoped storage, relative images, wrapping headers and English help added.
+Original Simplified Chinese interface retained except hosting adaptations below.
+Guard denied storage reads in the save loader.
+English essential control labels.
+Non-collapsing mobile board row prevents graph/control overlap.
+Touch-release activation with duplicate-click suppression for post-drag controls.
