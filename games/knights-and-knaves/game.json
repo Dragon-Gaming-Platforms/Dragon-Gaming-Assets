@@ -1,0 +1,15 @@
+{
+  "name": "Knights and Knaves",
+  "desc": "Deduce who always tells the truth and who always lies from logical testimony. Five generated tiers with English testimony and independent truth-table verification. Original interface partly Simplified Chinese; English help included.",
+  "controls": "Tap Knight, Knave or ? on each card. Arrows navigate; 1 Knight, 2 Knave, 0 unknown; H hint, U undo, R restart.",
+  "shelf": "Puzzle & Logic",
+  "tags": [
+    "games",
+    "html5",
+    "puzzle",
+    "logic",
+    "knights-and-knaves"
+  ],
+  "badge": "New",
+  "creator": "z-biz-game"
+}

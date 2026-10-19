@@ -1,0 +1,13 @@
+Knights and Knaves
+Source: https://github.com/z-biz-game/z-biz-game-syllogism-cos
+Revision: 66703f52c5e42dd9689e582b7d2766244dc011b3
+License: MIT (see LICENSE).
+Retrieved: 2026-10-19
+
+Static runtime, local icons and authored puzzle data only; build/test/desktop tools,
+manifest and service-worker registration omitted. No CDN or backend required.
+Game-scoped storage, relative images, wrapping headers and English help added.
+Original Simplified Chinese interface retained except hosting adaptations below.
+English canvas person names, identity buttons and parenthesized testimony presentation; rule engine and generated AST unchanged.
+Reduce narrow-screen outer padding so the 288px minimum card width fits a 320px iframe.
+Use document-relative board-height measurement so scrolling cannot reflow a chip between touch down/up.

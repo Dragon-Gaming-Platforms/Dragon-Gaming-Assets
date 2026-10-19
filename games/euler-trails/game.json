@@ -1,0 +1,15 @@
+{
+  "name": "Euler Trails",
+  "desc": "Draw every graph edge exactly once within the minimum stroke budget. Includes 48 baked puzzles, daily/seeded boards and independent graph-theory checks. Original interface partly Simplified Chinese; English help included.",
+  "controls": "Drag from pin to pin; release to end a stroke. U undo, H hint, R restart.",
+  "shelf": "Puzzle & Logic",
+  "tags": [
+    "games",
+    "html5",
+    "puzzle",
+    "logic",
+    "euler-trails"
+  ],
+  "badge": "New",
+  "creator": "z-biz-game"
+}
