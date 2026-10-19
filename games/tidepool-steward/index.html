@@ -1,0 +1,243 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#0b1b20">
+  <meta name="description" content="Steward a tiny intertidal reserve through a changing season in this original local ecosystem strategy game.">
+  <title>Tidepool Steward</title>
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #09171b;
+      --surface: #102329;
+      --surface-raised: #142c32;
+      --line: #29464b;
+      --ink: #eaf6f1;
+      --muted: #a1bbb5;
+      --sea: #71d8c1;
+      --sun: #ffd27f;
+      --coral: #ff9b85;
+      font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+    }
+    * { box-sizing: border-box; }
+    body { min-width: 320px; margin: 0; color: var(--ink); background: radial-gradient(ellipse at 72% -22%, #244a4a 0, #10252a 39%, var(--bg) 77%); font-size: 14px; line-height: 1.5; }
+    button { font: inherit; }
+    button:focus-visible { outline: 2px solid var(--sun); outline-offset: 2px; }
+    .shell { width: min(1160px, calc(100% - 30px)); margin: auto; padding: 24px 0 34px; }
+    .masthead { display: flex; align-items: center; justify-content: space-between; gap: 14px; margin-bottom: 17px; }
+    .identity { display: flex; align-items: center; gap: 13px; }
+    .brand-mark { width: 48px; height: 48px; display: grid; place-items: center; border: 1px solid #47736b; border-radius: 16px; background: linear-gradient(145deg, #1e4946, #182e39); color: var(--sea); font-size: 25px; font-weight: 900; box-shadow: 0 10px 30px #0003; }
+    .eyebrow { margin: 0 0 3px; color: var(--sea); font-size: 10px; font-weight: 850; letter-spacing: .17em; text-transform: uppercase; }
+    h1 { margin: 0; font-size: clamp(25px, 4vw, 34px); line-height: 1.1; letter-spacing: -.045em; }
+    .subtitle { margin: 5px 0 0; color: var(--muted); font-size: 12px; }
+    .offline-badge { flex: none; padding: 7px 10px; border: 1px solid #3e685d; border-radius: 999px; background: #112b27; color: #a5e9d5; font-size: 10px; font-weight: 850; letter-spacing: .04em; }
+    .mission { display: flex; align-items: center; justify-content: space-between; gap: 18px; margin-bottom: 14px; padding: 14px 17px; border: 1px solid #3a5f5a; border-radius: 14px; background: linear-gradient(105deg, #15332fdd, #13262bdd); box-shadow: 0 14px 36px #0002; }
+    .mission p { margin: 0; }
+    .mission-title { color: #d8f6e9; font-size: 12px; font-weight: 850; letter-spacing: .05em; text-transform: uppercase; }
+    .mission-copy { max-width: 780px; margin-top: 4px !important; color: #b2cbc2; font-size: 11px; }
+    .goal-chip { flex: none; padding: 8px 10px; border: 1px solid #6b6745; border-radius: 9px; background: #302c20; color: var(--sun); font-size: 10px; font-weight: 850; text-align: center; }
+    .dashboard { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; margin-bottom: 14px; }
+    .metric { min-width: 0; padding: 12px 14px; border: 1px solid var(--line); border-radius: 13px; background: linear-gradient(145deg, #142b30, #102126); box-shadow: 0 12px 30px #0002; }
+    .metric-label { display: flex; justify-content: space-between; gap: 8px; color: var(--muted); font-size: 9px; font-weight: 850; letter-spacing: .12em; text-transform: uppercase; }
+    .metric-main { display: flex; align-items: baseline; gap: 6px; margin-top: 3px; }
+    .metric-main strong { font-size: 22px; letter-spacing: -.035em; }
+    .metric-main span { color: #a5beb9; font-size: 10px; }
+    .metric-bar { height: 5px; overflow: hidden; margin-top: 7px; border-radius: 9px; background: #294148; }
+    .metric-bar i { display: block; width: 0; height: 100%; border-radius: inherit; background: linear-gradient(90deg, #f6c875, #73d8bf); transition: width .25s ease; }
+    .conditions-line { min-height: 15px; margin-top: 5px; color: #c5d9d2; font-size: 10px; }
+    .workspace { display: grid; grid-template-columns: minmax(0, 1.16fr) minmax(330px, .84fr); gap: 14px; align-items: start; }
+    .panel { overflow: hidden; border: 1px solid var(--line); border-radius: 15px; background: linear-gradient(145deg, #142a30, #102126); box-shadow: 0 18px 48px #0003; }
+    .panel-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 12px; padding: 14px 16px 12px; border-bottom: 1px solid #29444a; }
+    .panel-head h2 { margin: 0; font-size: 12px; letter-spacing: .075em; text-transform: uppercase; }
+    .panel-head p { margin: 3px 0 0; color: var(--muted); font-size: 10px; }
+    .panel-chip { flex: none; padding: 4px 8px; border: 1px solid #416259; border-radius: 999px; color: #a2e4d2; font: 9px ui-monospace, SFMono-Regular, Menlo, monospace; }
+    .map-wrap { padding: 14px; }
+    .habitat-grid { display: grid; grid-template-columns: repeat(8, minmax(0, 1fr)); gap: 6px; }
+    .tile { position: relative; min-width: 0; height: clamp(54px, 8vw, 76px); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 1px; overflow: hidden; padding: 4px 2px; border: 1px solid #47645e; border-radius: 9px; color: #e9f6ef; cursor: pointer; box-shadow: inset 0 1px #ffffff0a, 0 3px 7px #0002; transition: transform .13s ease, border-color .13s ease, filter .13s ease; }
+    .tile:hover { z-index: 1; transform: translateY(-2px); filter: brightness(1.15); }
+    .tile[data-habitat="rock"] { background: linear-gradient(150deg, #526e69, #314a4c 68%, #24383d); }
+    .tile[data-habitat="sand"] { border-color: #776b4b; background: linear-gradient(150deg, #92825a, #655b43 72%, #423f36); }
+    .tile[data-habitat="pool"] { border-color: #3c7773; background: linear-gradient(150deg, #368b83, #23615f 72%, #194449); }
+    .tile.selected { z-index: 2; border: 2px solid var(--sun); box-shadow: 0 0 0 2px #ffd27f2b, 0 0 18px #ffd27f44; }
+    .tile.debris { border-color: #bd806e; }
+    .tile-top { position: absolute; top: 3px; left: 5px; right: 5px; display: flex; justify-content: space-between; color: #f4f4ddc9; font: 8px ui-monospace, SFMono-Regular, Menlo, monospace; }
+    .tile-coordinate { opacity: .78; }
+    .tile-mark { color: #fff0a0; font-size: 11px; line-height: 1; }
+    .tile-icon { max-height: 22px; font-size: clamp(16px, 2.5vw, 22px); line-height: 1; text-shadow: 0 2px 7px #05211c77; }
+    .tile-name { max-width: 100%; overflow: hidden; color: #f1f4e9; font-size: 8px; font-weight: 750; line-height: 1.1; text-overflow: ellipsis; white-space: nowrap; text-shadow: 0 1px 4px #001; }
+    .legend { display: flex; flex-wrap: wrap; gap: 7px 12px; padding: 0 14px 13px; color: var(--muted); font-size: 9px; }
+    .legend span { display: inline-flex; align-items: center; gap: 4px; }
+    .legend i { width: 9px; height: 9px; display: inline-block; border-radius: 3px; }
+    .legend .rock-key { background: #506b66; }
+    .legend .sand-key { background: #88784f; }
+    .legend .pool-key { background: #2c7772; }
+    .map-note { margin: 0 14px 14px; padding: 9px 10px; border: 1px solid #2b484a; border-radius: 9px; background: #0d1f23; color: #a8c0b8; font-size: 10px; }
+    .side-column { display: grid; gap: 12px; }
+    .selection { padding: 11px 14px 0; color: #c6ddd5; font-size: 10px; }
+    .selection strong { color: var(--sun); }
+    .action-list { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; padding: 10px 14px 12px; }
+    .action-btn { min-width: 0; min-height: 72px; display: grid; grid-template-columns: 29px minmax(0, 1fr); align-items: center; gap: 8px; padding: 8px; border: 1px solid #355450; border-radius: 10px; background: #132a2b; color: var(--ink); cursor: pointer; text-align: left; transition: border-color .14s ease, background .14s ease, opacity .14s ease; }
+    .action-btn:hover:not(:disabled) { border-color: var(--sea); background: #183633; }
+    .action-btn:disabled { cursor: not-allowed; opacity: .42; }
+    .action-icon { width: 28px; height: 28px; display: grid; place-items: center; border: 1px solid #426760; border-radius: 8px; background: #1c3d3a; color: #b6efdc; font-size: 15px; font-weight: 800; }
+    .action-title { display: block; font-size: 10px; font-weight: 850; }
+    .action-help { display: block; margin-top: 2px; color: #a7c1b8; font-size: 8px; line-height: 1.3; }
+    .action-footer { display: flex; flex-wrap: wrap; gap: 8px; padding: 0 14px 14px; }
+    .btn { min-height: 35px; padding: 7px 10px; border: 1px solid #3c5b57; border-radius: 8px; background: #1b3537; color: #ddf0e8; cursor: pointer; font-size: 10px; font-weight: 800; }
+    .btn:hover:not(:disabled) { border-color: var(--sea); background: #234746; }
+    .btn:disabled { cursor: not-allowed; opacity: .48; }
+    .btn.primary { border-color: #4c8979; background: linear-gradient(135deg, #2c6b5e, #23564f); color: #f0fff7; }
+    .btn.restart { margin-left: auto; color: #f4c0ad; }
+    .status-message { min-height: 36px; margin: 0 14px 13px; padding: 8px 9px; border-left: 2px solid var(--sea); border-radius: 0 7px 7px 0; background: #0d2023; color: #b5cbc4; font-size: 9px; }
+    .species-list { display: grid; gap: 8px; padding: 12px 14px 14px; }
+    .species-row { display: grid; grid-template-columns: 88px minmax(0, 1fr) 36px; align-items: center; gap: 9px; }
+    .species-name { color: #d8e9e3; font-size: 9px; font-weight: 750; }
+    .species-role { display: block; color: #8fa9a3; font-size: 8px; font-weight: 500; }
+    .species-bar { height: 7px; overflow: hidden; border-radius: 99px; background: #284147; }
+    .species-bar i { display: block; width: 0; height: 100%; border-radius: inherit; background: linear-gradient(90deg, #d4b36c, #7bd7bd); transition: width .3s ease; }
+    .species-value { color: #e9f6ed; font: 10px ui-monospace, SFMono-Regular, Menlo, monospace; text-align: right; }
+    .species-delta { grid-column: 2 / 4; margin-top: -7px; color: #91b5a9; font: 8px ui-monospace, SFMono-Regular, Menlo, monospace; }
+    .journal { padding: 10px 14px 13px; }
+    .event-log { display: grid; gap: 7px; max-height: 155px; overflow: auto; margin: 0; padding: 0 2px 0 16px; color: #b2c9c2; font-size: 9px; }
+    .event-log li::marker { color: var(--sea); }
+    .event-log li:first-child { color: #e5f4eb; }
+    .fine-print { margin: 16px 3px 0; color: #78918c; font-size: 9px; text-align: center; }
+    @media (max-width: 860px) { .workspace { grid-template-columns: 1fr; } .side-column { grid-template-columns: repeat(2, minmax(0,1fr)); align-items: start; } .actions-panel { grid-row: span 2; } }
+    @media (max-width: 600px) {
+      .shell { width: min(100% - 18px, 1160px); padding-top: 15px; }
+      .masthead { align-items: flex-start; }
+      .identity { gap: 9px; }
+      .brand-mark { width: 40px; height: 40px; border-radius: 13px; }
+      .offline-badge { max-width: 90px; font-size: 8px; text-align: center; }
+      .subtitle { max-width: 235px; font-size: 10px; }
+      .mission { align-items: flex-start; gap: 8px; padding: 11px; }
+      .goal-chip { max-width: 104px; font-size: 8px; }
+      .dashboard { grid-template-columns: repeat(2, minmax(0,1fr)); gap: 7px; }
+      .metric { padding: 9px 10px; }
+      .metric-main strong { font-size: 20px; }
+      .habitat-grid { gap: 4px; }
+      .tile { height: clamp(48px, 13vw, 64px); border-radius: 7px; }
+      .tile-top { top: 2px; left: 3px; right: 3px; font-size: 7px; }
+      .tile-name { font-size: 7px; }
+      .side-column { grid-template-columns: 1fr; }
+      .actions-panel { grid-row: auto; }
+      .action-btn { min-height: 66px; }
+    }
+    @media (prefers-reduced-motion: reduce) { *, *::before, *::after { scroll-behavior: auto !important; transition-duration: .01ms !important; } }
+  </style>
+</head>
+<body>
+  <main class="shell">
+    <header class="masthead">
+      <div class="identity">
+        <div class="brand-mark" aria-hidden="true">≈</div>
+        <div>
+          <p class="eyebrow">A small-coast stewardship game</p>
+          <h1>Tidepool Steward</h1>
+          <p class="subtitle">Restore habitats. Balance a living shore. Let the season turn.</p>
+        </div>
+      </div>
+      <span class="offline-badge">LOCAL SIM · NO API</span>
+    </header>
+
+    <section class="mission" aria-label="Season mission">
+      <div>
+        <p class="mission-title">The intertidal year</p>
+        <p class="mission-copy">Guide this pocket reserve through twelve changing weeks. Spend two stewardship actions each week, then watch habitat and species respond to heat, runoff, and storms.</p>
+      </div>
+      <div class="goal-chip">Season goal<br>Index 64+ · all groups 28+</div>
+    </section>
+
+    <section class="dashboard" aria-label="Reserve status">
+      <article class="metric">
+        <div class="metric-label"><span>Season</span><span>12 weeks</span></div>
+        <div class="metric-main"><strong id="week-value">01 / 12</strong><span id="tide-value">Neap tide</span></div>
+        <div class="conditions-line" id="forecast-value">Quiet water · plan your first restoration</div>
+      </article>
+      <article class="metric">
+        <div class="metric-label"><span>Biodiversity</span><span>reserve index</span></div>
+        <div class="metric-main"><strong id="biodiversity-value">—</strong><span>/ 100</span></div>
+        <div class="metric-bar" aria-hidden="true"><i id="biodiversity-fill"></i></div>
+      </article>
+      <article class="metric">
+        <div class="metric-label"><span>Water</span><span id="clarity-label">clarity</span></div>
+        <div class="metric-main"><strong id="clarity-value">—</strong><span>/ 100</span></div>
+        <div class="metric-bar" aria-hidden="true"><i id="clarity-fill"></i></div>
+      </article>
+      <article class="metric">
+        <div class="metric-label"><span>Temperature</span><span>surface</span></div>
+        <div class="metric-main"><strong id="temperature-value">—</strong><span>°C</span></div>
+        <div class="conditions-line" id="actions-value">2 stewardship actions remain</div>
+      </article>
+    </section>
+
+    <div class="workspace">
+      <section class="panel" aria-label="Tidepool map">
+        <div class="panel-head">
+          <div><h2>Intertidal reserve</h2><p>Choose a square to inspect its habitat and restore it.</p></div>
+          <span class="panel-chip" id="habitat-summary">40 tiles</span>
+        </div>
+        <div class="map-wrap">
+          <div id="habitat-grid" class="habitat-grid" role="group" aria-label="Forty habitat tiles"></div>
+        </div>
+        <div class="legend" aria-label="Habitat legend">
+          <span><i class="rock-key"></i>Rocky shore</span>
+          <span><i class="sand-key"></i>Sandy flat</span>
+          <span><i class="pool-key"></i>Tide pool</span>
+          <span>🌿 Kelp</span><span>〰 Eelgrass</span><span>✦ Protected</span><span>▧ Debris</span>
+        </div>
+        <p class="map-note">Each cell is a tiny habitat patch. New planting needs a clear, unoccupied square; debris must be cleared before a patch can recover.</p>
+      </section>
+
+      <aside class="side-column">
+        <section class="panel actions-panel" aria-label="Stewardship actions">
+          <div class="panel-head">
+            <div><h2>Steward actions</h2><p>Choose carefully; each week grants two actions.</p></div>
+            <span class="panel-chip" id="action-chip">2 LEFT</span>
+          </div>
+          <div class="selection" id="selection-info">Select a habitat tile to begin.</div>
+          <div class="action-list">
+            <button class="action-btn" type="button" data-action="kelp">
+              <span class="action-icon" aria-hidden="true">🌿</span><span><span class="action-title">Plant kelp</span><span class="action-help">Clear rock or pool · shelter & canopy</span></span>
+            </button>
+            <button class="action-btn" type="button" data-action="eelgrass">
+              <span class="action-icon" aria-hidden="true">〰</span><span><span class="action-title">Plant eelgrass</span><span class="action-help">Clear sand · nursery & clean water</span></span>
+            </button>
+            <button class="action-btn" type="button" data-action="clean">
+              <span class="action-icon" aria-hidden="true">▧</span><span><span class="action-title">Clear debris</span><span class="action-help">Remove litter from the selected tile</span></span>
+            </button>
+            <button class="action-btn" type="button" data-action="reserve">
+              <span class="action-icon" aria-hidden="true">✦</span><span><span class="action-title">Mark protected</span><span class="action-help">Give one patch a low-disturbance refuge</span></span>
+            </button>
+          </div>
+          <div class="action-footer">
+            <button class="btn primary" id="advance-week" type="button">Advance to week 2</button>
+            <button class="btn restart" id="restart-season" type="button">Restart season</button>
+          </div>
+          <p class="status-message" id="status-message" role="status" aria-live="polite">Select a tile, then choose a restoration action. You can also advance early.</p>
+        </section>
+
+        <section class="panel" aria-label="Species population indices">
+          <div class="panel-head">
+            <div><h2>Species pulse</h2><p>Local population indices · 0–100</p></div>
+            <span class="panel-chip">FOOD WEB</span>
+          </div>
+          <div class="species-list" id="species-list"></div>
+        </section>
+
+        <section class="panel" aria-label="Field journal">
+          <div class="panel-head">
+            <div><h2>Field journal</h2><p>Recent changes around the shore.</p></div>
+            <span class="panel-chip">NOTES</span>
+          </div>
+          <div class="journal"><ol class="event-log" id="event-log" aria-live="polite"></ol></div>
+        </section>
+      </aside>
+    </div>
+
+    <p class="fine-print">An original, self-contained ecosystem strategy game. Population indices are simplified game values, not scientific forecasts.</p>
+  </main>
+  <script src="./app.js" defer></script>
+</body>
+</html>
