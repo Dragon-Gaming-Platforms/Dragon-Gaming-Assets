@@ -1,0 +1,15 @@
+{
+  "name": "Zebra Logic",
+  "desc": "Deduce who lives in each house from generated logic clues. English clue text and table labels accompany a pairwise deduction grid and independently checked answer panel. Original Simplified Chinese interface; English help included.",
+  "controls": "Tap the pair grid to cycle blank, cross and check. Arrows navigate, X excludes, O checks, Space cycles; fill answer dropdowns and check.",
+  "shelf": "Puzzle & Logic",
+  "tags": [
+    "games",
+    "html5",
+    "puzzle",
+    "logic",
+    "zebra-logic"
+  ],
+  "badge": "New",
+  "creator": "z-biz-game"
+}

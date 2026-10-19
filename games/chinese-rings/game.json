@@ -1,0 +1,15 @@
+{
+  "name": "Chinese Rings",
+  "desc": "Unlink interlocking rings under the classic Chinese-rings rule. Includes exhaustive shortest-path targets, campaign boards, hints and daily/seeded challenges. Original Simplified Chinese interface; English help included.",
+  "controls": "Tap a movable ring. U undo, H hint, R restart, D demonstration.",
+  "shelf": "Puzzle & Logic",
+  "tags": [
+    "games",
+    "html5",
+    "puzzle",
+    "logic",
+    "chinese-rings"
+  ],
+  "badge": "New",
+  "creator": "z-biz-game"
+}

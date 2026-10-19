@@ -1,0 +1,15 @@
+{
+  "name": "Matchstick Arithmetic",
+  "desc": "Repair seven-segment equations by moving matches without changing the total match count. Sixty campaign puzzles plus daily and seeded challenges. Original Simplified Chinese interface; English help included.",
+  "controls": "Drag a lit match to an unlit segment. U undo, H hint, R restart; Escape closes the result card.",
+  "shelf": "Puzzle & Logic",
+  "tags": [
+    "games",
+    "html5",
+    "puzzle",
+    "logic",
+    "matchstick-arithmetic"
+  ],
+  "badge": "New",
+  "creator": "z-biz-game"
+}

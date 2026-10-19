@@ -1,0 +1,11 @@
+Chinese Rings
+Source: https://github.com/z-biz-game/z-biz-game-nine-rings-cos
+Revision: 11182aa8fb858834c5397983aaa69ef9a429b429
+License: MIT (see LICENSE).
+Retrieved: 2026-10-18
+
+Static runtime and local icons/puzzle data only. Tooling, test fixtures, desktop
+wrappers, manifests and service-worker registration omitted. No CDN/backend needed.
+Browser storage namespaced; metadata images made relative; English help added.
+Phone header controls wrap. Original Chinese UI retained except noted below.
+Mark solver demonstrations as assisted for the lifetime unassisted tally; par badges retain upstream semantics.

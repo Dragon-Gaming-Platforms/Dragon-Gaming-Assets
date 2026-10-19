@@ -1,0 +1,15 @@
+{
+  "name": "River Crossing",
+  "desc": "Ferry people and cargo across a river while respecting capacity and forbidden pairings. Includes supervised and free-boat variants with shortest-route targets. Original Simplified Chinese interface; English help included.",
+  "controls": "Drag roles onto/off the boat; tap the boat or drag it to the opposite bank to cross. Space/Enter crosses, U undo, H hint, R restart.",
+  "shelf": "Puzzle & Logic",
+  "tags": [
+    "games",
+    "html5",
+    "puzzle",
+    "logic",
+    "river-crossing"
+  ],
+  "badge": "New",
+  "creator": "z-biz-game"
+}
