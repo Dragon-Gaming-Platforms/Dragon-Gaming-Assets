@@ -1,0 +1,8 @@
+{
+  "name": "Weather Forge",
+  "desc": "An original local weather experiment. Adjust temperature, humidity, pressure, and wind to see how a procedural cloud field responds; seed an updraft and watch it grow into a storm.",
+  "controls": "Adjust the weather sliders or choose a preset. Tap or click the sky to seed a warm updraft; Pause freezes the local simulation.",
+  "shelf": "Interactive Stories & Experiments",
+  "tags": ["simulation", "weather", "science", "experiment", "offline"],
+  "creator": "Dragon Gaming Assets contributors"
+}
