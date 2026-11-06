@@ -1,0 +1,8 @@
+{
+  "name": "L-System Garden",
+  "desc": "Grow procedural branching art from simple rewrite rules. Explore fern, tree, Koch, Sierpinski, and dragon-curve grammars with adjustable iterations, turns, stroke weight, and palette.",
+  "controls": "Choose a recipe, adjust iterations and turn angle, then Grow again. Change line weight and palette to restyle the generated paths.",
+  "shelf": "Interactive Stories & Experiments",
+  "tags": ["generative-art", "l-system", "fractals", "procedural", "offline"],
+  "creator": "Dragon Gaming Assets contributors"
+}
