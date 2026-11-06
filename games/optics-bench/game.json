@@ -1,0 +1,8 @@
+{
+  "name": "Optics Bench",
+  "desc": "Explore image formation with an interactive thin-lens ray bench. Change object distance, height, focal length, and lens type; compare real and virtual images and principal rays.",
+  "controls": "Use sliders and the lens selector to change the optical setup. The diagram and image readouts update immediately.",
+  "shelf": "Interactive Stories & Experiments",
+  "tags": ["physics", "optics", "lenses", "simulation", "offline"],
+  "creator": "Dragon Gaming Assets contributors"
+}

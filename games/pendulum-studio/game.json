@@ -1,0 +1,8 @@
+{
+  "name": "Pendulum Studio",
+  "desc": "Explore a damped pendulum with an interactive local physics workbench. Set its release angle, length, gravity, and damping; drag the bob and compare the motion trace and energy.",
+  "controls": "Mouse/touch: drag the bob to set its angle. Use sliders for angle, length, gravity, and damping; Start, Step, and Reset control the simulation.",
+  "shelf": "Interactive Stories & Experiments",
+  "tags": ["physics", "pendulum", "simulation", "education", "offline"],
+  "creator": "Dragon Gaming Assets contributors"
+}
