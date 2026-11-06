@@ -1,0 +1,15 @@
+{
+  "name": "PHASE",
+  "desc": "A vaporwave rhythm twin-stick shooter: your guns fire on the beat, every enemy you destroy plays a note in key, and your dashes are judged against the music to within 40 ms. Twenty-five sectors and five guardians, with a soundtrack composed live as you play — every pixel and every sound generated at runtime (zero asset files).",
+  "controls": "WASD/arrows move, mouse aims (always firing), left-click/Space dash, hold right-click/Shift for bullet time, Q/E/middle-click bomb, Esc pause (gamepad + touch supported)",
+  "shelf": "Arcade & Action",
+  "tags": [
+    "rhythm",
+    "shooter",
+    "twin-stick",
+    "vaporwave"
+  ],
+  "badge": "New",
+  "creator": "koh-gt",
+  "image": "title.png"
+}
