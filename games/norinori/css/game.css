@@ -1,0 +1,227 @@
+/* [hidden] 必须带着 !important 站在这张表的最前面。
+   #win-veil 平时是 display:grid，按层叠顺序它会盖掉 UA 的 [hidden]{display:none}，
+   于是那块"藏起来"的胜利卡片还在画、还在吃点击——指针闸会点不到它下面那颗按钮，
+   而红字看起来像"按钮坏了"。这条不是风格问题，是命中测试的问题。 */
+[hidden] { display: none !important; }
+
+* { box-sizing: border-box; }
+
+body {
+  /* 和纸底纹由 assets/gen/make_art.py 生成（512×512 平铺）。为什么是位图而不是渐变：
+     渐变在任何 DPR 上都是同一条数学式，放大到 iPad 就看得出"没有纸"；噪声图平铺到
+     任何尺寸都是同一份纤维。--page-bg 仍然站在底色位置上（纹理只是 ±3 的抖动）。 */
+  margin: 0;
+  background-color: var(--page-bg);
+  background-image: url('../textures/washi-512.png');
+  background-repeat: repeat;
+  color: var(--ink);
+  font: var(--font-ui);
+  /* safe-area：viewport-fit=cover 之后 env() 才有非零值。为什么四边都要：横屏 iPhone 的
+     刘海在左、底部横条在下，只补 top 等于把左列按钮塞进圆角里。 */
+  padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+}
+
+header {
+  padding: max(var(--space-pad), env(safe-area-inset-top)) var(--space-pad) 0;
+  padding-left: max(var(--space-pad), env(safe-area-inset-left));
+  padding-right: max(var(--space-pad), env(safe-area-inset-right));
+}
+h1 { margin: 0; font-size: 22px; letter-spacing: .04em; }
+h1 .sub { color: var(--ink-quiet); font-size: 14px; font-weight: 400; }
+.rule { margin: 8px 0 0; max-width: 62ch; color: var(--ink); }
+.rule b { color: var(--accent); font-weight: 600; }
+.quiet { color: var(--ink-quiet); }
+
+main {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--space-gap);
+  align-items: flex-start;
+  padding: var(--space-pad);
+  padding-left: max(var(--space-pad), env(safe-area-inset-left));
+  padding-right: max(var(--space-pad), env(safe-area-inset-right));
+}
+
+/* 全屏（#fullscreen → requestFullscreen）：画布居中、面板贴着底部安全区收成一排。
+   不做这一条的话全屏下面板会压在 :root 的左下角，横屏手机上够不着。 */
+:root:fullscreen .board-wrap { flex: 0 0 auto; margin: 0 auto; }
+:root:fullscreen main { align-items: center; }
+:root:fullscreen .panel { padding-bottom: max(var(--space-pad), env(safe-area-inset-bottom)); }
+
+.board-wrap {
+  /* 宽度由这条 flex 规则定死，画布只是里面的孩子：
+     main.js 的 layout() 量的就是这个容器，如果让它量画布自己，就成"画多大就量多大"的自反馈。 */
+  flex: 1 1 340px;
+  min-width: 260px;
+  max-width: 560px;
+  position: relative;
+}
+#board {
+  display: block;
+  border-radius: var(--space-radius);
+  background: var(--board-bg);
+  touch-action: manipulation;
+}
+#board:focus-visible { outline: 2px solid var(--selected); outline-offset: 3px; }
+
+#win-veil {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-content: center;
+  gap: 10px;
+  text-align: center;
+  border-radius: var(--space-radius);
+  background: color-mix(in srgb, var(--panel-bg) 88%, transparent);
+  animation: veil-in var(--motion-ms) ease;
+}
+#win-veil .big { margin: 0; font-size: 26px; color: var(--hint); }
+#win-veil .why { margin: 0; color: var(--ink-quiet); max-width: 30ch; }
+
+.panel {
+  display: grid;
+  gap: 10px;
+  width: var(--space-panel-w);
+  padding: var(--space-pad);
+  background: var(--panel-bg);
+  border-radius: var(--space-radius);
+}
+.row { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+.pens .pen.on { border-color: var(--accent); color: var(--accent); }
+
+button, select {
+  font: inherit;
+  color: var(--ink);
+  background: var(--board-bg);
+  border: 1px solid color-mix(in srgb, var(--ink-quiet) 45%, transparent);
+  border-radius: calc(var(--space-radius) - 4px);
+  padding: 7px 11px;
+  cursor: pointer;
+  transition: border-color var(--motion-ms) ease, color var(--motion-ms) ease;
+  /* 44px 是**命中盒**的下限，不是视觉高度：触摸目标由 border-box 算，只把 padding 撑大
+     会得到"看着挺大、指尖偏半格就点不中"。所以 min-height/min-width 直接钉 border-box。
+     画布上每一格的边长下限另有 theme.js 的 Board.cellMin=30 管，那是另一条账。 */
+  min-height: 44px;
+  min-width: 44px;
+}
+button:hover { border-color: var(--accent); }
+button:focus-visible { outline: 2px solid var(--selected); outline-offset: 2px; }
+button:disabled { opacity: .45; cursor: default; }
+label { color: var(--ink-quiet); }
+select { min-height: 44px; }
+
+/* HUD 三个开关的按下态由 aria-pressed 说，不由 class 说：读屏软件读的是前者，
+   两套并存的迟早会分家。 */
+.hud button[aria-pressed='true'] {
+  border-color: var(--accent);
+  color: var(--accent);
+  background: color-mix(in srgb, var(--accent) 14%, var(--board-bg));
+}
+.clock { color: var(--ink-quiet); font-variant-numeric: tabular-nums; }
+.clock.paused { color: var(--accent); }
+
+.read { margin: 0; font-variant-numeric: tabular-nums; color: var(--ink); }
+/* 状态行的红与绿是**元素身上的类**，不是内嵌的 span：main.js 一律用 textContent 写读数，
+   不拼 innerHTML——判定文本里会带格子下标与引擎原文，拼 HTML 就是把注入面留在自己家里。 */
+.read.bad { color: var(--wrong); }
+.read.good { color: var(--hint); }
+#msg { min-height: 1.45em; }
+.totals { color: var(--ink-quiet); }
+.help { color: var(--ink-quiet); }
+.help summary { cursor: pointer; }
+
+footer {
+  padding: 0 var(--space-pad) var(--space-pad);
+  padding-left: max(var(--space-pad), env(safe-area-inset-left));
+  padding-right: max(var(--space-pad), env(safe-area-inset-right));
+  padding-bottom: max(var(--space-pad), env(safe-area-inset-bottom));
+  max-width: 78ch;
+}
+footer code { color: var(--accent); }
+
+/* 中央分发：safe-area 兜底 */
+
+/* ---------- safe-area：刘海与主屏条不吃掉按钮（中央分发，akari-cos 同口径） ---------- */
+:root {
+  --sat: env(safe-area-inset-top, 0px);
+  --sar: env(safe-area-inset-right, 0px);
+  --sab: env(safe-area-inset-bottom, 0px);
+  --sal: env(safe-area-inset-left, 0px);
+}
+html, body {
+  padding-left: var(--sal);
+  padding-right: var(--sar);
+}
+body {
+  padding-top: var(--sat);
+  padding-bottom: var(--sab);
+  min-height: 100vh;
+  min-height: 100dvh;
+}
+/* 贴边的固定/吸底元素自己让开主屏条，别让 home indicator 压住按钮 */
+.fixed-bottom, .bottom-bar, .hud-bottom, footer.app-footer {
+  padding-bottom: calc(var(--sab) + env(safe-area-inset-bottom, 0px));
+}
+
+
+/* ============================================================
+   44px 触摸命中下限（Apple HIG 手机可用性底线）
+   每个真正可点的元素都要有 ≥44×44 CSS px 的命中盒。
+   min-height / min-width 是**硬下限**：只会把过小的盒子撑到 44px，
+   本来就够大的控件（宽药丸、整行列表项、大数字键）外形一点不变。
+
+   两处非平凡之处：
+   1) 需要 !important —— 各组件自己有 `.shelf button { min-width: 34px }`
+      这类更"贴身"的规则，类选择器的优先级高于任何标签堆叠，
+      不加的话这条底线会被组件规则逐个抵消。
+   2) 先把 --touch-min 定死：tapa / nurikabe 早就写了
+      `min-height: var(--touch-min)`，但全仓没有任何地方定义过这个变量，
+      无 fallback 的 var() 在计算值阶段整条作废 —— 那是个看着像 44px、
+      实际什么都不保证的死规则。这里补上定义，让它们原本的意图真正成立。
+   ============================================================ */
+:root { --touch-min: 44px; }
+button,
+select,
+input,
+textarea,
+a[href],
+[role="button"] {
+  min-height: 44px !important;
+  min-width: 44px !important;
+}
+
+/* 减弱动效（prefers-reduced-motion）—— 真分支，不是空壳
+ *
+ * 本仓的装饰性动效**真在 CSS 上**：button/select 的
+ * transition: border-color …, color …（悬停时边框与字色渐变过去，约 120ms 一段）。
+ * canvas 侧 js/render/board.js 全仓 Math.sin / performance.now() % / requestAnimationFrame
+ * 命中数为 0，逐帧完全静止，所以 CSS 媒体查询就是这里正确的工具，不必往 js 里塞
+ * matchMedia（往 js 里加等于给一个不存在的 canvas 动效造开关）。
+ *
+ * 判据：这段渐变只改边框色与字色，两者的**终值**（:hover 时的 --accent 边框、--ink 字色）
+ * 一概不动 —— 悬停反馈还在，只是"渐过去"变成"立刻变"。换句话说：动效去掉，信息一条不少。
+ *
+ * 注：上面那条声明里的 var(--motion-ms) 确实不在本仓 :root 里（:root 只有 safe-area
+ * 四个变量与 --touch-min），但它由 js/theme.js 的 Motion.ms（140ms）在 applyThemeVars()
+ * 里写进 document.documentElement.style —— 自定义属性定义在哪都算数，不必在 :root，
+ * 所以那条 transition 是活的：边框色与字色各 140ms 渐过去。本段规则写成 transition: none
+ * 这样的关键字，不依赖那个变量，无论将来变量怎么改都成立。 */
+@media (prefers-reduced-motion: reduce) {
+  /* 悬停不再渐变：边框色与字色立刻切到终值，:hover 规则本身保留 */
+  button,
+  select {
+    transition: none;
+  }
+
+  /* 兜底：仓内任何将来新增的装饰性动画/过渡都归零（不改 scroll-behavior 之外的布局量） */
+  * {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* Hosting: narrow embedded headers and local English instructions. */
+.topbar,.top-actions,.modes{flex-wrap:wrap;min-width:0}
+.hosting-guide{display:inline-block;font:14px/1.5 system-ui,sans-serif;color:#9ed8ff;background:#172433;padding:8px 12px;border-radius:6px;letter-spacing:normal}

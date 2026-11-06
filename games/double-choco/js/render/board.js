@@ -1,0 +1,368 @@
+// 画布渲染器：只读 js/ui/game.js 的状态并作画。它不做任何判断——
+// 一块"对不对"是 rules.js 那张条款表说的（game.js 已经把违反的格挑进 game.bad），
+// 这里只负责把那份判断画出来，所以画面不可能和判据各说一套。
+//
+// 布局也留在这个文件里（格子边长、盘面原点、DPR），因为 hitSegment 必须用 draw 刚用过的那几个数
+// 回答点击：两者一旦漂移，就会出现"画面对、点下去偏一格"——区界游戏里那是最难受的一种错。
+//
+// 三种线是这局的三种读数，必须分得开：
+//   点线   = 题面给的 dotted line，还没画界（相邻两格目前同属一个候选区域）
+//   粗实线 = 玩家画下的区界（原句：Divide the grid into blocks by drawing solid lines）
+//   外框   = 盘的边界，永远实线，不可点（外面没有格子）
+// 点线与粗实线都跨在两种底色上（灰格与白格相邻时），所以同一段的左半与右半各用自己的颜色，
+// 靠 clip 到各自格子实现——一条线一个颜色时，总有一半会沉进底色里看不见。
+
+
+function layoutFor(R, C, availW, availH) {
+  const pad = 8; // 区界只画在盘内部，格外不需要留写字的地方
+  const size = Math.max(0, Math.min((availW - pad * 2) / C, (availH - pad * 2) / R));
+  const cell = Math.max(Cell.min, Math.min(Cell.max, Math.floor(size)));
+  return { cell, boardW: cell * C, boardH: cell * R, pad };
+}
+
+// ---- 画布底纹：与 css/game.css 的图例吃同一张盘上文件 ----
+// 灰格是巧克力、白格是白纸，这不是修辞：js/theme.js 的 Palette.gray/paper 是这两种底色的
+// **大数**，而颗粒是围绕它的分布（assets/gen/gen_art.py 从同一批 token 出图）。
+// 只有画布也叠上同一张图，"图例说的底色"与"盘上的底色"才是同一件事；否则 css 注释里那句
+// "画布同源"就是一句假的。强度不另调：叠法与 CSS 的 `background: url() repeat, var(--x)`
+// 逐像素同式，最坏情况由 tools/ui-smoke.mjs 第 7 段在真像素上判（八种墨一条都不掉门槛）。
+const BOARD_TEX = {
+  gray: 'assets/texture/choco-grain.png',
+  paper: 'assets/texture/paper-fibre.png',
+};
+
+// 只载一次：两张图是静态资产，每一局重新 fetch 会让"重开"多两次网络往返，
+// 而 browser 的 cache 让第二次的代价本就不该由这个模块来付。
+const boardTexImages = {};
+let boardTexLoaded = false;
+function loadBoardTextures(onReady) {
+  const keys = Object.keys(BOARD_TEX);
+  let alive = keys.length;
+  for (const k of keys) {
+    if (boardTexImages[k]) { if (--alive === 0) onReady(); continue; }
+    const img = new Image();
+    // addEventListener 与 onload 两条都挂：这一层不能因为某个内核只认其中一条就永远等不到图。
+    // 但两条都认的内核会回调两次，所以每一张只许结算一次（否则 alive 扣成负数、onReady 多叫）。
+    let settled = false;
+    const settle = (ok) => {
+      if (settled) return;
+      settled = true;
+      if (ok) boardTexImages[k] = img;
+      else delete boardTexImages[k];
+      if (boardTexImages.gray && boardTexImages.paper) boardTexLoaded = true;
+      alive -= 1;
+      if (alive === 0) onReady();
+    };
+    img.addEventListener('load', () => settle(true));
+    img.addEventListener('error', () => settle(false));
+    img.onload = () => settle(true);
+    img.onerror = () => settle(false);
+    img.src = BOARD_TEX[k];
+  }
+}
+
+class BoardView {
+  constructor(canvas) {
+    this.canvas = canvas;
+    this.ctx = canvas.getContext('2d');
+    this.geo = { cell: 0, x: 0, y: 0, w: 0, h: 0, dpr: 1 };
+    // pattern 与 dpr 绑定（下面 setTransform 那一层），所以缓存的键是 dpr 而不是图。
+    this.patterns = new Map();
+    this.onTexturesReady = null;
+    loadBoardTextures(() => { if (this.onTexturesReady) this.onTexturesReady(); });
+  }
+
+  // 取（并按 dpr 校准）一张纹理的 pattern。取不到就返回 null，调用方退回纯色——
+  // 底纹是一层像素，不是一个判据：file:// 下被安全策略拦掉、或离线壳没带图的时候，
+  // 盘面必须照常可读。
+  pattern(kind) {
+    const img = boardTexImages[kind];
+    if (!img || !img.width) return null;
+    const key = kind + '@' + this.geo.dpr;
+    if (this.patterns.has(key)) return this.patterns.get(key);
+    let pat = null;
+    try {
+      pat = this.ctx.createPattern(img, 'repeat');
+      // CSS 的 background-image 按设备像素铺；这边的画布整体被 setTransform(dpr) 放大过，
+      // 所以 pattern 要缩回 1/dpr，否则 Retina 上颗粒比图例粗一倍，"同源"只剩一半。
+      const M = typeof DOMMatrix === 'function' ? DOMMatrix : (typeof window !== 'undefined' ? window.DOMMatrix : null);
+      if (pat && pat.setTransform && M) pat.setTransform(new M().scale(1 / Math.max(1, this.geo.dpr)));
+    } catch { pat = null; }
+    this.patterns.set(key, pat);
+    return pat;
+  }
+
+  // 后备缓冲按设备像素定尺寸，所有绘制调用留在 CSS 像素：开头一次 setTransform，
+  // 就不需要把本文件每个常量都乘一遍 DPR，也不会让点线在 Retina 上糊成一团。
+  resize(game, availW, availH) {
+    const l = layoutFor(game.R, game.C, availW, availH);
+    const dpr = Math.max(1, Math.round(window.devicePixelRatio || 1));
+    const size = { w: l.boardW + l.pad * 2, h: l.boardH + l.pad * 2 };
+    this.canvas.style.width = `${size.w}px`;
+    this.canvas.style.height = `${size.h}px`;
+    this.canvas.width = Math.round(size.w * dpr);
+    this.canvas.height = Math.round(size.h * dpr);
+    this.ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    this.geo = { cell: l.cell, x: l.pad, y: l.pad, w: size.w, h: size.h, dpr };
+    this.game = game;
+    return this.geo;
+  }
+
+  cellRect(i) {
+    const { cell, x, y } = this.geo;
+    const [r, c] = [Math.floor(i / this.game.C), i % this.game.C];
+    return { x: c * cell + x, y: r * cell + y, size: cell };
+  }
+
+  // 段 k 的两个端点（CSS 像素）。段表里 j>i 且相邻，所以只有"右邻"与"下邻"两种。
+  segLine(k) {
+    const { cell, x, y } = this.geo;
+    const C = this.game.C;
+    const [i, j] = this.game.segs[k];
+    const r = Math.floor(i / C), c = i % C;
+    return j === i + 1
+      ? { x1: x + (c + 1) * cell, y1: y + r * cell, x2: x + (c + 1) * cell, y2: y + (r + 1) * cell }
+      : { x1: x + c * cell, y1: y + (r + 1) * cell, x2: x + (c + 1) * cell, y2: y + (r + 1) * cell };
+  }
+
+  // 盘面坐标（已减去 canvas 左上角）→ 段号，或 -1（离所有段都太远）。
+  segFromPoint(px, py) {
+    const { cell } = this.geo;
+    if (!cell || !this.game) return -1;
+    const tol = Math.min(Math.max(5, cell * Hit.segRatio), cell * Hit.maxCell);
+    let best = -1, bestD = Infinity;
+    for (let k = 0; k < this.game.segs.length; k++) {
+      const s = this.segLine(k);
+      const d = distPointSeg(px, py, s.x1, s.y1, s.x2, s.y2);
+      if (d < bestD) { bestD = d; best = k; }
+    }
+    return bestD <= tol ? best : -1;
+  }
+
+  // 指针给的是视口 CSS 像素，segLine/cellRect 用的是 resize() 算出的那套 CSS 像素。
+  // 两者只在"画布没被任何 CSS 缩过"时才相等：flex 收缩、浏览器缩放、样式里加一条
+  // max-width 都会让 rect 与 style.width 分开——届时偏移是**比例**的，越靠盘右下角越大，
+  // 也就是简报点名的"点 A 打 B"。所以按 rect 实测尺寸换算，而不是假定 1:1。
+  localPoint(clientX, clientY) {
+    const rect = this.canvas.getBoundingClientRect();
+    const g = this.geo;
+    const sx = rect.width && g.w ? g.w / rect.width : 1;
+    const sy = rect.height && g.h ? g.h / rect.height : 1;
+    return { x: (clientX - rect.left) * sx, y: (clientY - rect.top) * sy };
+  }
+
+  hitSegment(clientX, clientY) {
+    const p = this.localPoint(clientX, clientY);
+    return this.segFromPoint(p.x, p.y);
+  }
+
+  // 点击所在格：段没点着时用它移动光标，键盘（Shift+方向键）就从这一格接着画。
+  hitCell(clientX, clientY) {
+    const { cell, x, y } = this.geo;
+    const g = this.game;
+    if (!cell || !g) return -1;
+    const p = this.localPoint(clientX, clientY);
+    const c = Math.floor((p.x - x) / cell);
+    const r = Math.floor((p.y - y) / cell);
+    if (r < 0 || c < 0 || c >= g.C || r >= g.R) return -1;
+    return g.B.id(r, c);
+  }
+
+  // 区域色来自玩家自己的划分（gid 取块内最小格号），不是答案：
+  // 同一层色只说明"你把这几格当成了一块"，画错了也不会泄露正确的排法。
+  colorMap(part) {
+    const ids = [...new Set([...part.values()])].sort((a, b) => a - b);
+    const m = new Map();
+    ids.forEach((g, k) => m.set(g, Palette.region[k % Palette.region.length]));
+    return m;
+  }
+
+  dotColor(i) {
+    return this.game.B.isGray(i) ? Palette.dot : Palette.dotOnPaper;
+  }
+
+  draw(game, { pulse = null, hover = -1, handles = true } = {}) {
+    this.game = game;
+    const { ctx, geo } = this;
+    const { cell } = geo;
+    const B = game.B;
+    const won = game.status === 'won';
+    ctx.clearRect(0, 0, geo.w, geo.h);
+    roundRect(ctx, 0, 0, geo.w, geo.h, Radius.card);
+    ctx.fillStyle = Palette.surface;
+    ctx.fill();
+
+    // 底层：题面给的灰格与白格。"数字数的是哪一半"全靠这一层，所以不用 alpha 蒙出来。
+    // 纯色是大数，颗粒是围绕它的分布：同一张盘上文件也被 CSS 的图例用着（BOARD_TEX 那两行）。
+    // 纹理只到这一层为止——区域回显、违反红罩、三种墨、数字全在它之上，所以它盖不住任何读数。
+    const patGray = this.pattern('gray');
+    const patPaper = this.pattern('paper');
+    for (const i of B.cells) {
+      const r = this.cellRect(i);
+      const gray = B.isGray(i);
+      ctx.fillStyle = gray ? Palette.gray : Palette.paper;
+      ctx.fillRect(r.x, r.y, cell, cell);
+      const pat = gray ? patGray : patPaper;
+      if (pat) {
+        ctx.fillStyle = pat;
+        ctx.fillRect(r.x, r.y, cell, cell);
+      }
+    }
+
+    // 玩家当前分块的回显：整块同色。画错时也照样回显——它是读数，不是判词。
+    const colors = this.colorMap(game.part);
+    for (const i of B.cells) {
+      const g = game.part.get(i);
+      if (g == null || g < 0) continue;
+      const r = this.cellRect(i);
+      ctx.fillStyle = withAlpha(colors.get(g), won ? 0.26 : 0.15);
+      ctx.fillRect(r.x, r.y, cell, cell);
+    }
+
+    // 过不了条款的块罩一层红。哪一条被违反由提示与状态行说，画面只指出是哪一块。
+    if (game.bad.size) {
+      ctx.fillStyle = withAlpha(Palette.error, 0.22);
+      for (const i of game.bad) {
+        const r = this.cellRect(i);
+        ctx.fillRect(r.x, r.y, cell, cell);
+      }
+    }
+
+    // 内部网格
+    const dotW = Math.max(1, cell * Cell.dotScale);
+    const solidW = Math.max(2.5, cell * Cell.borderScale);
+    const dash = [Math.max(2, cell * 0.09), Math.max(2, cell * 0.11)];
+    for (let k = 0; k < game.segs.length; k++) {
+      const [i, j] = game.segs[k];
+      const s = this.segLine(k);
+      // 一条段跨在两种底色上，所以实线与点线都分两次画、各 clip 进相邻的那一格。
+      // 两半各挑一种墨（灰底用 border，纸底用 borderOnPaper），因为"一白走两边"不成立：
+      // tools/ui-smoke.mjs 第 6 段拿题面自己的色差当尺，钉住四种墨都分得开，并留一条负样本
+      // 写着"两半同色会沉底"。像素那一层由 tools/scenarios.js 的 layout 腿逐段两侧量。
+      const sideStroke = (rect, col, dashPattern, width) => {
+        ctx.save();
+        ctx.beginPath();
+        ctx.rect(rect.x, rect.y, rect.size, rect.size);
+        ctx.clip();
+        ctx.setLineDash(dashPattern);
+        ctx.strokeStyle = col;
+        ctx.lineWidth = width;
+        ctx.beginPath(); ctx.moveTo(s.x1, s.y1); ctx.lineTo(s.x2, s.y2); ctx.stroke();
+        ctx.restore();
+      };
+      const badPair = game.bad.has(i) && game.bad.has(j);
+      if (game.st[k] === BORDER) {
+        const solidCol = (ix) => (won ? Palette.success : badPair ? Palette.error : B.isGray(ix) ? Palette.border : Palette.borderOnPaper);
+        sideStroke(this.cellRect(i), solidCol(i), [], solidW);
+        sideStroke(this.cellRect(j), solidCol(j), [], solidW);
+        continue;
+      }
+      sideStroke(this.cellRect(i), this.dotColor(i), dash, dotW);
+      sideStroke(this.cellRect(j), this.dotColor(j), dash, dotW);
+    }
+    ctx.setLineDash([]);
+    ctx.strokeStyle = Palette.lineHeavy;
+    ctx.lineWidth = Math.max(1.5, cell * 0.05);
+    ctx.strokeRect(geo.x, geo.y, cell * game.C, cell * game.R);
+
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    // 题面数字：印在哪种颜色上就数哪种颜色的格数（V5 的原句），所以底色要一直看得见。
+    for (const [i, v] of B.num) {
+      const r = this.cellRect(i);
+      const g = B.isGray(i);
+      ctx.fillStyle = game.bad.has(i) ? Palette.error : g ? Palette.ink : Palette.inkOnPaper;
+      ctx.font = `700 ${Math.round(cell * Cell.numScale)}px ${Font.mono}`;
+      ctx.fillText(String(v), r.x + cell / 2, r.y + cell / 2 + 1);
+    }
+
+    // 光标：虚线框 + 四条边上的把手点，说明 Shift+方向键在"这格与邻居之间"落子。
+    // 盘边的把手没有对应的段，就不画（那面没有相邻格）。
+    if (handles && game.cursor >= 0) {
+      const r = this.cellRect(game.cursor);
+      ctx.strokeStyle = won ? Palette.success : Palette.accent;
+      ctx.lineWidth = Math.max(2, cell * 0.055);
+      ctx.setLineDash([Math.max(4, cell * 0.18), Math.max(3, cell * 0.12)]);
+      ctx.strokeRect(r.x + ctx.lineWidth, r.y + ctx.lineWidth, cell - ctx.lineWidth * 2, cell - ctx.lineWidth * 2);
+      ctx.setLineDash([]);
+      const rad = Math.max(2.5, cell * 0.075);
+      for (const dir of ['up', 'down', 'left', 'right']) {
+        const to = game.step(game.cursor, dir);
+        if (to === null) continue;
+        const k = game.segIx.get(segKey(game.cursor, to));
+        if (k === undefined) continue;
+        const [cx, cy] = edgeMid(this.cellRect(game.cursor), dir);
+        ctx.beginPath();
+        ctx.arc(cx, cy, rad, 0, Math.PI * 2);
+        ctx.fillStyle = game.st[k] === BORDER ? Palette.accent : withAlpha(Palette.accent, 0.4);
+        ctx.fill();
+      }
+    }
+
+    // 指针正指着的那条段：落点要比亚"在哪"更早出现，否则玩家在猜坐标。
+    if (hover >= 0 && hover < game.segs.length) this.strokeEmphasis(this.segLine(hover), withAlpha(Palette.accent, 0.5), cell);
+
+    // 提示/冲突点名的那条界：界面唯一被允许说"看这里"的地方。
+    // alpha 是 js/anim.js 由帧 dt 累计出来的包络终点——这一行不乘它，那条时钟就只是
+    // 一笔算了却没人看的账（§6 的阴性对照钉的正是这里：把 alpha 丢掉，三档对拍必须变红）。
+    if (pulse && pulse.seg != null && pulse.seg >= 0 && pulse.seg < game.segs.length) {
+      const col = pulse.color || Palette.hint;
+      const a = pulse.alpha == null ? 1 : Math.max(0.08, Math.min(1, pulse.alpha));
+      this.strokeEmphasis(this.segLine(pulse.seg), a >= 1 ? col : withAlpha(col, a), cell);
+    }
+    if (pulse && (pulse.seg == null) && pulse.cell != null && pulse.cell >= 0) {
+      const r = this.cellRect(pulse.cell);
+      ctx.strokeStyle = pulse.color || Palette.hint;
+      ctx.lineWidth = Math.max(2.5, cell * 0.09);
+      roundRect(ctx, r.x + 2, r.y + 2, cell - 4, cell - 4, Radius.cell);
+      ctx.stroke();
+    }
+  }
+
+  strokeEmphasis(s, col, cell) {
+    const ctx = this.ctx;
+    ctx.strokeStyle = col;
+    ctx.lineWidth = Math.max(5, cell * 0.19);
+    ctx.lineCap = 'round';
+    ctx.beginPath(); ctx.moveTo(s.x1, s.y1); ctx.lineTo(s.x2, s.y2); ctx.stroke();
+    ctx.lineCap = 'butt';
+  }
+}
+
+// 光标格某一条边的中点（画把手用）
+function edgeMid(r, dir) {
+  const c = r.size;
+  if (dir === 'up') return [r.x + c / 2, r.y];
+  if (dir === 'down') return [r.x + c / 2, r.y + c];
+  if (dir === 'left') return [r.x, r.y + c / 2];
+  return [r.x + c, r.y + c / 2];
+}
+
+function distPointSeg(px, py, x1, y1, x2, y2) {
+  const dx = x2 - x1, dy = y2 - y1;
+  const len2 = dx * dx + dy * dy;
+  const t = len2 ? Math.max(0, Math.min(1, ((px - x1) * dx + (py - y1) * dy) / len2)) : 0;
+  return Math.hypot(px - (x1 + t * dx), py - (y1 + t * dy));
+}
+
+function roundRect(ctx, x, y, w, h, r) {
+  const k = Math.min(r, w / 2, h / 2);
+  ctx.beginPath();
+  ctx.moveTo(x + k, y);
+  ctx.arcTo(x + w, y, x + w, y + h, k);
+  ctx.arcTo(x + w, y + h, x, y + h, k);
+  ctx.arcTo(x, y + h, x, y, k);
+  ctx.arcTo(x, y, x + w, y, k);
+  ctx.closePath();
+}
+
+// #RRGGBB -> rgba()：填充和描边共用同一个 token，只是一个透明一个不透明，
+// 所以一个区域不可能"框是一种颜色、心是另一种"。
+function withAlpha(hex, a) {
+  const m = String(hex).replace('#', '');
+  const n = m.length === 3 ? m.split('').map((c) => c + c).join('') : m;
+  const r = parseInt(n.slice(0, 2), 16);
+  const g = parseInt(n.slice(2, 4), 16);
+  const b = parseInt(n.slice(4, 6), 16);
+  return `rgba(${r},${g},${b},${a})`;
+}

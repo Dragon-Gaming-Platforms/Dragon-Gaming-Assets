@@ -1,0 +1,15 @@
+{
+  "name": "Tatamibari",
+  "desc": "Partition the grid into rectangles with exactly one shape clue each; no four rectangles may meet at a point. Five generated tiers. Original interface partly Simplified Chinese; English help included.",
+  "controls": "Drag internal edges to draw walls or mark joins. 1 wall, 2 join, 3 unknown; see English help for other controls.",
+  "shelf": "Puzzle & Logic",
+  "tags": [
+    "games",
+    "html5",
+    "puzzle",
+    "logic",
+    "tatamibari"
+  ],
+  "badge": "New",
+  "creator": "z-biz-game"
+}

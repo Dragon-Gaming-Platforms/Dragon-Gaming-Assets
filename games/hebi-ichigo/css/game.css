@@ -1,0 +1,424 @@
+/* Colours, spacing and durations all come from js/theme.js via applyThemeVars(); there are
+   no literals here except geometry. That is what keeps the canvas and the stylesheet from
+   drifting into two different-looking games. */
+
+/* 单独一条 [hidden]：下面的 .view/#view-game 都是 display:grid，而 UA 样式表的
+   [hidden]{display:none} 优先级低于任何作者样式——少这一行，"藏起来的选档页"会照样
+   留在几何里被点到。闸不假设这一行存在，它量 hit box。 */
+[hidden] { display: none !important; }
+
+* { box-sizing: border-box; }
+
+html, body {
+  margin: 0;
+  min-height: 100%;
+  /* 纸的颗粒压在渐变上：这是母题里"纸"的那一半。它只在页面底层，不进格子——
+     格子的底色是门禁采样的对象（三种底色 / 留空 vs 未定），那里放纹理就是去搅判据。 */
+  background:
+    url('../assets/textures/paper-grain.png') 0 0 / 128px 128px repeat,
+    linear-gradient(180deg, var(--bg-top) 0%, var(--bg-bottom) 62%, var(--surface) 100%);
+  background-attachment: fixed;
+  color: var(--ink);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+}
+
+body { touch-action: manipulation; }
+
+#app {
+  max-width: 1180px;
+  margin: 0 auto;
+  /* max() 而不是直接加 env()：没有刘海的机器上 env() 恒为 0，设计间距不该因此缩水。 */
+  padding: max(var(--space-page), env(safe-area-inset-top))
+    max(var(--space-page), env(safe-area-inset-right))
+    max(var(--space-inner), env(safe-area-inset-bottom))
+    max(var(--space-page), env(safe-area-inset-left));
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-card);
+  min-height: 100vh;
+}
+
+.mono { font-family: var(--font-mono); font-variant-numeric: tabular-nums; }
+code { font-family: var(--font-mono); font-size: 0.92em; color: var(--ink-dim); }
+
+/* ---------- top bar ---------- */
+
+.topbar {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: var(--space-card);
+}
+
+.brand h1 {
+  margin: 0;
+  font: 700 30px/1.1 var(--font-sans);
+  letter-spacing: 0.16em;
+}
+
+.brand .sub {
+  margin: 4px 0 0;
+  color: var(--ink-dim);
+  font-size: 12px;
+  letter-spacing: 0.18em;
+}
+
+.top-actions { display: flex; flex-wrap: wrap; gap: var(--space-gutter); justify-content: flex-end; }
+
+button {
+  font: inherit;
+  color: inherit;
+  cursor: pointer;
+  border-radius: var(--radius-button);
+  border: 1px solid var(--line);
+  background: var(--surface-lift);
+  padding: 12px 16px;
+  /* 44px 是拇指的地板，不是审美选择：34px 那一档在手机上就是掷硬币。 */
+  min-height: 44px;
+  transition: transform var(--dur-tap) var(--ease-spring), border-color var(--dur-base) var(--ease-ease),
+    background var(--dur-base) var(--ease-ease);
+}
+
+button:hover { border-color: var(--line-heavy); }
+button:active { transform: translateY(1px) scale(0.99); }
+button:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+button.primary {
+  background: linear-gradient(180deg, var(--accent) 0%, #e2551f 100%);
+  border-color: var(--accent-edge);
+  color: #1a0d06;
+  font-weight: 700;
+}
+
+button.ghost { background: transparent; }
+/* link 只该去掉"像个按钮"，不该去掉拇指的地板：min-height:0 会让它是全仓唯一 <44px 的命中目标。
+   多出来的高度不可见（background:none、border:none），所以这里放大的是命中盒不是版面。 */
+button.link {
+  background: none;
+  border: none;
+  color: var(--ink-dim);
+  text-decoration: underline;
+  padding: 0;
+  min-height: 44px;
+  min-width: 44px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
+button[aria-pressed='true'] { border-color: var(--accent); background: var(--accent-soft); }
+
+/* ---------- views ---------- */
+
+.view { animation: rise var(--dur-base) var(--ease-ease) both; }
+@keyframes rise { from { opacity: 0; transform: translateY(6px); } to { opacity: 1; transform: none; } }
+
+.menu-hero h2 { margin: 0 0 8px; font-size: 19px; line-height: 1.45; font-weight: 700; }
+.menu-hero p { margin: 0 0 var(--space-card); color: var(--ink-dim); font-size: 14px; line-height: 1.85; max-width: 74ch; }
+.menu-hero b { color: var(--ink); }
+
+.menu-cols { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.1fr); gap: var(--space-card); }
+.col {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-card);
+  padding: var(--space-card);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-inner);
+}
+.col-title { margin: 0; font-size: 12px; letter-spacing: 0.12em; text-transform: uppercase; color: var(--ink-faint); }
+
+.tiers { display: grid; gap: 8px; }
+.tier {
+  display: grid;
+  grid-template-columns: 44px minmax(0, 1fr);
+  grid-template-rows: auto auto;
+  gap: 2px 10px;
+  text-align: left;
+  padding: 12px 14px;
+}
+.tier-name { grid-row: 1 / span 2; font-size: 22px; font-weight: 700; align-self: center; }
+.tier-note { font-size: 13px; }
+.tier-size { font-size: 11px; color: var(--ink-dim); }
+.tier-out { margin: 2px 0 0; font-size: 11px; line-height: 1.7; color: var(--ink-faint); }
+
+.menu-disclose {
+  margin: 0;
+  font-size: 12px;
+  line-height: 1.7;
+  color: var(--ink-dim);
+  border-left: 3px solid var(--line-heavy);
+  padding-left: 10px;
+}
+.menu-disclose b { color: var(--accent); }
+
+.resume {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  align-items: center;
+  gap: var(--space-inner);
+  border: 1px dashed var(--line-heavy);
+  border-radius: var(--radius-button);
+  padding: 12px;
+}
+.resume-txt { display: flex; flex-direction: column; gap: 2px; font-size: 13px; }
+.resume-txt span { color: var(--ink-dim); font-size: 12px; }
+
+.records { list-style: none; margin: 0; padding: 0; display: grid; gap: 6px; font-size: 13px; }
+.records li { display: flex; flex-wrap: wrap; gap: 6px; align-items: baseline; border-bottom: 1px solid var(--line); padding-bottom: 6px; }
+.records li b { min-width: 20px; }
+.records li span { color: var(--ink-dim); font-size: 12px; }
+
+.rules { margin: 0; padding-left: 20px; font-size: 13px; line-height: 1.75; color: var(--ink-dim); display: grid; gap: 4px; }
+.rules b { color: var(--ink); }
+.rules-note { margin: 0; font-size: 12px; color: var(--ink-faint); line-height: 1.7; }
+
+/* ---------- game view ---------- */
+
+#view-game {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 320px;
+  gap: var(--space-card);
+  align-items: start;
+}
+
+.stage { display: flex; flex-direction: column; gap: var(--space-inner); }
+.stage-head { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+.puzzle-name { font-size: 16px; font-weight: 700; }
+.chip {
+  font-size: 12px;
+  padding: 4px 9px;
+  border-radius: var(--radius-chip);
+  background: var(--surface-lift);
+  border: 1px solid var(--line);
+  color: var(--ink-dim);
+}
+
+#board-wrap {
+  position: relative;
+  align-self: center;
+  max-width: 100%;
+  border-radius: var(--radius-card);
+  border: 1px solid var(--line);
+  background: var(--surface);
+  padding: 6px;
+}
+
+/* 44px 拇指地板（theme.js 的 Cell.min）抬起来之后，8×8 在窄屏上比可视区宽：
+   这一层负责"装不下就横滚"，而不是把格子缩回掷硬币尺寸。position:relative 是必需的——
+   它是 #fx 的包含块，层与盘必须一起滚，否则滚一下光环就落在隔壁格上。 */
+#board-scroll {
+  position: relative;
+  max-width: 100%;
+  overflow-x: auto;
+  overscroll-behavior-x: contain;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: thin;
+}
+#board { display: block; touch-action: manipulation; border-radius: var(--radius-card); position: relative; z-index: 1; }
+#board:focus-visible { outline: 2px solid var(--accent); outline-offset: 3px; }
+
+/* 反馈层：叠在盘上、不吃输入。位置由 js/fx/layer.js 按 view.geo 写成 10px（板心偏移），
+   所以这里只定"贴在 #board-scroll 内沿 + 不参与命中"这两件事。 */
+.fx-layer {
+  position: absolute;
+  left: 0;
+  top: 0;
+  z-index: 2;
+  pointer-events: none;
+  border-radius: var(--radius-card);
+}
+
+#pause-veil {
+  position: absolute;
+  inset: 0;
+  z-index: 3;
+  display: grid;
+  place-items: center;
+  background: rgba(5, 7, 12, 0.86);
+  border-radius: var(--radius-card);
+  animation: rise var(--dur-base) var(--ease-ease) both;
+}
+.pause-card { text-align: center; padding: var(--space-card); max-width: 88%; }
+.pause-card h3 { margin: 0 0 6px; font-size: 20px; letter-spacing: 0.08em; }
+.pause-card p { margin: 0 0 12px; font-size: 12px; color: var(--ink-dim); line-height: 1.7; }
+
+#win-veil {
+  position: absolute;
+  inset: 0;
+  z-index: 4;
+  display: grid;
+  place-items: center;
+  background: rgba(5, 7, 12, 0.82);
+  border-radius: var(--radius-card);
+  animation: rise var(--dur-base) var(--ease-ease) both;
+}
+.win-card { text-align: center; padding: var(--space-card); max-width: 92%; }
+.win-card h3 { margin: 0 0 6px; font-size: 20px; }
+.win-card p { margin: 0 0 8px; font-size: 12px; color: var(--ink-dim); line-height: 1.7; }
+.win-record { font-size: 11px; }
+.win-actions { display: flex; gap: 8px; justify-content: center; margin-top: 10px; }
+
+.conflict-line { margin: 0; min-height: 18px; font-size: 12px; line-height: 1.6; color: var(--error); }
+.conflict-line:empty { color: var(--ink-dim); }
+
+.panel {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-card);
+  padding: var(--space-card);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-inner);
+}
+
+.digits { display: grid; grid-template-columns: repeat(6, 1fr); gap: 6px; }
+.digit { padding: 12px 0; min-height: 48px; font-size: 17px; font-weight: 700; text-align: center; }
+.digit.blank { font-size: 13px; font-weight: 600; color: var(--ink-dim); }
+.acts { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+#btn-hint .mono { margin-left: 6px; font-size: 11px; opacity: 0.75; }
+
+.stats { display: grid; grid-template-columns: 1fr 1fr; gap: 6px 10px; font-size: 12px; }
+.stat { display: flex; justify-content: space-between; gap: 8px; border-bottom: 1px solid var(--line); padding-bottom: 4px; color: var(--ink-dim); }
+.stat b { color: var(--ink); font-weight: 600; }
+.stat.bad b { color: var(--error); }
+
+.hint-box { border: 1px dashed var(--line-heavy); border-radius: var(--radius-button); padding: 10px 12px; }
+.hint-box h4 { margin: 0 0 6px; font-size: 13px; color: var(--warn); }
+.hint-box p { margin: 0; font-size: 12px; line-height: 1.75; color: var(--ink-dim); }
+
+.legend { display: grid; gap: 5px; font-size: 11.5px; color: var(--ink-dim); }
+.legend span { display: flex; align-items: center; gap: 8px; }
+.sw { width: 14px; height: 14px; border-radius: 3px; border: 1px solid var(--line); display: inline-block; }
+.sw-black { background: var(--black); border-color: var(--black-edge); }
+.sw-white { background: var(--bg-bottom); }
+.sw-blank { background: var(--surface-lift); }
+.sw-snake { background: var(--snake-0); }
+.sw-bad { background: var(--error); }
+
+.keyhint { margin: 0; font-size: 11px; line-height: 1.8; color: var(--ink-faint); }
+.keyhint b { color: var(--ink-dim); }
+
+.foot {
+  display: flex;
+  justify-content: space-between;
+  gap: var(--space-card);
+  align-items: baseline;
+  font-size: 11px;
+  color: var(--ink-faint);
+  line-height: 1.7;
+}
+
+.reduce-motion * { animation: none !important; transition: none !important; }
+/* 省动效不是"把动画调快"：反馈层整层不再参与画面。提示那一格的静态描边仍由 board.js 画，
+   信息一条不少，动的东西为零。 */
+.reduce-motion .fx-layer { display: none; }
+
+/* ---------- 玩法说明 ---------- */
+
+.how-to-play {
+  position: fixed;
+  inset: 0;
+  z-index: 20;
+  display: grid;
+  place-items: center;
+  padding: max(16px, env(safe-area-inset-top)) max(16px, env(safe-area-inset-right))
+    max(16px, env(safe-area-inset-bottom)) max(16px, env(safe-area-inset-left));
+  background: rgba(5, 7, 12, 0.82);
+  animation: rise var(--dur-base) var(--ease-ease) both;
+}
+
+.howto-card {
+  background: var(--surface);
+  border: 1px solid var(--line-heavy);
+  border-radius: var(--radius-card);
+  padding: var(--space-card);
+  max-width: 820px;
+  max-height: 86vh;
+  overflow: auto;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-inner);
+}
+.howto-card h3 { margin: 0; font-size: 18px; letter-spacing: 0.04em; }
+.howto-cols { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--space-card); }
+.howto-cols h4 { margin: 0 0 6px; font-size: 12px; letter-spacing: 0.1em; color: var(--warn); }
+.howto-cols p { margin: 0; font-size: 12.5px; line-height: 1.85; color: var(--ink-dim); }
+.howto-cols b { color: var(--ink); }
+.howto-keys { font-size: 12px; }
+.howto-note { border-left: 3px solid var(--line-heavy); padding-left: 10px; }
+.howto-actions { display: flex; justify-content: flex-end; }
+
+@media (max-width: 900px) {
+  .howto-cols { grid-template-columns: minmax(0, 1fr); }
+}
+
+@media (max-width: 900px) {
+  #view-game { grid-template-columns: minmax(0, 1fr); }
+  .menu-cols { grid-template-columns: minmax(0, 1fr); }
+  .panel { order: 2; }
+  .stage { order: 1; }
+  /* 窄屏把页面间距收紧，但 env() 必须继续参与：刘海只在手机上存在。 */
+  #app {
+    padding: max(12px, env(safe-area-inset-top)) max(12px, env(safe-area-inset-right))
+      max(var(--space-inner), env(safe-area-inset-bottom)) max(12px, env(safe-area-inset-left));
+  }
+}
+
+/* 中央分发：safe-area 兜底 */
+
+/* ---------- safe-area：刘海与主屏条不吃掉按钮（中央分发，akari-cos 同口径） ---------- */
+:root {
+  --sat: env(safe-area-inset-top, 0px);
+  --sar: env(safe-area-inset-right, 0px);
+  --sab: env(safe-area-inset-bottom, 0px);
+  --sal: env(safe-area-inset-left, 0px);
+}
+html, body {
+  padding-left: var(--sal);
+  padding-right: var(--sar);
+}
+body {
+  padding-top: var(--sat);
+  padding-bottom: var(--sab);
+  min-height: 100vh;
+  min-height: 100dvh;
+}
+/* 贴边的固定/吸底元素自己让开主屏条，别让 home indicator 压住按钮 */
+.fixed-bottom, .bottom-bar, .hud-bottom, footer.app-footer {
+  padding-bottom: calc(var(--sab) + env(safe-area-inset-bottom, 0px));
+}
+
+
+/* ============================================================
+   44px 触摸命中下限（Apple HIG 手机可用性底线）
+   每个真正可点的元素都要有 ≥44×44 CSS px 的命中盒。
+   min-height / min-width 是**硬下限**：只会把过小的盒子撑到 44px，
+   本来就够大的控件（宽药丸、整行列表项、大数字键）外形一点不变。
+
+   两处非平凡之处：
+   1) 需要 !important —— 各组件自己有 `.shelf button { min-width: 34px }`
+      这类更"贴身"的规则，类选择器的优先级高于任何标签堆叠，
+      不加的话这条底线会被组件规则逐个抵消。
+   2) 先把 --touch-min 定死：tapa / nurikabe 早就写了
+      `min-height: var(--touch-min)`，但全仓没有任何地方定义过这个变量，
+      无 fallback 的 var() 在计算值阶段整条作废 —— 那是个看着像 44px、
+      实际什么都不保证的死规则。这里补上定义，让它们原本的意图真正成立。
+   ============================================================ */
+:root { --touch-min: 44px; }
+button,
+select,
+input,
+textarea,
+a[href],
+[role="button"] {
+  min-height: 44px !important;
+  min-width: 44px !important;
+}
+
+/* Hosting: narrow embedded headers and local English instructions. */
+.topbar,.top-actions,.modes{flex-wrap:wrap;min-width:0}
+.hosting-guide{display:inline-block;font:14px/1.5 system-ui,sans-serif;color:#9ed8ff;background:#172433;padding:8px 12px;border-radius:6px;letter-spacing:normal}
+
+@media(max-width:360px){.digits{grid-template-columns:repeat(3,minmax(0,1fr))}}

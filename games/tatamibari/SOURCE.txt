@@ -1,0 +1,10 @@
+Tatamibari
+Source: https://github.com/z-biz-game/z-biz-game-tatamibari-cos
+Revision: c5bcfbe260eed72d38146813e0894d21048371eb
+License: MIT (see LICENSE).
+Retrieved: 2026-11-05
+
+Static runtime and local authored assets only. Build/test/desktop tooling,
+asset-generation scripts, manifests and service-worker registration omitted.
+No CDN/backend required. Save/audio/probe keys namespaced; metadata images
+relative; narrow headers wrap; English guide added. Essential controls translated; other Chinese UI retained.

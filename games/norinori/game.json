@@ -1,0 +1,15 @@
+{
+  "name": "Norinori",
+  "desc": "Shade exactly two cells in each region, forming isolated dominoes that may cross region boundaries. Generated boards run in a local worker. Original interface partly Simplified Chinese; English help included.",
+  "controls": "Choose Black/White and tap cells to mark or erase. Arrows navigate, Space/Enter marks, E erases; 1/2 tools, U undo, H hint.",
+  "shelf": "Puzzle & Logic",
+  "tags": [
+    "games",
+    "html5",
+    "puzzle",
+    "logic",
+    "norinori"
+  ],
+  "badge": "New",
+  "creator": "z-biz-game"
+}

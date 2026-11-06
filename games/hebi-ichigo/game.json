@@ -1,0 +1,15 @@
+{
+  "name": "Hebi-Ichigo",
+  "desc": "Place non-touching 1–5 snakes using directional number clues. Every white cell must be assigned a number or explicitly marked empty. Original interface partly Simplified Chinese; English help included.",
+  "controls": "Select a white cell, then choose Empty or 1–5. Arrows navigate, 0/Space marks empty, Delete clears; H hint, Z undo.",
+  "shelf": "Puzzle & Logic",
+  "tags": [
+    "games",
+    "html5",
+    "puzzle",
+    "logic",
+    "hebi-ichigo"
+  ],
+  "badge": "New",
+  "creator": "z-biz-game"
+}

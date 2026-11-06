@@ -1,0 +1,15 @@
+{
+  "name": "Double Choco",
+  "desc": "Divide a two-tone grid into blocks whose connected light and dark halves are congruent. Number clues give the size of each half. Original interface partly Simplified Chinese; English help included.",
+  "controls": "Tap internal edges to draw/remove borders; drag to edit multiple edges. See English help for keyboard controls.",
+  "shelf": "Puzzle & Logic",
+  "tags": [
+    "games",
+    "html5",
+    "puzzle",
+    "logic",
+    "double-choco"
+  ],
+  "badge": "New",
+  "creator": "z-biz-game"
+}

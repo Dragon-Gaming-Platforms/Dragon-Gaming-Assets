@@ -1,0 +1,10 @@
+Norinori
+Source: https://github.com/z-biz-game/z-biz-game-norinori-cos
+Revision: 183c28c6188b68197d0a911a194beb6883797d88
+License: MIT (see LICENSE).
+Retrieved: 2026-11-05
+
+Static runtime and local authored assets only. Build/test/desktop tooling,
+asset-generation scripts, manifests and service-worker registration omitted.
+No CDN/backend required. Save/audio/probe keys namespaced; metadata images
+relative; narrow headers wrap; English guide added. Essential controls translated; other Chinese UI retained.
