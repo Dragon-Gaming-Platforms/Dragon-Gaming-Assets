@@ -1,0 +1,325 @@
+/* 跳蛙渡 · LEAP — one stylesheet, no framework, no font files.
+ *
+ * The board's box is load-bearing rather than cosmetic: js/view.js measures the canvas with
+ * getBoundingClientRect() and maps every finger press through that measurement, so a canvas
+ * that never gets a height (the HTML default is 300x150) would draw a 17-pad river into a
+ * strip and the hit test would press the wrong lily pad. The `aspect-ratio` plus the
+ * min-height below are what tools/playtest.mjs @boot asserts, not decoration.
+ */
+
+:root {
+  --ink: #e6ecf3;
+  --ink-dim: #93a2b4;
+  --water: #0f1d24;
+  --water-deep: #08121a;
+  --edge: rgba(226, 232, 240, 0.12);
+  --leap: #63c76a;
+  --hop: #e0a54a;
+  --good: #7fe0a0;
+  --bad: #ff9d7a;
+  --card: #141c22;
+}
+
+* { box-sizing: border-box; }
+
+html, body {
+  margin: 0;
+  padding: 0;
+  background: radial-gradient(120% 100% at 50% 0%, var(--water) 0%, var(--water-deep) 70%);
+  color: var(--ink);
+  font: 15px/1.5 system-ui, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+  -webkit-text-size-adjust: 100%;
+}
+
+.topbar {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: 12px 16px;
+  padding: 14px 18px 8px;
+}
+
+.brand {
+  margin: 0;
+  font-size: 20px;
+  letter-spacing: 0.04em;
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+}
+
+.brand small { color: var(--ink-dim); font-size: 11px; letter-spacing: 0.22em; }
+.brand-mark { color: var(--leap); }
+
+.modes { display: flex; gap: 6px; }
+
+.modes button {
+  padding: 6px 13px;
+  border-radius: 999px;
+  border: 1px solid var(--edge);
+  background: transparent;
+  color: var(--ink-dim);
+  font: inherit;
+  cursor: pointer;
+}
+
+.modes button[aria-current="true"] {
+  border-color: var(--leap);
+  color: var(--ink);
+  background: rgba(99, 199, 106, 0.12);
+}
+
+.totals { margin: 0 0 0 auto; color: var(--ink-dim); font-size: 13px; }
+.totals b { color: var(--ink); font-weight: 600; }
+
+.stage {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 320px;
+  gap: 16px;
+  padding: 0 18px 26px;
+  align-items: start;
+}
+
+.board {
+  position: relative;
+  border: 1px solid var(--edge);
+  border-radius: 16px;
+  background: rgba(6, 14, 20, 0.7);
+  padding: 8px;
+  min-height: 320px;
+}
+
+/* The river keeps a wide box even on a phone: 17 pads need horizontal room, and the hop arc
+   needs vertical room above the water. */
+#river {
+  display: block;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  min-height: 320px;
+  border-radius: 12px;
+  touch-action: none;
+  cursor: pointer;
+}
+
+.hint-line {
+  min-height: 22px;
+  margin: 8px 4px 2px;
+  color: var(--ink-dim);
+  font-size: 13px;
+}
+
+.hint-line b { color: var(--ink); }
+.hint-line .no { color: var(--bad); }
+.hint-line .yes { color: var(--good); }
+
+/* ---- the paused state ----
+   The veil is the visible proof that the river is on hold: it covers the board (so a finger
+   cannot reach a lily pad behind it), it says 「已暂停」 in words, and it prints the reading
+   that stopped with the clock. */
+.pause-veil {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  background: rgba(4, 10, 14, 0.66);
+  border-radius: 16px;
+  backdrop-filter: blur(2px);
+  z-index: 1;
+}
+
+.pause-veil[hidden] { display: none; }
+
+.pause-card {
+  width: min(92%, 320px);
+  padding: 18px 20px;
+  border-radius: 14px;
+  border: 1px solid var(--edge);
+  background: var(--card);
+  text-align: center;
+}
+
+.pause-title { margin: 0; font-size: 20px; letter-spacing: 0.12em; }
+.pause-sub { margin: 6px 0 12px; color: var(--ink-dim); font-size: 13px; }
+.pause-sub b { color: var(--ink); font-variant-numeric: tabular-nums; }
+.pause-actions { display: flex; gap: 8px; justify-content: center; }
+.pause-hint { margin: 10px 0 0; color: var(--ink-dim); font-size: 12px; }
+.pause-hint b { color: var(--ink); }
+
+.curtain {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  background: rgba(4, 10, 14, 0.72);
+  border-radius: 16px;
+  backdrop-filter: blur(2px);
+}
+
+.curtain[hidden] { display: none; }
+
+.curtain-card {
+  width: min(92%, 380px);
+  padding: 18px 20px;
+  border-radius: 14px;
+  border: 1px solid var(--edge);
+  background: var(--card);
+  text-align: center;
+}
+
+.stars { margin: 0; font-size: 30px; letter-spacing: 0.16em; color: var(--hop); }
+.curtain-card h2 { margin: 4px 0 8px; font-size: 19px; }
+.tally { margin: 0 0 6px; color: var(--ink-dim); font-size: 13px; }
+.tally b { color: var(--ink); }
+.proof { margin: 0 0 12px; font-size: 12px; color: var(--ink-dim); }
+.proof b { color: var(--good); }
+
+.curtain-actions { display: flex; gap: 8px; justify-content: center; }
+
+.panel {
+  border: 1px solid var(--edge);
+  border-radius: 16px;
+  padding: 12px 14px 14px;
+  background: rgba(10, 20, 26, 0.66);
+}
+
+.crumbs { margin: 0 0 10px; font-size: 14px; }
+.crumbs b { float: right; color: var(--ink-dim); font-weight: 500; font-size: 12px; }
+.crumbs .band { color: var(--ink-dim); }
+
+.readout {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 8px 10px;
+  margin: 0 0 12px;
+}
+
+.readout > div { min-width: 0; }
+.readout dt { color: var(--ink-dim); font-size: 11px; }
+.readout dd { margin: 0; font-size: 19px; font-variant-numeric: tabular-nums; }
+.readout dd small { font-size: 11px; color: var(--ink-dim); }
+.readout .par dd { color: var(--good); }
+.readout .over dd { color: var(--hop); }
+.readout .bad dd { color: var(--bad); }
+
+.controls { display: flex; flex-wrap: wrap; gap: 6px; }
+
+button {
+  /* 44px 是 iOS HIG / WCAG 的命中区下限，不是审美选择：这条河在手机上就是一排 44px 的按钮。 */
+  min-height: 44px;
+  min-width: 44px;
+  padding: 7px 12px;
+  border-radius: 9px;
+  border: 1px solid var(--edge);
+  background: rgba(233, 241, 248, 0.05);
+  color: var(--ink);
+  font: inherit;
+  cursor: pointer;
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+
+button:hover:not(:disabled) { border-color: var(--leap); }
+button:disabled { opacity: 0.4; cursor: not-allowed; }
+button.primary { border-color: var(--leap); background: rgba(99, 199, 106, 0.16); }
+button[aria-pressed="true"] { border-color: var(--hop); background: rgba(224, 165, 74, 0.16); }
+
+.shelf { margin-top: 12px; display: flex; flex-wrap: wrap; gap: 5px; }
+.shelf p.tier { width: 100%; margin: 6px 0 2px; color: var(--ink-dim); font-size: 11px; }
+
+.shelf button {
+  min-width: 44px;
+  padding: 5px 7px;
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+}
+
+.shelf button[data-tier], .shelf button[data-reroll] { min-width: 0; padding: 5px 9px; }
+.shelf button.wide { width: 100%; }
+.shelf button.here { border-color: var(--ink); }
+.shelf button.done { border-color: rgba(127, 224, 160, 0.5); color: var(--good); }
+.shelf button.perfect { background: rgba(99, 199, 106, 0.16); color: var(--good); border-color: var(--leap); }
+
+.about { margin-top: 14px; font-size: 12.5px; color: var(--ink-dim); }
+.about summary { cursor: pointer; color: var(--ink); font-size: 13px; }
+.about p { margin: 8px 0 0; }
+.about code { color: var(--hop); }
+.about em { color: var(--good); font-style: normal; }
+.about .save { display: flex; align-items: center; gap: 8px; }
+.about .save button { font-size: 11px; padding: 4px 8px; }
+
+.toast {
+  position: fixed;
+  left: 50%;
+  bottom: 22px;
+  transform: translateX(-50%);
+  margin: 0;
+  padding: 9px 16px;
+  border-radius: 999px;
+  border: 1px solid var(--edge);
+  background: var(--card);
+  color: var(--ink);
+  font-size: 13px;
+}
+
+.toast[hidden] { display: none; }
+
+@media (max-width: 860px) {
+  .stage { grid-template-columns: minmax(0, 1fr); }
+  .totals { margin-left: 0; width: 100%; }
+  #river { min-height: 260px; }
+}
+
+/* 中央分发：safe-area 兜底 */
+
+/* ---------- safe-area：刘海与主屏条不吃掉按钮（中央分发，akari-cos 同口径） ---------- */
+:root {
+  --sat: env(safe-area-inset-top, 0px);
+  --sar: env(safe-area-inset-right, 0px);
+  --sab: env(safe-area-inset-bottom, 0px);
+  --sal: env(safe-area-inset-left, 0px);
+}
+html, body {
+  padding-left: var(--sal);
+  padding-right: var(--sar);
+}
+body {
+  padding-top: var(--sat);
+  padding-bottom: var(--sab);
+  min-height: 100vh;
+  min-height: 100dvh;
+}
+/* 贴边的固定/吸底元素自己让开主屏条，别让 home indicator 压住按钮 */
+.fixed-bottom, .bottom-bar, .hud-bottom, footer.app-footer {
+  padding-bottom: calc(var(--sab) + env(safe-area-inset-bottom, 0px));
+}
+
+
+/* ============================================================
+   44px 触摸命中下限（Apple HIG 手机可用性底线）
+   每个真正可点的元素都要有 ≥44×44 CSS px 的命中盒。
+   min-height / min-width 是**硬下限**：只会把过小的盒子撑到 44px，
+   本来就够大的控件（宽药丸、整行列表项、大数字键）外形一点不变。
+
+   两处非平凡之处：
+   1) 需要 !important —— 各组件自己有 `.shelf button { min-width: 34px }`
+      这类更"贴身"的规则，类选择器的优先级高于任何标签堆叠，
+      不加的话这条底线会被组件规则逐个抵消。
+   2) 先把 --touch-min 定死：tapa / nurikabe 早就写了
+      `min-height: var(--touch-min)`，但全仓没有任何地方定义过这个变量，
+      无 fallback 的 var() 在计算值阶段整条作废 —— 那是个看着像 44px、
+      实际什么都不保证的死规则。这里补上定义，让它们原本的意图真正成立。
+   ============================================================ */
+:root { --touch-min: 44px; }
+button,
+select,
+input,
+textarea,
+a[href],
+[role="button"] {
+  min-height: 44px !important;
+  min-width: 44px !important;
+}
+
+/* Shared-site embedding and English guide. */
+.topbar,.top-actions{flex-wrap:wrap;min-width:0}
+.hosting-guide{display:inline-block;padding:8px 12px;background:#182c39;color:#bde6ff;border-radius:6px;font:14px/1.5 system-ui,sans-serif;letter-spacing:normal}

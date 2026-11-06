@@ -1,0 +1,565 @@
+// 应用外壳：路由、计时、记分、输入设备无关性都在这里。棋盘内部的一切属于引擎。
+
+import { store } from '../core/storage.js';
+import { initReduceMotion, reduceMotionTouched, watchReduceMotion } from '../core/motion.js';
+import { sfx, haptic, isMuted, setMuted, toggleMuted, audioState } from '../core/audio.js';
+import { todayKey } from '../core/rng.js';
+import { KINDS, byId, dailySpec, dailySeed } from '../puzzles/registry.js';
+import { BoardView } from './board_view.js';
+import { paintGlyph, paintStamp, onArtReady, STAMP_FULL, STAMP_FAINT } from '../core/art.js';
+import { elapsedOf, pauseAt, resumeAt, resetAt, finishAt, lockedAt } from '../core/pause.js';
+
+const $ = (s) => document.querySelector(s);
+const $$ = (s) => [...document.querySelectorAll(s)];
+const make = (tag, cls, text) => {
+  const n = document.createElement(tag);
+  if (cls) n.className = cls;
+  if (text !== undefined) n.textContent = text;
+  return n;
+};
+
+// 题头优先用位图 sprite（一张纸上一格玩法题面），图没到位才退回文字 glyph：
+// 那枚 unicode 字符在缺字体的设备上是豆腐块，但有总比空白强。
+function glyphNode(kind, px, cls) {
+  const canvas = document.createElement('canvas');
+  canvas.className = cls;
+  canvas.style.width = `${px}px`;
+  canvas.style.height = `${px}px`;
+  canvas.setAttribute('role', 'img');
+  canvas.setAttribute('aria-label', `${kind.title} 题头`);
+  if (!paintGlyph(canvas, kind.id, px)) return make('span', cls, kind.shell.glyph);
+  return canvas;
+}
+
+const fmt = (ms) => {
+  const t = Math.max(0, Math.floor(ms / 1000));
+  return `${Math.floor(t / 60)}:${String(t % 60).padStart(2, '0')}`;
+};
+
+const S = {
+  kind: null,
+  sizeKey: 0,
+  index: 0,
+  daily: false,
+  seed: '',
+  engine: null,
+  hints: 0,
+  startedAt: 0,
+  elapsed: 0,
+  paused: false,     // 玩家按下的暂停，或切到后台的自动暂停
+  finished: false,   // 已解出：结算动画期间也算 paused，但切回前台不许把它复活
+  tool: 0,
+  lastSecond: -1,
+};
+
+let view = null;
+
+// ---- 路由 -----------------------------------------------------------------------
+
+const parseHash = () => {
+  const parts = location.hash.replace(/^#\/?/, '').split('/').filter(Boolean);
+  if (parts[0] !== 'p' || parts.length < 3) return null;
+  const kind = byId(parts[1]);
+  if (!kind) return null;
+  const sizeKey = Number(parts[2]);
+  if (!kind.sizes.some((s) => s.key === sizeKey)) return null;
+  const tail = parts[3] || '';
+  const daily = tail === 'd';
+  const index = daily ? 0 : Math.max(0, Number(tail) || 0);
+  return { kind, sizeKey, daily, index };
+};
+
+const route = () => {
+  const r = parseHash();
+  if (!r) {
+    view && view.stop();
+    S.kind = null;
+    renderHome();
+    show('home');
+    return;
+  }
+  start(r.kind, r.sizeKey, r.index, r.daily);
+};
+
+function show(name) {
+  for (const s of $$('.screen')) s.hidden = s.id !== name;
+}
+
+// ---- 首页 -----------------------------------------------------------------------
+
+function renderHome() {
+  const day = todayKey();
+  $('#daily-date').textContent = day.replaceAll('-', ' / ');
+  const done = store.dailyDone(day);
+  const row = $('#daily-row');
+  row.textContent = '';
+  const nDone = Object.keys(done).length;
+  const specs = dailySpec(day);
+  $('#daily-done').textContent = String(nDone);
+  // 分母跟着注册表走：加一款玩法，这里不许还写着上一次那个数
+  $('#daily-total').textContent = '/' + specs.length;
+  for (const d of specs) {
+    const k = byId(d.kindId);
+    const b = make('button', 'daily-cell' + (done[k.id] ? ' done' : ''));
+    b.appendChild(glyphNode(k, 22, 'g'));
+    b.appendChild(make('span', 'n', k.title));
+    b.appendChild(make('span', 's', sizeLabel(k, d.sizeKey)));
+    b.onclick = () => {
+      sfx.click();
+      location.hash = `#/p/${k.id}/${d.sizeKey}/d`;
+    };
+    row.appendChild(b);
+  }
+
+  const grid = $('#kinds');
+  grid.textContent = '';
+  for (const k of KINDS) {
+    const card = make('article', 'kind');
+    const top = make('div', 'kind-top');
+    top.appendChild(glyphNode(k, 44, 'kind-glyph'));
+    top.appendChild(make('span', 'kind-latin', k.latin));
+    card.appendChild(top);
+    const name = make('div');
+    name.appendChild(make('div', 'kind-name', k.title));
+    name.appendChild(make('div', 'kind-tag', k.tagline));
+    card.appendChild(name);
+
+    const foot = make('div', 'kind-foot');
+    const chips = make('div', 'kind-sizes');
+    for (const s of k.sizes) {
+      const chip = make('button', 'size-chip', s.label);
+      chip.title = s.tier + ' · 开这一档';
+      chip.onclick = () => {
+        sfx.click();
+        location.hash = `#/p/${k.id}/${s.key}/${randomIndex()}`;
+      };
+      chips.appendChild(chip);
+    }
+    foot.appendChild(chips);
+    const rec = bestAcrossSizes(k);
+    foot.appendChild(make('span', 'kind-best', rec));
+    card.appendChild(foot);
+
+    const help = make('button', 'kind-help', '?');
+    help.title = '怎么玩';
+    help.onclick = (e) => { e.stopPropagation(); openHowto(k); };
+    card.appendChild(help);
+    card.onclick = () => {
+      sfx.click();
+      location.hash = `#/p/${k.id}/${k.sizes[0].key}/${randomIndex()}`;
+    };
+    grid.appendChild(card);
+  }
+
+  $('#stat-solves').textContent = String(store.totalSolves());
+  const g = store.statsObj();
+  $('#stat-nohint').textContent = String(g.noHint);
+  $('#stat-hints').textContent = String(g.hints);
+  const sk = store.streak(day);
+  $('#stat-streak').textContent = String(sk.count);
+  $('#streak-chip').textContent = `${sk.count} 天`;
+  $('#streak-chip').title = sk.alive ? '连续中' : '今天还没做';
+}
+
+function bestAcrossSizes(k) {
+  let best = 0;
+  let label = '';
+  for (const s of k.sizes) {
+    const r = store.record(`${k.id}:${s.key}`);
+    if (r && r.bestMs && (!best || r.bestMs < best)) { best = r.bestMs; label = s.label; }
+  }
+  return best ? `最佳 ${fmt(best)} · ${label}` : '还没有纪录';
+}
+
+// 档位名得由玩法自己给：孔明棋的 sizeKey 是孔数，印成 "33×33" 就是在描述一块不存在的棋盘。
+const sizeLabel = (kind, sizeKey) =>
+  kind.sizes.find((s) => s.key === sizeKey)?.label || `${sizeKey}×${sizeKey}`;
+
+const randomIndex = () => Math.floor(Math.random() * 1e6) + Date.now() % 1000;
+
+// ---- 一局 -----------------------------------------------------------------------
+
+function start(kind, sizeKey, index, daily) {
+  S.kind = kind;
+  S.sizeKey = sizeKey;
+  S.index = index;
+  S.daily = daily;
+  S.seed = daily ? dailySeed(todayKey(), kind.id) : `${kind.id}:${sizeKey}:${index}`;
+  const spec = kind.generate(S.seed, sizeKey);
+  S.engine = kind.create(spec);
+  S.hints = 0;
+  S.tool = 0;
+  resetAt(S, performance.now());
+  S.lastSecond = -1;
+
+  view.attach(S.engine);
+  view.tool = 0;
+  view.layout();
+  $('#play-title').textContent = kind.title;
+  $('#play-size').textContent = sizeLabel(kind, sizeKey) + (daily ? ' · 今日' : '');
+  $('#hint-note').textContent = kind.shell.tip;
+  $('#hint-count').textContent = '0';
+  const dual = kind.shell.dual;
+  $('#tool-toggle').hidden = !dual;
+  $('#tool-primary').textContent = kind.shell.primary || '主笔';
+  $('#tool-secondary').textContent = kind.shell.secondary || '副笔';
+  $$('#tool-toggle button').forEach((b) => b.classList.toggle('on', Number(b.dataset.tool) === S.tool));
+  syncPauseUI();
+  show('play');
+  updateHud();
+  history.replaceState(null, '', `#/p/${kind.id}/${sizeKey}/${daily ? 'd' : index}`);
+}
+
+function elapsedMs() {
+  return elapsedOf(S, performance.now());
+}
+
+function updateHud() {
+  const e = S.engine;
+  if (!e) return;
+  const st = e.stats();
+  $('#progress-bar').style.width = `${st.total ? Math.min(100, (st.done / st.total) * 100) : 0}%`;
+  const unit = S.kind.unit || '';
+  $('#status-text').textContent =
+    `${st.done} / ${st.total} ${unit}` + ` · 步 ${st.moves}` + (st.par ? ` / 基准 ${st.par}` : '');
+  $('#hint-count').textContent = String(S.hints);
+  const timer = $('#play-timer');
+  const sec = Math.floor(elapsedMs() / 1000);
+  if (sec !== S.lastSecond) {
+    S.lastSecond = sec;
+    timer.textContent = fmt(elapsedMs());
+  }
+  $$('[data-action=undo]').forEach((b) => { b.disabled = !e.canUndo(); });
+  $$('[data-action=redo]').forEach((b) => { b.disabled = !e.canRedo(); });
+}
+
+// ---- 暂停 -----------------------------------------------------------------------
+
+// 暂停的遮罩只盖住画布，下面那排按钮还在。凡是会改棋盘状态的动作都得自己挡一下。
+// 结算面板上 S.paused 也是 true（finish() 置的），但那一局已经打完了，按钮当然能用。
+const inputLocked = () => lockedAt(S, !$('#play').hidden);
+
+// 暂停要做三件事：计时结算进 S.elapsed（不再吃墙上时间）、rAF 停掉（仿真与动画一帧都不推进）、
+// 输入闸门关掉（棋盘不再改引擎状态）。恢复时只重开 startedAt 与循环，引擎状态一个字节都不动。
+function setPaused(next) {
+  if (!S.kind || !view) return;
+  if (S.paused === next) { syncPauseUI(); return; }
+  if (next) {
+    // 先收掉在飞的那一笔（相当于抬手），闸门还开着；然后表停、闸门关。
+    // 顺序反了的话，那一笔的收尾会落在暂停之后 —— 那就是暂停期间改盘面。
+    view.pause();
+    pauseAt(S, performance.now());
+  } else {
+    resumeAt(S, performance.now());
+    view.resume();
+  }
+  syncPauseUI();
+  updateHud();
+}
+
+function syncPauseUI() {
+  const veil = $('#pause-veil');
+  const btn = $('#pause-btn');
+  if (veil) veil.hidden = !S.paused;
+  if (btn) {
+    btn.textContent = S.paused ? 'Resume' : 'Pause';
+    btn.setAttribute('aria-pressed', S.paused ? 'true' : 'false');
+  }
+}
+
+// ---- 全屏 -----------------------------------------------------------------------
+
+const fsElement = () => document.fullscreenElement || document.webkitFullscreenElement || null;
+
+function syncFullscreenUI() {
+  const on = !!fsElement();
+  const btn = $('#fullscreen-btn');
+  if (btn) {
+    btn.classList.toggle('on', on);
+    btn.textContent = on ? '⤡' : '⤢';
+    btn.setAttribute('aria-pressed', on ? 'true' : 'false');
+    btn.setAttribute('aria-label', on ? 'Exit fullscreen' : 'Fullscreen');
+    btn.title = on ? '退出全屏 (F)' : '全屏 (F)';
+  }
+  document.body.classList.toggle('is-fullscreen', on);
+}
+
+// iOS Safari 至今不给网页 requestFullscreen：那里"Fullscreen"的正解是添加到主屏幕
+// （manifest + apple-mobile-web-app-capable 已经备好），所以这条只提示、不静默失败。
+function toggleFullscreen() {
+  const doc = document;
+  if (fsElement()) {
+    const exit = doc.exitFullscreen || doc.webkitExitFullscreen;
+    if (exit) Promise.resolve(exit.call(doc)).catch(() => toast('退出全屏被系统挡下了'));
+    syncFullscreenUI();
+    return;
+  }
+  const el = doc.documentElement;
+  const req = el.requestFullscreen || el.webkitRequestFullscreen;
+  if (!req) { toast('这台设备不开放网页全屏 —— 用"添加到主屏幕"全屏打开'); return; }
+  Promise.resolve(req.call(el, { navigationUI: 'hide' }))
+    .catch(() => toast('全屏被系统挡下了（通常是没在用户手势里）'));
+}
+
+// ---- 结算 -----------------------------------------------------------------------
+
+function finish() {
+  if (!S.kind) return;
+  const e = S.engine;
+  const ms = elapsedMs();
+  finishAt(S);
+  const frame = S.hints ? STAMP_FAINT : STAMP_FULL;
+  view.win(frame);
+  sfx.win();
+  haptic(30);
+  flashBoard();
+  const st = e.stats();
+  const id = `${S.kind.id}:${S.sizeKey}`;
+  const prev = store.record(id);
+  const rec = store.finish(id, { ms, moves: st.moves, hints: S.hints });
+  const isNewBest = !prev || !prev.bestMs || ms <= rec.bestMs;
+  if (S.daily) {
+    const bumped = store.markDaily(todayKey(), S.kind.id);
+    if (bumped >= 3) toast(`连续 ${bumped} 天 · 中间断一天就会归零`);
+  }
+
+  const stars = starsOf(st, S.hints);
+  window.setTimeout(() => {
+    $('#result-title').textContent = S.daily ? '今日挑战完成' : '解开了';
+    $('#result-sub').textContent = `${S.kind.title} · ${sizeLabel(S.kind, S.sizeKey)} · ${S.kind.latin}`;
+    resultMark(S.hints ? STAMP_FAINT : STAMP_FULL);
+    $$('#result-stars i').forEach((n, i) => n.classList.toggle('on', i < stars));
+    const rows = $('#result-rows');
+    rows.textContent = '';
+    const add = (label, value, hot) => {
+      const d = make('div');
+      d.appendChild(make('dt', null, label));
+      const dd = make('dd', hot ? 'best' : null, value);
+      d.appendChild(dd);
+      rows.appendChild(d);
+    };
+    add('用时', fmt(ms), isNewBest);
+    add('最少用时纪录', fmt(rec.bestMs), false);
+    add('步数', st.par ? `${st.moves} / 基准 ${st.par}` : String(st.moves), false);
+    add('Hint', S.hints ? `用了 ${S.hints} 次` : '没用', false);
+    add('本档累计解题', String(rec.solves), false);
+    add('无提示完成', String(rec.noHintSolves), false);
+    show('result');
+    view.stop();
+  }, 950);
+}
+
+function starsOf(st, hints) {
+  let s = 1;
+  if (!hints) s++;
+  if (!hints && st.par && st.moves <= Math.ceil(st.par * 1.2)) s++;
+  return s;
+}
+
+function resultMark(frame) {
+  const host = $('#result-mark');
+  host.textContent = '';
+  const canvas = document.createElement('canvas');
+  canvas.style.width = '58px';
+  canvas.style.height = '58px';
+  canvas.setAttribute('role', 'img');
+  canvas.setAttribute('aria-label', frame === STAMP_FULL ? '一次解开的印章' : '用过提示的印章');
+  if (paintStamp(canvas, frame, 58)) host.appendChild(canvas);
+  else host.textContent = frame === STAMP_FULL ? '✦' : '◇';
+}
+
+function flashBoard() {
+  const f = $('#flash');
+  f.hidden = false;
+  f.addEventListener('animationend', () => { f.hidden = true; }, { once: true });
+}
+
+function toast(text) {
+  const t = $('#toast');
+  t.textContent = text;
+  t.classList.add('show');
+  clearTimeout(toast._t);
+  toast._t = setTimeout(() => t.classList.remove('show'), 2600);
+}
+
+// ---- 抽屉 -----------------------------------------------------------------------
+
+function openHowto(kind) {
+  $('#howto-title').textContent = `${kind.title} · ${kind.latin}`;
+  const body = $('#howto-body');
+  body.textContent = '';
+  for (const r of kind.rules) body.appendChild(make('li', null, r));
+  $('#howto').showModal();
+}
+
+function syncSettings() {
+  $$('#settings input[data-setting]').forEach((i) => { i.checked = !!store.settings[i.dataset.setting]; });
+  const muted = isMuted();
+  const btn = $('#sound-btn');
+  if (btn) {
+    btn.classList.toggle('off', muted);
+    btn.setAttribute('aria-pressed', muted ? 'false' : 'true');
+    btn.setAttribute('aria-label', muted ? '声音已关' : '声音已开');
+    btn.title = muted ? '声音已关 (M)' : '声音 (M)';
+  }
+}
+
+// ---- 装配 -----------------------------------------------------------------------
+
+export function boot() {
+  initReduceMotion();   // 必须在第一次 layout 之前：view.reduce 是在 layout 里算的
+  // 闸门只有一处定义（js/core/pause.js 的 lockedAt）：外壳的动作与画布的指针走同一把锁。
+  view = new BoardView($('#board'), $('#board-wrap'), () => lockedAt(S, true));
+  // 落子音每一步都放；错题检查要跑一遍求解器，只在抬手时算，15×15 才不掉帧
+  view.onInput = (strokeEnd) => {
+    if (S.tool === 1 && S.kind.shell.dual) sfx.mark();
+    else sfx.tap();
+    haptic(6);
+    if (strokeEnd && S.engine.badCells && S.engine.badCells().length) sfx.bad();
+    updateHud();
+  };
+  view.onWin = () => finish();
+  view.onFrame = () => { if (!S.paused) updateHud(); };
+
+  document.body.addEventListener('click', (ev) => {
+    const t = ev.target.closest('[data-action]');
+    if (!t) return;
+    const a = t.dataset.action;
+    if (a === 'home') location.hash = '#/';
+    else if (a === 'settings') { syncSettings(); $('#settings').showModal(); }
+    else if (a === 'howto-global') openHowto(KINDS[0]);
+    else if (a === 'pause') setPaused(!S.paused);
+    else if (a === 'toggle-fullscreen') toggleFullscreen();
+    else if (a === 'toggle-sound') {
+      const wasMuted = isMuted();
+      toggleMuted();
+      syncSettings();
+      if (wasMuted) sfx.click();   // 取消静音才补一声；静音那一下必须无声
+    } else if (a === 'undo' && doUndo()) { /* played sound */ }
+    else if (a === 'redo' && doRedo()) { /* ditto */ }
+    else if (a === 'hint') doHint();
+    else if (a === 'restart') doRestart();
+    else if (a === 'next') location.hash = `#/p/${S.kind.id}/${S.sizeKey}/${randomIndex()}`;
+    else if (a === 'replay') doRestart();
+    else if (a === 'export') {
+      navigator.clipboard && navigator.clipboard.writeText(store.exportText());
+      toast('存档已复制到剪贴板');
+    } else if (a === 'import') $('#import-box').hidden = false;
+    else if (a === 'import-apply') {
+      try { store.importText($('#import-text').value.trim()); syncSettings(); renderHome(); toast('存档已载入'); }
+      catch { toast('这不是有效的存档字符串'); }
+    } else if (a === 'reset') { store.reset(); syncSettings(); renderHome(); toast('已清空'); }
+  });
+
+  $$('#tool-toggle button').forEach((b) => {
+    b.onclick = () => {
+      S.tool = Number(b.dataset.tool);
+      view.tool = S.tool;
+      $$('#tool-toggle button').forEach((x) => x.classList.toggle('on', x === b));
+      sfx.click();
+    };
+  });
+
+  $$('#settings input[data-setting]').forEach((i) => {
+    i.onchange = () => {
+      if (i.dataset.setting === 'sound') setMuted(!i.checked);
+      else {
+        if (i.dataset.setting === 'reduceMotion') reduceMotionTouched(true);
+        store.set(i.dataset.setting, i.checked);
+      }
+      syncSettings();
+      view.layout();
+    };
+  });
+
+  window.addEventListener('hashchange', route);
+  document.addEventListener('visibilitychange', () => {
+    if (!S.kind || $('#play').hidden || S.finished) return;
+    setPaused(!!document.hidden);
+  });
+  for (const ev of ['fullscreenchange', 'webkitfullscreenchange']) {
+    document.addEventListener(ev, syncFullscreenUI);
+  }
+  syncFullscreenUI();
+
+  window.addEventListener('keydown', (ev) => {
+    if (ev.metaKey || ev.ctrlKey || ev.altKey) return;
+    if ($('#settings').open || $('#howto').open) return;
+    const k = ev.key;
+    if (k === 'Escape') { location.hash = '#/'; return; }
+    // 全局键：首页也要能用
+    if (k === 'm' || k === 'M') {
+      ev.preventDefault();
+      const wasMuted = isMuted();
+      toggleMuted();
+      syncSettings();
+      if (wasMuted) sfx.click();
+      return;
+    }
+    if (k === 'f' || k === 'F') { ev.preventDefault(); toggleFullscreen(); return; }
+    if (k === '?') { ev.preventDefault(); openHowto(S.kind || KINDS[0]); return; }
+    if ($('#play').hidden) return;
+    if (k === 'p' || k === 'P') { ev.preventDefault(); setPaused(!S.paused); return; }
+    const nav = { ArrowLeft: [-1, 0], ArrowRight: [1, 0], ArrowUp: [0, -1], ArrowDown: [0, 1] }[k];
+    if (nav) { view.nudge(...nav); ev.preventDefault(); return; }
+    if (k === ' ' || k === 'Enter') { view.press(true); ev.preventDefault(); return; }
+    if (k === 'z' || k === 'Z') { ev.preventDefault(); k === 'Z' ? doRedo() : doUndo(); return; }
+    if (k === 'h') { doHint(); return; }
+    if (k === 'r') { doRestart(); return; }
+    if (k === '1' || k === '2') {
+      const b = $(`#tool-toggle button[data-tool="${Number(k) - 1}"]`);
+      if (b && !b.closest('#tool-toggle').hidden) b.click();
+    }
+  });
+
+  syncSettings();
+  renderHome();
+  route();
+  // sprite 是异步进来的：到位后只在首页重画一次，局中不打断正在下的那题
+  onArtReady(() => { if ($('#play').hidden) renderHome(); });
+}
+
+function doUndo() {
+  if (inputLocked() || !S.engine || !S.engine.undo()) return false;
+  sfx.undo();
+  view.resetWin();
+  updateHud();
+  return true;
+}
+
+function doRedo() {
+  if (inputLocked() || !S.engine || !S.engine.redo()) return false;
+  sfx.tap();
+  updateHud();
+  return true;
+}
+
+function doHint() {
+  if (!S.engine || inputLocked()) return;
+  const h = S.engine.hint();
+  if (!h) { toast('这一步推不出来了 —— 要么已经解完，要么得先退回一步'); sfx.bad(); return; }
+  S.hints++;
+  sfx.hint();
+  $('#hint-note').textContent = h.note || '提示已落子';
+  updateHud();
+}
+
+function doRestart() {
+  if (!S.kind || inputLocked()) return;
+  start(S.kind, S.sizeKey, S.index, S.daily);
+  sfx.erase();
+}
+
+// 无头复验（tools/playtest.mjs）需要一个稳定的入口来切题、读状态、按提示把题解完。
+// 只暴露读与"像玩家一样操作"的动词，不提供任何绕过引擎判定的后门。
+export const debug = {
+  state: S,
+  view: () => view,
+  start,
+  store,
+  todayKey,
+  elapsed: elapsedMs,
+  home: () => { location.hash = '#/'; },
+  setPaused,
+  audioState,
+};

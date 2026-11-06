@@ -1,0 +1,15 @@
+{
+  "name": "Dominosa",
+  "desc": "Partition a number grid into dominoes, using each unordered number pair exactly once. English help included; original interface partly Chinese.",
+  "controls": "Mouse / touch; see the linked English rules and controls guide.",
+  "shelf": "Puzzle & Logic",
+  "tags": [
+    "games",
+    "html5",
+    "puzzle",
+    "logic",
+    "dominosa"
+  ],
+  "badge": "New",
+  "creator": "z-biz-game"
+}

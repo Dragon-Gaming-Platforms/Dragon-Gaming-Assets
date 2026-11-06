@@ -1,0 +1,13 @@
+Dosun-Fuwari
+Source: https://github.com/z-biz-game/z-biz-game-dosun-cos
+Revision: 27ed5e22db08f664912e370a6f33faaa9c00f6db
+License: MIT (see LICENSE)
+Retrieved: 2026-11-06
+
+Self-contained static runtime and local authored assets; tools, desktop files,
+asset-generation scripts, web-app manifests and service-worker installation omitted.
+Save/preference keys game-scoped; essential controls and English guide added.
+Other original Chinese interface and hint text retained; not a full translation.
+Storage property access guarded for privacy-restricted iframes.
+Hint button now displays returned advice instead of silently discarding it.
+Accept seed 0 when decoding a saved official fixture; generated games still require positive seeds.

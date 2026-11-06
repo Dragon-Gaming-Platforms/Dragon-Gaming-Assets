@@ -1,0 +1,10 @@
+Bulgarian Solitaire
+Source: https://github.com/z-biz-game/z-biz-game-staircase-cos
+Revision: 0389df9507a2fb30e50e8eda97242470ad2799fa
+License: MIT (see LICENSE)
+Retrieved: 2026-11-06
+
+Self-contained static runtime and local authored assets; tools, desktop files,
+asset-generation scripts, web-app manifests and service-worker installation omitted.
+Save/preference keys game-scoped; essential controls and English guide added.
+Other original Chinese interface and hint text retained; not a full translation.

@@ -1,0 +1,923 @@
+// 接线：DOM、指针、键盘、时钟、存档，以及验收 harness 驱动的 window.yajilin 那层门面。
+//
+// window.yajilin.engine 挂的就是页面自己 import 的那张模块图（不是为测试另抄一份），所以
+// 门禁在浏览器里绿一次，等于玩家那侧的出题器/推理机同时绿一次。
+//
+// 这里没有一条 Yajilin 规则：落笔写进 ui/game.js 的两张笔表，赢不赢问 engine/model.js 的
+// verify()，画什么由 render/board.js 读同一批数字。「提示」也不在这里判断任何事——它只是问
+// engine/pencil.js 的事件流水要下一条被迫的结论，再交给 Game 的公开入口，和玩家自己拖的一笔
+// 是同一条路。唯一留在这层的判断是「指针这一下落在哪一格 / 压着哪一条边」，
+// 而那也要经 view.hitCell / view.hitEdge → 引擎 counter.js prepare() 的那张邻接表。
+import { Palette, Space, applyThemeVars, setReduceMotion, prefersReducedMotion } from './theme.js';
+import { Store } from './store.js';
+// SW 注册单独一个文件、一条 import：装不上（file://、非安全上下文、Pages 上还没部署 sw.js）
+// 只该让控制台少一行，不该让游戏起不来。
+import { swRegistration } from './sw-register.js';
+// 音效单独一个模块：静音的判据（「一个节点都不造」）要在它自己那侧成立，而不是靠接线层
+// 每次调用前记得if 一下——那样漏一处就是一次「静音了但还在响」。
+import { setMuted, isMuted, noteGesture, audioStats, sfx } from './audio.js';
+import { makeQuestion, parseSize, SIZES, TIERS } from './ui/puzzle.js';
+import { Game, RULE_TEXT, RULES, E_ON, E_OFF, E_UNK, BLACK, UNK, UP, RIGHT, DOWN, LEFT } from './ui/game.js';
+import { BoardView } from './render/board.js';
+// 动效层单独一个模块：帧率无关这件事只有在「状态只由步数决定」时才成立，
+// 而那是可以拿出来单独量的——把它塞进接线层就只剩信仰了。
+import { createFx, SIM_STEP } from './render/anim.js';
+// 引擎原样透传给门面（页面加载的就是这张模块图本身，不是为测试另抄的一份）
+import { verify } from './engine/model.js';
+import { pencil, ROLE, EDGE } from './engine/pencil.js';
+import { shipBoard, makePencilBoard, pSet, pDig, DEFAULT_LOOP_FRACS, DEFAULT_MAX_ATTEMPTS } from './engine/generate.js';
+import { countSolutions, materialize, prepare } from './engine/counter.js';
+import { Board, DIRS } from './engine/grid.js';
+import { hashSeed, mulberry32, makeRng } from './engine/rng.js';
+
+const VERSION = '0.1.0';
+const DEFAULT_SIZE = '6x6';
+// 「换一局」自己 mint 的 seed 出不了盘时可以再敲一颗；调用方给了明确 seed 就**不许**偷偷换
+//（门禁与存档靠的就是「同一个 seed 同一张盘」）。封顶 = 试这么多颗，全失败就照直说。
+const MINT_TRIES = 8;
+const $ = (id) => document.getElementById(id);
+
+applyThemeVars();
+setReduceMotion(Store.setting('reduceMotion') === true);
+
+const canvas = $('board');
+const wrap = $('board-wrap');
+const veil = $('win-veil');
+const stateLine = $('state-line');
+const srCell = $('sr-cell');
+const sizeSelect = $('size-select');
+const verifyLine = $('verify-line');
+
+const view = new BoardView(canvas);
+let game = null;
+// 四支笔，对着引擎的取值表：画环=E_ON、涂黑=BLACK、排除叉=E_OFF、擦掉=E_UNK/UNK。
+// 「排除叉」是一支真的笔，不是「擦掉」的别名：它把一条边写成 E_OFF，画出来是一个小叉。
+let mode = 'loop';
+const PENS = { loop: E_ON, black: BLACK, cut: E_OFF, erase: E_UNK };
+let drag = null;
+let cursor = -1;
+let anchor = -1;
+let won = false;
+let hintNote = null;
+let noteMoves = -1;
+
+// ── 时钟 ────────────────────────────────────────────────────────────────
+// 只有这一条读数：baseElapsed（已结算的跑动）+ 本段跑动。暂停不是遮罩特效——它就是把
+// now 钉死在 pausedAt 那一毫秒上；恢复时把 startedAt 整段往前推（推的就是暂停掉的时长），
+// 于是那几分钟不是「事后扣掉的近似值」，而是根本没进过这条算式。
+let startedAt = 0;
+let baseElapsed = 0;
+let pausedAt = 0;
+const paused = () => pausedAt > 0;
+const clock = () => baseElapsed + (startedAt ? (pausedAt || Date.now()) - startedAt : 0);
+function startClock() {
+  if (!startedAt) startedAt = Date.now();
+}
+
+function fmt(ms) {
+  const s = Math.floor(ms / 1000);
+  return `${String(Math.floor(s / 60)).padStart(2, '0')}:${String(s % 60).padStart(2, '0')}`;
+}
+setInterval(() => {
+  $('stat-time').textContent = fmt(clock());
+}, 500);
+
+// ── seed ────────────────────────────────────────────────────────────────
+// 「换一局」必须真的换一局，而且这个 seed **不许从日期来**：日期当默认 seed 等于一整天发同一张盘，
+// 而页面上写着「seed xxxx」——那是在替界面说谎。所以随机只发生在**选 seed**这一步，
+// 生成器内部一点随机都不许有（shipBoard 是 seed 的纯函数）。
+let seedCounter = 0;
+function mintSeed() {
+  const bytes = crypto.getRandomValues(new Uint8Array(6));
+  let hex = '';
+  for (const b of bytes) hex += b.toString(16).padStart(2, '0');
+  seedCounter++;
+  return `y${seedCounter.toString(36)}-${hex}`;
+}
+
+// ── 渲染 ────────────────────────────────────────────────────────────────
+function avail() {
+  const w = Math.max(280, wrap.clientWidth || 520);
+  const h = Math.max(280, Math.min(w, window.innerHeight - 230));
+  return { w, h };
+}
+
+function render() {
+  if (!game) return;
+  const preview = [];
+  if (anchor >= 0 && cursor >= 0 && anchor !== cursor) {
+    const d = view.dirFromTo(anchor, cursor);
+    if (d >= 0) preview.push([anchor, d]);
+  }
+  view.draw(game, { preview, cursor, won });
+  fx.draw(view.ctx); // 粒子与脉冲叠在同一块画布上：不另开 canvas，就不必再对一次 DPR/缩放
+  paintStats();
+}
+
+// ── 动效循环：全仓唯一吃「帧间隔」的地方 ─────────────────────────────────
+const fx = createFx();
+let fxRng = mulberry32(0x9e3779b9); // 粒子形状跟着 seed 走；比对三档帧率时用的是同一串随机
+// fxRng 的**起点**：fxReset() 要能把 rng 拨回这里。不记这个起点的话，重置只清了粒子、
+// 没清随机序列——门禁那三档帧率对拍比的是「同一簇粒子在三种帧率下的积分」，
+// rng 不归位，第二档拿到的就是另一串随机，三档比的就不是同一件事了（真话被判成假话）。
+let fxRngBase = 0x9e3779b9;
+let rafId = 0;
+let lastFrameSec = 0;
+
+function frame(now) {
+  rafId = requestAnimationFrame(frame);
+  const t = now / 1000;
+  const dt = lastFrameSec ? t - lastFrameSec : 0; // 帧间隔（秒）：全仓唯一吃它的读数
+  lastFrameSec = t;
+  if (paused()) return; // 暂停 = 一步都不推：这一帧的时间直接丢掉，不进累加器
+  if (fx.advance(dt)) render(); // 真推进了步才重画：144Hz 的帧不会白画四分之三
+}
+
+// 减少动效是一条真分支：循环不启动、粒子与脉冲都不存在（setReduce 里连清场一起做掉），
+// 画面退化成静帧——不是「把时长写成 0.001s」那种自欺。
+function ensureLoop() {
+  const want = !prefersReducedMotion();
+  fx.setReduce(!want);
+  if (want && !rafId) {
+    lastFrameSec = 0;
+    rafId = requestAnimationFrame(frame);
+  } else if (!want && rafId) {
+    cancelAnimationFrame(rafId);
+    rafId = 0;
+    fx.reset();
+    render();
+  }
+}
+
+function paintStats() {
+  const segs = game.loopEdges();
+  const offs = game.offEdges();
+  const blacks = game.blackCells();
+  const bad = game.badCells();
+  const ends = game.endpoints();
+  $('stat-seed').textContent = `seed ${game.seed}`;
+  $('stat-time').textContent = fmt(clock());
+  $('stat-clues').textContent = String(game.clues);
+  $('stat-black').textContent = String(blacks.length);
+  $('stat-segs').textContent = String(segs.length);
+  $('stat-cuts').textContent = String(offs.length);
+  $('stat-ends').textContent = String(ends.length);
+  const badEl = $('stat-bad');
+  badEl.textContent = String(bad.length);
+  badEl.classList.toggle('bad', bad.length > 0);
+  $('stat-moves').textContent = String(game.moves);
+  $('stat-pencil').textContent = `${game.ghost.size}/${game.ladder.length}`;
+  const v = game.status();
+  const vEl = $('stat-verify');
+  vEl.textContent = v.ok ? '通过' : `${v.count} 处不对`;
+  vEl.classList.toggle('good', v.ok);
+  vEl.classList.toggle('bad', !v.ok && segs.length + offs.length + blacks.length > 0);
+  verifyLine.textContent = v.ok ? 'verify() → []（判胜就这一处）' : `verify() → ${v.errs[0]}`;
+  paintPencilTable();
+  if (!won) {
+    stateLine.className = 'state-line' + (bad.length ? ' bad' : '');
+    stateLine.textContent = bad.length
+      ? `${bad.length} 格引出了 3 条以上的环段——那里不可能接成一条环。引擎第一句：${v.errs[0] || ''}`
+      : segs.length + offs.length + blacks.length === 0
+        ? '拖拽相邻两格连环段；「涂黑」那支笔点一格就上黑格；右键落在哪条边上就把那条边画成排除叉。箭头格是题面，改不动。'
+        : `环段 ${segs.length}、黑格 ${blacks.length}、排除 ${offs.length}，${ends.length} 个没接上的端点。引擎说：${v.errs[0] || '全部对上'}`;
+  }
+  // 提示说过的那句话盖在进度播报之上：它是「刚刚发生的那件事」，而进度行每一帧都能重算出来。
+  // 过期条件是步数变了（或者这局已经赢了），不是这里现编一个计时器。
+  if (hintNote && !won && game.moves === noteMoves) {
+    stateLine.className = 'state-line hint';
+    stateLine.textContent = hintNote;
+  } else {
+    hintNote = null;
+    noteMoves = -1;
+  }
+}
+
+// 铅笔台：引擎 pencil() 对**题面**跑出来的每条规则命中次数。UI 一个都不自己数。
+function paintPencilTable() {
+  const host = $('pencil-list');
+  if (!host.children.length) {
+    for (const r of RULES) {
+      const li = document.createElement('li');
+      li.dataset.rule = r;
+      const b = document.createElement('b');
+      b.textContent = r;
+      const s = document.createElement('span');
+      li.appendChild(b);
+      li.appendChild(s);
+      host.appendChild(li);
+    }
+  }
+  for (const li of host.children) {
+    li.querySelector('span').textContent = String(game.ladderFired[li.dataset.rule] ?? 0);
+  }
+}
+
+// ── 判胜：唯一的入口是引擎的 verify，UI 不给自己记账 ─────────────────────
+function checkWin() {
+  const v = game.status();
+  if (!v.ok) {
+    // 撤一步之后盘不再成立，胜利卡片就该下来：赢是 verify() 此刻说的话，不是once‑and‑for‑all 的徽章
+    if (won) {
+      won = false;
+      veil.hidden = true;
+      render();
+    }
+    return false;
+  }
+  if (won) return true;
+  won = true;
+  veil.hidden = false;
+  $('win-meta').textContent = `环段 ${game.loopEdges().length} 条 · 黑格 ${game.blackCells().length} 个 · 箭头 ${game.clues} 条 · ${game.moves} 步 · ${fmt(clock())}`;
+  stateLine.className = 'state-line good';
+  stateLine.textContent = 'verify() 判定通过：每条箭头数齐、黑格不相邻、一条环盖住了所有不是箭头也不是黑格的格。';
+  Store.recordSolve(clock(), game.moves);
+  sfx.win();
+  // 庆祝落在环上的那些格（还没被涂黑、也不是箭头题面的格），最多 14 处、每处 10 颗。
+  for (let i = 0, made = 0; i < game.n && made < 14; i++) {
+    if (game.role[i] !== UNK) continue;
+    const m = view.centerOf(i);
+    if (fx.burst(m.x, m.y, 10, fxRng, Palette.accent)) made++;
+  }
+  Store.clearResume();
+  render();
+  return true;
+}
+
+// ── 提示：引擎的下一条被迫结论，落笔仍然只经 Game 的公开入口 ──────────────────
+// 关键不在「有个按钮」，而在**它和玩家自己画的是同一个写入者**：pencil() 的事件流水只给一条结论，
+// Game.hint() 把它经 setEdge/setRole 写下去。于是提示落的每一笔都进撤销栈、在 moves 上记一步，
+// 玩家撤得掉、门禁数得出。反过来，只要有一句结论绕过 Game 直接写笔表，那一步就不在账上。
+function hint() {
+  if (!game || won || paused()) return null;
+  startClock();
+  const mv = game.moves;
+  const out = game.hint();
+  if (out.kind === 'done') {
+    hintNote = '铅笔流水上的结论已经都在盘上了（这条路径推完就是这道题的解）。再按不落新东西——剩下的那格是答案。';
+    noteMoves = mv;
+    render();
+    return { kind: 'done', moved: false };
+  }
+  if (out.kind === 'conflict') {
+    // 玩家在这一处已经写了相反的一态：铅笔不肯再往前推。该撤哪一笔是玩家自己的判断。
+    // ⚠ Game.hint() 在冲突时返回的是 {kind, nx}（没有 ev 这一层），那句话要从 nx.ev 里取；
+    //   写 out.ev.rule 会在按提示的那一刻直接抛 TypeError——浏览器闸的 hint 场就是打这一条的。
+    hintNote = `盘上自己打脸了（${out.nx.ev.rule}）：铅笔要说的那一条，你已经写成了相反的一态。提示这一步什么都不画 —— 先撤掉那笔再说。`;
+    noteMoves = mv;
+    render();
+    return { kind: 'conflict', ev: out.nx.ev, moved: false };
+  }
+  if (out.kind === 'noop') {
+    hintNote = `提示这次没落下去：引擎给的第 ${out.nx.index} 条结论，Game 拒收（出盘或已经这样了）。再按一次。`;
+    noteMoves = mv;
+    render();
+    return { kind: 'noop', moved: false };
+  }
+  const ev = out.ev;
+  const hp = view.centerOf(cursor >= 0 ? cursor : 0);
+  fx.hintPulse(hp.x, hp.y); // 减少动效时这条返回 false：脉冲不起，笔照样落
+  hintNote = `${RULE_TEXT[ev.rule] || ev.rule} —— ${ev.kind === 'role' ? '涂黑那一格' : ev.v === E_ON ? '连上那条边' : '排除那条边'}`;
+  noteMoves = game.moves;
+  render();
+  checkWin();
+  persist();
+  return { kind: out.kind, ev, rec: out.rec, moved: true };
+}
+
+function hideVeil() {
+  veil.hidden = true;
+}
+
+// ── 开局 ────────────────────────────────────────────────────────────────
+let busy = false;
+async function generate(seed, sizeKey) {
+  busy = true;
+  $('btn-new').disabled = true;
+  $('btn-new').textContent = '生成中…';
+  stateLine.className = 'state-line';
+  stateLine.textContent = '正在出题：铅笔要零猜测推得完、计数器要说唯一、箭头要逐条数得过——三道门都过了才发给你。';
+  // 出题是同步的（本台机器实测 6×6 几毫秒、12×12 几百毫秒），让出一帧好让「生成中」真的看得见
+  await new Promise((r) => setTimeout(r, 0));
+  const p = makeQuestion(seed, sizeKey);
+  busy = false;
+  $('btn-new').disabled = false;
+  $('btn-new').textContent = 'New puzzle';
+  return p;
+}
+
+async function newGame({ seed = null, sizeKey = game ? game.sizeKey : DEFAULT_SIZE, marks = null, moves = 0, elapsedMs = 0, resumeFrom = null } = {}) {
+  const callerSeed = seed !== null && seed !== undefined;
+  let p = null;
+  let tries = 0;
+  const start = callerSeed ? String(seed) : mintSeed();
+  for (let k = 0; k < (callerSeed ? 1 : MINT_TRIES); k++) {
+    tries++;
+    // 自己 mint 的时候每敲一颗都换一个（第一颗出不了盘，第二颗必须真的是另一颗）
+    const s = !callerSeed && k > 0 ? mintSeed() : start;
+    p = await generate(s, sizeKey);
+    if (p.ok) break;
+  }
+  if (!p || !p.ok) {
+    stateLine.className = 'state-line bad';
+    stateLine.textContent = `这个 seed 出不了盘（${p ? p.status : '?'}，试了 ${tries} 颗）：再按一次换一局。`;
+    return null;
+  }
+  game = new Game(p);
+  game.clues = p.clues;
+  // 续局的判据不是「有没有这份存档」，而是「存档里那张盘和现在重画出来的是不是同一张」：
+  // 存档存的正是 seed，出货流水线一改版，同一个 seed 就是另一张盘，旧笔迹贴上去等于在玩家
+  // 没做过的题上续命。Store.resume(指纹) 对不上会返回 null 并作废存档。
+  const resume = resumeFrom ? Store.resume(p.fingerprint) : null;
+  const carry = resume ? { marks: resume.marks, moves: resume.moves, elapsedMs: resume.elapsedMs } : { marks, moves, elapsedMs };
+  // 存档的串长度必须正好对上这张盘的格数+边数——对不上就不搬（尺寸换过、串被截断都算）。
+  // 步数只在笔迹真的搬过来之后才跟着搬：盘是空的却说「这局走了 12 步」又是另一句谎话。
+  const want = game.n + game.edgeCount();
+  if (typeof carry.marks === 'string' && carry.marks.length === want) game.decode(carry.marks, carry.moves);
+  hintNote = null;
+  noteMoves = -1;
+  won = false;
+  hideVeil();
+  cursor = -1;
+  anchor = -1;
+  baseElapsed = carry.elapsedMs || 0;
+  startedAt = Date.now();
+  // 新一局的时钟刚刚重锚到 now：残留的 pausedAt 会跑到 startedAt 前面去，clock() 于是开始报负数。
+  // 暂停态不属于这张新盘，一起清掉，并把按钮画回它该有的样子。
+  pausedAt = 0;
+  // 上一局的粒子、累加器、步数都不属于这一局；rng 换成这张盘的 seed 派生，
+  // 于是「同一张盘在不同帧率上跑出的动效」是可逐位对照的，不是每局换个形状。
+  fx.reset();
+  fxRngBase = hashSeed(String(p.seed));
+  fxRng = mulberry32(fxRngBase);
+  paintPauseUi();
+  relayout();
+  render();
+  persist();
+  if (tries > 1) {
+    stateLine.className = 'state-line hint';
+    stateLine.textContent = `前 ${tries - 1} 颗 seed 撞上流水线封顶（NO_BOARD），这一张是第 ${tries} 颗出的：${p.stats.attempts} 次 attempt。`;
+  }
+  // 作废的那份存档要当着玩家说清楚：这一局是新的，不是他那一局。
+  // 写在 persist() 之后，因为 persist 已经把这张新盘存下去了，玩家下一次刷新就是正常续局。
+  //
+  // ⚠ 这句话必须**留得住**：render() 每一帧都会把状态行重算成进度播报（盘上还没有笔迹时
+  // 写的是那句「拖拽相邻两格…」），直接写 textContent 的话，下一帧（16ms 后）就被抹掉了——
+  // 玩家根本来不及看见，闸也就读不到「当着玩家说清楚为什么」这条承诺。
+  // 所以走 hintNote 那条道：它是现成的「刚刚发生的那件事」通道，过期条件是步数变了
+  // （或者这一局赢了），不是自己掐表。
+  if (resumeFrom && !resume) {
+    hintNote = '这一局的存档与现在重画出来的题面对不上（存档存的是 seed，出题流水线改版后同一个 seed 是另一张盘）：旧笔迹没有搬过来，这一局重新开始。';
+    noteMoves = game.moves;
+    stateLine.className = 'state-line hint';
+    stateLine.textContent = hintNote;
+  }
+  return game;
+}
+
+function relayout() {
+  if (!game) return;
+  const a = avail();
+  view.resize(game, a.w, a.h);
+}
+
+function persist() {
+  if (!game || won) return;
+  Store.saveResume(game, clock());
+}
+
+// ── HUD：暂停 / 重来 / 全屏 / 静音 ──────────────────────────────────────────
+// 这四个控件的判据都是「状态真的变了」，不是「按钮亮了一下」：暂停要能用量出来的时钟与笔表证明
+// 盘面没推进，重来要能让同一张盘归零，静音要能让音频节点数停在原地，全屏要挂在真存在的按钮上。
+const swap = (id, on, name, labelOn, labelOff) => {
+  const b = $(id);
+  b.setAttribute('aria-pressed', String(!!on));
+  b.querySelector('.lb').textContent = on ? labelOn : labelOff;
+  b.querySelector('.ic').src = `assets/sprites/${name}-48.png`;
+}
+
+function paintPauseUi() {
+  swap('btn-pause', paused(), paused() ? 'play' : 'pause', 'Resume', 'Pause');
+  wrap.classList.toggle('paused', paused());
+}
+
+// ── 暂停 ────────────────────────────────────────────────────────────────
+// 暂停是**真冻结时钟**，不是挂个标签：暂停那一瞬把 pausedAt 钉在当前毫秒上，
+// clock() 里那个 `(pausedAt || Date.now())` 于是恒取冻结值，一毫秒都不再涨。
+// 恢复时把整段暂停从 startedAt 里减掉，时钟从冻结处续走；恢复后第一帧的 dt
+// 就是一个正常帧间隔，不会把暂停那几秒一次性吃掉（不跳步）。
+//
+// 这里原来还有第二个实现 paintPause()：它把 paused 当布尔值用（paused 是函数，
+// 当布尔值永远为真），按钮于是恒显示「继续」、aria-pressed 恒为 true，而
+// btn.textContent = … 还会把按钮里的图标与文字标签一起抹掉。它从没被调用过——
+// 真正在跑的是 paintPauseUi()。同一个功能留一份实现，活着的那份才配得上这段注释。
+function setPaused(next) {
+  if (!game || won) return paused();
+  // 幂等：重复按 P 不许把「暂停」翻成「继续」——那会把玩家手里的键变成掷硬币。
+  if (!!next === paused()) { paintPauseUi(); return paused(); }
+  if (next) {
+    pausedAt = Date.now();
+    stateLine.className = 'state-line hint';
+    stateLine.textContent = `已暂停于 ${fmt(clock())}：时钟停在这一毫秒，笔也进不去。再按一次（P 或那个按钮）接着走。`;
+  } else {
+    startedAt += Date.now() - pausedAt; // 整段暂停从跑动时间里抹掉
+    pausedAt = 0;
+    stateLine.className = 'state-line';
+    stateLine.textContent = `继续，用时 ${fmt(clock())}。`;
+  }
+  paintPauseUi();
+  $('stat-time').textContent = fmt(clock());
+  return paused();
+}
+
+async function restartGame() {
+  if (!game) return null;
+  const seed = game.seed;
+  const sizeKey = game.sizeKey;
+  pausedAt = 0; // 「暂停中按重来」不该把暂停态带进新的一局
+  // 同一颗 seed、同一档尺寸，但 marks/moves/elapsed 一律给零，且不带着存档来对指纹：
+  // 「换一局」是另一张盘，这个是这张盘从零开始——两件事不能混成一个按钮。
+  const out = await newGame({ seed, sizeKey, marks: null, moves: 0, elapsedMs: 0, resumeFrom: null });
+  if (out) {
+    stateLine.className = 'state-line';
+    stateLine.textContent = `重来：同一张盘（seed ${seed}），笔迹与用时归零。`;
+    paintPauseUi();
+  }
+  return out;
+}
+
+// 全屏只有**一个实现**、**两个入口**（顶栏 #btn-fullscreen 与面板 #btn-full）。
+// 能力取两边并集：ms 前缀（老 Edge）、拒绝时给一句人话理由而不是默默失败、Esc 退出后按钮跟着事实走。
+// 曾经这里有两套实现（面板那颗走本地这套，顶栏那颗走后来那套 IIFE），于是同一个功能有两个状态源——
+// 按一下 A 改的是 A 的标签，按一下 B 改的是 B 的标签，两边迟早对不上。
+const FS_UNSUPPORTED_TITLE = '这个浏览器不提供元素全屏（iOS Safari 请用「添加到主屏幕」独立打开）';
+const fsRoot = document.documentElement;
+const fsRequest = () => fsRoot.requestFullscreen || fsRoot.webkitRequestFullscreen || fsRoot.msRequestFullscreen;
+const fsExit = () => document.exitFullscreen || document.webkitExitFullscreen || document.msExitFullscreen;
+const fsCurrent = () => document.fullscreenElement || document.webkitFullscreenElement || document.msFullscreenElement || null;
+let fsSupported = !!fsRequest();
+
+function paintFullUi() {
+  const on = !!fsCurrent();
+  // 两处入口的标签与 aria 都从这一处写出来：任何一处自己维护自己的状态，早晚有一处停在旧样子。
+  const top = $('btn-fullscreen');
+  if (top) {
+    top.setAttribute('aria-pressed', String(on));
+    top.textContent = on ? 'Exit fullscreen' : 'Fullscreen';
+    if (fsSupported) top.title = '全屏（F）';
+  }
+  swap('btn-full', on, 'full', 'Exit fullscreen', 'Fullscreen');
+  document.body.classList.toggle('fullscreen', on);
+}
+
+// 不支持也要给个说法：只把按钮灰掉而不解释，玩家会以为这功能没做完。
+// supported 这枚标记不能省：paintFullUi 每次都会重写 title，不挡住的话，装的时候刚写进去的
+// 人话原因会被随后的 paintFullUi 立刻抹成「全屏（F）」——禁用就变成一句没有理由的禁用。
+function markFullscreenUnsupported() {
+  fsSupported = false;
+  for (const id of ['btn-fullscreen', 'btn-full']) {
+    const b = $(id);
+    if (!b) continue;
+    b.disabled = true;
+    b.title = FS_UNSUPPORTED_TITLE;
+  }
+  paintFullUi();
+}
+
+function toggleFullscreen() {
+  if (!fsSupported) { markFullscreenUnsupported(); return Promise.resolve(false); }
+  const cur = fsCurrent();
+  const ex = fsExit();
+  const req = fsRequest();
+  try {
+    if (cur) {
+      if (!ex) return Promise.resolve(false);
+      // 拒绝（iframe 没允许、用户按了 Esc 的竞态）不许变成未捕获异常：那条红会被读成「游戏坏了」。
+      return Promise.resolve(ex.call(document)).then(() => { paintFullUi(); return false; }, () => false);
+    }
+    if (!req) { markFullscreenUnsupported(); return Promise.resolve(false); }
+    return Promise.resolve(req.call(fsRoot, { navigationUI: 'hide' })).then(
+      () => { paintFullUi(); return true; },
+      () => { markFullscreenUnsupported(); return false; }
+    );
+  } catch (err) {
+    markFullscreenUnsupported();
+    return Promise.resolve(false);
+  }
+}
+
+function paintMuteUi() {
+  swap('btn-mute', !isMuted(), isMuted() ? 'sound-off' : 'sound-on', 'Sound on', 'Sound off');
+}
+
+function setSound(on) {
+  setMuted(!on);
+  Store.setSetting('sound', !!on);
+  paintMuteUi();
+  return !!on;
+}
+
+function setMode(next) {
+  // 判「这个笔名认不认」用 in，不用取值真假：擦掉那支笔的 kind 就是 E_UNK=0，
+  // 写成 PENS[next] ? next : 'loop' 会把「擦掉」当成没认出来、悄悄退回画环。
+  mode = next in PENS ? next : 'loop';
+  for (const id of ['loop', 'black', 'cut', 'erase']) {
+    $(`btn-mode-${id}`).setAttribute('aria-pressed', String(mode === id));
+  }
+  canvas.style.cursor = mode === 'black' ? 'cell' : 'crosshair';
+}
+
+// ── 指针 ────────────────────────────────────────────────────────────────
+// 拖拽走的是「相邻格心」：每一段都问 view 要方向，view 再问引擎的邻接表。
+// 不相邻的两格（甩太快）只会挪笔，不会凭空长出一条斜边。
+const onDown = (ev) => {
+  if (!game) return;
+  noteGesture(); // 任何一次按下都是用户激活：音频图只在这里被建起来
+  if (paused()) {
+    srCell.textContent = '已暂停：按 P 继续。';
+    return;
+  }
+  const cell = view.hitCell(ev.clientX, ev.clientY);
+  if (cell < 0) return;
+  ev.preventDefault();
+  try {
+    canvas.setPointerCapture(ev.pointerId);
+  } catch {
+    /* 合成事件没有真的 pointerId：下面的 move/up 仍然按 clientX/Y 走同一条路 */
+  }
+  startClock();
+  if (mode === 'black') sfx.black(); else sfx.edge();
+  if (ev.button === 2) {
+    const hit = view.hitEdge(ev.clientX, ev.clientY);
+    if (hit) game.toggleCut(hit.cell, hit.d); // 不在手势里：setEdge 自己就是一组
+    render();
+    checkWin();
+    persist();
+    return;
+  }
+  game.beginGesture();
+  drag = { cells: [cell] };
+  cursor = cell;
+  if (mode === 'loop') {
+    // 起点那一格还没有「上一条」，所以先只把笔放下去；拖到相邻格才连边
+  } else if (mode === 'black') {
+    // 涂黑那支笔点第二下要能把它清掉：setRole(cell, BLACK) 在已经是黑格时返回 null，
+    // 于是「点错了再点一次」在盘上没有出口，玩家只能换到擦掉笔——点两下toggle 才是这支笔该有的手感。
+    game.toggleBlack(cell);
+  } else if (mode === 'cut') {
+    const hit = view.hitEdge(ev.clientX, ev.clientY);
+    if (hit) game.setEdge(hit.cell, hit.d, E_OFF);
+  } else if (mode === 'erase') {
+    game.eraseAt(cell);
+  }
+  render();
+};
+
+const onMove = (ev) => {
+  if (!game || !drag) return;
+  const cell = view.hitCell(ev.clientX, ev.clientY);
+  if (cell < 0) return;
+  const last = drag.cells[drag.cells.length - 1];
+  if (cell === last) return;
+  if (mode === 'erase') {
+    game.eraseAt(cell);
+    drag.cells.push(cell);
+    cursor = cell;
+    render();
+    return;
+  }
+  if (mode === 'black') {
+    // 拖过的那一格是「涂上」不是「翻面」：pointerdown 那一处的 toggle 已经用过了，
+    // 这里再 toggle 的话，一笔绕回同一格就会把它擦掉，涂黑笔就成了随机开关。
+    game.setRole(cell, BLACK);
+    drag.cells.push(cell);
+    cursor = cell;
+    render();
+    return;
+  }
+  const d = view.dirFromTo(last, cell);
+  if (d < 0) {
+    // 不相邻：只挪笔，不连线（斜着甩出去不该凭空长出一条边）
+    drag.cells = [cell];
+    cursor = cell;
+    return;
+  }
+  drag.cells.push(cell);
+  game.setEdge(last, d, mode === 'cut' ? E_OFF : E_ON);
+  cursor = cell;
+  render();
+};
+
+async function endDrag() {
+  if (!drag) return;
+  drag = null;
+  game.endGesture();
+  render();
+  await checkWin();
+  persist();
+}
+canvas.addEventListener('pointerdown', onDown);
+canvas.addEventListener('pointermove', onMove);
+canvas.addEventListener('pointerup', endDrag);
+canvas.addEventListener('pointercancel', endDrag);
+
+// Pointer Events 是主路。老 WebView / 没 PE 的实现上，同一条 onDown/onMove/endDrag 必须照样跑得起来：
+// 这里只换事件源，不换笔——两条路共用同一组函数，才不会出现「鼠标能连边、手指只能涂黑」这种
+// 各写一半的漂移。坐标一律取 clientX/clientY，交给 view.hitCell 去减 rect 与除缩放。
+if (!('onpointerdown' in window)) {
+  const shim = (x, y, button, ev) => ({
+    clientX: x, clientY: y, button, pointerId: 1,
+    preventDefault: () => { if (ev && ev.cancelable !== false) ev.preventDefault(); },
+  });
+  const first = (ev) => (ev.touches && ev.touches[0]) || (ev.changedTouches && ev.changedTouches[0]) || ev;
+  canvas.addEventListener('mousedown', (ev) => { const p = first(ev); onDown(shim(p.clientX, p.clientY, ev.button, ev)); });
+  canvas.addEventListener('mousemove', (ev) => { const p = first(ev); onMove(shim(p.clientX, p.clientY, ev.button, ev)); });
+  canvas.addEventListener('mouseup', (ev) => { const p = first(ev); endDrag(shim(p.clientX, p.clientY, ev.button, ev)); });
+  canvas.addEventListener('touchstart', (ev) => { const p = first(ev); onDown(shim(p.clientX, p.clientY, 0, ev)); }, { passive: false });
+  canvas.addEventListener('touchmove', (ev) => { const p = first(ev); onMove(shim(p.clientX, p.clientY, 0, ev)); }, { passive: false });
+  canvas.addEventListener('touchend', (ev) => { const p = first(ev); endDrag(shim(p.clientX, p.clientY, 0, ev)); }, { passive: false });
+}
+canvas.addEventListener('contextmenu', (ev) => ev.preventDefault());
+
+// ── 键盘 ────────────────────────────────────────────────────────────────
+window.addEventListener('keydown', async (ev) => {
+  if (!game) return;
+  if (ev.target && /INPUT|SELECT|TEXTAREA/.test(ev.target.tagName)) return;
+  const k = ev.key;
+  noteGesture(); // 键盘同样是用户激活：只用键盘的玩家也该有声音
+  // 暂停中只放行「离开暂停」与那两个不改盘面的 HUD 键；改盘的键（含换一局、提示）一律先挡下来
+  // 并在 aria-live 上说一句——静默吞键会被读成「这键盘是装饰」。
+  const hud = k === 'p' || k === 'P' || k === 'r' || k === 'R' || k === 'm' || k === 'M'
+    || k === 'f' || k === 'F' || k === 'Escape';
+  if (paused() && !hud) {
+    srCell.textContent = '已暂停：按 P 继续。';
+    return;
+  }
+  const w = game.w;
+  const h = game.h;
+  const move = (dr, dc) => {
+    if (cursor < 0) cursor = 0;
+    const r = Math.min(h - 1, Math.max(0, Math.floor(cursor / w) + dr));
+    const c = Math.min(w - 1, Math.max(0, (cursor % w) + dc));
+    cursor = r * w + c;
+    // 锚点必须活着跨过这一次移动：index.html:148 那句 keyhint 写的是「回车 从锚点动手」，
+    // 形状就是 Enter（定锚）→ 方向键（搬光标）→ Enter（将笔连过去）。这里以前是 anchor = -1，
+    // 于是下面 `else if (anchor !== cursor)` 那一整条落笔分支（含 setEdge/setRole/eraseAt 四支）
+    // 从键盘永远进不去——实测纯键盘按多少发都画不出一段环。放掉锚点是 Escape 的活，不是方向键的。
+    srCell.textContent = game.cellReport(cursor) + (anchor >= 0 && anchor !== cursor ? `（锚在第 ${Math.floor(anchor / w) + 1} 行第 ${anchor % w + 1} 列，回车将笔连过去）` : '');
+  };
+  // #sr-cell 是 aria-live 的那张嘴：只在方向键时改口是不够的——B / 退格 / Z 都真的改了盘面，
+  // 读完「第 1 行第 3 列 没落笔」再按 B，屏幕上那句话说的是上一秒的事。
+  const announce = () => {
+    if (game && cursor >= 0) srCell.textContent = game.cellReport(cursor);
+  };
+  if (k === 'ArrowUp') move(-1, 0);
+  else if (k === 'ArrowDown') move(1, 0);
+  else if (k === 'ArrowLeft') move(0, -1);
+  else if (k === 'ArrowRight') move(0, 1);
+  else if (k === 'Enter' || k === ' ') {
+    ev.preventDefault();
+    startClock();
+    if (cursor < 0) cursor = 0;
+    if (anchor < 0) {
+      anchor = cursor;
+      srCell.textContent = `锚在第 ${Math.floor(cursor / w) + 1} 行第 ${cursor % w + 1} 列`;
+    } else if (anchor !== cursor) {
+      const d = view.dirFromTo(anchor, cursor);
+      game.beginGesture();
+      if (d >= 0) {
+        if (mode === 'loop') game.setEdge(anchor, d, E_ON);
+        else if (mode === 'cut') game.setEdge(anchor, d, E_OFF);
+        else if (mode === 'black') game.setRole(cursor, BLACK);
+        else game.eraseAt(cursor);
+      } else if (mode === 'black') {
+        game.setRole(cursor, BLACK);
+      }
+      game.endGesture();
+      anchor = cursor;
+      render();
+      await checkWin();
+      persist();
+    }
+  } else if (k === 'Escape') {
+    anchor = -1;
+    hideVeil();
+  } else if (k === 'b' || k === 'B') {
+    startClock();
+    game.toggleBlack(cursor < 0 ? 0 : cursor);
+    render();
+    announce();
+    await checkWin();
+    persist();
+  } else if (k === 'Backspace' || k === 'Delete') {
+    ev.preventDefault();
+    startClock();
+    game.eraseAt(cursor < 0 ? 0 : cursor);
+    render();
+    announce();
+    await checkWin();
+    persist();
+  } else if (k === 'z' || k === 'Z') {
+    game.undo();
+    render();
+    announce();
+    await checkWin();
+    persist();
+  } else if (k === 'h' || k === 'H') {
+    hint();
+  } else if (k === 'p' || k === 'P') {
+    setPaused(!paused());
+    return;
+  } else if (k === 'r' || k === 'R') {
+    await restartGame();
+    return;
+  } else if (k === 'm' || k === 'M') {
+    setSound(isMuted()); // 现在是静音 → 开声；现在是开声 → 静音
+    if (!isMuted()) sfx.tap(); // 只在「刚刚有了声音」这一下响，否则静音的确认也变成声音
+    return;
+  } else if (k === 'f' || k === 'F') {
+    // 按住不放不该把全屏来回刷：全屏是一次性动作，长按只算一次。
+    if (ev.repeat) return;
+    await toggleFullscreen();
+    return;
+  } else if (k === 'e' || k === 'E') {
+    const order = ['loop', 'black', 'cut', 'erase'];
+    setMode(order[(order.indexOf(mode) + 1) % order.length]);
+    srCell.textContent = `画笔：${mode}`;
+  } else if (k === 'n' || k === 'N') {
+    await newGame({});
+    return;
+  } else return;
+  render();
+});
+
+// ── 按钮 ────────────────────────────────────────────────────────────────
+$('btn-new').addEventListener('click', () => newGame({}));
+$('btn-again').addEventListener('click', () => newGame({}));
+$('btn-close-veil').addEventListener('click', () => hideVeil());
+$('btn-hint').addEventListener('click', () => hint());
+$('btn-undo').addEventListener('click', async () => {
+  if (!game || paused()) return;
+  game.undo();
+  render();
+  await checkWin();
+  persist();
+});
+$('btn-clear').addEventListener('click', () => {
+  if (!game || paused()) return;
+  game.clearAll();
+  won = false;
+  hideVeil();
+  render();
+  persist();
+});
+for (const id of ['loop', 'black', 'cut', 'erase']) {
+  $(`btn-mode-${id}`).addEventListener('click', () => setMode(id));
+}
+$('btn-motion').addEventListener('click', (ev) => {
+  const next = !(ev.currentTarget.getAttribute('aria-pressed') === 'true');
+  ev.currentTarget.setAttribute('aria-pressed', String(next));
+  ev.currentTarget.textContent = next ? '动效 减' : '动效 全';
+  setReduceMotion(next);
+  Store.setSetting('reduceMotion', next);
+  ensureLoop(); // 「减动效」必须真的把循环停掉，而不是留着 rAF 在一帧帧空转
+});
+$('btn-reset').addEventListener('click', () => {
+  Store.reset();
+  setSound(!!Store.setting('sound')); // 存档回到默认（sound:false）——音频那侧必须跟着闭嘴，不然「清空存档」清不掉声音
+  newGame({});
+});
+$('btn-pause').addEventListener('click', () => setPaused(!paused()));
+$('btn-mute').addEventListener('click', () => {
+  setSound(isMuted());
+  if (!isMuted()) sfx.tap();
+});
+$('btn-full').addEventListener('click', () => { toggleFullscreen(); });
+$('btn-restart').addEventListener('click', () => { restartGame(); });
+// fullscreenchange 的回写挂在下面 bindFullscreenButton 那一份里（window 级、含 MSFullscreenChange）。
+// 这里再挂一遍 document 级的，同一个事件就会被回写两次——同一个功能只留一份接线。
+
+// 下拉里列的就是 puzzle.js 那份 SIZES（菜单只有一处定义；12×12 已经不在里面，新开不了）
+for (const key of SIZES) {
+  const t = parseSize(key);
+  const o = document.createElement('option');
+  o.value = t.key;
+  o.textContent = `${t.key}（${t.w}×${t.h}）`;
+  sizeSelect.appendChild(o);
+}
+sizeSelect.value = DEFAULT_SIZE;
+sizeSelect.addEventListener('change', async () => {
+  parseSize(sizeSelect.value);
+  // 尺寸一换就是新一局：不同 w×h 的格数与边数不同，旧存档的笔迹没法搬过去
+  await newGame({ sizeKey: sizeSelect.value });
+});
+
+window.addEventListener('resize', () => {
+  relayout();
+  render();
+});
+window.addEventListener('pagehide', persist);
+
+// ── 门面 ────────────────────────────────────────────────────────────────
+window.yajilin = {
+  version: VERSION,
+  state: 'booting',
+  engine: {
+    makeQuestion, parseSize, SIZES, TIERS, Game, RULE_TEXT, RULES,
+    // 引擎原样透传：门禁在页面里读到的 verify/pencil/countSolutions 就是玩家这条路加载的同一份模块
+    verify, pencil, shipBoard, makePencilBoard, pSet, pDig, countSolutions, materialize, prepare,
+    Board, DIRS, hashSeed, mulberry32, makeRng, ROLE, EDGE,
+    DEFAULT_LOOP_FRACS, DEFAULT_MAX_ATTEMPTS,
+    E_ON, E_OFF, E_UNK, BLACK, UNK, UP, RIGHT, DOWN, LEFT,
+  },
+  view,
+  get game() {
+    return game;
+  },
+  get won() {
+    return won;
+  },
+  get mode() {
+    return mode;
+  },
+  setMode,
+  hint,
+  newGame,
+  mintSeed,
+  checkWin,
+  render,
+  relayout,
+  hideVeil,
+  // HUD 的「状态」而不是「按钮亮没亮」：暂停中的那一毫秒读数、时钟当前的值、音频真造过的节点数，
+  // 门禁要量的是这三个，读 aria-pressed 只能证明我改了个属性。
+  get paused() {
+    return paused();
+  },
+  get clockMs() {
+    return clock();
+  },
+  audio: audioStats,
+  // 动效状态：steps/simTime/accum 是「推进了多少」的读数，三档帧率的比对就量这三个。
+  fx: () => fx.state(),
+  // 两条纯透传的接缝（转调 anim.js 已有的 advance/reset，这里不新增任何判断）：
+  // 有了它们，「帧率无关」在仓内就不再只是注释——门禁能在真页面里拿真模块按指定帧间隔喂
+  // 30/60/120Hz，自己复算定步长的读数。跑完必须 fxReset()，别把玩家那侧的动效留在测试态。
+  fxAdvance: (sec) => fx.advance(sec),
+  // 粒子那侧同理：门禁要比的是「同一步数上粒子积分到哪了」（Σx/Σy/Σlife/Σspin），
+  // 拿不到 burst 就只能比恒为 0 的读数——那是假绿。rng 用这一局 seed 派生的 fxRng，
+  // 于是同一张盘在三档帧率上拿到的是同一串随机，逐位可比。
+  fxBurst: (x, y, n = 12, color = '#FFC85C') => fx.burst(x, y, n, fxRng, color),
+  // 重置要把粒子与 rng 一起拨回这一局的起点：只清粒子的话，随机序列已经往前走了，
+  // 下一簇粒子就不是「这一局的那一簇」——三档帧率对拍比的必须是同一簇。
+  fxReset: () => { fx.reset(); fxRng = mulberry32(fxRngBase); },
+  simStep: SIM_STEP,
+  fxSeed: (s) => { fxRngBase = hashSeed(String(s)); fxRng = mulberry32(fxRngBase); },
+  fxAt: (cell) => view.centerOf(cell),
+  setPaused,
+  restart: restartGame,
+  toggleFullscreen,
+  setSound,
+  store: Store,
+  // SW 注册的结果留在门面上：排障要能一眼读到「装上了没、没装上是为什么」，
+  // 而不是去控制台里猜一条被 catch 掉的异常。
+  sw: swRegistration,
+  palette: Palette,
+  space: Space,
+  /** 正在推进的那个数（毫秒）。暂停时它必须一毫秒不动 —— 这就是"真冻结"的判据。 */
+  simClock: () => clock(),
+};
+
+// ── 启动 ────────────────────────────────────────────────────────────────
+(async function boot() {
+  setMode('loop');
+  // 静音位从存档里读回来，并把三个 HUD 按钮画成状态的镜像：默认 sound:false，所以首帧上那句
+  // 「音效 关」必须是真关着（音频节点数为 0），不是「还没接线的灰按钮」。
+  setMuted(!Store.setting('sound'));
+  ensureLoop(); // 循环晚于首帧启动：reduced-motion 的存档位在这一刻才读得回来
+  paintPauseUi();
+  paintMuteUi();
+  paintFullUi();
+  // 先只看「有没有一份形状正确的存档」，笔迹/步数不在这里搬：newGame 要用存档里的 seed 重画出盘，
+  // 再拿那张盘的真实指纹向 Store.resume(指纹) 对一次账（对不上就作废存档、开新局并说给玩家听）。
+  const pending = Store.pendingResume();
+  let started = null;
+  if (pending) started = await newGame({ seed: pending.seed, sizeKey: pending.sizeKey, resumeFrom: pending });
+  if (!started) await newGame({});
+  window.yajilin.state = 'ready';
+})();
+
+// ---- 顶栏那颗全屏按钮（#btn-fullscreen）的接线 ----
+// 它与面板那颗（#btn-full）走**同一个** toggleFullscreen / paintFullUi：
+// 全屏最常见的假实现就是引用一个并不存在的 id，点下去什么也不会发生，量具却算它「已实现」；
+// 反过来，两颗按钮各写各的标签，就一定会有一处停在旧样子。这里只负责接线，能力在上面那一份。
+(function bindFullscreenButton() {
+  const btn = document.getElementById('btn-fullscreen');
+  if (!btn) return;
+  btn.addEventListener('click', () => { toggleFullscreen(); });
+  // Esc 和系统手势退出都不经过我们的代码，按钮状态只能靠 fullscreenchange 回写，
+  // 否则用户已经退出、HUD 还停在「退出全屏」，下一次点击反而会重新进全屏。
+  window.addEventListener('fullscreenchange', paintFullUi);
+  window.addEventListener('webkitfullscreenchange', paintFullUi);
+  window.addEventListener('MSFullscreenChange', paintFullUi);
+  paintFullUi();
+})();

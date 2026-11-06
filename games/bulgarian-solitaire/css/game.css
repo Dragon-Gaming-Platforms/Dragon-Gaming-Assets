@@ -1,0 +1,318 @@
+/* One dark table, one warm accent. No font files and no color images to download for the
+   layout: the board is drawn procedurally in js/view.js, and assets/art/*.png are an
+   optional texture layer (a missing file leaves the same picture one flatter, never broken).
+   Every tappable control is sized for a thumb, and the notch is respected. */
+
+:root {
+  --bg: #14161a;
+  --panel: #1b1f26;
+  --ink: #e3e8f0;
+  --muted: #9aa5b4;
+  --line: rgba(226, 232, 240, 0.12);
+  --gold: #e0a63c;
+  --gold-dark: #a97721;
+  --good: #6ea06e;
+  --bad: #c96a5e;
+  --radius: 12px;
+}
+
+* { box-sizing: border-box; }
+
+html, body {
+  margin: 0;
+  padding: 0;
+  background: var(--bg);
+  color: var(--ink);
+  font-family: ui-sans-serif, system-ui, "PingFang SC", "Hiragino Sans GB", "Microsoft YaHei", sans-serif;
+  -webkit-text-size-adjust: 100%;
+}
+
+.topbar {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px 18px;
+  align-items: baseline;
+  /* viewport-fit=cover 把画面推到刘海与圆角下面，这三条 env() 就是把内容推回来的那层。 */
+  padding: calc(12px + env(safe-area-inset-top)) calc(18px + env(safe-area-inset-right)) 6px calc(18px + env(safe-area-inset-left));
+  border-bottom: 1px solid var(--line);
+}
+
+.brand {
+  margin: 0;
+  font-size: 19px;
+  letter-spacing: 0.04em;
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+}
+
+.brand-mark { color: var(--gold); font-size: 16px; }
+.brand small { color: var(--muted); font-size: 11px; letter-spacing: 0.18em; }
+
+.modes { display: flex; gap: 6px; }
+.modes button, .controls button, .shelf button, .curtain-actions button, .about button, .help-body button {
+  font: inherit;
+  color: var(--ink);
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 9px;
+  padding: 6px 11px;
+  cursor: pointer;
+  /* 拇指命中区：44×44 是下限而不是装饰，小按钮（关卡号格子）靠它撑开。 */
+  min-height: 44px;
+  min-width: 44px;
+  touch-action: manipulation;
+  transition: border-color 120ms ease, background-color 120ms ease, color 120ms ease;
+}
+.modes button:hover, .controls button:hover:not(:disabled), .shelf button:hover:not(:disabled) {
+  border-color: rgba(224, 166, 60, 0.55);
+}
+.modes button:active:not(:disabled), .controls button:active:not(:disabled) { background: #232a34; }
+.modes button:focus-visible, .controls button:focus-visible, .shelf button:focus-visible,
+.help-body button:focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }
+.modes button[aria-current="true"] { background: #232a34; border-color: var(--gold); color: #f6e3bd; }
+.controls button.primary { background: var(--gold); border-color: var(--gold-dark); color: #201708; font-weight: 600; }
+button:disabled { opacity: 0.42; cursor: not-allowed; }
+
+.totals { margin: 0 0 0 auto; color: var(--muted); font-size: 12px; }
+.totals b { color: var(--ink); }
+
+.stage {
+  display: grid;
+  grid-template-columns: minmax(280px, 1fr) minmax(260px, 340px);
+  gap: 16px;
+  padding: 14px calc(18px + env(safe-area-inset-right)) calc(22px + env(safe-area-inset-bottom)) calc(18px + env(safe-area-inset-left));
+  align-items: start;
+  max-width: 1180px;
+  margin: 0 auto;
+}
+
+.board { position: relative; }
+
+canvas#board {
+  display: block;
+  width: 100%;
+  height: min(62vh, 520px);
+  min-height: 280px;
+  background: var(--bg);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  touch-action: none;
+}
+
+.hint-line { min-height: 20px; margin: 8px 2px 0; font-size: 13px; color: var(--muted); }
+.hint-line b { color: var(--gold); }
+
+.curtain {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  background: rgba(10, 12, 16, 0.72);
+  border-radius: var(--radius);
+}
+/* `[hidden]` alone does nothing here: `display: grid` above beats the UA's
+   `[hidden] { display: none }`, so the overlay stayed invisible-but-clickable and swallowed
+   every pointer event on the canvas. Measured in headless Chrome, 2026-09-27. */
+.curtain[hidden] { display: none; }
+.curtain-card {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  padding: 18px 22px;
+  text-align: center;
+  max-width: 86%;
+}
+.stars { margin: 0; font-size: 30px; color: var(--gold); letter-spacing: 0.12em; }
+.curtain-card h2 { margin: 6px 0 4px; font-size: 18px; }
+.tally { margin: 0 0 12px; color: var(--muted); font-size: 13px; line-height: 1.6; }
+.tally b { color: var(--ink); }
+.curtain-actions { display: flex; gap: 8px; justify-content: center; }
+
+.panel { display: flex; flex-direction: column; gap: 12px; }
+.crumbs { margin: 0; font-size: 14px; }
+.crumbs b { float: right; color: var(--muted); font-weight: 500; font-size: 12px; }
+.band { color: #7f8a99; font-size: 11px; }
+
+.readout {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 8px;
+  margin: 0;
+}
+.readout div {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  padding: 7px 9px;
+}
+.readout dt { font-size: 11px; color: var(--muted); }
+.readout dd { margin: 2px 0 0; font-size: 19px; }
+.readout div.par dd { color: var(--gold); }
+.readout div.steps dd { color: #86b0d6; }
+.readout dt small { font-size: 10px; color: #74808f; }
+
+.controls { display: flex; flex-wrap: wrap; gap: 6px; }
+.legend { margin: 0; font-size: 12px; color: var(--muted); line-height: 1.65; }
+.legend b { color: #cfd8e4; }
+.legend i { color: var(--gold); font-style: normal; }
+
+.shelf { display: flex; flex-direction: column; gap: 6px; }
+.shelf p.tier { margin: 6px 0 0; font-size: 12px; color: var(--muted); }
+.shelf:not(:empty) { flex-direction: column; }
+.shelf p + p { margin-top: 4px; }
+.shelf button.here { outline: 2px solid var(--gold); }
+.shelf button.done { border-color: rgba(110, 160, 110, 0.7); }
+.shelf button.perfect { background: #2a3a2c; border-color: var(--good); }
+.shelf button.wide { width: 100%; }
+.shelf .row { display: flex; flex-wrap: wrap; gap: 6px; }
+.shelf button small { color: var(--muted); font-size: 10px; }
+
+.about { font-size: 12px; color: var(--muted); border-top: 1px solid var(--line); padding-top: 10px; }
+.about summary { cursor: pointer; color: #cfd8e4; }
+.about p { line-height: 1.7; }
+.about code { background: #20252d; padding: 1px 5px; border-radius: 4px; color: #d7e2f0; }
+.about .save { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+
+.toast {
+  position: fixed;
+  left: 50%;
+  bottom: calc(22px + env(safe-area-inset-bottom));
+  transform: translateX(-50%);
+  background: #262c35;
+  border: 1px solid var(--line);
+  color: var(--ink);
+  padding: 9px 14px;
+  border-radius: 10px;
+  font-size: 13px;
+  max-width: 84vw;
+}
+.toast[hidden] { display: none; }
+
+/* 辅助开关（暂停 / 声音 / 全屏 / 说明）：aria-pressed 就是真状态，样式只是把它画出来。 */
+.controls.aux { border-top: 1px dashed var(--line); padding-top: 8px; }
+.controls.aux button { font-size: 13px; }
+.controls.aux button[aria-pressed="true"] {
+  background: #232a34;
+  border-color: var(--gold);
+  color: #f6e3bd;
+}
+
+/* 玩法说明：盖住棋盘的那一层，[hidden] 必须显式压回 display:none（和 .curtain 同一个坑）。 */
+.helpcard {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  background: rgba(8, 10, 14, 0.82);
+  border-radius: var(--radius);
+  padding: 12px;
+  animation: help-in 160ms ease-out;
+}
+.helpcard[hidden] { display: none; }
+@keyframes help-in {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: none; }
+}
+.help-body {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  padding: 14px 18px 16px;
+  max-width: 620px;
+  max-height: 100%;
+  overflow: auto;
+  -webkit-overflow-scrolling: touch;
+}
+.help-body h2 { margin: 0 0 8px; font-size: 17px; color: var(--gold); }
+.help-body ol { margin: 0 0 10px; padding-left: 20px; line-height: 1.75; font-size: 13px; }
+.help-body p { margin: 0 0 10px; font-size: 13px; line-height: 1.7; }
+.help-body .muted { color: var(--muted); }
+.help-body code { background: #20252d; padding: 1px 5px; border-radius: 4px; color: #d7e2f0; }
+.help-body .keys { color: var(--muted); font-size: 12px; line-height: 2; }
+kbd {
+  font: inherit;
+  font-size: 11px;
+  background: #262c35;
+  border: 1px solid var(--line);
+  border-bottom-width: 2px;
+  border-radius: 5px;
+  padding: 1px 6px;
+  color: #dfe6f1;
+}
+
+/* 系统说"少动效"时这里是真的规则，不是空块：呼吸/入场/颜色过渡全部退化成一次到位，
+   js/view.js 里同一条查询另有一支（光环相位钉死在 0.3）。 */
+@media (prefers-reduced-motion: reduce) {
+  * { animation-duration: 0.001ms !important; animation-iteration-count: 1 !important; }
+  .helpcard { animation: none; }
+  .modes button, .controls button, .shelf button, .curtain-actions button, .about button,
+  .help-body button { transition: none; }
+  .modes button:active:not(:disabled), .controls button:active:not(:disabled) { background: var(--panel); }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .controls button:hover:not(:disabled) { transform: translateY(-1px); }
+}
+
+@media (max-width: 780px) {
+  .stage { grid-template-columns: 1fr; }
+  canvas#board { height: 58vh; }
+  .readout { grid-template-columns: repeat(2, 1fr); }
+  .totals { margin-left: 0; width: 100%; }
+}
+
+/* 中央分发：safe-area 兜底 */
+
+/* ---------- safe-area：刘海与主屏条不吃掉按钮（中央分发，akari-cos 同口径） ---------- */
+:root {
+  --sat: env(safe-area-inset-top, 0px);
+  --sar: env(safe-area-inset-right, 0px);
+  --sab: env(safe-area-inset-bottom, 0px);
+  --sal: env(safe-area-inset-left, 0px);
+}
+html, body {
+  padding-left: var(--sal);
+  padding-right: var(--sar);
+}
+body {
+  padding-top: var(--sat);
+  padding-bottom: var(--sab);
+  min-height: 100vh;
+  min-height: 100dvh;
+}
+/* 贴边的固定/吸底元素自己让开主屏条，别让 home indicator 压住按钮 */
+.fixed-bottom, .bottom-bar, .hud-bottom, footer.app-footer {
+  padding-bottom: calc(var(--sab) + env(safe-area-inset-bottom, 0px));
+}
+
+
+/* ============================================================
+   44px 触摸命中下限（Apple HIG 手机可用性底线）
+   每个真正可点的元素都要有 ≥44×44 CSS px 的命中盒。
+   min-height / min-width 是**硬下限**：只会把过小的盒子撑到 44px，
+   本来就够大的控件（宽药丸、整行列表项、大数字键）外形一点不变。
+
+   两处非平凡之处：
+   1) 需要 !important —— 各组件自己有 `.shelf button { min-width: 34px }`
+      这类更"贴身"的规则，类选择器的优先级高于任何标签堆叠，
+      不加的话这条底线会被组件规则逐个抵消。
+   2) 先把 --touch-min 定死：tapa / nurikabe 早就写了
+      `min-height: var(--touch-min)`，但全仓没有任何地方定义过这个变量，
+      无 fallback 的 var() 在计算值阶段整条作废 —— 那是个看着像 44px、
+      实际什么都不保证的死规则。这里补上定义，让它们原本的意图真正成立。
+   ============================================================ */
+:root { --touch-min: 44px; }
+button,
+select,
+input,
+textarea,
+a[href],
+[role="button"] {
+  min-height: 44px !important;
+  min-width: 44px !important;
+}
+
+/* Shared-site embedding and English guide. */
+.topbar,.top-actions{flex-wrap:wrap;min-width:0}
+.hosting-guide{display:inline-block;padding:8px 12px;background:#182c39;color:#bde6ff;border-radius:6px;font:14px/1.5 system-ui,sans-serif;letter-spacing:normal}
