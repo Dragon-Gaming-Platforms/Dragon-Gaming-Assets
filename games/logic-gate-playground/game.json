@@ -1,0 +1,8 @@
+{
+  "name": "Logic Gate Playground",
+  "desc": "Build a four-stage Boolean circuit from common logic gates. Toggle three inputs, wire earlier outputs into later gates, and compare all eight truth-table rows against a target function.",
+  "controls": "Click Input A/B/C to toggle bits. Select each gate's inputs and operator, choose an output tap, and select a target truth table.",
+  "shelf": "Tools & Utilities",
+  "tags": ["logic", "circuits", "boolean", "education", "offline"],
+  "creator": "Dragon Gaming Assets contributors"
+}

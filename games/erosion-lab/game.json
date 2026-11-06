@@ -1,0 +1,8 @@
+{
+  "name": "Erosion Lab",
+  "desc": "Sculpt a procedural terrain and run a local water-and-sediment experiment. Tune rainfall and erodibility, then watch downhill channels reshape the height field.",
+  "controls": "Mouse/touch: drag to raise; hold Shift or set Brush mode to Carve channel to lower. Adjust rainfall, erodibility, and brush controls; Run, Rain one step, or Reset.",
+  "shelf": "Interactive Stories & Experiments",
+  "tags": ["terrain", "erosion", "simulation", "water", "offline"],
+  "creator": "Dragon Gaming Assets contributors"
+}
