@@ -1,0 +1,8 @@
+{
+  "name": "Interference Studio",
+  "desc": "Arrange local point emitters and explore constructive and destructive wave interference. Tune wavelength, phase, propagation speed, and color map in an original canvas-based physics visualizer.",
+  "controls": "Mouse or touch: click to add an emitter, drag to move it, Shift-click to remove. Space: run/pause. Adjust wavelength, alternate phase, speed, and presets.",
+  "shelf": "Interactive Stories & Experiments",
+  "tags": ["physics", "waves", "interference", "simulation", "offline"],
+  "creator": "Dragon Gaming Assets contributors"
+}
