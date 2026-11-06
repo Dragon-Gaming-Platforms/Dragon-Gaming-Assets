@@ -1,0 +1,15 @@
+{
+  "name": "Null Sector",
+  "desc": "A single-file first-person wave-survival shooter with a military-sci-fi TAC-UI: escalating hostile-signal waves across a generated facility, an arsenal with heat/reload management, score streaks and endless mode — plus a built-in visual MOD editor (mod-studio) for reskinning weapons and effects. Bilingual EN/ZH HUD with a language setting (default ZH).",
+  "controls": "WASD to move, mouse to aim, left-click to fire, R to reload, Shift to sprint, E to interact (touch controls on mobile)",
+  "shelf": "Arcade & Action",
+  "tags": [
+    "fps",
+    "wave-survival",
+    "shooter",
+    "mod-editor"
+  ],
+  "badge": "New",
+  "creator": "zwkwwwwww",
+  "image": "title.png"
+}
