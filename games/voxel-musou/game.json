@@ -1,0 +1,15 @@
+{
+  "name": "Voxel Musou",
+  "desc": "A Dynasty Warriors-inspired voxel action game: one warrior against a thousand foes. Seven officers with distinct attack sets, four Three Kingdoms battlefields (Hulao Gate, Changban, the Red Cliffs night fleet, Mount Dingjun), officer duels, rescues and set pieces, plus three ranked trials — hundreds of instanced soldiers, charge attacks and scripted musou combos at a fixed 60 Hz.",
+  "controls": "WASD/arrows to move (camera-relative), J/left-click attack, K/right-click charge, Space jump, L/Shift dodge, I musou (full gauge), mouse/Q/E camera, R recenter (gamepad supported)",
+  "shelf": "Arcade & Action",
+  "tags": [
+    "action",
+    "musou",
+    "voxel",
+    "3d"
+  ],
+  "badge": "New",
+  "creator": "mike007jd",
+  "image": "title.png"
+}
