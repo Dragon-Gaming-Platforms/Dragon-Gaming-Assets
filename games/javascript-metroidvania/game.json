@@ -1,0 +1,15 @@
+{
+  "name": "JavaScript Metroidvania",
+  "desc": "A compact metroidvania in Kaboom.js: explore two connected caves, fight drones and health-hungry set pieces, and take down the boss — whose defeat unlocks the double jump that opens the remaining passages.",
+  "controls": "Arrows/WASD to move, X to jump, Z to attack",
+  "shelf": "RPG & Adventure",
+  "tags": [
+    "metroidvania",
+    "platformer",
+    "action",
+    "exploration"
+  ],
+  "badge": "New",
+  "creator": "JSLegend",
+  "image": "title.png"
+}
