@@ -1,0 +1,11 @@
+Hebi-Ichigo
+Source: https://github.com/z-biz-game/z-biz-game-hebi-cos
+Revision: cf05c5c3f4140674f971ff5dc6a31460b65f42a6
+License: MIT (see LICENSE).
+Retrieved: 2026-11-05
+
+Static runtime and local authored assets only. Build/test/desktop tooling,
+asset-generation scripts, manifests and service-worker registration omitted.
+No CDN/backend required. Save/audio/probe keys namespaced; metadata images
+relative; narrow headers wrap; English guide added. Essential controls translated; other Chinese UI retained.
+Narrow boards share responsive drawing/hit-test geometry; keypad wraps on 320px screens.

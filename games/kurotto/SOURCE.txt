@@ -1,0 +1,11 @@
+Kurotto
+Source: https://github.com/z-biz-game/z-biz-game-kurotto-cos
+Revision: 493f0884d75584b55189cd9e9c1463b7032f2dab
+License: MIT (see LICENSE).
+Retrieved: 2026-11-05
+
+Static runtime and local authored assets only. Build/test/desktop tooling,
+asset-generation scripts, manifests and service-worker registration omitted.
+No CDN/backend required. Save/audio/probe keys namespaced; metadata images
+relative; narrow headers wrap; English guide added. Essential controls translated; other Chinese UI retained.
+Save boards and records validated before loading (sizes, states, counters and record entries).

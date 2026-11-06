@@ -1,0 +1,15 @@
+{
+  "name": "Kurotto",
+  "desc": "Shade cells so each numbered circle touches black components whose combined size equals its clue. Four generated board sizes. Original interface partly Simplified Chinese; English help included.",
+  "controls": "Tap cells to cycle unknown/black/white. B black, W white, 0 clears; H hint, Z undo, N new puzzle.",
+  "shelf": "Puzzle & Logic",
+  "tags": [
+    "games",
+    "html5",
+    "puzzle",
+    "logic",
+    "kurotto"
+  ],
+  "badge": "New",
+  "creator": "z-biz-game"
+}

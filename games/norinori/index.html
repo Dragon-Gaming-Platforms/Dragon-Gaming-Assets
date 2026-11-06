@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta name="color-scheme" content="dark light">
+  <meta name="theme-color" content="#0a0a12">
+
+<meta charset="utf-8">
+<!-- 不写 <base>，也没有一个以 / 开头的资源路径：Pages 把站点发在 /<repo>/ 前缀下，
+     硬编 "/" 会在这一形把 css 与引擎全部 404 掉（本组织的浏览器闸因此跑两趟 URL 形态）。 -->
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"><meta name="twitter:card" content="summary">
+<!-- 浏览器**无论有没有声明**都会去 origin 根探测 /favicon.ico：不列它，就是每条腿的 console 尾巴上
+     多一条 404（本机 2026-09-29 实测：Chrome 154 自己发的请求，不走元素 error 事件）。
+     门禁那条「无资源 404」判的是 link/script/img 的 error 事件，favicon 探测根本不走这条路 ——
+     也就是说那条断言没有为此放宽，只是读数里噪声一条。声明一个空的 data: 图标就不发这个请求。 -->
+<link rel="icon" href="data:,">
+<title>Norinori</title>
+<meta name="description" content="乗りのり（Norinori）二格区域涂黑谜题：题面已用粗线切好区域，在其中涂黑部分格子，使每块区域恰好两颗黑格，且黑格两两成对组成 1×2／2×1 骨牌；骨牌可以跨过区域边界，但两块骨牌不许共边。"><meta property="og:title" content="乗りのり · Norinori"><meta property="og:description" content="乗りのり（Norinori）二格区域涂黑谜题：题面已用粗线切好区域，在其中涂黑部分格子，使每块区域恰好两颗黑格，且黑格两两成对组成 1×2／2×1 骨牌；骨牌可以跨过区域边界，但两块骨牌不许共边。"><meta property="og:image" content="icons/icon-512.png"><meta name="twitter:image" content="icons/icon-512.png">
+<link rel="stylesheet" href="css/game.css">
+<script type="module" src="js/main.js"></script>
+
+  <link rel="icon" type="image/png" sizes="32x32" href="icons/favicon-32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="icons/favicon-16.png">
+  <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+
+  <link rel="stylesheet" href="css/studio.css" />
+</head>
+<body>
+<header>
+  <h1>乗りのり <span class="sub">Norinori</span></h1>
+  <p class="rule">每块粗线区域<b>恰好两颗黑格</b>；黑格两两成 1×2／2×1 骨牌，<b>骨牌可以跨出区域</b>，
+    两块骨牌不得共边（可以共角）。<span class="quiet">白格不需要连成一片。</span></p>
+<a class="hosting-guide" href="help.html" lang="en">English rules &amp; controls</a>
+</header>
+
+<main>
+  <section class="board-wrap">
+    <!-- tabindex 让棋盘自己接键盘；焦点由 main.js 在落子/提示后收回画布，
+         不然按键会飘到 body 上，浏览器闸里那几条键盘断言就成了"点得到但键不动"。 -->
+    <canvas id="board" tabindex="0" aria-label="のりのり 棋盘：点击落子"></canvas>
+    <div id="win-veil" hidden>
+      <p class="big">推完了</p>
+      <p class="why" id="win-why"></p>
+      <button id="win-next" type="button">New puzzle</button>
+    </div>
+  </section>
+
+  <section class="panel" aria-label="控制">
+    <label class="row">档位
+      <select id="tier"></select>
+    </label>
+    <div class="row pens" role="group" aria-label="笔">
+      <button id="pen-black" class="pen on" type="button" aria-pressed="true">Black</button>
+      <button id="pen-white" class="pen" type="button" aria-pressed="false">White</button>
+    </div>
+    <div class="row">
+      <button id="btn-pause" type="button" aria-pressed="false" title="暂停 / 继续 (P)">Pause</button>
+      <button id="new-game" type="button">New puzzle</button>
+      <button id="hint" type="button">Hint</button>
+      <button id="undo" type="button">Undo</button>
+      <button id="check" type="button">Check</button>
+      <button id="clear" type="button">Clear</button>
+      <button id="btn-fullscreen" type="button" aria-pressed="false" title="全屏（F）">Fullscreen</button>
+    </div>
+    <!-- 三个 HUD 开关住在这里，id 与 js/main.js 的 dom 表一一对应：
+         requestFullscreen 绑的就是 #fullscreen，写成一个盘上不存在的 id 等于"全屏做了"是假的。 -->
+    <div class="row hud" role="group" aria-label="状态开关">
+      <button id="pause" type="button" aria-pressed="false">Pause</button>
+      <button id="mute" type="button" aria-pressed="false">Mute</button>
+      <button id="fullscreen" type="button">Fullscreen</button>
+    </div>
+    <p class="read clock" id="clock"></p>
+    <p class="read" id="status">开局之前没有读数。</p>
+    <p class="read" id="progress"></p>
+    <p class="read seedline">种子 <span id="seed"></span>｜第 <span id="attempt-n">0</span> 次尝试</p>
+    <p class="read totals" id="totals"></p>
+    <p class="read msg" id="msg" aria-live="polite"></p>
+    <details class="help">
+      <summary>键盘</summary>
+      <p>1 黑格笔、2 白点笔、U 撤销、H 提示、N 换一局、R 用同一颗种子重开这一盘（拿回的是同一张题面）、
+         E 清空当前笔所在格的落子。方向键移动焦点格，空格/回车在焦点格落子。<br>
+         P 暂停／继续：暂停时计时冻住、动效一步都不走，落子与提示会被挡下；
+         M 静音：音频上下文挂起，静音期间不再新建任何音节点；F 全屏。</p>
+    </details>
+  </section>
+</main>
+
+<footer>
+  <p class="quiet">引擎在 <code>js/engine/</code>：出货的每一盘都由穷举计数器数到「恰好一个解」，
+    再由五条局部规则零猜测推到底。出题跑在 <code>js/gen-worker.js</code> 这个 module worker 里——
+    硬骨档一次 attempt 的实测尾巴是 0.6～2.3 秒，主线程同步等就是把界面钉死。</p>
+</footer>
+
+<script src="js/haptics.js"></script>
+  <div class="studio-atmosphere" aria-hidden="true"></div>
+</body>
+</html>
