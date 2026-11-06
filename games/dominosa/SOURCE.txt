@@ -1,0 +1,12 @@
+Dominosa
+Source: https://github.com/z-biz-game/z-biz-game-nikoli-cos
+Revision: 353b9d769cf918bd70dd86c1635319676ba9e981
+License: MIT (see LICENSE)
+Retrieved: 2026-11-06
+
+Self-contained static runtime and local authored assets; tools, desktop files,
+asset-generation scripts, web-app manifests and service-worker installation omitted.
+Save/preference keys game-scoped; essential controls and English guide added.
+Other original Chinese interface and hint text retained; not a full translation.
+Single-game extraction: registry contains only Dominosa; other puzzle modules omitted.
+Subtract canvas padding when measuring available width/height so 8x9 boards fit narrow screens.

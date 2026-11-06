@@ -1,0 +1,197 @@
+/* 布局与配色。这里不写判据、不写数字：格子怎么画由 js/render/board.js 从引擎状态决定，
+   档位读数由 js/main.js 直接取 js/engine/tiers.js 的 TIERS_MEASURED。 */
+:root {
+  --bg: #0b0c10;
+  --panel: #14171f;
+  --panel-2: #1b1f29;
+  --line: #2a2f3d;
+  --fg: #e8ebf2;
+  --dim: #98a1b3;
+  --accent: #5ec8ff;
+  --balloon: #f2f4f7;
+  --ball: #4a5361;
+  --bad: #ff6b6b;
+  /* safe-area：viewport-fit=cover 已经在了，没有这几条 env() 就是"刘海把 HUD 吃掉"的另一种写法。
+     兜底 0px 写给不支持 env() 的老内核，不让 padding 变成非法值整条丢掉。 */
+  --safe-t: env(safe-area-inset-top, 0px);
+  --safe-r: env(safe-area-inset-right, 0px);
+  --safe-b: env(safe-area-inset-bottom, 0px);
+  --safe-l: env(safe-area-inset-left, 0px);
+}
+* { box-sizing: border-box; }
+/* display:grid 会盖掉 UA 的 [hidden]：藏起来这件事必须由这条规则作证，
+   而闸里量的是 getClientRects()，不是"我以为 hidden 就有效"。 */
+[hidden] { display: none !important; }
+body {
+  margin: 0; background: var(--bg); color: var(--fg);
+  font: 15px/1.6 -apple-system, "Hiragino Sans", "Noto Sans CJK SC", sans-serif;
+  /* 纸纹是 assets/gen/make_art.py 现画的无缝瓦片（64 周期噪声放大），不是外部素材 */
+  background-image: url("../assets/textures/paper-256.png");
+  background-size: 256px 256px;
+  background-attachment: fixed;
+}
+#app {
+  max-width: 1080px; margin: 0 auto;
+  padding: calc(16px + var(--safe-t)) calc(18px + var(--safe-r)) calc(28px + var(--safe-b)) calc(18px + var(--safe-l));
+}
+code { font-family: ui-monospace, "SF Mono", Menlo, monospace; font-size: .92em; color: var(--dim); }
+.topbar { display: flex; justify-content: space-between; align-items: flex-end; gap: 16px; flex-wrap: wrap; }
+.brand h1 { margin: 0; font-size: 30px; letter-spacing: .04em; }
+.brand .sub { margin: 2px 0 0; color: var(--dim); font-size: 13px; }
+.top-actions { display: flex; gap: 8px; }
+button {
+  font: inherit; color: var(--fg); background: var(--panel-2);
+  border: 1px solid var(--line); border-radius: 9px; padding: 8px 13px; cursor: pointer;
+  /* 44px 是 iOS HIG 的触摸下限，不是"看着够用"：拇指在 375pt 屏上点 36px 高的钮会连错。 */
+  min-height: 44px; min-width: 44px;
+  transition: border-color .12s ease, background-color .12s ease, transform .08s ease;
+}
+button:active { transform: translateY(1px); }
+button:hover { border-color: var(--accent); }
+button.primary { background: linear-gradient(180deg, #1c4f6b, #143a52); border-color: #2b7ba8; }
+button.ghost { background: transparent; }
+button.link { background: none; border: 0; color: var(--dim); text-decoration: underline; padding: 2px 6px; }
+.view { margin-top: 18px; }
+.menu-hero h2 { margin: 0 0 6px; font-size: 19px; }
+.menu-hero p { margin: 0; color: var(--dim); max-width: 74ch; }
+.menu-cols { display: grid; grid-template-columns: minmax(280px, 1fr) minmax(280px, 1fr); gap: 22px; margin-top: 20px; }
+@media (max-width: 860px) { .menu-cols { grid-template-columns: 1fr; } }
+.col-title { margin: 0 0 8px; font-size: 14px; color: var(--dim); font-weight: 600; letter-spacing: .04em; }
+.tiers { display: flex; flex-direction: column; gap: 8px; }
+.tier { display: grid; gap: 2px; text-align: left; }
+.tier-name { font-weight: 700; }
+.tier-note { color: var(--dim); font-size: 12.5px; }
+.tier-size { color: var(--accent); font-size: 12px; }
+.menu-disclose { color: var(--dim); font-size: 12.5px; border-left: 2px solid var(--line); padding-left: 10px; }
+.rules { margin: 0; padding-left: 18px; color: var(--dim); font-size: 13px; }
+.rules-note { color: var(--dim); font-size: 12.5px; }
+.stage-head { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; margin-bottom: 8px; }
+.puzzle-name { font-weight: 700; }
+.chip { border: 1px solid var(--line); border-radius: 999px; padding: 2px 10px; font-size: 12.5px; color: var(--dim); }
+.mono { font-family: ui-monospace, "SF Mono", Menlo, monospace; }
+#view-game { display: grid; grid-template-columns: minmax(280px, 1fr) 300px; gap: 20px; align-items: start; }
+@media (max-width: 860px) { #view-game { grid-template-columns: 1fr; } }
+#board-wrap { position: relative; display: inline-block; }
+#board { display: block; border-radius: 10px; outline: none; background: #10131a; }
+#board:focus { box-shadow: 0 0 0 2px var(--accent); }
+#win-veil {
+  position: absolute; inset: 0; display: grid; place-items: center;
+  background: rgba(8, 10, 14, .82); border-radius: 10px;
+}
+.win-card { text-align: center; padding: 14px; max-width: 92%; }
+.win-card h3 { margin: 0 0 6px; }
+.win-card p { margin: 2px 0; font-size: 13px; color: var(--dim); }
+.win-record { color: var(--accent); }
+.win-actions { display: flex; gap: 8px; justify-content: center; margin-top: 10px; }
+
+/* ---------- 两张 veil 卡片：教学盖整页，暂停贴在盘下面 ---------- */
+/* 教学页是整页对话框：玩法说明要盖住盘面，玩家不该一边看着盘一边被半张卡片压着。 */
+#help-veil {
+  position: fixed; inset: 0; z-index: 20; display: grid; place-items: center;
+  background: rgba(8, 10, 14, .82); padding: 18px;
+}
+#help-veil .veil-card { max-width: 640px; max-height: 86vh; overflow: auto; }
+/* 暂停**不遮盘**：盘面必须看得见、点得到 —— 暂停里点一下要有一句"被暂停挡住了"，
+   挡的方式是"退回 + 在状态行说清楚为什么"，不是把盘藏起来（藏起来就分不清"挡住"和"坏了"）。 */
+#pause-veil { display: block; margin-top: 8px; }
+.veil-card {
+  background: var(--panel); border: 1px solid var(--line); border-radius: 12px;
+  padding: 12px 14px; font-size: 13.5px;
+}
+.veil-card h3 { margin: 0 0 6px; font-size: 15px; }
+.veil-card p { margin: 4px 0; color: var(--dim); }
+.veil-card ol { margin: 6px 0; padding-left: 20px; color: var(--dim); }
+.veil-card li { margin: 2px 0; }
+.veil-actions { display: flex; gap: 8px; margin-top: 10px; }
+#pause-mark { margin: 0 0 2px; font-weight: 700; color: var(--accent); }
+.kbd {
+  font-family: ui-monospace, "SF Mono", Menlo, monospace; font-size: 12px;
+  border: 1px solid var(--line); border-radius: 5px; padding: 0 5px; color: var(--accent);
+}
+.conflict-line { min-height: 20px; margin: 8px 0 0; color: var(--bad); font-size: 13px; }
+.panel { display: grid; gap: 12px; background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 12px; }
+.digits { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; }
+.place { padding: 8px 4px; }
+.place[aria-pressed="true"] { border-color: var(--accent); background: #1d2b38; }
+.stats { display: grid; grid-template-columns: 1fr 1fr; gap: 4px 10px; font-size: 13px; }
+.stat { display: flex; justify-content: space-between; gap: 6px; border-bottom: 1px dashed var(--line); }
+.stat span { color: var(--dim); }
+.stat.bad b { color: var(--bad); }
+.legend { display: grid; gap: 3px; font-size: 12.5px; color: var(--dim); }
+.legend span { display: flex; align-items: center; gap: 7px; }
+.sw { width: 14px; height: 14px; border-radius: 4px; display: inline-block; border: 1px solid var(--line); }
+.sw-black { background: #05070b; }
+.sw-gray { background: #232837; }
+.sw-bal { background: var(--balloon); border-radius: 50%; }
+.sw-ball { background: var(--ball); border-radius: 50%; }
+.sw-mark { background: #1b1f29; }
+.keyhint { margin: 0; font-size: 12px; color: var(--dim); }
+.foot { margin-top: 22px; border-top: 1px solid var(--line); padding-top: 10px; display: flex; gap: 10px; justify-content: space-between; flex-wrap: wrap; font-size: 12.5px; color: var(--dim); }
+
+/* 中央分发：safe-area 兜底 */
+
+/* ---------- safe-area：刘海与主屏条不吃掉按钮（中央分发，akari-cos 同口径） ---------- */
+:root {
+  --sat: env(safe-area-inset-top, 0px);
+  --sar: env(safe-area-inset-right, 0px);
+  --sab: env(safe-area-inset-bottom, 0px);
+  --sal: env(safe-area-inset-left, 0px);
+}
+html, body {
+  padding-left: var(--sal);
+  padding-right: var(--sar);
+}
+body {
+  padding-top: var(--sat);
+  padding-bottom: var(--sab);
+  min-height: 100vh;
+  min-height: 100dvh;
+}
+/* 贴边的固定/吸底元素自己让开主屏条，别让 home indicator 压住按钮 */
+.fixed-bottom, .bottom-bar, .hud-bottom, footer.app-footer {
+  padding-bottom: calc(var(--sab) + env(safe-area-inset-bottom, 0px));
+}
+
+
+/* ============================================================
+   44px 触摸命中下限（Apple HIG 手机可用性底线）
+   每个真正可点的元素都要有 ≥44×44 CSS px 的命中盒。
+   min-height / min-width 是**硬下限**：只会把过小的盒子撑到 44px，
+   本来就够大的控件（宽药丸、整行列表项、大数字键）外形一点不变。
+
+   两处非平凡之处：
+   1) 需要 !important —— 各组件自己有 `.shelf button { min-width: 34px }`
+      这类更"贴身"的规则，类选择器的优先级高于任何标签堆叠，
+      不加的话这条底线会被组件规则逐个抵消。
+   2) 先把 --touch-min 定死：tapa / nurikabe 早就写了
+      `min-height: var(--touch-min)`，但全仓没有任何地方定义过这个变量，
+      无 fallback 的 var() 在计算值阶段整条作废 —— 那是个看着像 44px、
+      实际什么都不保证的死规则。这里补上定义，让它们原本的意图真正成立。
+   ============================================================ */
+:root { --touch-min: 44px; }
+button,
+select,
+input,
+textarea,
+a[href],
+[role="button"] {
+  min-height: 44px !important;
+  min-width: 44px !important;
+}
+
+/* ---------- 减弱动效（prefers-reduced-motion）---------- */
+/* 本仓当前**没有**可减的装饰性动效：board.draw() 的 pulse 形参默认值是 null，全仓没有任何调用方传过它，那处 strokeStyle 分支恒不成立（是死参数，不是动效）
+   剩下的 :hover 颜色瞬切与 focus 轮廓是状态反馈，不是动效，动了反而更难用。 */
+@media (prefers-reduced-motion: reduce) {
+  /* 当下这三条不命中任何东西；写在这里是为了将来有人加动画/过渡时自动被归零，
+     而不必再想起来补这一段。颜色、透明度、命中区、focus 轮廓一律不动。 */
+  *, *::before, *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+  }
+}
+
+/* Shared-site embedding and English guide. */
+.topbar,.top-actions{flex-wrap:wrap;min-width:0}
+.hosting-guide{display:inline-block;padding:8px 12px;background:#182c39;color:#bde6ff;border-radius:6px;font:14px/1.5 system-ui,sans-serif;letter-spacing:normal}

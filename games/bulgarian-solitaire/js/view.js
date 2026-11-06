@@ -1,0 +1,591 @@
+// Canvas renderer + pointer handling. This file owns pixels and gestures and decides
+// nothing about the rules: on release it hands js/main.js the operation the finger asked
+// for ({deal} / {merge a,b} / {split i,j}), and js/core/solve.js is the only thing that can
+// say yes or no. A pile can therefore be highlighted wrong for a frame; it can never be
+// moved illegally.
+//
+// Textures are an enhancement, never a dependency: assets/art/*.png are loaded through
+// loadTextures() and every draw call checks for the pattern first, so a missing file (or
+// file://, or a device with no network) still gets the full procedural table. Animation is
+// integrated from the frame delta — nothing here reads a wall clock, so a 30Hz and a 144Hz
+// device show the same phase at the same virtual second.
+
+export const TEXTURES = {
+  felt: 'assets/art/felt-256.png',
+  card: 'assets/art/cardback-128.png',
+  glow: 'assets/art/glow-256.png',
+};
+
+// 一张都不落地也不抛：返回的 map 里只有成功的那些键。
+export function loadTextures(src = TEXTURES) {
+  const loaded = {};
+  if (typeof Image !== 'function') return Promise.resolve(loaded);
+  return Promise.all(Object.keys(src).map((key) => new Promise((done) => {
+    const img = new Image();
+    img.onload = () => {
+      if (img.naturalWidth || img.width) loaded[key] = img;
+      done();
+    };
+    img.onerror = () => done();
+    img.src = src[key];
+  }))).then(() => loaded);
+}
+
+const PAD = 16;
+const DECK = 0.78; // deck block width, in card widths
+const STRIP = 46; // the target row across the top
+const CARD = ['#2f4b63', '#6b4046', '#3f6046', '#6d5a34', '#4a3f68', '#2f5f5c', '#63493a', '#3d4a63',
+  '#5c4055', '#47563f', '#6a5560', '#3a5560'];
+const BG = '#14161a';
+const FELT = '#1b1f26';
+const EDGE = 'rgba(226, 232, 240, 0.10)';
+const GOLD = '#e0a63c';
+const GLOW = 'rgba(224, 166, 60, 0.6)';
+
+function roundRect(ctx, x, y, w, h, r) {
+  const rr = Math.max(0, Math.min(r, w / 2, h / 2));
+  ctx.beginPath();
+  ctx.moveTo(x + rr, y);
+  ctx.arcTo(x + w, y, x + w, y + h, rr);
+  ctx.arcTo(x + w, y + h, x, y + h, rr);
+  ctx.arcTo(x, y + h, x, y, rr);
+  ctx.arcTo(x, y, x + w, y, rr);
+  ctx.closePath();
+}
+
+export function createView(canvas, { onAction, onPick } = {}) {
+  const ctx = canvas.getContext('2d');
+  let game = null;
+  let target = [];
+  let geom = null;
+  let drag = null; // { i, j, from, along, split }
+  let flash = null; // { kind, left } — a refusal or a landed deal, counted down in seconds
+  let hintAt = null; // { i, j, left }
+  let raf = 0;
+
+  let last = 0;
+  let animClock = 0;   // 虚拟秒：只有它前进，画面才动；暂停时冻住
+  let hintLeft = 0;
+  let flashLeft = 0;
+  let paused = false;
+  let dirty = false;
+
+  // ---- 减弱动效（prefers-reduced-motion）----
+  // 一枚开关，两处读它：呼吸光环的相位（animClock 那一支）与光晕/阴影抬升。
+  // 初值直接读系统设置（media.matches），不是 false —— 玩家系统里开着减弱动效时，
+  // 第一帧就不该闪一下再停下来。
+  //
+  // 被指出的那张牌的描边环按 t = (animClock % 0.9) / 0.9 变粗变淡，是纯装饰；
+  // 减弱动效下把 t 钉在 0.3：环照画、牌照指，只停相位。
+  // 用 animClock（虚拟秒）而不是 performance.now（墙钟）：暂停时虚拟秒冻住，
+  // 环也跟着停；墙钟不冻，按住暂停键看环还在呼吸，是"暂停"这个词在骗人。
+  const media = typeof matchMedia === 'function' ? matchMedia('(prefers-reduced-motion: reduce)') : null;
+  let reduceMotion = !!(media && media.matches);
+  const tex = { felt: null, card: null, glow: null };
+  const pat = { felt: null, card: null };
+
+  function setTextures(next) {
+    for (const k of Object.keys(tex)) {
+      if (next && next[k]) {
+        tex[k] = next[k];
+        if (k !== 'glow' && ctx.createPattern) pat[k] = ctx.createPattern(next[k], 'repeat');
+      }
+    }
+    draw();
+    return Object.keys(tex).filter((k) => !!tex[k]);
+  }
+
+  // ---- geometry --------------------------------------------------------------------
+  // 一列牌堆的拇指命中宽度下限：44px 是 Apple HIG / WCAG 2.5.5 同一条，不是装饰。
+  // 窄屏上原本算得出 15.6px 的列（master-07 在 343px 下 19 堆），点歪一格就并错堆，
+  // 所以放不下就换行——行数是堆数的函数，几何每次 measure() 重算。
+  const MIN_TOUCH = 44;
+  const ROW_GAP = 12;
+
+  function measure() {
+    const box = canvas.getBoundingClientRect();
+    const dpr = Math.max(1, Math.min(3, window.devicePixelRatio || 1));
+    const W = Math.max(240, Math.round(box.width));
+    const H = Math.max(240, Math.round(box.height));
+    canvas.width = Math.round(W * dpr);
+    canvas.height = Math.round(H * dpr);
+    ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+    if (!game) { geom = null; return; }
+    const piles = game.piles;
+    const usable = W - PAD * 2;
+    // 一排摆几列：既不能超过堆数+牌库，也不能让列宽掉到 44px 以下（最少仍留 4 列，
+    // 否则单垛关卡在宽屏上会把一张牌放大到半块画布 —— 那是换行前就有的下限）。
+    const columns = Math.max(4, Math.min(Math.floor(usable / MIN_TOUCH), piles.length + 1));
+    const rows = [];
+    let next = 1;  // 第一行的第 0 列是牌库
+    for (let i = 0; i < piles.length; i++) {
+      if (!rows.length || next >= columns) {
+        rows.push({ cells: [], tallest: 1 });
+        next = rows.length === 1 ? 1 : 0;
+      }
+      const row = rows[rows.length - 1];
+      row.cells.push(i);
+      row.tallest = Math.max(row.tallest, piles[i]);
+      next += 1;
+    }
+    if (!rows.length) rows.push({ cells: [], tallest: 1 });
+    // 单行时 tallest 与换行前完全一致（含 target 的最高垛），保证宽屏画面一个像素都不动。
+    if (rows.length === 1) rows[0].tallest = Math.max(...piles, ...target, 1);
+    const slot = usable / columns;
+    const cardW = Math.max(22, Math.floor(Math.min(slot * 0.82, (H - STRIP - PAD * 2) / (rows.length * 1.4))));
+    const cardH = Math.round(cardW * 1.38);
+    const ox = Math.round(PAD + slot * DECK + (slot - cardW) / 2);
+    const oy = STRIP + PAD;
+    const rowBudget = (H - oy - PAD - (rows.length - 1) * ROW_GAP) / rows.length;
+    rows.forEach((row, r) => {
+      const room = Math.max(cardH + 4, rowBudget - cardH);
+      row.oy = oy + r * (rowBudget + ROW_GAP);
+      // 第 0 行的原点就是历史 ox（含牌库那一列）；换行之后的行没有牌库，从左边距起排。
+      row.x0 = r === 0 ? ox : Math.round(PAD + (slot - cardW) / 2);
+      row.step = Math.max(6, Math.min(Math.round(cardH * 0.42), Math.floor(room / Math.max(1, row.tallest - 1))));
+    });
+    const rowOf = [];
+    const colOf = [];
+    rows.forEach((row, r) => row.cells.forEach((i, c) => { rowOf[i] = r; colOf[i] = c; }));
+    geom = {
+      W, H, slot, cardW, cardH, ox, oy, step: rows[0].step,
+      deckX: Math.round(PAD + (slot * DECK - cardW) / 2),
+      deckW: cardW,
+      deckY: oy,
+      count: piles.length,
+      columns, rows, rowOf, colOf,
+      piles,
+    };
+    draw();
+  }
+
+  // 某一堆落在哪一行：换行之后每行有自己的顶点与露出带高度。
+  function rowMeta(i) {
+    return geom.rows[geom.rowOf[i]];
+  }
+
+  function localPoint(ev) {
+    const box = canvas.getBoundingClientRect();
+    return { x: ev.clientX - box.left, y: ev.clientY - box.top };
+  }
+
+  // Client-space pixels for a pile/card/deck — the same mapping the hit test reads, run
+  // backwards, so an automated finger presses what a player would aim at.
+  function toClient(x, y) {
+    const box = canvas.getBoundingClientRect();
+    return { x: Math.round(box.left + x), y: Math.round(box.top + y) };
+  }
+
+  function cardTop(i, j) {
+    const row = rowMeta(i);
+    return row.oy + j * row.step;
+  }
+
+  // The centre of the part of card j that is actually visible: cards overlap by design, so a
+  // finger can only land on the exposed band (plus the whole of the last card). `hit()` maps
+  // a point to a band and `cardPoint()` returns that band's centre — if those two ever
+  // disagree, a split drag lands on the wrong card.
+  function cardMid(i, j) {
+    const row = rowMeta(i);
+    const size = game.piles[i];
+    return j < size - 1 ? cardTop(i, j) + row.step / 2 : cardTop(i, size - 1) + geom.cardH / 2;
+  }
+
+  function pileX(i) {
+    return rowMeta(i).x0 + geom.colOf[i] * geom.slot;
+  }
+
+  // Which pile/card a point is over. The topmost card wins on the overlap, and a pile's
+  // exposed sliver counts as its own card.
+  function hit(p) {
+    if (!geom || !game) return null;
+    if (p.x >= geom.deckX && p.x <= geom.deckX + geom.deckW
+      && p.y >= geom.deckY && p.y <= geom.deckY + geom.cardH) return { deck: true };
+    for (const row of geom.rows) {
+      const c = Math.floor((p.x - row.x0 + (geom.slot - geom.cardW) / 2) / geom.slot);
+      if (c < 0) continue;
+      const i = row.cells[c];
+      if (i === undefined) continue;
+      const size = game.piles[i];
+      const bottom = cardTop(i, size - 1) + geom.cardH;
+      if (p.y < row.oy || p.y > bottom) continue;
+      let j = Math.floor((p.y - row.oy) / row.step);
+      j = Math.max(0, Math.min(size - 1, j));
+      return { i, j, size };
+    }
+    return null;
+  }
+
+  // ---- input -----------------------------------------------------------------------
+  function down(ev) {
+    if (!game || game.done || paused) return;
+    const p = localPoint(ev);
+    const h = hit(p);
+    if (!h) return;
+    if (h.deck) {
+      drag = { deck: true, from: p };
+      ev.preventDefault();
+      return;
+    }
+    drag = { i: h.i, j: h.j, grab: h.j, size: h.size, from: p, along: 0, split: 0 };
+    if (canvas.setPointerCapture) {
+      try { canvas.setPointerCapture(ev.pointerId); } catch { /* capture is a nicety */ }
+    }
+    ev.preventDefault();
+    draw();
+  }
+
+  function move(ev) {
+    if (!drag || drag.deck || paused) return;
+    const p = localPoint(ev);
+    drag.along = p.y - drag.from.y;
+    // Cosmetic only: the cut is the card the finger grabbed, and grabbing the top card
+    // would carve off nothing. js/core/solve.js applies the real rule.
+    drag.split = drag.along > Math.max(6, rowMeta(drag.i).step * 0.5) && drag.grab >= 1 ? drag.grab : 0;
+    ev.preventDefault();
+  }
+
+  function up(ev) {
+    if (!drag) return;
+    const d = drag;
+    drag = null;
+    if (ev) ev.preventDefault();
+    if (paused) { draw(); return; }   // 中途被暂停：这次拖动作废，不提交任何动作
+    if (d.deck) {
+      if (onAction) onAction({ kind: 'deal' });
+      return;
+    }
+    if (d.split >= 1 && onAction) {
+      onAction({ kind: 'split', i: d.i, j: d.split });
+      return;
+    }
+    if (onPick) onPick(d.i);
+  }
+
+  // ---- drawing ---------------------------------------------------------------------
+  function drawCard(x, y, w, h, i, lifted) {
+    ctx.save();
+    ctx.shadowColor = 'rgba(0,0,0,0.45)';
+    ctx.shadowBlur = lifted ? (reduceMotion ? 8 : 14) : 5;
+    ctx.shadowOffsetY = lifted ? 6 : 2;
+    ctx.fillStyle = CARD[i % CARD.length];
+    roundRect(ctx, x, y, w, h, Math.round(w * 0.14));
+    ctx.fill();
+    ctx.restore();
+    // 牌背纹理：裁进圆角里叠一层，读不到图就整段跳过（画面退回纯程序化）。
+    if (pat.card) {
+      ctx.save();
+      roundRect(ctx, x, y, w, h, Math.round(w * 0.14));
+      ctx.clip();
+      ctx.globalAlpha = 0.34;
+      ctx.fillStyle = pat.card;
+      ctx.fillRect(x, y, w, h);
+      ctx.restore();
+    }
+    ctx.fillStyle = 'rgba(240, 244, 250, 0.10)';
+    roundRect(ctx, x + 3, y + 3, w - 6, h - 6, Math.round(w * 0.11));
+    ctx.fill();
+    ctx.strokeStyle = 'rgba(12, 16, 22, 0.55)';
+    ctx.lineWidth = 1;
+    roundRect(ctx, x + 0.5, y + 0.5, w - 1, h - 1, Math.round(w * 0.14));
+    ctx.stroke();
+  }
+
+  function drawTargetStrip() {
+    const { W, cardW } = geom;
+    const scale = Math.min(0.5, (W - PAD * 2) / (cardW * (target.reduce((a, b) => a + b, 0) + target.length)));
+    const w = Math.max(8, Math.round(cardW * scale));
+    const h = Math.round(w * 1.38);
+    ctx.fillStyle = EDGE;
+    ctx.fillRect(PAD, 6, W - PAD * 2, STRIP - 12);
+    ctx.font = `${Math.max(10, Math.round(h * 0.5))}px ui-sans-serif, system-ui, sans-serif`;
+    ctx.textBaseline = 'middle';
+    ctx.fillStyle = 'rgba(226, 232, 240, 0.75)';
+    ctx.fillText('目标', PAD + 6, 6 + (STRIP - 12) / 2);
+    let x = PAD + 6 + ctx.measureText('目标').width + 10;
+    for (const size of target) {
+      for (let j = 0; j < size; j++) {
+        const y = Math.max(6, STRIP - 8 - h - (size - 1 - j) * Math.max(2, h * 0.16));
+        ctx.fillStyle = 'rgba(226, 232, 240, 0.22)';
+        roundRect(ctx, x, y, w, h, 3);
+        ctx.fill();
+      }
+      ctx.fillStyle = 'rgba(226, 232, 240, 0.7)';
+      ctx.fillText(String(size), x, STRIP - 10);
+      x += w + 6;
+    }
+    ctx.fillStyle = 'rgba(226, 232, 240, 0.55)';
+    ctx.textAlign = 'right';
+    ctx.fillText(`${game.n} 张 · par ${game.lot.par} · 只发牌 ${game.lot.steps}`, W - PAD - 6, STRIP / 2);
+    ctx.textAlign = 'left';
+  }
+
+  function drawDeck() {
+    const { deckX, deckY, deckW, cardH } = geom;
+    const grabbed = drag && drag.deck;
+    if (tex.glow) {
+      ctx.save();
+      ctx.globalAlpha = grabbed && !reduceMotion ? 0.6 : 0.32;
+      ctx.drawImage(tex.glow, deckX - deckW * 0.55, deckY - cardH * 0.34, deckW * 2.1, cardH * 1.7);
+      ctx.restore();
+    }
+    ctx.save();
+    ctx.shadowColor = 'rgba(0,0,0,0.5)';
+    ctx.shadowBlur = grabbed ? 16 : 6;
+    ctx.shadowOffsetY = grabbed ? 7 : 3;
+    ctx.fillStyle = grabbed ? '#2a4a5e' : '#204153';
+    roundRect(ctx, deckX, deckY + (grabbed ? -3 : 0), deckW, cardH, Math.round(deckW * 0.14));
+    ctx.fill();
+    ctx.restore();
+    ctx.strokeStyle = GLOW;
+    ctx.lineWidth = 2;
+    roundRect(ctx, deckX + 0.5, deckY + (grabbed ? -3 : 0) + 0.5, deckW - 1, cardH - 1, Math.round(deckW * 0.14));
+    ctx.stroke();
+    ctx.fillStyle = 'rgba(240, 244, 250, 0.9)';
+    ctx.font = `${Math.max(11, Math.round(cardH * 0.2))}px ui-sans-serif, system-ui, sans-serif`;
+    ctx.textAlign = 'center';
+    ctx.fillText('发牌', deckX + deckW / 2, deckY + cardH * 0.42);
+    ctx.font = `${Math.max(10, Math.round(cardH * 0.16))}px ui-sans-serif, system-ui, sans-serif`;
+    ctx.fillStyle = 'rgba(226, 232, 240, 0.6)';
+    ctx.fillText(`已发 ${game.deals}`, deckX + deckW / 2, deckY + cardH * 0.72);
+    ctx.textAlign = 'left';
+  }
+
+  function drawPile(i, size) {
+    const { cardW, cardH } = geom;
+    const row = rowMeta(i);
+    const step = row.step;
+    const x = pileX(i);
+    const selected = game.selected === i;
+    const hinted = !!hintAt && hintAt.i === i && hintLeft > 0;
+    const dragging = drag && drag.i === i && drag.split >= 1;
+    const cut = dragging ? drag.split : -1;
+    for (let j = 0; j < size; j++) {
+      const y = cardTop(i, j) + (cut >= 0 && j >= cut ? Math.min(18, drag.along * 0.35) : 0);
+      drawCard(x, y, cardW, cardH, i, selected || (hinted || false) || (cut >= 0 && j === cut));
+      if (j === size - 1) {
+        ctx.fillStyle = 'rgba(240, 244, 250, 0.92)';
+        ctx.font = `${Math.max(11, Math.round(cardW * 0.42))}px ui-sans-serif, system-ui, sans-serif`;
+        ctx.textAlign = 'center';
+        ctx.fillText(String(size), x + cardW / 2, y + cardH * 0.55);
+        ctx.textAlign = 'left';
+      }
+    }
+    if (selected) {
+      ctx.strokeStyle = GOLD;
+      ctx.lineWidth = 2.5;
+      roundRect(ctx, x - 3, row.oy - 3, cardW + 6, (size - 1) * step + cardH + 6, Math.round(cardW * 0.16));
+      ctx.stroke();
+    }
+    if (hinted) {
+      const t = reduceMotion ? 0.3 : (animClock % 0.9) / 0.9;
+      ctx.strokeStyle = `rgba(120, 220, 255, ${(0.85 - t * 0.5).toFixed(3)})`;
+      ctx.lineWidth = 2 + t * 4;
+      roundRect(ctx, x - 4 - t * 5, row.oy - 4 - t * 5, cardW + 8 + t * 10, (size - 1) * step + cardH + 8 + t * 10, Math.round(cardW * 0.18));
+      ctx.stroke();
+    }
+    if (cut >= 0) {
+      // The cut line: where the pile would separate if the finger let go here.
+      const y = cardTop(i, cut) - Math.max(3, step * 0.35) + Math.min(18, drag.along * 0.35);
+      ctx.strokeStyle = GLOW;
+      ctx.setLineDash([5, 4]);
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.moveTo(x - 4, y);
+      ctx.lineTo(x + cardW + 4, y);
+      ctx.stroke();
+      ctx.setLineDash([]);
+    }
+  }
+
+  function draw() {
+    if (!geom) return;
+    // 几何跟着状态走：拆/并堆改变牌堆数，而 js/main.js 的 commit() 只 redraw()。不重 measure
+    // 就会把新增的整堆画到画布外（实测 900px 宽下第 6 堆中心 x=1379，越界 479px，手指也点不到）。
+    if (game && game.piles.length !== geom.count) { measure(); return; }
+    const { W, H } = geom;
+    ctx.clearRect(0, 0, W, H);
+    ctx.fillStyle = BG;
+    ctx.fillRect(0, 0, W, H);
+    if (!game) return;
+    ctx.fillStyle = FELT;
+    roundRect(ctx, 6, STRIP - 6, W - 12, H - STRIP, 12);
+    ctx.fill();
+    if (pat.felt) {
+      ctx.save();
+      roundRect(ctx, 6, STRIP - 6, W - 12, H - STRIP, 12);
+      ctx.clip();
+      ctx.globalAlpha = 0.55;
+      ctx.fillStyle = pat.felt;
+      ctx.fillRect(0, 0, W, H);
+      ctx.restore();
+    }
+    drawTargetStrip();
+    drawDeck();
+    for (let i = 0; i < game.piles.length; i++) drawPile(i, game.piles[i]);
+    if (game.done) {
+      if (tex.glow) {
+        ctx.save();
+        ctx.globalAlpha = 0.5;
+        ctx.drawImage(tex.glow, 6, STRIP - 6, W - 12, H - STRIP + 6);
+        ctx.restore();
+      }
+      ctx.fillStyle = 'rgba(224, 166, 60, 0.16)';
+      roundRect(ctx, 6, STRIP - 6, W - 12, H - STRIP, 12);
+      ctx.fill();
+      ctx.fillStyle = GOLD;
+      ctx.font = `${Math.max(14, Math.round(geom.cardW * 0.5))}px ui-sans-serif, system-ui, sans-serif`;
+      ctx.textAlign = 'center';
+      ctx.fillText('阶梯已成', W / 2, H - 22);
+      ctx.textAlign = 'left';
+    }
+    if (flash && flashLeft > 0) {
+      ctx.fillStyle = 'rgba(255, 120, 120, 0.9)';
+      ctx.font = '13px ui-sans-serif, system-ui, sans-serif';
+      ctx.fillText(flash.kind, PAD, H - 12);
+    }
+    if (paused) {
+      ctx.fillStyle = 'rgba(10, 12, 16, 0.55)';
+      roundRect(ctx, 6, STRIP - 6, W - 12, H - STRIP, 12);
+      ctx.fill();
+      ctx.fillStyle = GOLD;
+      ctx.font = `${Math.max(16, Math.round(geom.cardW * 0.6))}px ui-sans-serif, system-ui, sans-serif`;
+      ctx.textAlign = 'center';
+      ctx.fillText('已暂停', W / 2, H / 2);
+      ctx.textAlign = 'left';
+    }
+  }
+
+  // dt 是唯一的时间来源：位移、倒计时、相位全部按秒累加，30Hz 与 144Hz 在同一虚拟秒
+  // 上画出同一个相位。暂停时整个累加器冻住，恢复后不跳步。
+  function frame(now) {
+    raf = requestAnimationFrame(frame);
+    const dt = Math.min(0.064, (now - (last || now)) / 1000);
+    last = now;
+    if (paused) return;
+    animClock += dt;
+    if (hintLeft > 0) hintLeft = Math.max(0, hintLeft - dt);
+    if (flashLeft > 0) {
+      flashLeft = Math.max(0, flashLeft - dt);
+      if (!flashLeft) flash = null;
+    }
+    if (drag || hintLeft > 0 || flashLeft > 0 || dirty) {
+      dirty = false;
+      draw();
+    }
+  }
+
+  canvas.addEventListener('pointerdown', down);
+  canvas.addEventListener('pointermove', move);
+  canvas.addEventListener('pointerup', up);
+  canvas.addEventListener('pointercancel', up);
+
+  // pointer 优先；没有 PointerEvent 的引擎（老 WebKit、部分桌面浏览器）必须还能玩，
+  // 所以 touch/mouse 落到同一组 down/move/up —— 命中换算与合法性检查不存在第二条路。
+  // 支持 pointer 时整段不绑：否则一次触摸会同时来 pointerdown 与 touchstart，点一下并两次。
+  if (!('PointerEvent' in window)) {
+    const wrap = (src, native, id) => ({
+      clientX: src.clientX, clientY: src.clientY, pointerId: id,
+      preventDefault: () => { if (typeof native.preventDefault === 'function') native.preventDefault(); },
+    });
+    const one = (native) => (native.touches && native.touches[0]) || (native.changedTouches && native.changedTouches[0]);
+    const viaTouch = (pick) => (native) => {
+      const t = one(native);
+      if (t) pick(wrap(t, native, 'touch'));
+    };
+    const touchStart = viaTouch(down);
+    const touchMove = viaTouch(move);
+    const touchEnd = viaTouch(up);
+    canvas.addEventListener('touchstart', touchStart, { passive: false });
+    canvas.addEventListener('touchmove', touchMove, { passive: false });
+    canvas.addEventListener('touchend', touchEnd, { passive: false });
+    canvas.addEventListener('touchcancel', touchEnd, { passive: false });
+    canvas.addEventListener('mousedown', (ev) => down(wrap(ev, ev, 'mouse')));
+    canvas.addEventListener('mousemove', (ev) => move(wrap(ev, ev, 'mouse')));
+    canvas.addEventListener('mouseup', (ev) => up(wrap(ev, ev, 'mouse')));
+  }
+
+  return {
+    attach(next) {
+      game = next;
+      target = next && next.target ? next.target.slice() : [];
+      drag = null;
+      hintAt = null;
+      hintLeft = 0;
+      flash = null;
+      flashLeft = 0;
+      animClock = 0;
+      last = 0;
+      measure();
+    },
+    // The gate the runtime pref flip lands on: idempotent, and repaints so a player who
+    // toggles the OS switch sees the ring settle on the same frame, not at the next hint.
+    // 幂等：同一个值再来一次就直接返回，不重画（重画会把 hintLeft 这类倒计时也推一帧）。
+    // 变了就重画：开关来回拨时环的相位要立刻换边，而不是等下一帧。
+    setReducedMotion(on) {
+      const v = !!on;
+      if (v === reduceMotion) return reduceMotion;
+      reduceMotion = v;
+      dirty = true;
+      draw();
+      return reduceMotion;
+    },
+    isReducedMotion: () => reduceMotion,
+    measure,
+    redraw: draw,
+    geometry() { return geom ? { slot: geom.slot, cardW: geom.cardW, cardH: geom.cardH, step: geom.step, ox: geom.ox, oy: geom.oy, W: geom.W, H: geom.H, count: geom.count, columns: geom.columns, rows: geom.rows.length } : null; },
+    // Client-space centre of pile i, and of card j inside it: what an automated finger needs.
+    pilePoint(i) {
+      if (!geom || !game || i < 0 || i >= game.piles.length) return null;
+      const size = game.piles[i];
+      return {
+        ...toClient(pileX(i) + geom.cardW / 2, cardTop(i, size - 1) + geom.cardH / 2),
+        cell: geom.cardW, size, step: rowMeta(i).step,
+      };
+    },
+    cardPoint(i, j) {
+      if (!geom || !game || i < 0 || i >= game.piles.length) return null;
+      const jj = Math.max(0, Math.min(game.piles[i] - 1, j));
+      return {
+        ...toClient(pileX(i) + geom.cardW / 2, cardMid(i, jj)),
+        cell: geom.cardW, j: jj, size: game.piles[i], step: rowMeta(i).step,
+      };
+    },
+    deckPoint() {
+      if (!geom) return null;
+      return { ...toClient(geom.deckX + geom.deckW / 2, geom.deckY + geom.cardH / 2), cell: geom.deckW };
+    },
+    showHint(action) {
+      if (!action) return;
+      if (action.kind === 'split') hintAt = { i: action.i, j: action.j };
+      else if (action.kind === 'merge') hintAt = { i: action.a, j: action.b };
+      else hintAt = { i: -1, j: -1 };
+      hintLeft = 2.4;
+      dirty = true;
+      draw();
+    },
+    flash(reason) {
+      flash = { kind: reason || '不合法' };
+      flashLeft = 1.6;
+      dirty = true;
+      draw();
+    },
+    setTextures,
+    setPaused(on) {
+      paused = !!on;
+      if (paused) drag = null;
+      else last = 0;          // 恢复时不吃掉暂停期间的整段墙钟
+      dirty = true;
+      draw();
+      return paused;
+    },
+    // 对拍要读的就是这几个数：全部由 dt 积分而来，帧率换了它们也必须落在同一个虚拟秒上。
+    clock() {
+      return { animClock, hintLeft, flashLeft, paused, reduceMotion, dirty };
+    },
+    start() {
+      if (!raf) { last = 0; raf = requestAnimationFrame(frame); }
+    },
+    stop() { cancelAnimationFrame(raf); raf = 0; },
+  };
+}

@@ -1,0 +1,15 @@
+{
+  "name": "Dosun-Fuwari",
+  "desc": "Place one balloon and one iron ball per region, obeying upward and downward support rules. English help included; original interface partly Chinese.",
+  "controls": "Mouse / touch; see the linked English rules and controls guide.",
+  "shelf": "Puzzle & Logic",
+  "tags": [
+    "games",
+    "html5",
+    "puzzle",
+    "logic",
+    "dosun-fuwari"
+  ],
+  "badge": "New",
+  "creator": "z-biz-game"
+}

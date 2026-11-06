@@ -1,0 +1,450 @@
+/* 颜色、间距、时长全部来自 js/theme.js，经 applyThemeVars() 落成自定义属性；这里除了几何
+   没有第二个色值字面量。这就是让 canvas 和样式表不至于长成两个不同游戏的办法。 */
+
+/* [hidden] 必须带着 !important 站在这条规则的最前面：#win-veil 平时是 display:grid，
+   按层叠顺序它会盖掉 UA 的 [hidden]{display:none}，于是那块「藏起来」的胜利卡片还在画、
+   还在吃点击。工具链里所有隐藏层都靠这一条兜底，场景量的是矩形而不是属性。 */
+[hidden] { display: none !important; }
+
+* { box-sizing: border-box; }
+
+html, body {
+  margin: 0;
+  min-height: 100%;
+  /* 纸纹走在 CSS 层，不在 canvas 层：assets/gen/make_art.mjs 产的 256² 可平铺噪声，
+     alpha 只有 0.09，所以它是「摸得出纸」的那一层，而不是把盘面像素搅浑的那一层——
+     render 场景的 histogram() 取样仍然只属于引擎自己画的东西。
+     路径必须是相对的：Pages 把这棵树挂在 /<仓库名>/ 下，写死 /assets/… 就是一条 404，
+     而且浏览器不会为一张缺了背景图的盒子报任何错。 */
+  background-image: url(../assets/textures/paper-256.png),
+    linear-gradient(180deg, var(--bg-top) 0%, var(--bg-bottom) 62%, var(--surface) 100%);
+  background-size: 256px 256px, auto;
+  background-repeat: repeat, no-repeat;
+  background-attachment: scroll, fixed;
+  color: var(--ink);
+  font-family: var(--font-sans);
+  -webkit-font-smoothing: antialiased;
+}
+
+body { touch-action: manipulation; }
+
+#app {
+  max-width: 1120px;
+  margin: 0 auto;
+  /* 四条边各加各的 inset，不是「padding: var(--space-page)」一句了事：viewport-fit=cover
+     已经声明了页面要铺到刘海与 home indicator 底下，那么不补这笔账就是把第一个控件塞进
+     刘海里。bottom 单独一条，因为它的地基是 --space-inner 而不是 --space-page。 */
+  padding: var(--space-page) var(--space-page) var(--space-inner);
+  padding:
+    calc(var(--space-page) + env(safe-area-inset-top, 0px))
+    calc(var(--space-page) + env(safe-area-inset-right, 0px))
+    calc(var(--space-inner) + env(safe-area-inset-bottom, 0px))
+    calc(var(--space-page) + env(safe-area-inset-left, 0px));
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-card);
+  min-height: 100vh;
+}
+
+.mono { font-family: var(--font-mono); font-variant-numeric: tabular-nums; }
+
+/* 只给读屏器看：不能 display:none（那等于从可访问树里删掉）。 */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* ---------- top bar ---------- */
+
+.topbar {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: var(--space-card);
+}
+
+.brand h1 {
+  margin: 0;
+  font: 700 30px/1.1 var(--font-sans);
+  letter-spacing: 0.18em;
+}
+
+.brand .sub {
+  margin: 4px 0 0;
+  color: var(--ink-dim);
+  font-size: 12px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+}
+
+/* 顶栏现在有四个控件（暂停/音效/全屏/动效），不 wrap 就是 390px 上溢出——移动那条腿量的就是
+   「每个控件都在视口里」，溢出会一次性红四条，而根因只是一行 flex-wrap。 */
+.top-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: var(--space-gutter);
+}
+
+/* 笔与 HUD 的小图：48px 的精灵缩到 20 CSS px（dpr 3 下取的是 60 设备像素，仍是降采样，
+   不会糊成马赛克）。alt="" 是刻意的——文字标签已经在旁边，图再读一遍就是噪音。 */
+.ic {
+  width: 20px;
+  height: 20px;
+  flex: none;
+  margin-right: 6px;
+}
+
+button.mode { display: flex; align-items: center; justify-content: center; }
+
+/* 拇指的下限：44×44 CSS px（WCAG 2.5.5 / iOS HIG）。刻意落在元素级、不是一个 .touch 类：
+   靠类的话「新加一个按钮忘了挂类」就是一次静默的回归，而这条 floor 让漏尺寸不可能发生。
+   文字位置仍由各自的 padding 决定——floor 只保证命中区，不改变视觉密度。 */
+button,
+select {
+  min-height: 44px;
+  min-width: 44px;
+}
+
+button {
+  font: inherit;
+  color: inherit;
+  cursor: pointer;
+  border-radius: var(--radius-button);
+  border: 1px solid var(--line);
+  background: var(--surface);
+  padding: 10px 14px;
+  transition: background var(--dur-tap) var(--ease-ease), border-color var(--dur-tap) var(--ease-ease), transform var(--dur-tap) var(--ease-spring);
+}
+
+button:active { transform: translateY(1px); }
+button:focus-visible { outline: 2px solid var(--info); outline-offset: 2px; }
+button.ghost:hover { border-color: var(--line-heavy); background: var(--surface-lift); }
+
+button.primary {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: #14100a;
+  font-weight: 600;
+}
+button.primary:hover { background: var(--accent-edge); }
+button.primary[disabled] { opacity: 0.55; cursor: progress; }
+
+button.mode[aria-pressed='true'] {
+  border-color: var(--accent);
+  background: var(--accent-soft);
+  color: var(--accent-edge);
+}
+
+button.link {
+  background: none;
+  border: 0;
+  padding: 0;
+  color: var(--ink-dim);
+  text-decoration: underline;
+  font-size: 12px;
+}
+
+select {
+  font: inherit;
+  color: inherit;
+  background: var(--surface-lift);
+  border: 1px solid var(--line-heavy);
+  border-radius: var(--radius-chip);
+  /* 表单控件是 UA 样式最容易吃掉 min-height 的地方，所以这里让 padding 自己的账就够高：
+     12 + 12 + 行高 ≈ 44，再叠上那条 floor 只是第二道保险，不是唯一依据。 */
+  padding: 12px 10px;
+}
+
+/* ---------- layout ---------- */
+
+.view {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 340px;
+  gap: var(--space-card);
+  align-items: start;
+}
+
+@media (max-width: 860px) {
+  .view { grid-template-columns: minmax(0, 1fr); }
+}
+
+.stage {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-inner);
+  min-width: 0;
+}
+
+.stage-head { display: flex; flex-wrap: wrap; gap: var(--space-gutter); align-items: center; }
+
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 5px 10px;
+  border: 1px solid var(--line);
+  border-radius: var(--radius-chip);
+  background: var(--surface);
+  color: var(--ink-dim);
+  font-size: 12px;
+  letter-spacing: 0.04em;
+}
+.chip.select-chip { color: var(--ink); }
+#stat-seed { max-width: 300px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+
+#board-wrap.paused { opacity: 0.6; pointer-events: none; }
+
+#board-wrap {
+  position: relative;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  min-height: 260px;
+}
+
+#board {
+  display: block;
+  border-radius: var(--radius-card);
+  background: var(--surface);
+  touch-action: none;
+  cursor: crosshair;
+}
+#board:focus-visible { outline: 2px solid var(--info); outline-offset: 3px; }
+
+/* 胜利卡片。display:grid 是它平时的样子；藏起来时靠上面那条 [hidden]!important，
+   这里再补一条同形状的规则，防止有人把 !important 删了以后它只是「透明」了还在吃点击。 */
+#win-veil {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  padding: var(--space-inner);
+  background: rgba(7, 10, 20, 0.72);
+  border-radius: var(--radius-card);
+  animation: veil-in var(--dur-base) var(--ease-ease);
+}
+#win-veil[hidden] { display: none; }
+
+@keyframes veil-in { from { opacity: 0; } to { opacity: 1; } }
+@media (prefers-reduced-motion: reduce) {
+  #win-veil { animation: none; }
+  * { transition-duration: 1ms !important; }
+}
+
+.win-card {
+  max-width: 340px;
+  padding: var(--space-card);
+  border: 1px solid var(--success);
+  border-radius: var(--radius-card);
+  background: var(--surface-lift);
+  text-align: center;
+}
+.win-card h3 { margin: 0 0 8px; font-size: 17px; }
+.win-card p { margin: 4px 0; color: var(--ink-dim); font-size: 13px; }
+.win-card .win-note { font-size: 11px; }
+.win-actions { display: flex; gap: var(--space-gutter); justify-content: center; margin-top: 12px; }
+
+.state-line {
+  margin: 0;
+  min-height: 20px;
+  color: var(--ink-dim);
+  font-size: 13px;
+}
+.state-line.bad { color: var(--error); }
+.state-line.good { color: var(--success); }
+/* 提示那句 RULE_TEXT 借环线的暖色：它是「引擎替玩家想通的一步」说的话，
+   既不是错误也不是胜利。状态行本来就在 aria-live 里，所以这段话同时也念给读屏。 */
+.state-line.hint { color: var(--accent-edge); }
+
+/* ---------- panel ---------- */
+
+.panel {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-inner);
+  padding: var(--space-card);
+  border: 1px solid var(--line);
+  border-radius: var(--radius-card);
+  /* 底色仍然是令牌（切主题/减对比时它照旧生效），纹理只是叠在它上面的一张纸。
+     面板与页面用两张不同的纹理：field 走盘面那支色，纸纹走 body 那支——同一份材质语言，
+     不需要第二次翻译。 */
+  background-color: var(--surface);
+  background-image: url(../assets/textures/field-256.png);
+  background-size: 256px 256px;
+  background-repeat: repeat;
+}
+
+/* 四支笔一行：面板 340px 减去左右 16px 内边距 = 308，四个按钮 + 3 个 10px 间距，
+   每个净宽约 70px。boot 场景量的就是这四个命中盒（少放一列会挤成半宽或溢出）。 */
+.modes { display: grid; grid-template-columns: repeat(4, 1fr); gap: var(--space-gutter); }
+.modes .mode { padding: 10px 6px; }
+.acts { display: grid; grid-template-columns: repeat(3, 1fr); gap: var(--space-gutter); }
+.acts #btn-new { grid-column: 2 / -1; }
+
+/* 设置类控件单独一行（音效开关 / 全屏），不进顶栏：上面 .acts 那排是「玩法动作」，
+   这一排是「设置」。两颗都是「图标 + 文字」的形状，视觉上跟纯文字按钮分得开。 */
+.settings { display: flex; gap: var(--space-gutter); }
+.settings button { flex: 1 1 0; }
+
+/* 带精灵图标的按钮（.ic + .lb）：图标与文字要并排且在一条基线上。
+   不写这条的话 img 走行内基线对齐，图标会比文字低半格；写了 inline-flex 才是居中。 */
+button:has(> .ic) { display: inline-flex; align-items: center; justify-content: center; }
+
+.stats {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 6px var(--space-gutter);
+}
+.stat {
+  display: flex;
+  justify-content: space-between;
+  gap: 8px;
+  font-size: 12px;
+  color: var(--ink-dim);
+}
+.stat b { color: var(--ink); font-weight: 600; }
+.stat b.bad { color: var(--error); }
+.stat b.good { color: var(--success); }
+
+.verify-box h4 { margin: 0 0 4px; font-size: 12px; letter-spacing: 0.08em; color: var(--ink-dim); text-transform: uppercase; }
+.verify-box p { margin: 0; font-size: 12px; line-height: 1.6; color: var(--ink-faint); }
+
+.col-title { margin: 0; font-size: 12px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--ink-dim); }
+
+.rules { margin: 0; padding-left: 18px; font-size: 12.5px; line-height: 1.7; color: var(--ink-dim); }
+.rules b { color: var(--ink); }
+.rules-note { margin: 6px 0 0; font-size: 11.5px; line-height: 1.6; color: var(--ink-faint); }
+
+/* 铅笔台：规则名是 engine/pencil.js 的 RULES 字符串（改名会作废历史读数），右边那个数是
+   pencil().fired 的原样返回。这一列不是难度分级表，它只说「引擎在这张盘上动了哪些规则」。 */
+.pencil-list {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 3px var(--space-gutter);
+  font-size: 11.5px;
+  color: var(--ink-dim);
+}
+.pencil-list li {
+  display: contents;
+}
+.pencil-list li b {
+  font-family: var(--font-mono);
+  font-weight: 500;
+  color: var(--ink-faint);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.pencil-list li span {
+  font-family: var(--font-mono);
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+  color: var(--pencil-mark);
+}
+
+.legend { display: flex; flex-direction: column; gap: 5px; font-size: 11.5px; color: var(--ink-dim); }
+.legend span { display: flex; align-items: center; gap: 8px; }
+.sw { width: 14px; height: 14px; border-radius: 4px; border: 1px solid var(--line-heavy); flex: none; }
+.sw-loop { background: var(--accent); border-color: var(--accent); }
+.sw-black { background: var(--black-cell); border-color: var(--black-cell-ring); }
+.sw-clue { background: var(--clue-tile); border-color: var(--clue-tile); }
+/* 铅笔结论是描边（不是填充），色来自 js/theme.js 的 Palette.pencilMark */
+.sw-pencil { background: transparent; border: 2px solid var(--pencil-mark); }
+.sw-bad { background: var(--error-soft); border-color: var(--bad-ring); border-radius: 50%; }
+/* 排除叉：方块里画一个叉（不是纯色块），因为「叉」是形状，图例就该给形状。 */
+.sw-cut {
+  background:
+    linear-gradient(45deg, transparent calc(50% - 1.5px), var(--cut-mark) calc(50% - 1.5px) calc(50% + 1.5px), transparent calc(50% + 1.5px)),
+    linear-gradient(-45deg, transparent calc(50% - 1.5px), var(--cut-mark) calc(50% - 1.5px) calc(50% + 1.5px), transparent calc(50% + 1.5px)),
+    var(--grid-line);
+  border-color: var(--cut-mark);
+}
+
+.keyhint { margin: 0; font-size: 11.5px; line-height: 1.8; color: var(--ink-faint); }
+.keyhint b { color: var(--ink-dim); }
+
+.foot {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: var(--space-card);
+  padding-top: var(--space-inner);
+  border-top: 1px solid var(--line);
+  font-size: 11.5px;
+  color: var(--ink-faint);
+}
+.foot code { font-family: var(--font-mono); }
+
+/* 中央分发：safe-area 兜底 */
+
+/* ---------- safe-area：刘海与主屏条不吃掉按钮（中央分发，akari-cos 同口径） ---------- */
+:root {
+  --sat: env(safe-area-inset-top, 0px);
+  --sar: env(safe-area-inset-right, 0px);
+  --sab: env(safe-area-inset-bottom, 0px);
+  --sal: env(safe-area-inset-left, 0px);
+}
+html, body {
+  padding-left: var(--sal);
+  padding-right: var(--sar);
+}
+body {
+  padding-top: var(--sat);
+  padding-bottom: var(--sab);
+  min-height: 100vh;
+  min-height: 100dvh;
+}
+/* 贴边的固定/吸底元素自己让开主屏条，别让 home indicator 压住按钮 */
+.fixed-bottom, .bottom-bar, .hud-bottom, footer.app-footer {
+  padding-bottom: calc(var(--sab) + env(safe-area-inset-bottom, 0px));
+}
+
+
+/* ============================================================
+   44px 触摸命中下限（Apple HIG 手机可用性底线）
+   每个真正可点的元素都要有 ≥44×44 CSS px 的命中盒。
+   min-height / min-width 是**硬下限**：只会把过小的盒子撑到 44px，
+   本来就够大的控件（宽药丸、整行列表项、大数字键）外形一点不变。
+
+   两处非平凡之处：
+   1) 需要 !important —— 各组件自己有 `.shelf button { min-width: 34px }`
+      这类更"贴身"的规则，类选择器的优先级高于任何标签堆叠，
+      不加的话这条底线会被组件规则逐个抵消。
+   2) 先把 --touch-min 定死：tapa / nurikabe 早就写了
+      `min-height: var(--touch-min)`，但全仓没有任何地方定义过这个变量，
+      无 fallback 的 var() 在计算值阶段整条作废 —— 那是个看着像 44px、
+      实际什么都不保证的死规则。这里补上定义，让它们原本的意图真正成立。
+   ============================================================ */
+:root { --touch-min: 44px; }
+button,
+select,
+input,
+textarea,
+a[href],
+[role="button"] {
+  min-height: 44px !important;
+  min-width: 44px !important;
+}
+
+/* org 003 §4 reduced-motion 全域兜底：系统偏好"减少动效"时停掉所有动画 / 过渡 */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation: none !important;
+    transition: none !important;
+  }
+}
+
+/* Shared-site embedding and English guide. */
+.topbar,.top-actions{flex-wrap:wrap;min-width:0}
+.hosting-guide{display:inline-block;padding:8px 12px;background:#182c39;color:#bde6ff;border-radius:6px;font:14px/1.5 system-ui,sans-serif;letter-spacing:normal}

@@ -1,0 +1,15 @@
+{
+  "name": "Frog Swap",
+  "desc": "Swap two groups of forward-only frogs using adjacent slides and jumps over an opposing frog. English help included; original interface partly Chinese.",
+  "controls": "Mouse / touch; see the linked English rules and controls guide.",
+  "shelf": "Puzzle & Logic",
+  "tags": [
+    "games",
+    "html5",
+    "puzzle",
+    "logic",
+    "frog-swap"
+  ],
+  "badge": "New",
+  "creator": "z-biz-game"
+}

@@ -1,0 +1,13 @@
+Yajilin
+Source: https://github.com/z-biz-game/z-biz-game-yajilin-cos
+Revision: 935c56e77148601cfd33308df403c4e51b2c89d0
+License: MIT (see LICENSE)
+Retrieved: 2026-11-06
+
+Self-contained static runtime and local authored assets; tools, desktop files,
+asset-generation scripts, web-app manifests and service-worker installation omitted.
+Save/preference keys game-scoped; essential controls and English guide added.
+Other original Chinese interface and hint text retained; not a full translation.
+Hint entry point respects the pause gate (buttons and direct keyboard paths).
+Canvas layout may shrink below the original 32px cell floor so the 10x10 board fits 320px-wide screens.
+Pause gates also protect hint costs, undo and other board mutations.

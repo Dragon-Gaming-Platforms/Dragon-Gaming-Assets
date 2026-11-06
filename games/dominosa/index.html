@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta name="color-scheme" content="dark light">
+
+<meta charset="utf-8">
+<title>Dominosa</title>
+<meta name="description" content="Partition a number grid into dominoes, using each unordered number pair exactly once.">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#f4efe3">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="Dominosa">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+
+<link rel="icon" type="image/png" sizes="16x16" href="assets/icons/icon-16.png">
+<link rel="icon" type="image/png" sizes="32x32" href="assets/icons/icon-32.png">
+<link rel="icon" type="image/png" sizes="48x48" href="assets/icons/icon-48.png">
+<link rel="icon" type="image/png" sizes="96x96" href="assets/icons/icon-96.png">
+<link rel="apple-touch-icon" href="assets/icons/icon-180.png">
+<link rel="mask-icon" href="assets/icons/icon-180.png" color="#1f6f5c">
+<meta property="og:type" content="website">
+<meta property="og:title" content="Dominosa Nikoli · Domino partition puzzle">
+<meta property="og:description" content="Partition a number grid into dominoes, using each unordered number pair exactly once.">
+<meta property="og:image" content="assets/brand/og-cover.png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image" content="assets/brand/og-cover.png">
+<link rel="stylesheet" href="css/game.css">
+  <link rel="stylesheet" href="css/studio.css" />
+</head>
+<body>
+<div id="app">
+
+  <header id="topbar">
+    <button class="brand" data-action="home" aria-label="回到首页">
+      <span class="brand-mark">▦</span>
+      <span class="brand-text">
+        <b>Dominosa</b>
+        <i>NIKOLI</i>
+      </span>
+    </button>
+    <div class="topbar-right">
+      <span id="streak-chip" class="chip" title="连续做每日挑战的天数">— 天</span>
+      <button class="icon" data-action="toggle-sound" id="sound-btn" aria-label="声音" aria-pressed="true" title="声音 (M)">♪</button>
+      <button class="icon" data-action="toggle-fullscreen" id="fullscreen-btn" aria-label="全屏" aria-pressed="false" title="全屏 (F)">⤢</button>
+      <button class="icon" data-action="settings" aria-label="设置">⋯</button>
+    </div>
+  <a class="hosting-guide" href="help.html" lang="en">English rules &amp; controls</a></header>
+
+  <main id="stage">
+
+    <!-- ── 首页 ───────────────────────────────────────────────── -->
+    <section id="home" class="screen">
+      <div class="scroll">
+        <article id="daily" class="card daily">
+          <div class="daily-head">
+            <div>
+              <h2>今日挑战</h2>
+              <p class="muted" id="daily-date">—</p>
+            </div>
+            <div class="daily-count"><b id="daily-done">0</b><span id="daily-total">/1</span></div>
+          </div>
+          <div class="daily-row" id="daily-row"></div>
+          <p class="muted tiny">同一天的题面全世界一样：题面由日期算出的种子决定。</p>
+        </article>
+
+        <div id="kinds" class="kind-grid"></div>
+
+        <article class="card stats">
+          <div class="stat"><b id="stat-solves">0</b><span>解出</span></div>
+          <div class="stat"><b id="stat-nohint">0</b><span>无提示</span></div>
+          <div class="stat"><b id="stat-hints">0</b><span>用过提示</span></div>
+          <div class="stat"><b id="stat-streak">0</b><span>连续天数</span></div>
+        </article>
+
+        <button class="textlink" data-action="howto-global">Dominosa rules →</button>
+      </div>
+    </section>
+
+    <!-- ── 对局 ───────────────────────────────────────────────── -->
+    <section id="play" class="screen" hidden>
+      <div class="playbar">
+        <button class="ghost" data-action="home" aria-label="返回">‹ 首页</button>
+        <div class="playbar-title">
+          <b id="play-title">Dominosa</b>
+          <i id="play-size">5×5</i>
+        </div>
+        <div class="playbar-right">
+          <span id="play-timer" class="mono">0:00</span>
+        </div>
+      </div>
+
+      <div id="board-wrap">
+        <canvas id="board"></canvas>
+        <div id="flash" class="flash" hidden></div>
+        <button id="pause-veil" class="veil" data-action="pause" hidden>
+          <b>已暂停</b>
+          <i>点这里继续 · P</i>
+        </button>
+      </div>
+
+      <div class="statusline">
+        <div class="progress"><i id="progress-bar"></i></div>
+        <span id="status-text" class="muted mono">0 / 0</span>
+      </div>
+
+      <div class="controls">
+        <div class="tool-toggle" id="tool-toggle" role="group" aria-label="笔">
+          <button data-tool="0" class="on"><span id="tool-primary">主笔</span></button>
+          <button data-tool="1"><span id="tool-secondary">副笔</span></button>
+        </div>
+        <div class="spacer"></div>
+        <button class="ctl" data-action="pause" id="pause-btn" title="暂停 (P)">Pause</button>
+        <button class="ctl" data-action="undo" title="撤销 (Z)">↺</button>
+        <button class="ctl" data-action="redo" title="重做 (Shift+Z)">↻</button>
+        <button class="ctl hint" data-action="hint" title="提示 (H)">Hint <b id="hint-count">0</b></button>
+        <button class="ctl" data-action="restart" title="重来 (R)">Restart</button>
+      </div>
+      <p class="hint-note" id="hint-note"></p>
+    </section>
+
+    <!-- ── 结算 ───────────────────────────────────────────────── -->
+    <section id="result" class="screen" hidden>
+      <div class="scroll">
+        <article class="card result">
+          <div class="result-mark" id="result-mark">✦</div>
+          <h2 id="result-title">解开了</h2>
+          <p class="muted" id="result-sub"></p>
+          <div class="stars" id="result-stars"><i>★</i><i>★</i><i>★</i></div>
+          <dl class="result-rows" id="result-rows"></dl>
+          <div class="result-actions">
+            <button class="primary" data-action="next">下一题 →</button>
+            <button class="ghost" data-action="replay">再做这题</button>
+            <button class="ghost" data-action="home">Home</button>
+          </div>
+        </article>
+      </div>
+    </section>
+
+  </main>
+
+  <dialog id="howto">
+    <h3 id="howto-title">怎么玩</h3>
+    <ol id="howto-body"></ol>
+    <form method="dialog"><button class="ghost">Close</button></form>
+  </dialog>
+
+  <dialog id="settings">
+    <h3>设置</h3>
+    <label class="row"><span>音效</span><input type="checkbox" data-setting="sound" checked></label>
+    <label class="row"><span>减弱动效</span><input type="checkbox" data-setting="reduceMotion"></label>
+    <div class="row"><span>存档</span><div class="row-btns">
+      <button class="ghost" data-action="export">导出</button>
+      <button class="ghost" data-action="import">导入</button>
+      <button class="ghost danger" data-action="reset">清空</button>
+    </div></div>
+    <p class="muted tiny" id="import-box" hidden>
+      把之前导出的字符串粘进来：
+      <textarea id="import-text" rows="3"></textarea>
+      <button class="primary" data-action="import-apply">载入</button>
+    </p>
+    <form method="dialog"><button class="ghost">关闭</button></form>
+  </dialog>
+
+  <div id="toast" class="toast" hidden></div>
+</div>
+
+<script type="module" src="js/main.js"></script>
+  <div class="studio-atmosphere" aria-hidden="true"></div>
+</body>
+</html>
