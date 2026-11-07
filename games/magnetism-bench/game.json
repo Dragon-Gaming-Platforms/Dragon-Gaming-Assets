@@ -1,0 +1,8 @@
+{
+  "name": "Magnetism Bench",
+  "desc": "Arrange bar magnets and inspect a locally computed magnetic-field vector map. Move the probe, compare like and unlike poles, and rotate the selected magnet.",
+  "controls": "Drag magnets to move them. Click empty canvas to add one; right-click or use Remove selected to remove one. Rotate selected turns it 45 degrees; adjust global strength.",
+  "shelf": "Interactive Stories & Experiments",
+  "tags": ["physics", "magnetism", "field", "simulation", "offline"],
+  "creator": "Dragon Gaming Assets contributors"
+}

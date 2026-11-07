@@ -1,0 +1,8 @@
+{
+  "name": "Voronoi Workshop",
+  "desc": "Move, add, and remove sites to reshape a Voronoi diagram. Every pixel belongs to its nearest site, revealing how a handful of points partition a plane.",
+  "controls": "Drag a marker to move it. Click empty canvas to add a site; right-click a marker to remove it. Change layout, palette, and boundaries, then generate a new map.",
+  "shelf": "Interactive Stories & Experiments",
+  "tags": ["geometry", "voronoi", "procedural", "visualization", "offline"],
+  "creator": "Dragon Gaming Assets contributors"
+}

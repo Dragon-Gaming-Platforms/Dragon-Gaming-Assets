@@ -1,0 +1,8 @@
+{
+  "name": "Sorting Studio",
+  "desc": "Watch bubble, selection, and insertion sort rearrange a generated list. Step through comparisons and swaps, or play at an adjustable speed while operation counters update.",
+  "controls": "Choose a sorting algorithm, array size, and speed. Use Play, Step, Reset list, or New random list to explore comparisons and swaps.",
+  "shelf": "Tools & Utilities",
+  "tags": ["sorting", "algorithms", "education", "visualization", "offline"],
+  "creator": "Dragon Gaming Assets contributors"
+}
