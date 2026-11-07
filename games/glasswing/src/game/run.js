@@ -1,0 +1,252 @@
+import {emitSound} from '../core/sound.js';
+import {entity,remember,leadX} from '../core/entity.js';
+import {hashSeed,random} from '../core/rng.js';
+import {F,EYES,energyMax} from '../data/feel.js';
+import {UPGRADES,EXTRA_UPGRADES,UPGRADE_VALUES as U} from '../data/upgrades.js';
+import {VISUALS as V} from '../data/visuals.js';
+import {RUN as R} from '../data/run.js';
+import {B,edge} from '../core/input.js';
+import {playerTick} from './player.js';
+import {projectilesTick,heal,attackTick} from '../core/combat.js';
+import {updateCamera} from '../core/camera.js';
+import {enemyTick,wavesTick} from './enemies/wild.js';
+import {spawnBoss,bossTick} from './boss.js';
+import {versusFlow,arenaHazards,resetRound} from './versus.js';
+import {coopTick} from './coop.js';
+import {validateLevel} from './level.js';
+import {tierMask} from '../data/rules.js';
+import {initProgress,startDraft,chooseMoult} from './moults.js';
+import {initVerbs,verbs5} from './moults5.js';
+import {initForms,resetForm} from './possession.js';
+import {initMend,resetMend} from './mend.js';
+import {hallLevels,setupHall,hallTick} from './hall.js';
+import {gullet} from './chrysalis.js';
+import {hubLevels,setupHub,hubTick,hubFlow,hubRespawn,hubAgain} from './hub.js';
+import {monsterArena} from '../data/monsters.js';
+import {monstersTick} from './enemies/monsters.js';
+import {nave} from './tallowgrave.js';
+import {mere} from './antiphon.js';
+import {drum} from './anchorite.js';
+import {garden} from './cordycea.js';
+import {well} from './exuvial.js';
+import {gullet5} from './chrysalis5.js';
+
+const choiceKeys=[B.attack,B.sword,B.blast];
+const noInput=[0,0];
+
+export function createRun(levels,config={}){
+ config={seed:'glasswing',kind:'brawler',difficulty:'normal',mode:'solo',rulesVersion:1,eye:EYES[0],kind2:'skimmer',eye2:EYES[1],arena:'arena-clearing',...config};
+ // An editor level is the whole run, including one whose ID starts with arena-.
+ if(config.customLevel)levels=[validateLevel(config.customLevel)];
+ else if(config.hall)levels=hallLevels(levels,config);
+ // The Hub with Spokes (config.campaign, rules 4): a segment's rooms, or the boss arena of a hub fight.
+ else if(config.campaign)levels=hubLevels(levels,config);
+ else if(config.monsters)levels=[validateLevel(monsterArena(config.monsters))];
+ else levels=config.mode==='versus'?[levels.find(l=>l.id===config.arena)||levels[0]]:levels.filter(l=>!l.id.startsWith('arena-'));
+ const s={
+  config,seed:config.seed,rng:hashSeed(config.seed),frame:0,area:0,areasCleared:0,
+  level:null,levels,levelRevision:0,
+  players:[entity(1,config.kind,R.startX,R.introY,0,config.difficulty)],
+  enemies:[],nextId:R.firstEnemyId,spawned:[],lock:null,fragments:0,
+  offered:[],choices:[],altarPlayer:0,bonusUsed:false,bossStarted:false,
+  projectiles:Array.from({length:F.projectilePool},()=>({active:false})),
+  effects:Array.from({length:F.effectPool},()=>({life:0})),drops:[],
+  camera:{x:F.cameraWidth/2,y:F.cameraHeight/2},hitStop:0,shake:0,
+  lives:F.lives,phase:'playing',checkpoint:R.initialCheckpoint,log:[],audio:null,
+  audioEvents:[],respawn:0,won:false,scores:[0,0],round:0,roundWinner:-1,winner:-1
+ };
+ s.players[0].eye=config.eye;
+ if(config.mode!=='solo'){
+  const p2=entity(2,config.kind2,R.partnerX,R.groundY,config.mode==='coop'?0:1,config.difficulty);
+  p2.eye=config.eye2===config.eye?EYES[(EYES.indexOf(config.eye)+1)%EYES.length]:config.eye2;
+  s.players.push(p2);
+  if(config.mode==='coop')s.lives=F.coopLives;
+ }
+ if(config.rulesVersion>=4){
+  // Rules v4: tier mask counts, Amber XP and moult drafts on their own seeded stream.
+  Object.assign(s,{moultRng:{rng:hashSeed(config.seed+':moults')},draft:null,draftId:0,bossAttempts:0});
+  for(const p of s.players){
+   p.maxMask=p.mask=tierMask(p.kind,config.difficulty);p.hits=0;
+   if(config.mode!=='versus')initProgress(p,config.moults||[]);
+   // moults5: verb moults (their state exists only under this key; without it a v4 run is unchanged).
+   if(verbs5(s))initVerbs(p,config.moults||[]);
+   // M4: owned boss masks (forms, Mask Ember, Echoes). Without masks a v4 run is unchanged.
+   if(config.masks?.length)initForms(p,config.masks);
+   // Mend runs: every hunter carries the Mask Ember meter (no form until a mask is owned) and the Mend channel.
+   if(config.mend&&config.mode!=='versus'){if(!p.forms)initForms(p,[]);initMend(p);}
+  }
+ }
+ enterArea(s,0);
+ s.players[0].y=R.introY;s.players[0].py=R.introY;
+ if(config.mode==='versus')resetRound(s);
+ if(config.hall)setupHall(s);
+ if(config.campaign)setupHub(s);
+ return s;
+}
+
+export function enterArea(s,index){
+ s.area=index;s.level=structuredClone(s.levels[index]);s.levelRevision++;
+ // Rules v4 with the Unborn Chrysalis: the Nest's boss arena becomes the taller Gullet.
+ if(s.config.boss==='chrysalis'&&s.config.rulesVersion>=4&&s.level.id==='nest')gullet(s.level);
+ // Tallowgrave, the Renderer: the Nest's boss arena becomes the Rendering Nave.
+ if(s.config.boss==='tallowgrave'&&s.config.rulesVersion>=4&&s.level.id==='nest')nave(s.level);
+ // The Drowned Antiphon: the boss arena becomes the Scale Mere's causeway.
+ if(s.config.boss==='antiphon'&&s.config.rulesVersion>=4&&s.level.id==='nest')mere(s.level);
+ // Rules v4 with the Hourglass Anchorite: the Nest's boss end becomes the Reliquary Drum.
+ if(s.config.boss==='anchorite'&&s.config.rulesVersion>=4&&s.level.id==='nest')drum(s.level);
+ if(s.config.boss==='cordycea'&&s.config.rulesVersion>=4&&s.level.id==='nest')garden(s.level);
+ // Rules v4 with the Exuvial: the Nest's boss arena becomes the Moulting Well.
+ if(s.config.boss==='exuvial'&&s.config.rulesVersion>=4&&s.level.id==='nest')well(s.level);
+ if(s.config.boss==='chrysalis5'&&s.config.rulesVersion>=4&&s.level.id==='nest')gullet5(s.level);
+ s.enemies=[];s.spawned=[];s.lock=null;s.bossStarted=false;
+ s.checkpoint=s.level.checkpoints[0];
+ s.drops=(s.level.secrets||[]).map(d=>({...d,active:true,life:Infinity}));
+ for(const p of s.projectiles)p.active=false;
+ s.camera.x=F.cameraWidth/2;
+ for(const p of s.players){
+  p.x=s.level.start.x;p.y=s.level.start.y;p.px=p.x;p.py=p.y;
+  p.vx=0;p.vy=0;p.move=null;p.dead=false;p.prev=0;
+ }
+ s.phase='playing';
+}
+
+export function offer(s,bonus=false){
+ s.choices=[];
+ const pool=(s.config.rulesVersion>=3?UPGRADES.concat(EXTRA_UPGRADES):UPGRADES).filter(k=>!s.offered.includes(k));
+ for(let i=0;i<R.upgradeChoices&&pool.length;i++){
+  const index=Math.floor(random(s)*pool.length),key=pool.splice(index,1)[0];
+  s.choices.push(key);s.offered.push(key);
+ }
+ s.phase=bonus?'bonus':'altar';s.altarPlayer=0;
+ for(const p of s.players)p.prev=0;
+ emitSound(s,'altar-chime');
+}
+
+export function choose(s,index){
+ const p=s.players[s.altarPlayer],key=s.choices[index];
+ if(!key)return;
+ p.upgrades.push(key);
+ if(key==='hardenedMask')p.maxMask+=U.hardenedMask;
+ heal(p,p.maxMask);p.energy=energyMax(p);s.altarPlayer++;
+ if(s.altarPlayer<s.players.length)return;
+ if(s.phase==='bonus'){s.bonusUsed=true;s.phase='playing';}
+ else enterArea(s,s.area+1);
+}
+
+function respawn(s){
+ if(s.bossRetry&&hubAgain(s))return;
+ for(const p of s.players){
+  const old=p,fresh=entity(p.id,p.kind,s.checkpoint,R.respawnY,p.team,s.config.difficulty);
+  Object.assign(p,fresh,{
+   upgrades:old.upgrades,maxMask:old.maxMask,mask:old.maxMask,eye:old.eye,
+   kills:old.kills,survived:old.survived,secondUsed:old.secondUsed,inv:F.invincible
+  });
+  if(p.forms){resetForm(p);if(s.bossRetry)p.ember=0;}
+  if(p.mend!==undefined)resetMend(p);
+ }
+ for(const p of s.projectiles)p.active=false;
+ // Rules v4: a death in the boss fight restarts at the boss door with a fresh boss.
+ if(s.bossRetry){
+  s.bossRetry=false;s.bossStarted=false;s.bossAttempts++;
+  if(s.level.gullet){gullet(s.level);s.levelRevision++;}
+  if(s.level.nave&&s.config.boss==='tallowgrave'){nave(s.level);s.levelRevision++;}
+  if(s.level.drum){drum(s.level);s.levelRevision++;}
+  if(s.level.gullet5){gullet5(s.level);s.levelRevision++;}
+  for(let i=s.enemies.length-1;i>=0;i--)if(s.enemies[i].boss||s.enemies[i].minion)s.enemies.splice(i,1);
+ }
+ if(s.world&&!s.world.fight)hubRespawn(s);
+ s.phase='playing';
+}
+
+function flow(s){
+ if(s.config.mode==='versus'){versusFlow(s);return;}
+ if(s.world&&!s.world.fight){hubFlow(s);return;}
+ const lead=leadX(s.players);
+ for(const c of s.level.checkpoints)if(lead>=c)s.checkpoint=Math.max(c,s.checkpoint);
+ let allDead=true;
+ for(const p of s.players){
+  if(p.y<R.playerFallY){
+   p.dead=true;p.defeatedFrame=s.frame;p.clip='beaten';
+   if(p.forms)resetForm(p);
+   if(s.config.mode==='coop'){
+    while(p.x<s.level.width-R.edgeInset&&!s.level.grid[0][Math.floor(p.x)])p.x+=R.safeGroundStep;
+    p.y=R.groundY;p.py=R.groundY;p.vy=0;
+   }
+  }
+  if(!p.dead)allDead=false;
+ }
+ if(allDead){
+  // Rules v4: no lives inside the boss fight; a death retries at the boss door.
+  if(s.bossStarted&&s.config.rulesVersion>=4){s.phase='respawn';s.respawn=F.respawn;s.bossRetry=true;return;}
+  s.lives--;
+  if(s.lives<=0){s.phase='result';s.won=false;emitSound(s,'run-lost');}
+  else{s.phase='respawn';s.respawn=F.respawn;}
+  return;
+ }
+ // The Hall of Masks has no drafts, and a Mask Trial ends only when the hunter falls.
+ if(s.hall?.kind==='trial')return;
+ if(s.config.rulesVersion>=4&&!s.hall&&startDraft(s))return;
+ if(s.fragments>=F.fragmentBonus&&!s.bonusUsed&&s.area===R.bonusArea){offer(s,true);return;}
+ let enemyAlive=false,boss=null;
+ for(const e of s.enemies){if(!e.dead)enemyAlive=true;if(e.boss&&!boss)boss=e;}
+ const clear=s.spawned.length===(s.level.waves?.length||0)&&!enemyAlive;
+ if(s.level.boss&&clear&&!s.bossStarted){spawnBoss(s);return;}
+ // A boss may hold the win card while its kill plays out (e.dying, Tallowgrave's melt); others end at once.
+ if(s.bossStarted&&boss?.dead&&!(boss.dying>0)){
+  s.areasCleared=R.forestAreas;s.won=true;s.phase='result';emitSound(s,'run-win');return;
+ }
+ if(lead>=s.level.end&&clear&&!s.level.boss){
+  s.areasCleared=s.area+1;
+  if(s.area<s.levels.length-1)offer(s);
+  else{s.won=true;s.phase='result';emitSound(s,'run-win');}
+ }
+}
+
+// Snapshot both moves before either hit lands so simultaneous attacks still trade.
+function versusAttacks(s){
+ const a=s.players[0],b=s.players[1];
+ const moveA=a.move,frameA=a.moveFrame,moveB=b.move,frameB=b.moveFrame;
+ if(moveA){a.move=moveA;a.moveFrame=frameA;attackTick(s,a,s.players);if(a.dead)a.move=null;}
+ if(moveB){b.move=moveB;b.moveFrame=frameB;attackTick(s,b,s.players);if(b.dead)b.move=null;}
+}
+
+export function tick(s,inputs=noInput){
+ if(s.phase==='result')return;
+ s.frame++;s.audio=null;s.audioEvents.length=0;
+ const last=s.log.at(-1);
+ if(last&&last[1]===inputs[0]&&last[2]===(inputs[1]||0))last[0]++;
+ else s.log.push([1,inputs[0],inputs[1]||0]);
+
+ if(s.phase==='round'){versusFlow(s);return;}
+ if(s.phase==='respawn'){if(--s.respawn<=0)respawn(s);return;}
+ if(s.phase==='moult'){
+  const d=s.draft,p=s.players[d.player],mask=inputs[d.player]||0;
+  if(d.delay>0)d.delay--;
+  else for(let i=0;i<choiceKeys.length;i++)if(edge(mask,p.prev,choiceKeys[i])){chooseMoult(s,i);break;}
+  p.prev=mask;return;
+ }
+ if(s.phase==='altar'||s.phase==='bonus'){
+  const p=s.players[s.altarPlayer],mask=inputs[s.altarPlayer]||0;
+  for(let i=0;i<choiceKeys.length;i++)if(edge(mask,p.prev,choiceKeys[i])){choose(s,i);break;}
+  p.prev=mask;return;
+ }
+ if(s.hitStop>0){s.hitStop--;return;}
+ if(s.shake)s.shake--;
+ for(const e of s.players)remember(e);
+ for(const e of s.enemies)remember(e);
+ const versus=s.config.mode==='versus';
+ for(let i=0;i<s.players.length;i++)playerTick(s,s.players[i],inputs[i]||0,versus?s.players:s.enemies,!versus);
+ if(versus)versusAttacks(s);
+ for(const e of s.enemies)e.boss?bossTick(s,e):enemyTick(s,e);
+ projectilesTick(s,s.players,s.enemies);
+ if(s.mon)monstersTick(s);
+ wavesTick(s);
+ if(s.hall)hallTick(s);
+ if(s.world)hubTick(s,inputs);
+ if(versus)arenaHazards(s);
+ if(s.config.mode==='coop')coopTick(s);
+ flow(s);
+ for(const e of s.effects)if(e.life>0){e.life--;e.x+=e.vx;e.y+=e.vy;e.vy-=V.effectGravity;}
+ updateCamera(s.camera,s.players,s.level.width);
+}
+
