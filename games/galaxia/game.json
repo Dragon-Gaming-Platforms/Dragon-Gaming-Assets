@@ -1,0 +1,15 @@
+{
+  "name": "GALAXIA",
+  "desc": "An original fixed-screen arcade space shooter for the browser: hold off diving alien formations, rescue captured fighters, and clear challenging stages in Classic Mode — or fly freely through open space in Free Roam, charting real-galaxy systems from the Andromeda to the Milky Way. Keyboard, touch, or gamepad. Every sprite procedural, every note synthesized.",
+  "controls": "WASD/arrows move, Space fire, Enter pause/menu (or touch controls / gamepad). Pick Classic Mode for fixed-screen arcade action or Free Roam for open-space flight.",
+  "shelf": "Arcade & Action",
+  "tags": [
+    "arcade",
+    "shooter",
+    "space",
+    "free-roam"
+  ],
+  "badge": "New",
+  "creator": "GVaishanth",
+  "image": "title.png"
+}

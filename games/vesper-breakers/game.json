@@ -1,0 +1,15 @@
+{
+  "name": "Vesper Breakers",
+  "desc": "An original momentum arcade expedition: split comet cores, dodge raiders, and spend energy on shield, blink, and pulse abilities to clear the five-sector Vesper corridor. Solo, or two-player local co-op on one keyboard, plus a local last-survivor tournament mode. All art is procedural and all audio is synthesized at runtime.",
+  "controls": "Solo: W/↑ thrust, A/D or ←/→ turn, S/↓ brake, Space/F fire, Shift shield, Q blink, E pulse, Esc/P pause. Co-op: Mint uses W/A/S/D + F/Shift/Q/E, Copper uses arrows + / Enter/, . (touch supported)",
+  "shelf": "Arcade & Action",
+  "tags": [
+    "arcade",
+    "shooter",
+    "co-op",
+    "comet"
+  ],
+  "badge": "New",
+  "creator": "intrepion",
+  "image": "title.png"
+}
