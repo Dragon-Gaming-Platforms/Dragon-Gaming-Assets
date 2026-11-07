@@ -1,0 +1,8 @@
+{
+  "name": "Prime Spiral Lab",
+  "desc": "Plot consecutive integers on a Ulam spiral and highlight primes to reveal diagonal patterns. Change the range, cell scale, and residue coloring with a local sieve.",
+  "controls": "Adjust the largest integer and cell scale sliders; choose prime highlighting, prime classes modulo 6, or all residues modulo 10.",
+  "shelf": "Tools & Utilities",
+  "tags": ["number-theory", "primes", "ulam-spiral", "mathematics", "offline"],
+  "creator": "Dragon Gaming Assets contributors"
+}

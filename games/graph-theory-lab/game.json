@@ -1,0 +1,8 @@
+{
+  "name": "Graph Theory Lab",
+  "desc": "Build a small weighted network and step through breadth-first search, depth-first search, or Dijkstra's shortest-path algorithm. Compare visited order, frontier, path, and cost.",
+  "controls": "Choose an algorithm, start, and goal; Run search, then Step or Play. Drag nodes, click empty space to add one, right-click to remove, or enable Edit connections and click two nodes.",
+  "shelf": "Tools & Utilities",
+  "tags": ["graph-theory", "algorithms", "education", "visualization", "offline"],
+  "creator": "Dragon Gaming Assets contributors"
+}
