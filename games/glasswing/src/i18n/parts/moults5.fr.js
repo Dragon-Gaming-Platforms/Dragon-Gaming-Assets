@@ -1,0 +1,25 @@
+// moults5 : mues-verbes (fusionnées dans src/i18n/fr.js). Le français tutoie.
+export default {
+  "moultVerb": "Nouveau pouvoir",
+  "verbsOn": "Mues-verbes actives : chaque niveau peut t’offrir un nouveau pouvoir.",
+  "arms-tether": "Griffe-grappin",
+  "arms-tetherDesc": "Lance une griffe crochue au bout d’un fil. Les petits ennemis sont tirés à tes pieds, leur coup brisé ; les murs, les rebords et les gros ennemis te tirent vers eux.",
+  "arms-tetherDeep": "Portée de 7 cases, traction plus rapide, recharge plus courte, et les ennemis tirés restent sonnés plus longtemps.",
+  "verbHow_arms-tether": "En l’air : {block} la lance vers le haut et l’avant, {down} + {block} vers le bas et l’avant. {jump} annule la traction et te propulse.",
+  "horns-charge": "Front-bélier",
+  "horns-chargeDesc": "Baisse la tête et charge. Le coup de tête brise l’armure d’un élite, étourdit fort et fracasse les murs friables, mais tu n’as aucune invulnérabilité.",
+  "horns-chargeDeep": "Une charge plus longue qui inflige 6 et étourdit plus longtemps.",
+  "verbHow_horns-charge": "Au sol : {down} + {dodge}.",
+  "legs-cricket": "Pattes de grillon",
+  "legs-cricketDesc": "Bande tes pattes pendant ta garde, puis détends-toi : un bond environ deux fois plus haut qu’un saut.",
+  "legs-cricketDeep": "Elles se bandent presque deux fois plus vite et bondissent encore plus haut.",
+  "verbHow_legs-cricket": "Maintiens {block} jusqu’à ce que tes pattes brillent, puis {jump}.",
+  "sigil-shell": "Chute-carapace",
+  "sigil-shellDesc": "Roule-toi dans ta carapace et plonge. L’onde de choc à l’atterrissage étourdit les ennemis autour de toi et te fait rebondir ; les sols friables cèdent sous toi.",
+  "sigil-shellDeep": "Une onde plus large, plus forte et plus longue, et un rebond plus haut.",
+  "verbHow_sigil-shell": "En l’air : {down} + {dodge}.",
+  "back-spines": "Épines de verre",
+  "back-spinesDesc": "Chaque parade parfaite tire 3 éclats de verre vers ton agresseur.",
+  "back-spinesDeep": "5 éclats qui frappent plus fort et transpercent un ennemi.",
+  "verbHow_back-spines": "Pare : {block} juste avant que le coup ne porte."
+};

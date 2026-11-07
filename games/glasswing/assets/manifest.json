@@ -1,0 +1,50 @@
+{
+  "version": 1,
+  "models": {},
+  "sets": {},
+  "sprites": {
+    "brawler": {
+      "image": "assets/sprites/brawler.webp",
+      "data": "assets/sprites/brawler.json",
+      "glow": "assets/sprites/brawler-glow.webp"
+    },
+    "wild-brawler": {
+      "image": "assets/sprites/wild-brawler.webp",
+      "data": "assets/sprites/wild-brawler.json",
+      "glow": "assets/sprites/wild-brawler-glow.webp"
+    },
+    "old-glasswing": {
+      "image": "assets/sprites/old-glasswing.webp",
+      "data": "assets/sprites/old-glasswing.json",
+      "glow": "assets/sprites/old-glasswing-glow.webp"
+    },
+    "form-old-glasswing": {
+      "image": "assets/sprites/form-old-glasswing.webp",
+      "data": "assets/sprites/form-old-glasswing.json",
+      "glow": "assets/sprites/form-old-glasswing-glow.webp"
+    },
+    "skimmer": {
+      "image": "assets/sprites/skimmer.webp",
+      "data": "assets/sprites/skimmer.json",
+      "glow": "assets/sprites/skimmer-glow.webp"
+    },
+    "wild-skimmer": {
+      "image": "assets/sprites/wild-skimmer.webp",
+      "data": "assets/sprites/wild-skimmer.json",
+      "glow": "assets/sprites/wild-skimmer-glow.webp"
+    },
+    "spark": {
+      "image": "assets/sprites/spark.webp",
+      "data": "assets/sprites/spark.json",
+      "glow": "assets/sprites/spark-glow.webp"
+    },
+    "wild-spark": {
+      "image": "assets/sprites/wild-spark.webp",
+      "data": "assets/sprites/wild-spark.json",
+      "glow": "assets/sprites/wild-spark-glow.webp"
+    }
+  },
+  "music": {},
+  "sounds": {},
+  "keyArt": null
+}

@@ -1,0 +1,15 @@
+{
+  "name": "Glasswing",
+  "desc": "A dark action game where you break a boss's mask — then wear it. The Hub campaign holds six bosses and their wearable forms, perfect-parry guards, charge blasters and a glass-mask life system: at zero points your mask shatters (damage ×3, speed +20%, the next hit is fatal). EN/FR in-game language setting, full key remapping, gamepad + touch, solo or two players. Original MIT sprite art, synthesized sound, level editor included.",
+  "controls": "Arrows/WASD move, Space/W jump (again double-jumps, hold glides), J punch, K needle-sword (down+K in air pogos), L fire/charge, Shift/I dodge, U/Ctrl guard (tap for perfect parry), Esc/P pause; keys remappable, gamepad + touch supported",
+  "shelf": "Arcade & Action",
+  "tags": [
+    "action",
+    "platformer",
+    "boss-rush",
+    "parry"
+  ],
+  "badge": "New",
+  "creator": "codex-lm",
+  "image": "title.png"
+}

@@ -1,0 +1,15 @@
+{
+  "name": "Squeek Arena",
+  "desc": "An original hamster arcade fighting game: create your own fighter, then master high/low defense, hit-confirmed combos, throws, fireballs and full-meter supers against an infinite-time training dummy or three CPU opponents. 99-second rounds, first to two wins, original hamster artwork and fully synthesized sound. PvE only — everything stays in your browser.",
+  "controls": "A-D/arrows move, W jump, S crouch, Shift/hold back guard (crouch+guard blocks low), J/U light/heavy punch, I/K light/heavy kick, L fireball, O uppercut, V throw, Q super, Esc pause (touch supported)",
+  "shelf": "Arcade & Action",
+  "tags": [
+    "fighting",
+    "arcade",
+    "combos",
+    "hamster"
+  ],
+  "badge": "New",
+  "creator": "zeroisme1994",
+  "image": "title.png"
+}

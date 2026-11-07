@@ -1,0 +1,25 @@
+// moults5: verb moults (spread into src/i18n/en.js).
+export default {
+  "moultVerb": "New power",
+  "verbsOn": "Verb moults on: level-ups can grant new powers.",
+  "arms-tether": "Tether Claw",
+  "arms-tetherDesc": "Throw a hooked claw on a cord. Small foes are yanked to your feet, their swing broken; walls, ledges and big foes pull you to them.",
+  "arms-tetherDeep": "Reaches 7 tiles, pulls faster, recharges sooner, and yanked foes stay dazed longer.",
+  "verbHow_arms-tether": "In the air: {block} throws it up and ahead, {down} + {block} down and ahead. {jump} cancels the pull and flings you on.",
+  "horns-charge": "Battering Brow",
+  "horns-chargeDesc": "Lower your head and charge. The headbutt strips an elite's armour, stuns hard and smashes brittle walls, but you have no dodge frames.",
+  "horns-chargeDeep": "A longer charge that hits for 6 and stuns longer.",
+  "verbHow_horns-charge": "On the ground: {down} + {dodge}.",
+  "legs-cricket": "Cricket Legs",
+  "legs-cricketDesc": "Coil your legs while you guard, then spring: a leap about twice as high as a jump.",
+  "legs-cricketDeep": "Coils almost twice as fast and leaps even higher.",
+  "verbHow_legs-cricket": "Hold {block} until your legs glow, then {jump}.",
+  "sigil-shell": "Shell Drop",
+  "sigil-shellDesc": "Curl into your shell and plummet. The landing quake stuns foes around you and bounces you back up; brittle floors break under you.",
+  "sigil-shellDeep": "A wider quake that hits harder and stuns longer, and a higher bounce.",
+  "verbHow_sigil-shell": "In the air: {down} + {dodge}.",
+  "back-spines": "Glass Spines",
+  "back-spinesDesc": "Every perfect parry fires 3 glass shards back at your attacker.",
+  "back-spinesDeep": "5 shards that hit harder and pierce one foe.",
+  "verbHow_back-spines": "Parry: {block} just before a hit lands."
+};
