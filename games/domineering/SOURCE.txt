@@ -1,0 +1,11 @@
+Domineering
+Source: https://github.com/MedAly666/domineering
+Revision: cbdac0480d04bf647b9cefe1c8bcadf7702e9180
+License: MIT (see LICENSE)
+Retrieved: 2026-11-06
+
+Static runtime only; development/server/test tooling omitted.
+Runtime uses system fonts with no external font requests. English hosting guide added.
+Save keys, where present, are game-scoped; malformed storage falls back to defaults.
+Game view promoted to root; unused lobby/settings omitted. Canvas input uses scaled client coordinates and rejects out-of-board positions. Win/loss is a status message, and finished games lock further moves.
+Synchronous AI depth bounded to two plies for responsiveness; no strength selector is advertised.

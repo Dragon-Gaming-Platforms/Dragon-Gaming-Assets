@@ -1,0 +1,13 @@
+{
+  "name": "Domineering",
+  "desc": "You place red vertical dominoes on an 8\u00d78 board; the computer places blue horizontal dominoes.",
+  "controls": "Mouse / touch; English rules and controls linked in-game.",
+  "shelf": "Puzzle & Logic",
+  "tags": [
+    "games",
+    "html5",
+    "board"
+  ],
+  "badge": "New",
+  "creator": "MedAly666"
+}

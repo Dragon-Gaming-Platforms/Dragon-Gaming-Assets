@@ -1,0 +1,13 @@
+{
+  "name": "Lines of Action",
+  "desc": "Connect all of your pieces into one group, including diagonal neighbors.",
+  "controls": "Mouse / touch; English rules and controls linked in-game.",
+  "shelf": "Puzzle & Logic",
+  "tags": [
+    "games",
+    "html5",
+    "board"
+  ],
+  "badge": "New",
+  "creator": "andersonfaller"
+}
