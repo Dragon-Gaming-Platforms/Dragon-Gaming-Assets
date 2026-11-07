@@ -1,0 +1,13 @@
+{
+  "name": "Quarto",
+  "desc": "Choose a piece for your opponent, then place the piece they give you on an empty square.",
+  "controls": "Mouse / touch; English rules and controls linked in-game.",
+  "shelf": "Puzzle & Logic",
+  "tags": [
+    "games",
+    "html5",
+    "board"
+  ],
+  "badge": "New",
+  "creator": "stmorse"
+}

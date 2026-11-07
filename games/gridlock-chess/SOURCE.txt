@@ -1,0 +1,9 @@
+Gridlock Chess
+Source: https://github.com/andersonfaller/gridlock-chess
+Revision: 1aa57e5a258e67f646e657e4c7b53f72906437c2
+License: MIT (see LICENSE)
+Retrieved: 2026-11-06
+
+Static runtime only; development/server/test tooling omitted.
+Runtime uses system fonts with no external font requests. English hosting guide added.
+Save keys, where present, are game-scoped; malformed storage falls back to defaults.

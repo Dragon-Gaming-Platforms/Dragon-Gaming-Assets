@@ -1,0 +1,13 @@
+{
+  "name": "Knights Out",
+  "desc": "Move your knight in an L (two squares one way, one the other), landing only on a lit, unoccupied square.",
+  "controls": "Mouse / touch; English rules and controls linked in-game.",
+  "shelf": "Puzzle & Logic",
+  "tags": [
+    "games",
+    "html5",
+    "puzzle"
+  ],
+  "badge": "New",
+  "creator": "andersonfaller"
+}

@@ -1,0 +1,10 @@
+Quarto
+Source: https://github.com/stmorse/quarto-game
+Revision: d44e0ee2b564eda360a1d246ac82e19d1731d9ea
+License: MIT (see LICENSE)
+Retrieved: 2026-11-06
+
+Static runtime only; development/server/test tooling omitted.
+Runtime uses system fonts with no external font requests. English hosting guide added.
+Save keys, where present, are game-scoped; malformed storage falls back to defaults.
+Saved settings/progress validation hardened against null or wrong-shaped JSON.

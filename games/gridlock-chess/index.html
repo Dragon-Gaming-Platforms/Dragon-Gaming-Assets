@@ -1,0 +1,1412 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="theme-color" content="#05070b">
+    <title>Gridlock Chess</title>
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%2305070b'/%3E%3Cpath d='M16 6.5 25.5 16 16 25.5 6.5 16Z' fill='none' stroke='%23ecc87c' stroke-width='1.6'/%3E%3Ccircle cx='16' cy='16' r='3' fill='%2322d3ee'/%3E%3C/svg%3E">
+    <style>
+        :root {
+            --bg: #05070b;
+            --ink: #e7edf6;
+            --muted: #6b7587;
+            --tile-a: #141a25;
+            --tile-b: #10151e;
+            --cyan: 34 211 238;
+            --cyan-hi: 186 246 253;
+            --cyan-lo: 14 116 144;
+            --gold: 236 200 124;
+            --gap: 3px;
+            --pad: 10px;
+            --radius: 7px;
+            --vh: 100vh;
+            --ease: cubic-bezier(.65, 0, .25, 1);
+            --ease-out: cubic-bezier(.16, 1, .3, 1);
+            --spring: cubic-bezier(.34, 1.56, .64, 1);
+        }
+        @supports (height: 100svh) {
+            :root { --vh: 100svh; }
+        }
+
+        * { box-sizing: border-box; }
+
+        body {
+            margin: 0;
+            min-height: var(--vh);
+            font-family: 'Inter', system-ui, -apple-system, sans-serif;
+            color: var(--ink);
+            background: radial-gradient(ellipse 80% 60% at 50% 42%, #0e1422 0%, #080b12 45%, var(--bg) 80%) fixed, var(--bg);
+            overflow: hidden;
+            touch-action: manipulation;
+            -webkit-tap-highlight-color: transparent;
+            -webkit-font-smoothing: antialiased;
+            user-select: none;
+            -webkit-user-select: none;
+        }
+
+        /* --- ATMOSFERA --- */
+        #dust { position: fixed; inset: 0; z-index: 3; pointer-events: none; }
+        .vignette {
+            position: fixed; inset: 0; z-index: 1; pointer-events: none;
+            background: radial-gradient(ellipse 75% 70% at 50% 45%, transparent 50%, rgba(0, 0, 0, .6) 100%);
+        }
+        .grain {
+            position: fixed; inset: 0; z-index: 60; pointer-events: none; opacity: .05;
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='2' stitchTiles='stitch'/%3E%3CfeColorMatrix values='0 0 0 0 1 0 0 0 0 1 0 0 0 0 1 0 0 0 .6 0'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+        }
+
+        /* --- LAYOUT --- */
+        #game {
+            --rows: 5;
+            --cols: 5;
+            --cell: min(80px,
+                calc((100vw - 32px - 2 * var(--pad) + var(--gap)) / var(--cols) - var(--gap)),
+                calc((var(--vh) - 210px + var(--gap)) / var(--rows) - var(--gap)));
+            --board-w: calc(var(--cols) * var(--cell) + (var(--cols) - 1) * var(--gap) + 2 * var(--pad));
+            position: relative;
+            z-index: 2;
+            min-height: var(--vh);
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: max(16px, env(safe-area-inset-top)) 16px max(16px, env(safe-area-inset-bottom));
+        }
+
+        /* --- HUD --- */
+        .hud {
+            width: min(100%, max(300px, var(--board-w)));
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 26px;
+            padding: 0 2px;
+        }
+        .stats { display: flex; align-items: center; gap: clamp(14px, 5vw, 28px); }
+        .stat { display: flex; align-items: center; gap: 8px; }
+        .stat svg { width: 16px; height: 16px; color: var(--muted); }
+        .stat span {
+            display: inline-block;
+            min-width: 1ch;
+            font-size: 22px;
+            font-weight: 200;
+            line-height: 1;
+            font-variant-numeric: tabular-nums;
+        }
+        .stat.total span { color: rgb(var(--cyan)); text-shadow: 0 0 14px rgb(var(--cyan) / .5); }
+        .stat span.tick { animation: tick .45s var(--ease-out); }
+        @keyframes tick { from { opacity: 0; transform: translateY(-40%); filter: blur(2px); } }
+
+        .actions { display: flex; align-items: center; gap: 4px; margin-right: -8px; }
+        .icon-btn {
+            width: 40px;
+            height: 40px;
+            display: grid;
+            place-items: center;
+            padding: 0;
+            border: 0;
+            border-radius: 50%;
+            background: transparent;
+            color: var(--ink);
+            opacity: .55;
+            cursor: pointer;
+            transition: opacity .25s, background-color .25s, transform .15s;
+        }
+        .icon-btn svg { width: 20px; height: 20px; }
+        .icon-btn:disabled { opacity: .14; cursor: default; }
+        .icon-btn:active:not(:disabled) { transform: scale(.9); }
+        .icon-btn:focus-visible, .next-btn:focus-visible { outline: 1px solid rgb(var(--cyan) / .7); outline-offset: 2px; }
+        .icon-btn.spin svg { animation: spin .6s var(--ease-out); }
+        .icon-btn.nudge svg { animation: nudge .4s var(--ease-out); }
+        @keyframes spin { from { transform: rotate(-360deg); } }
+        @keyframes nudge { 40% { transform: translateX(-4px); } }
+
+        @media (hover: hover) {
+            .icon-btn:hover:not(:disabled) { opacity: 1; background: rgba(255, 255, 255, .05); }
+        }
+
+        /* --- TABULEIRO --- */
+        .stage { position: relative; }
+
+        .aura {
+            position: absolute;
+            inset: -20%;
+            border-radius: 50%;
+            background: radial-gradient(closest-side, rgb(var(--cyan) / .32), rgb(var(--cyan) / .08) 55%, transparent 78%);
+            filter: blur(26px);
+            opacity: var(--aura, .3);
+            transition: opacity 1.4s ease;
+            pointer-events: none;
+        }
+
+        .frame {
+            --t: 12px;
+            --k: rgb(var(--gold) / .45);
+            position: absolute;
+            inset: -14px;
+            pointer-events: none;
+            background:
+                linear-gradient(var(--k), var(--k)) top left / var(--t) 1px,
+                linear-gradient(var(--k), var(--k)) top left / 1px var(--t),
+                linear-gradient(var(--k), var(--k)) top right / var(--t) 1px,
+                linear-gradient(var(--k), var(--k)) top right / 1px var(--t),
+                linear-gradient(var(--k), var(--k)) bottom left / var(--t) 1px,
+                linear-gradient(var(--k), var(--k)) bottom left / 1px var(--t),
+                linear-gradient(var(--k), var(--k)) bottom right / var(--t) 1px,
+                linear-gradient(var(--k), var(--k)) bottom right / 1px var(--t);
+            background-repeat: no-repeat;
+        }
+        @media (max-width: 480px) {
+            .frame { inset: -8px; }
+        }
+
+        .board {
+            position: relative;
+            display: grid;
+            grid-template-columns: repeat(var(--cols), var(--cell));
+            grid-template-rows: repeat(var(--rows), var(--cell));
+            gap: var(--gap);
+            padding: var(--pad);
+            border-radius: calc(var(--radius) + var(--pad));
+            background: linear-gradient(180deg, #0b0f17, #07090e);
+            box-shadow:
+                0 0 0 1px rgba(255, 255, 255, .045),
+                inset 0 1px 0 rgba(255, 255, 255, .04),
+                0 40px 80px -30px rgba(0, 0, 0, .9);
+        }
+
+        .sq {
+            position: relative;
+            border-radius: var(--radius);
+            background: var(--tile-a);
+            box-shadow: inset 0 1px 0 rgba(255, 255, 255, .035), inset 0 -1px 0 rgba(0, 0, 0, .4);
+            cursor: pointer;
+            transition: background-color .25s;
+        }
+        .sq.alt { background: var(--tile-b); }
+        .sq.lit { z-index: 1; cursor: default; }
+        .sq.origin { outline: 1px solid rgba(231, 237, 246, .3); outline-offset: -1px; }
+
+        /* Bloqueio: campo de luz que se acende a partir do centro */
+        .glow {
+            position: absolute;
+            inset: 0;
+            border-radius: inherit;
+            pointer-events: none;
+            background: radial-gradient(110% 110% at 50% 30%, rgb(var(--cyan-hi) / .8), rgb(var(--cyan) / .55) 45%, rgb(var(--cyan-lo) / .6) 100%);
+            box-shadow:
+                inset 0 0 0 1px rgb(var(--cyan-hi) / .65),
+                inset 0 0 16px rgb(var(--cyan) / .55),
+                0 0 22px rgb(var(--cyan) / .35);
+            opacity: 0;
+            transform: scale(.5);
+            transition: opacity .35s ease-in var(--d, 0ms), transform .4s ease-in var(--d, 0ms);
+        }
+        .sq.lit .glow {
+            opacity: 1;
+            transform: none;
+            transition: opacity .3s ease-out var(--d, 0ms), transform .55s var(--spring) var(--d, 0ms);
+        }
+        .glow::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            border-radius: inherit;
+            background: radial-gradient(60% 45% at 50% 22%, rgba(255, 255, 255, .45), transparent 70%);
+            animation: breathe 5s ease-in-out infinite;
+            animation-delay: calc(var(--wave) * -.4s);
+        }
+        @keyframes breathe { 0%, 100% { opacity: .1; } 50% { opacity: .75; } }
+
+        .sq.flash::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            border-radius: inherit;
+            pointer-events: none;
+            background: radial-gradient(closest-side, #fff, rgb(var(--cyan-hi) / .7) 45%, rgb(var(--cyan) / 0));
+            animation: flash .7s ease-out var(--d, 0ms) both;
+        }
+        @keyframes flash {
+            0% { opacity: 0; transform: scale(.4); }
+            15% { opacity: .9; }
+            100% { opacity: 0; transform: scale(1.5); }
+        }
+
+        /* Casa de destino: um selo gravado na pedra */
+        .sigil {
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            color: rgb(var(--gold));
+            fill: none;
+            stroke: currentColor;
+            stroke-width: 1.3px;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+            filter: drop-shadow(0 0 3px rgb(var(--gold) / .6));
+            opacity: .75;
+            transition: color .4s ease var(--d, 0ms), opacity .4s, filter .4s;
+        }
+        .sigil path { vector-effect: non-scaling-stroke; }
+        .sigil .brackets, .sigil .rune, .sigil .core {
+            transform-box: view-box;
+            transform-origin: 50% 50%;
+        }
+        .sigil .brackets { transition: transform .6s var(--spring); }
+        .sigil .rune { animation: rune 4.5s ease-in-out infinite; }
+        .sigil .core { fill: currentColor; stroke: none; transition: opacity .3s; }
+        @keyframes rune { 0%, 100% { transform: scale(.88); opacity: .55; } 50% { transform: scale(1.04); opacity: 1; } }
+
+        .sq.lit .sigil { color: #052630; filter: none; opacity: .8; }
+        .sq.occupied .sigil { opacity: 1; }
+        .sq.occupied .sigil .brackets { transform: scale(.86); }
+
+        /* Movimentos possíveis */
+        .mark {
+            position: absolute;
+            left: 40%;
+            top: 40%;
+            width: 20%;
+            height: 20%;
+            border-radius: 50%;
+            pointer-events: none;
+            background: rgba(231, 237, 246, .85);
+            box-shadow: 0 0 10px rgba(231, 237, 246, .55);
+            opacity: 0;
+            transform: scale(0);
+            transition: transform .35s var(--spring) var(--md, 0ms), opacity .2s ease var(--md, 0ms);
+        }
+        .sq.move .mark { opacity: 1; transform: none; }
+        .sq.move.target .mark { background: rgb(var(--gold)); box-shadow: 0 0 12px rgb(var(--gold) / .8); }
+        .sq.move.target .core { opacity: 0; }
+
+        @media (hover: hover) {
+            .sq.move:hover { background: #1b2230; }
+            .sq.move:hover .mark { transform: scale(1.45); transition-delay: 0ms; }
+        }
+
+        /* Prévia do efeito do movimento (cruz de casas que alternam) */
+        .sq.pv-on::before {
+            content: '';
+            position: absolute;
+            inset: 3px;
+            z-index: 2;
+            border-radius: calc(var(--radius) - 2px);
+            border: 1px dashed rgb(var(--cyan) / .6);
+            pointer-events: none;
+        }
+        .sq.pv-off .glow { opacity: .35; transition: opacity .2s ease; }
+
+        /* --- PEÇAS --- */
+        .piece {
+            position: absolute;
+            left: var(--pad);
+            top: var(--pad);
+            z-index: 5;
+            width: var(--cell);
+            height: var(--cell);
+            pointer-events: none;
+            transform: translate(calc(var(--c) * (var(--cell) + var(--gap))), calc(var(--r) * (var(--cell) + var(--gap))));
+            transition: transform var(--dur, 300ms) var(--move-ease, var(--ease));
+        }
+        .piece.moving { z-index: 7; }
+        .piece.instant { transition: none; }
+
+        .piece-shadow {
+            position: absolute;
+            left: 22%;
+            right: 22%;
+            bottom: 7%;
+            height: 13%;
+            border-radius: 50%;
+            background: radial-gradient(closest-side, rgba(0, 0, 0, .65), transparent);
+            transition: transform .3s var(--ease-out), opacity .3s;
+        }
+        .piece-halo {
+            position: absolute;
+            inset: 4%;
+            border-radius: 50%;
+            background: radial-gradient(closest-side, rgb(var(--gold) / .55), rgb(var(--gold) / .12) 60%, transparent);
+            opacity: 0;
+            transform: scale(.6);
+            transition: opacity .6s ease, transform .8s var(--ease-out);
+        }
+        .piece.home .piece-halo { opacity: 1; transform: none; }
+
+        .piece-body {
+            position: absolute;
+            inset: 0;
+            display: grid;
+            place-items: center;
+            transform-origin: 50% 85%;
+            transition: transform .3s var(--spring);
+        }
+        .piece-body svg {
+            width: 82%;
+            height: 82%;
+            overflow: visible;
+            filter: drop-shadow(0 2px 2px rgba(0, 0, 0, .6));
+            transition: filter .3s;
+        }
+        .piece.selected .piece-body { transform: translateY(-10%) scale(1.06); }
+        .piece.selected .piece-body svg {
+            filter: drop-shadow(0 0 6px rgba(231, 237, 246, .6)) drop-shadow(0 9px 6px rgba(0, 0, 0, .45));
+        }
+        .piece.selected .piece-shadow { transform: scale(.72); opacity: .45; }
+
+        .p-body { fill: url(#pearl); stroke: rgba(8, 12, 20, .55); stroke-width: 1.4; stroke-linejoin: round; }
+        .piece.home .p-body { fill: url(#pearl-gold); }
+        .p-det { fill: none; stroke: rgba(8, 12, 20, .45); stroke-width: 1.6; stroke-linecap: round; }
+        .p-dot { fill: rgba(8, 12, 20, .7); }
+
+        /* --- EFEITOS --- */
+        .fx {
+            position: absolute;
+            inset: var(--pad);
+            z-index: 4;
+            overflow: hidden;
+            border-radius: var(--radius);
+            pointer-events: none;
+        }
+        .pulse {
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: var(--cell);
+            height: var(--cell);
+            transform: translate(calc(var(--c) * (var(--cell) + var(--gap))), calc(var(--r) * (var(--cell) + var(--gap))));
+        }
+        .pulse::before, .pulse::after {
+            content: '';
+            position: absolute;
+            border-radius: var(--radius);
+            opacity: 0;
+        }
+        .pulse::before {
+            top: 34%;
+            bottom: 34%;
+            left: calc(-1 * (var(--cell) + var(--gap)));
+            right: calc(-1 * (var(--cell) + var(--gap)));
+            background: linear-gradient(90deg, transparent, rgb(var(--cyan-hi) / .9) 35%, #fff 50%, rgb(var(--cyan-hi) / .9) 65%, transparent);
+            animation: beam-h .7s var(--ease-out) forwards;
+        }
+        .pulse::after {
+            left: 34%;
+            right: 34%;
+            top: calc(-1 * (var(--cell) + var(--gap)));
+            bottom: calc(-1 * (var(--cell) + var(--gap)));
+            background: linear-gradient(180deg, transparent, rgb(var(--cyan-hi) / .9) 35%, #fff 50%, rgb(var(--cyan-hi) / .9) 65%, transparent);
+            animation: beam-v .7s var(--ease-out) forwards;
+        }
+        @keyframes beam-h { 0% { opacity: .9; transform: scaleX(.15); } 100% { opacity: 0; transform: scaleX(1); } }
+        @keyframes beam-v { 0% { opacity: .9; transform: scaleY(.15); } 100% { opacity: 0; transform: scaleY(1); } }
+
+        /* --- PROGRESSO (um losango por destino) --- */
+        .seals { display: flex; justify-content: center; gap: 13px; height: 12px; margin-top: 30px; }
+        .seal {
+            width: 8px;
+            height: 8px;
+            border: 1px solid rgb(var(--gold) / .45);
+            transform: rotate(45deg);
+            transition: background-color .4s, border-color .4s, box-shadow .4s, transform .5s var(--spring);
+        }
+        .seal.on {
+            background: rgb(var(--gold));
+            border-color: rgb(var(--gold));
+            box-shadow: 0 0 10px rgb(var(--gold) / .8);
+            transform: rotate(45deg) scale(1.2);
+        }
+
+        /* --- TRANSIÇÕES DE NÍVEL --- */
+        .level-card {
+            position: absolute;
+            inset: 0;
+            z-index: 8;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: clamp(14px, 4vw, 22px);
+            pointer-events: none;
+            opacity: 0;
+        }
+        .level-card .num {
+            font-size: clamp(64px, 18vw, 128px);
+            font-weight: 200;
+            line-height: 1;
+            font-variant-numeric: tabular-nums;
+            text-shadow: 0 0 34px rgb(var(--cyan) / .55);
+        }
+        .level-card .line { width: clamp(28px, 9vw, 64px); height: 1px; background: linear-gradient(90deg, transparent, rgb(var(--gold) / .8)); }
+        .level-card .line:last-child { transform: scaleX(-1); }
+        .level-card.show { animation: card 1.5s var(--ease) both; }
+        @keyframes card {
+            0% { opacity: 0; filter: blur(10px); transform: scale(1.1); }
+            25% { opacity: 1; filter: blur(0); transform: none; }
+            45% { opacity: 1; filter: blur(0); transform: none; }
+            100% { opacity: 0; filter: blur(8px); transform: scale(.96); }
+        }
+
+        .board.building .sq { animation: tile-in .7s var(--ease-out) both; animation-delay: calc(var(--bd) + 550ms); }
+        .board.building .piece-body { animation: piece-in .75s var(--spring) both; animation-delay: var(--bd); }
+        .board.building .piece-shadow { animation: fade-in .6s ease both; animation-delay: var(--bd); }
+        @keyframes tile-in { from { opacity: 0; transform: scale(.55); } }
+        @keyframes piece-in { from { opacity: 0; transform: translateY(-45%) scale(.9); } }
+        @keyframes fade-in { from { opacity: 0; } }
+
+        .board.leaving .sq { animation: tile-out .5s var(--ease) both; animation-delay: var(--bd); }
+        .board.leaving .piece { animation: piece-out .45s ease-in both; }
+        @keyframes tile-out { to { opacity: 0; transform: scale(.6); } }
+        @keyframes piece-out { to { opacity: 0; filter: blur(4px); } }
+
+        .board.solved .sigil { color: rgb(var(--gold)); filter: drop-shadow(0 0 7px rgb(var(--gold))); opacity: 1; }
+        .board.solved .piece-body svg { filter: drop-shadow(0 0 9px rgb(var(--gold) / .75)) drop-shadow(0 2px 2px rgba(0, 0, 0, .5)); }
+
+        /* --- VITÓRIA --- */
+        .veil {
+            position: fixed;
+            inset: 0;
+            z-index: 50;
+            display: grid;
+            place-items: center;
+            background: radial-gradient(ellipse at 50% 45%, rgba(5, 7, 11, .5), rgba(5, 7, 11, .92));
+            -webkit-backdrop-filter: blur(6px);
+            backdrop-filter: blur(6px);
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity .7s ease, visibility 0s linear .7s;
+        }
+        .veil.open { opacity: 1; visibility: visible; transition: opacity .7s ease; }
+        .win { display: flex; flex-direction: column; align-items: center; gap: 26px; }
+        .win-seal {
+            width: 120px;
+            height: 120px;
+            overflow: visible;
+            color: rgb(var(--gold));
+            fill: none;
+            stroke: currentColor;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+            filter: drop-shadow(0 0 10px rgb(var(--gold) / .55));
+        }
+        .win-seal .ring { stroke-width: 1; opacity: .5; stroke-dasharray: 340; stroke-dashoffset: 340; }
+        .win-seal .dia { stroke-width: 1.3; stroke-dasharray: 205; stroke-dashoffset: 205; }
+        .win-seal .chk { stroke-width: 2.4; stroke-dasharray: 46; stroke-dashoffset: 46; }
+        .veil.open .ring { animation: draw 1.4s var(--ease) .1s forwards; }
+        .veil.open .dia { animation: draw 1s var(--ease) .3s forwards; }
+        .veil.open .chk { animation: draw .5s var(--ease-out) 1s forwards; }
+        @keyframes draw { to { stroke-dashoffset: 0; } }
+
+        .win-moves { display: flex; align-items: center; gap: 10px; opacity: 0; }
+        .win-moves svg { width: 22px; height: 22px; color: var(--muted); }
+        .win-moves span { font-size: 36px; font-weight: 200; line-height: 1; font-variant-numeric: tabular-nums; }
+        .win-next { opacity: 0; }
+        .veil.open .win-moves { animation: rise .8s var(--ease-out) .55s both; }
+        .veil.open .win-next { animation: rise .8s var(--ease-out) .8s both; }
+        @keyframes rise { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: none; } }
+
+        .next-btn {
+            width: 64px;
+            height: 64px;
+            display: grid;
+            place-items: center;
+            padding: 0;
+            border: 1px solid rgb(var(--gold) / .35);
+            border-radius: 50%;
+            background: rgb(var(--gold) / .04);
+            color: var(--ink);
+            cursor: pointer;
+            animation: beckon 2.8s ease-in-out 2s infinite;
+            transition: border-color .3s, background-color .3s, transform .2s;
+        }
+        .next-btn svg { width: 26px; height: 26px; }
+        .next-btn:active { transform: scale(.93); }
+        @keyframes beckon { 0%, 100% { box-shadow: 0 0 0 0 rgb(var(--gold) / 0); } 50% { box-shadow: 0 0 26px 2px rgb(var(--gold) / .25); } }
+        @media (hover: hover) {
+            .next-btn:hover { border-color: rgb(var(--gold) / .85); background: rgb(var(--gold) / .1); }
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            *, *::before, *::after {
+                animation-duration: 1ms !important;
+                animation-delay: 0ms !important;
+                animation-iteration-count: 1 !important;
+                transition-duration: 1ms !important;
+                transition-delay: 0ms !important;
+            }
+        }
+    </style>
+<style>.hosting-guide{font:13px/1.4 system-ui,sans-serif;display:inline-block;padding:7px 10px;border-radius:8px;color:inherit;text-decoration:underline}header{flex-wrap:wrap}</style></head>
+<body>
+    <svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+        <defs>
+            <linearGradient id="pearl" x1="0" y1="0" x2=".35" y2="1">
+                <stop offset="0" stop-color="#ffffff"/>
+                <stop offset=".55" stop-color="#e3e9f2"/>
+                <stop offset="1" stop-color="#a9b6c9"/>
+            </linearGradient>
+            <linearGradient id="pearl-gold" x1="0" y1="0" x2=".35" y2="1">
+                <stop offset="0" stop-color="#fffdf7"/>
+                <stop offset=".55" stop-color="#f1e6cd"/>
+                <stop offset="1" stop-color="#c4a873"/>
+            </linearGradient>
+        </defs>
+    </svg>
+
+    <div class="vignette" aria-hidden="true"></div>
+    <canvas id="dust" aria-hidden="true"></canvas>
+
+    <main id="game">
+        <header class="hud">
+            <div class="stats">
+                <div class="stat" title="Level">
+                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"></path></svg>
+                    <span id="level-display">1</span>
+                </div>
+                <div class="stat" title="Level Moves">
+                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 5l7 7-7 7M5 5l7 7-7 7"></path></svg>
+                    <span id="moves-display">0</span>
+                </div>
+                <div class="stat total" title="Total Accumulated Moves">
+                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18 6H6l6 6-6 6h12"></path></svg>
+                    <span id="total-moves-display">0</span>
+                </div>
+            </div>
+
+            <div class="actions">
+                <button id="btn-undo" class="icon-btn" title="Undo (Z)" aria-label="Undo">
+                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M3 10h10a8 8 0 018 8v2M3 10l6 6m-6-6l6-6"></path></svg>
+                </button>
+                <button id="btn-reset" class="icon-btn" title="Restart (R)" aria-label="Restart">
+                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.75" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path></svg>
+                </button>
+            </div>
+        <a class="hosting-guide" href="help.html">Rules &amp; source</a></header>
+
+        <div class="stage">
+            <div class="aura" aria-hidden="true"></div>
+            <div class="frame" aria-hidden="true"></div>
+            <div id="board" class="board">
+                <!-- Casas, efeitos e peças são gerados aqui -->
+            </div>
+            <div id="level-card" class="level-card" aria-hidden="true">
+                <i class="line"></i><span class="num">1</span><i class="line"></i>
+            </div>
+        </div>
+
+        <div id="seals" class="seals" aria-hidden="true"></div>
+    </main>
+
+    <!-- Vitória -->
+    <div id="win-modal" class="veil" aria-hidden="true">
+        <div class="win" role="dialog" aria-label="Level complete">
+            <svg class="win-seal" viewBox="0 0 120 120" aria-hidden="true">
+                <circle class="ring" cx="60" cy="60" r="54"/>
+                <path class="dia" d="M60 24 96 60 60 96 24 60Z"/>
+                <path class="chk" d="M47 61 56 70 74 51"/>
+            </svg>
+            <div class="win-moves" title="Level Moves">
+                <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 5l7 7-7 7M5 5l7 7-7 7"></path></svg>
+                <span id="win-moves">0</span>
+            </div>
+            <div class="win-next">
+                <button id="btn-next" class="next-btn" title="Next Level" aria-label="Next level">
+                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9 5l7 7-7 7"></path></svg>
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <div class="grain" aria-hidden="true"></div>
+
+    <script>
+        const PIECE_BASE = '<path class="p-body" d="M24 90 L76 90 L76 85 Q76 80.5 71 80.5 L29 80.5 Q24 80.5 24 85 Z"/>';
+        const PIECE_SVG = {
+            'N': PIECE_BASE + '<path class="p-body" d="M32 80.5 C33 71 40 63 46 55 C40 58.5 32 62 26.5 60.5 C20.5 59 18 53 20.5 48 C25 40 32 30 39.5 23.5 L45 11 L53.5 18.5 C66 23.5 74.5 38 73 55 C72.5 66 71 74 70 80.5 Z"/><circle class="p-dot" cx="39" cy="32" r="2.6"/><circle class="p-dot" cx="23.6" cy="51" r="1.3"/><path class="p-det" d="M57 24 C65 32 68 44 66.5 58"/>',
+            'B': PIECE_BASE + '<path class="p-body" d="M33 80.5 Q40 72 41 61 L59 61 Q60 72 67 80.5 Z"/><path class="p-body" d="M37 57 H63 Q65.5 59 63 61.5 H37 Q34.5 59 37 57 Z"/><path class="p-body" d="M50 19 C63 28 67.5 41 63 52 Q61 57 56 57 L44 57 Q39 57 37 52 C32.5 41 37 28 50 19 Z"/><circle class="p-body" cx="50" cy="14" r="5"/><path class="p-det" d="M55.5 31 L46.5 43"/>',
+            'R': PIECE_BASE + '<path class="p-body" d="M31 80.5 L35 74 L36.5 46 L31 41 L31 22 L39.5 22 L39.5 29 L45.5 29 L45.5 22 L54.5 22 L54.5 29 L60.5 29 L60.5 22 L69 22 L69 41 L63.5 46 L65 74 L69 80.5 Z"/><path class="p-det" d="M36.5 46 H63.5 M35.5 74 H64.5"/>',
+            'Q': PIECE_BASE + '<path class="p-body" d="M31 80.5 Q40 68 42 54 L58 54 Q60 68 69 80.5 Z"/><path class="p-body" d="M37 49 H63 Q66 51.5 63 54.5 H37 Q34 51.5 37 49 Z"/><path class="p-body" d="M37 49 L27 27 L39.5 39 L40 21 L47 37 L50 17 L53 37 L60 21 L60.5 39 L73 27 L63 49 Z"/><circle class="p-body" cx="27" cy="25" r="3.6"/><circle class="p-body" cx="40" cy="19" r="3.6"/><circle class="p-body" cx="50" cy="14.5" r="3.8"/><circle class="p-body" cx="60" cy="19" r="3.6"/><circle class="p-body" cx="73" cy="25" r="3.6"/>'
+        };
+
+        const SIGIL_SVG = '<svg class="sigil" viewBox="0 0 100 100" aria-hidden="true">' +
+            '<path class="brackets" d="M12 27V12h15M73 12h15v15M88 73v15H73M27 88H12V73"/>' +
+            '<path class="rune" d="M50 34 66 50 50 66 34 50Z"/>' +
+            '<path class="core" d="M50 45 55 50 50 55 45 50Z"/>' +
+            '</svg>';
+
+        const REDUCED_MOTION = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+        const T = ms => REDUCED_MOTION ? 0 : ms;
+
+        let currentLevelIndex = 0;
+        let currentLevelData = null;
+        let boardRows = 5;
+        let boardCols = 5;
+
+        let previousLevelsTotalMoves = 0;
+
+        let gameState = {
+            pieces: [],
+            lights: [],
+            moves: 0
+        };
+        let history = [];
+        let selectedPieceId = null;
+        let validMoves = []; // Array of {r, c}
+
+        let busy = false;       // Trava a entrada durante transições de nível e vitória
+        let renderToken = 0;    // Invalida efeitos agendados quando o estado muda de novo
+        let squareEls = [];     // [r][c] -> elemento da casa
+        let pieceEls = {};      // id -> elemento da peça
+        let fxLayer = null;
+
+        const gameElement = document.getElementById('game');
+        const boardElement = document.getElementById('board');
+
+        function initGame() {
+            document.getElementById('btn-undo').addEventListener('click', undoMove);
+            document.getElementById('btn-reset').addEventListener('click', resetLevel);
+            document.getElementById('btn-next').addEventListener('click', nextLevel);
+            boardElement.addEventListener('click', e => {
+                const sq = e.target.closest('.sq');
+                if (sq) handleSquareClick(+sq.dataset.r, +sq.dataset.c);
+            });
+            boardElement.addEventListener('pointerover', handlePreview);
+            boardElement.addEventListener('pointerleave', clearPreview);
+            document.addEventListener('keydown', handleKey);
+
+            loadLevel(currentLevelIndex);
+        }
+
+        // --- SISTEMA DE GERAÇÃO REVERSA ---
+        function generateLevel(index) {
+            // Aumenta o tabuleiro mais rápido (a cada 2 níveis em vez de 3) para dar espaço
+            const rows = Math.min(5 + Math.floor(index / 2), 8);
+            const cols = rows;
+            const numPieces = Math.min(2 + Math.floor(index / 2), 7);
+
+            let levelData = null;
+            let attempt = 0;
+
+            // Tenta gerar tabuleiros
+            while (!levelData && attempt < 300) {
+                attempt++;
+                levelData = tryGenerate(rows, cols, numPieces, index);
+            }
+
+            if (!levelData) {
+                console.warn(`Falha após 300 tentativas no índice ${index}. Reduzindo dificuldade...`);
+                return generateLevel(Math.max(0, index - 1)); // Tenta mais fácil se falhar
+            }
+            return levelData;
+        }
+
+        function getPiecePool(num) {
+            const pool = ['N', 'R'];
+            if (num > 2) pool.push('B');
+            if (num > 3) pool.push('Q');
+            if (num > 4) pool.push('N');
+            if (num > 5) pool.push('R');
+            if (num > 6) pool.push('B');
+            return pool.slice(0, num);
+        }
+
+        function tryGenerate(rows, cols, numPieces, index) {
+            // 1. Escolhe os destinos (Estado de Vitória)
+            let targets = [];
+            while(targets.length < numPieces) {
+                let r = Math.floor(Math.random() * rows);
+                let c = Math.floor(Math.random() * cols);
+                if (!targets.some(t => t.r === r && t.c === c)) targets.push({r, c});
+            }
+
+            // 2. Coloca as peças nos destinos
+            const pieceTypes = getPiecePool(numPieces);
+            let pieces = targets.map((t, i) => ({
+                id: 'p' + (i+1),
+                type: pieceTypes[i],
+                r: t.r,
+                c: t.c
+            }));
+
+            boardRows = rows; // Atualiza globais para as funções auxiliares
+            boardCols = cols;
+
+            // 3. Luzes iniciais aleatórias (ESTADO DE VITÓRIA CORRIGIDO)
+            // As casas de destino precisam estar acesas para podermos reverter a saída da peça.
+            let lights = [];
+            targets.forEach(t => {
+                lights.push({r: t.r, c: t.c});
+            });
+            // Ruído aleatório no resto do tabuleiro
+            for (let r=0; r<rows; r++) {
+                for (let c=0; c<cols; c++) {
+                    if (!targets.some(t => t.r === r && t.c === c) && Math.random() < 0.1) {
+                        lights.push({r, c});
+                    }
+                }
+            }
+
+            // 4. Embaralhamento Reverso (Scramble)
+            const scrambleSteps = 15 + index * 5;
+            let actualSteps = 0;
+
+            for (let i = 0; i < scrambleSteps; i++) {
+                let allPossibleReverses = [];
+                for (let piece of pieces) {
+                    let moves = getReverseMoves(piece, lights, pieces);
+                    moves.forEach(m => allPossibleReverses.push({piece, toR: m.r, toC: m.c}));
+                }
+
+                if (allPossibleReverses.length === 0) break; // Sem movimentos reversos possíveis
+
+                // Escolhe um movimento reverso aleatório
+                let move = allPossibleReverses[Math.floor(Math.random() * allPossibleReverses.length)];
+
+                // Aplica a reversão (Luzes desfazem o toggle, peça volta pra casa anterior)
+                lights = simulateToggle(move.piece.r, move.piece.c, lights);
+                move.piece.r = move.toR;
+                move.piece.c = move.toC;
+                actualSteps++;
+            }
+
+            // Verifica se o embaralhamento foi bom o suficiente
+            let piecesOnTargets = pieces.filter(p => targets.some(t => t.r === p.r && t.c === p.c)).length;
+
+            if (actualSteps < scrambleSteps * 0.25 || piecesOnTargets >= Math.max(1, Math.ceil(numPieces / 2))) {
+                return null; // Muito fácil ou travado muito cedo, gera novamente
+            }
+
+            return { rows, cols, targets, pieces, initialLights: lights };
+        }
+
+        function getReverseMoves(piece, currentLights, allPieces) {
+            // A luz ANTES do movimento é o estado atual togglado na posição atual da peça
+            const prevLights = simulateToggle(piece.r, piece.c, currentLights);
+
+            // Regra: A peça não poderia ter pousado aqui se a casa já estivesse acesa antes do toggle!
+            if (isLitInState(piece.r, piece.c, prevLights)) return [];
+
+            let reverseMoves = [];
+
+            if (piece.type === 'N') {
+                const knightDirs = [[-2, -1], [-2, 1], [-1, -2], [-1, 2], [1, -2], [1, 2], [2, -1], [2, 1]];
+                knightDirs.forEach(dir => {
+                    let nr = piece.r + dir[0];
+                    let nc = piece.c + dir[1];
+                    if (nr >= 0 && nr < boardRows && nc >= 0 && nc < boardCols && !getPieceAt(nr, nc, allPieces)) {
+                        reverseMoves.push({r: nr, c: nc});
+                    }
+                });
+            } else {
+                let directions = [];
+                if (piece.type === 'R' || piece.type === 'Q') directions.push([-1,0], [1,0], [0,-1], [0,1]);
+                if (piece.type === 'B' || piece.type === 'Q') directions.push([-1,-1], [-1,1], [1,-1], [1,1]);
+
+                directions.forEach(dir => {
+                    let nr = piece.r + dir[0];
+                    let nc = piece.c + dir[1];
+                    while (nr >= 0 && nr < boardRows && nc >= 0 && nc < boardCols) {
+                        if (isLitInState(nr, nc, prevLights)) break; // Raio bloqueado por luz
+                        if (getPieceAt(nr, nc, allPieces)) break; // Raio bloqueado por peça
+
+                        reverseMoves.push({r: nr, c: nc});
+                        nr += dir[0];
+                        nc += dir[1];
+                    }
+                });
+            }
+            return reverseMoves;
+        }
+
+        function simulateToggle(r, c, currentLights) {
+            let newLights = [...currentLights];
+            const coordsToToggle = [
+                {r: r, c: c}, {r: r - 1, c: c}, {r: r + 1, c: c}, {r: r, c: c - 1}, {r: r, c: c + 1}
+            ];
+            coordsToToggle.forEach(coord => {
+                if (coord.r >= 0 && coord.r < boardRows && coord.c >= 0 && coord.c < boardCols) {
+                    const idx = newLights.findIndex(l => l.r === coord.r && l.c === coord.c);
+                    if (idx >= 0) newLights.splice(idx, 1);
+                    else newLights.push({r: coord.r, c: coord.c});
+                }
+            });
+            return newLights;
+        }
+
+        function isLitInState(r, c, stateLights) {
+            return stateLights.some(l => l.r === r && l.c === c);
+        }
+
+
+        // --- LÓGICA DO JOGO ---
+
+        function loadLevel(index) {
+            setStat('level-display', index + 1);
+
+            currentLevelData = generateLevel(index);
+            boardRows = currentLevelData.rows;
+            boardCols = currentLevelData.cols;
+
+            buildBoard();
+            resetLevelState(true);
+            playIntro(index + 1);
+        }
+
+        function resetLevel() {
+            if (busy || history.length === 0) return;
+            replayClass(document.getElementById('btn-reset'), 'spin', 600);
+            resetLevelState(false);
+        }
+
+        function resetLevelState(instant) {
+            gameState = {
+                pieces: JSON.parse(JSON.stringify(currentLevelData.pieces)),
+                lights: JSON.parse(JSON.stringify(currentLevelData.initialLights)),
+                moves: 0
+            };
+            history = [];
+            selectedPieceId = null;
+            validMoves = [];
+            renderToken++;
+            clearPreview();
+
+            const dur = instant ? 0 : T(520);
+            gameState.pieces.forEach(p => {
+                if (instant) placePieceInstantly(p);
+                else movePiece(p, dur, false);
+            });
+            syncLights(instant ? null : (r, c) => T(140) + (r + c) * T(35), !instant);
+            renderSelection();
+            updateUI();
+            afterArrival(syncOccupancy, dur);
+        }
+
+        function saveState() {
+            history.push(JSON.parse(JSON.stringify(gameState)));
+        }
+
+        function undoMove() {
+            if (busy || history.length === 0) return;
+            replayClass(document.getElementById('btn-undo'), 'nudge', 400);
+
+            const prev = history.pop();
+            let landing = null;
+            let dur = T(300);
+            prev.pieces.forEach(p => {
+                const cur = gameState.pieces.find(q => q.id === p.id);
+                if (cur.r !== p.r || cur.c !== p.c) {
+                    landing = { r: cur.r, c: cur.c };
+                    dur = travelTime(p.type, cur, p);
+                    movePiece(p, dur, p.type === 'N');
+                }
+            });
+
+            gameState = prev;
+            selectedPieceId = null;
+            validMoves = [];
+            renderToken++;
+            clearPreview();
+
+            syncLights((r, c) => landing ? manhattan(r, c, landing.r, landing.c) * T(70) : 0, false);
+            renderSelection();
+            updateUI();
+            afterArrival(syncOccupancy, dur);
+        }
+
+        function updateUI() {
+            setStat('moves-display', gameState.moves);
+            setStat('total-moves-display', previousLevelsTotalMoves + gameState.moves);
+            document.getElementById('btn-undo').disabled = history.length === 0;
+            document.getElementById('btn-reset').disabled = history.length === 0;
+        }
+
+        function setStat(id, value) {
+            const el = document.getElementById(id);
+            if (el.textContent === String(value)) return;
+            el.textContent = value;
+            replayClass(el, 'tick', 450);
+        }
+
+        // Reinicia uma animação CSS mesmo que a classe já esteja aplicada
+        function replayClass(el, cls, ms) {
+            el.classList.remove(cls);
+            void el.offsetWidth;
+            el.classList.add(cls);
+            clearTimeout(el['_' + cls]);
+            el['_' + cls] = setTimeout(() => el.classList.remove(cls), ms);
+        }
+
+        // Executa fn quando a peça chega, a menos que outro movimento aconteça antes
+        function afterArrival(fn, delay) {
+            const token = renderToken;
+            setTimeout(() => { if (token === renderToken) fn(); }, delay);
+        }
+
+        // --- RENDERIZAÇÃO ---
+
+        function buildBoard() {
+            gameElement.style.setProperty('--rows', boardRows);
+            gameElement.style.setProperty('--cols', boardCols);
+            boardElement.innerHTML = '';
+            squareEls = [];
+
+            const midR = (boardRows - 1) / 2;
+            const midC = (boardCols - 1) / 2;
+
+            for (let r = 0; r < boardRows; r++) {
+                squareEls.push([]);
+                for (let c = 0; c < boardCols; c++) {
+                    const square = document.createElement('div');
+                    square.className = 'sq' + ((r + c) % 2 ? ' alt' : '');
+                    square.dataset.r = r;
+                    square.dataset.c = c;
+                    square.style.setProperty('--wave', r + c);
+                    square.style.setProperty('--bd', Math.round(Math.hypot(r - midR, c - midC) * 60) + 'ms');
+
+                    const target = isTarget(r, c);
+                    if (target) square.classList.add('target');
+                    square.innerHTML = '<i class="glow"></i>' + (target ? SIGIL_SVG : '') + '<i class="mark"></i>';
+
+                    boardElement.appendChild(square);
+                    squareEls[r].push(square);
+                }
+            }
+
+            fxLayer = document.createElement('div');
+            fxLayer.className = 'fx';
+            boardElement.appendChild(fxLayer);
+
+            pieceEls = {};
+            currentLevelData.pieces.forEach((p, i) => {
+                const pieceEl = document.createElement('div');
+                pieceEl.className = 'piece';
+                pieceEl.style.setProperty('--bd', (900 + i * 110) + 'ms');
+                pieceEl.innerHTML =
+                    '<div class="piece-shadow"></div><div class="piece-halo"></div>' +
+                    '<div class="piece-body"><svg viewBox="0 0 100 100" aria-hidden="true">' + PIECE_SVG[p.type] + '</svg></div>';
+                boardElement.appendChild(pieceEl);
+                pieceEls[p.id] = pieceEl;
+            });
+
+            document.getElementById('seals').innerHTML = currentLevelData.targets.map(() => '<i class="seal"></i>').join('');
+        }
+
+        function placePieceInstantly(p) {
+            const el = pieceEls[p.id];
+            el.classList.add('instant');
+            el.style.setProperty('--r', p.r);
+            el.style.setProperty('--c', p.c);
+            void el.offsetWidth;
+            el.classList.remove('instant');
+        }
+
+        function travelTime(type, from, to) {
+            if (REDUCED_MOTION) return 0;
+            if (type === 'N') return 440;
+            const dist = Math.max(Math.abs(from.r - to.r), Math.abs(from.c - to.c));
+            return Math.min(190 + dist * 75, 600);
+        }
+
+        function movePiece(p, dur, hop) {
+            const el = pieceEls[p.id];
+            const body = el.querySelector('.piece-body');
+            el.classList.add('moving');
+            el.style.setProperty('--dur', dur + 'ms');
+            el.style.setProperty('--move-ease', hop ? 'cubic-bezier(.45, 0, .55, 1)' : 'var(--ease)');
+            el.style.setProperty('--r', p.r);
+            el.style.setProperty('--c', p.c);
+
+            if (dur === 0) {
+                el.classList.remove('moving');
+                return;
+            }
+            if (hop) {
+                // O cavalo salta por cima de tudo
+                body.animate([
+                    { transform: 'translateY(0) scale(1)' },
+                    { transform: 'translateY(-38%) scale(1.12)', offset: .45 },
+                    { transform: 'translateY(0) scale(1)' }
+                ], { duration: dur, easing: 'cubic-bezier(.4, 0, .6, 1)' });
+            }
+            clearTimeout(el._land);
+            el._land = setTimeout(() => {
+                el.classList.remove('moving');
+                body.animate([
+                    { transform: 'scale(1.07, .9)' },
+                    { transform: 'scale(1)' }
+                ], { duration: 280, easing: 'cubic-bezier(.34, 1.56, .64, 1)' });
+            }, dur);
+        }
+
+        // Sincroniza as luzes com o estado; delayFn define quando cada casa reage
+        function syncLights(delayFn, withFlash = true) {
+            for (let r = 0; r < boardRows; r++) {
+                for (let c = 0; c < boardCols; c++) {
+                    const sq = squareEls[r][c];
+                    const lit = isLit(r, c);
+                    if (sq.classList.contains('lit') === lit) continue;
+
+                    const d = delayFn ? delayFn(r, c) : 0;
+                    sq.style.setProperty('--d', d + 'ms');
+                    sq.classList.toggle('lit', lit);
+                    if (lit && withFlash && delayFn) replayClass(sq, 'flash', d + 650);
+                }
+            }
+            const ratio = gameState.lights.length / (boardRows * boardCols);
+            gameElement.style.setProperty('--aura', Math.min(1, .2 + ratio * 1.3).toFixed(2));
+        }
+
+        function renderSelection() {
+            const selected = gameState.pieces.find(p => p.id === selectedPieceId);
+            for (let r = 0; r < boardRows; r++) {
+                for (let c = 0; c < boardCols; c++) {
+                    const sq = squareEls[r][c];
+                    const isMove = validMoves.some(m => m.r === r && m.c === c);
+                    if (isMove) sq.style.setProperty('--md', T(Math.max(Math.abs(r - selected.r), Math.abs(c - selected.c)) * 40) + 'ms');
+                    sq.classList.toggle('move', isMove);
+                    sq.classList.toggle('origin', !!selected && selected.r === r && selected.c === c);
+                }
+            }
+            gameState.pieces.forEach(p => pieceEls[p.id].classList.toggle('selected', p.id === selectedPieceId));
+        }
+
+        function syncOccupancy() {
+            let filled = 0;
+            currentLevelData.targets.forEach(t => {
+                const occupied = !!getPieceAt(t.r, t.c, gameState.pieces);
+                squareEls[t.r][t.c].classList.toggle('occupied', occupied);
+                if (occupied) filled++;
+            });
+            gameState.pieces.forEach(p => pieceEls[p.id].classList.toggle('home', isTarget(p.r, p.c)));
+            document.querySelectorAll('.seal').forEach((s, i) => s.classList.toggle('on', i < filled));
+        }
+
+        // Onda de luz em cruz: mostra exatamente quais casas o pouso alterna
+        function pulseAt(r, c) {
+            if (REDUCED_MOTION) return;
+            const pulse = document.createElement('div');
+            pulse.className = 'pulse';
+            pulse.style.setProperty('--r', r);
+            pulse.style.setProperty('--c', c);
+            fxLayer.appendChild(pulse);
+            setTimeout(() => pulse.remove(), 800);
+        }
+
+        function handlePreview(e) {
+            if (e.pointerType !== 'mouse') return;
+            clearPreview();
+            const sq = e.target.closest('.sq');
+            if (!sq || !selectedPieceId || busy) return;
+            const r = +sq.dataset.r;
+            const c = +sq.dataset.c;
+            if (!validMoves.some(m => m.r === r && m.c === c)) return;
+
+            [[0, 0], [-1, 0], [1, 0], [0, -1], [0, 1]].forEach(([dr, dc]) => {
+                const nr = r + dr;
+                const nc = c + dc;
+                if (!isWithinBounds(nr, nc)) return;
+                const cell = squareEls[nr][nc];
+                cell.style.setProperty('--d', '0ms');
+                cell.classList.add(isLit(nr, nc) ? 'pv-off' : 'pv-on');
+            });
+        }
+
+        function clearPreview() {
+            boardElement.querySelectorAll('.pv-on, .pv-off').forEach(sq => sq.classList.remove('pv-on', 'pv-off'));
+        }
+
+        function playIntro(levelNumber) {
+            busy = true;
+            const card = document.getElementById('level-card');
+            card.querySelector('.num').textContent = levelNumber;
+            replayClass(card, 'show', 1500);
+            boardElement.classList.add('building');
+            setTimeout(() => { busy = false; }, T(1200));
+            setTimeout(() => boardElement.classList.remove('building'), T(2200));
+        }
+
+        // --- INTERAÇÃO ---
+
+        function handleSquareClick(r, c) {
+            if (busy) return;
+            const clickedPiece = getPieceAt(r, c, gameState.pieces);
+
+            if (selectedPieceId) {
+                const isValid = validMoves.some(m => m.r === r && m.c === c);
+                if (isValid) {
+                    executeMove(selectedPieceId, r, c);
+                    return;
+                }
+            }
+
+            if (clickedPiece && selectedPieceId !== clickedPiece.id) {
+                selectedPieceId = clickedPiece.id;
+                calculateValidMoves(clickedPiece);
+            } else {
+                selectedPieceId = null;
+                validMoves = [];
+            }
+            clearPreview();
+            renderSelection();
+        }
+
+        function handleKey(e) {
+            if (document.getElementById('win-modal').classList.contains('open')) {
+                if (e.key === 'Enter' || e.key === ' ' || e.key === 'ArrowRight') {
+                    e.preventDefault();
+                    nextLevel();
+                }
+                return;
+            }
+            const key = e.key.toLowerCase();
+            if (key === 'z' || key === 'backspace') {
+                e.preventDefault();
+                undoMove();
+            } else if (key === 'r' && !e.ctrlKey && !e.metaKey) {
+                resetLevel();
+            } else if (key === 'escape' && selectedPieceId) {
+                selectedPieceId = null;
+                validMoves = [];
+                clearPreview();
+                renderSelection();
+            }
+        }
+
+        function executeMove(id, r, c) {
+            saveState();
+
+            const piece = gameState.pieces.find(p => p.id === id);
+            const from = { r: piece.r, c: piece.c };
+            piece.r = r;
+            piece.c = c;
+            gameState.moves++;
+
+            gameState.lights = simulateToggle(r, c, gameState.lights);
+
+            selectedPieceId = null;
+            validMoves = [];
+            renderToken++;
+            clearPreview();
+
+            const dur = travelTime(piece.type, from, piece);
+            movePiece(piece, dur, piece.type === 'N');
+            syncLights((sr, sc) => dur + T(30) + manhattan(sr, sc, r, c) * T(90));
+            renderSelection();
+            updateUI();
+            setTimeout(() => pulseAt(r, c), dur);
+            afterArrival(syncOccupancy, dur);
+
+            if (isSolved()) {
+                busy = true;
+                setTimeout(celebrate, dur + T(450));
+            }
+        }
+
+        function calculateValidMoves(piece) {
+            validMoves = [];
+            const { type, r, c } = piece;
+
+            if (type === 'N') {
+                const knightMoves = [[-2, -1], [-2, 1], [-1, -2], [-1, 2], [1, -2], [1, 2], [2, -1], [2, 1]];
+                knightMoves.forEach(dir => {
+                    let nr = r + dir[0];
+                    let nc = c + dir[1];
+                    if (isWithinBounds(nr, nc) && !isLit(nr, nc) && !getPieceAt(nr, nc, gameState.pieces)) {
+                        validMoves.push({r: nr, c: nc});
+                    }
+                });
+            } else {
+                let directions = [];
+                if (type === 'R' || type === 'Q') directions.push([-1,0], [1,0], [0,-1], [0,1]);
+                if (type === 'B' || type === 'Q') directions.push([-1,-1], [-1,1], [1,-1], [1,1]);
+
+                directions.forEach(dir => {
+                    let nr = r + dir[0];
+                    let nc = c + dir[1];
+                    while (isWithinBounds(nr, nc)) {
+                        if (isLit(nr, nc)) break;
+                        if (getPieceAt(nr, nc, gameState.pieces)) break;
+
+                        validMoves.push({r: nr, c: nc});
+                        nr += dir[0];
+                        nc += dir[1];
+                    }
+                });
+            }
+        }
+
+        function isWithinBounds(r, c) {
+            return r >= 0 && r < boardRows && c >= 0 && c < boardCols;
+        }
+
+        function isLit(r, c) {
+            return gameState.lights.some(l => l.r === r && l.c === c);
+        }
+
+        function isTarget(r, c) {
+            return currentLevelData.targets.some(t => t.r === r && t.c === c);
+        }
+
+        function getPieceAt(r, c, pieceArray) {
+            return pieceArray.find(p => p.r === r && p.c === c);
+        }
+
+        function manhattan(r1, c1, r2, c2) {
+            return Math.abs(r1 - r2) + Math.abs(c1 - c2);
+        }
+
+        function isSolved() {
+            return gameState.pieces.every(p => isTarget(p.r, p.c));
+        }
+
+        // --- VITÓRIA ---
+
+        function celebrate() {
+            syncOccupancy();
+            boardElement.classList.add('solved');
+
+            currentLevelData.targets.forEach((t, i) => {
+                setTimeout(() => {
+                    const rect = squareEls[t.r][t.c].getBoundingClientRect();
+                    Dust.burst(rect.left + rect.width / 2, rect.top + rect.height / 2, 16);
+                }, T(i * 140));
+            });
+
+            // A luz se dissolve do centro para as bordas
+            const midR = (boardRows - 1) / 2;
+            const midC = (boardCols - 1) / 2;
+            boardElement.querySelectorAll('.sq.lit').forEach(sq => {
+                const d = T(350) + Math.round(Math.hypot(sq.dataset.r - midR, sq.dataset.c - midC) * T(110));
+                sq.style.setProperty('--d', d + 'ms');
+                sq.classList.remove('lit');
+            });
+            gameElement.style.setProperty('--aura', '0');
+
+            setTimeout(showWin, T(1500));
+        }
+
+        function showWin() {
+            document.getElementById('win-moves').innerText = gameState.moves;
+            const modal = document.getElementById('win-modal');
+            modal.classList.add('open');
+            modal.setAttribute('aria-hidden', 'false');
+        }
+
+        function nextLevel() {
+            const modal = document.getElementById('win-modal');
+            if (!modal.classList.contains('open')) return;
+            modal.classList.remove('open');
+            modal.setAttribute('aria-hidden', 'true');
+
+            previousLevelsTotalMoves += gameState.moves; // Adiciona os movimentos do nível aos totais acumulados
+            currentLevelIndex++;
+
+            boardElement.classList.add('leaving');
+            setTimeout(() => {
+                boardElement.classList.remove('leaving', 'solved');
+                loadLevel(currentLevelIndex);
+            }, T(850));
+        }
+
+        // --- POEIRA: partículas de ambiente e faíscas da vitória ---
+
+        const Dust = (() => {
+            const canvas = document.getElementById('dust');
+            const ctx = canvas.getContext('2d');
+            let w = 0, h = 0;
+            const motes = [];
+            const sparks = [];
+
+            function mote(anywhere) {
+                return {
+                    x: Math.random() * w,
+                    y: anywhere ? Math.random() * h : h + 6,
+                    r: .4 + Math.random() * 1.1,
+                    vx: (Math.random() - .5) * .06,
+                    vy: -(.04 + Math.random() * .16),
+                    a: .05 + Math.random() * .22,
+                    t: Math.random() * Math.PI * 2,
+                    gold: Math.random() < .25
+                };
+            }
+
+            function resize() {
+                const dpr = Math.min(window.devicePixelRatio || 1, 2);
+                w = window.innerWidth;
+                h = window.innerHeight;
+                canvas.width = w * dpr;
+                canvas.height = h * dpr;
+                canvas.style.width = w + 'px';
+                canvas.style.height = h + 'px';
+                ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+                const count = Math.min(70, Math.round(w * h / 16000));
+                while (motes.length < count) motes.push(mote(true));
+                motes.length = count;
+            }
+
+            function dot(x, y, r, color) {
+                ctx.fillStyle = color;
+                ctx.beginPath();
+                ctx.arc(x, y, r, 0, Math.PI * 2);
+                ctx.fill();
+            }
+
+            function frame() {
+                ctx.clearRect(0, 0, w, h);
+
+                motes.forEach(m => {
+                    m.t += .012;
+                    m.x += m.vx + Math.sin(m.t) * .06;
+                    m.y += m.vy;
+                    if (m.y < -6) Object.assign(m, mote(false));
+                    const alpha = m.a * (.55 + .45 * Math.sin(m.t * 1.7));
+                    dot(m.x, m.y, m.r, m.gold ? `rgba(236,200,124,${alpha})` : `rgba(186,246,253,${alpha})`);
+                });
+
+                for (let i = sparks.length - 1; i >= 0; i--) {
+                    const s = sparks[i];
+                    s.x += s.vx;
+                    s.y += s.vy;
+                    s.vx *= .985;
+                    s.vy = s.vy * .985 - .006;
+                    s.life -= s.decay;
+                    if (s.life <= 0) { sparks.splice(i, 1); continue; }
+                    dot(s.x, s.y, s.r * 3, `rgba(236,200,124,${s.life * .12})`);
+                    dot(s.x, s.y, s.r, `rgba(255,236,190,${s.life * .9})`);
+                }
+
+                requestAnimationFrame(frame);
+            }
+
+            function burst(x, y, n) {
+                for (let i = 0; i < n; i++) {
+                    const angle = Math.random() * Math.PI * 2;
+                    const speed = .3 + Math.random() * 1.4;
+                    sparks.push({
+                        x, y,
+                        vx: Math.cos(angle) * speed,
+                        vy: Math.sin(angle) * speed - .6,
+                        r: .6 + Math.random() * 1.2,
+                        life: 1,
+                        decay: .007 + Math.random() * .012
+                    });
+                }
+            }
+
+            if (REDUCED_MOTION) return { burst() {} };
+
+            resize();
+            window.addEventListener('resize', resize);
+            requestAnimationFrame(frame);
+            return { burst };
+        })();
+
+        window.onload = initGame;
+
+    </script>
+</body>
+</html>

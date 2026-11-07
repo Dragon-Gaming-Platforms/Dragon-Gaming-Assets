@@ -1,0 +1,10 @@
+Knights Out
+Source: https://github.com/andersonfaller/knights-out
+Revision: f8d0ad0228d0b27268b72a19544e6358417b47e0
+License: MIT (see LICENSE)
+Retrieved: 2026-11-06
+
+Static runtime only; development/server/test tooling omitted.
+Runtime uses system fonts with no external font requests. English hosting guide added.
+Save keys, where present, are game-scoped; malformed storage falls back to defaults.
+Saved settings/progress validation hardened against null or wrong-shaped JSON.

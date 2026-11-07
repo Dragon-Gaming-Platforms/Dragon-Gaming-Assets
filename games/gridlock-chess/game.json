@@ -1,0 +1,13 @@
+{
+  "name": "Gridlock Chess",
+  "desc": "Guide chess pieces to marked targets while landings toggle a cross of blocking lights.",
+  "controls": "Mouse / touch; English rules and controls linked in-game.",
+  "shelf": "Puzzle & Logic",
+  "tags": [
+    "games",
+    "html5",
+    "puzzle"
+  ],
+  "badge": "New",
+  "creator": "andersonfaller"
+}

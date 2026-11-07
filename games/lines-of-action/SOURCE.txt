@@ -1,0 +1,10 @@
+Lines of Action
+Source: https://github.com/andersonfaller/loa
+Revision: 2524c97071c57f5655e0978fb8fa9ac73522afbd
+License: MIT (see LICENSE)
+Retrieved: 2026-11-06
+
+Static runtime only; development/server/test tooling omitted.
+Runtime uses system fonts with no external font requests. English hosting guide added.
+Save keys, where present, are game-scoped; malformed storage falls back to defaults.
+Saved settings/progress validation hardened against null or wrong-shaped JSON.
