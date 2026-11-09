@@ -1,0 +1,17 @@
+Aquarium — original static implementation, version 1.0
+Created: 2026-10-17
+Code, CSS and all 18 puzzle instances: original for Dragon Gaming Platforms.
+License: MIT (see LICENSE).
+Source: https://github.com/Dragon-Gaming-Platforms/Dragon-Gaming-Assets/tree/main/games/aquarium
+
+This is not an upstream mirror. It independently implements the established
+Aquarium puzzle rules, without affiliation with any puzzle publisher.
+No borrowed code, puzzle instances, images, fonts or audio. No runtime services.
+Puzzle pack: six 4x4, six 5x5 and six 6x6 boards, generated locally and each
+checked for exactly one solution with separate rule/search implementations.
+Generation seed family: 241017. Pack changes are tracked in this repository.
+puzzles.js SHA-256: 2d1a21d425dbce30466d7dacda704e5da0efebd14c9510eb4b105e54d197497d
+
+Each folder is self-contained; its copies of the common UI/rule evaluator need
+no parent-directory resources or build step. See help.html for exact rules,
+controls, storage behavior, timing and the distinction between checks and hints.

@@ -1,0 +1,15 @@
+{
+  "name": "Aqre",
+  "desc": "Match each room’s shaded-cell total, connect all shaded cells, and avoid runs of four of either color.",
+  "controls": "Mouse / touch. Arrows navigate; 1 shades, 0 clears; Space cycles; Backspace erases.",
+  "shelf": "Puzzle & Logic",
+  "tags": [
+    "games",
+    "html5",
+    "puzzle",
+    "logic",
+    "original"
+  ],
+  "badge": "New",
+  "creator": "Dragon Gaming Platforms"
+}
