@@ -1,0 +1,15 @@
+{
+  "name": "The Final Ending",
+  "desc": "An original top-down angled procedural robot shooter: drop in with your skiff, harvest shards from the world, forge walls, floors, ramps and roofs under your feet, upgrade from luminous caches and outlast 39 machines as the violet Collapse contracts. Seven experiences — battle royale, Skyspires, the Sinkhole, duels, box fights, zone wars and team deathmatch — with bot fill, three difficulties, synthesized sound and a Canvas 2D fallback when WebGL2 is unavailable. No ads, no analytics, no downloaded assets.",
+  "controls": "WASD move, pointer aims, click fires, Space jump, Shift sprint, C crouch; Q/Z/X/V forge wall/floor/ramp/roof, G door/window, M material; 1-5 or scroll switch weapons, E/F collect loot, B jump pad, T spike trap, H shield cell, J heal kit (touch: left stick + right-half aim + FIRE)",
+  "shelf": "Arcade & Action",
+  "tags": [
+    "shooter",
+    "battle-royale",
+    "building",
+    "procedural"
+  ],
+  "badge": "New",
+  "creator": "colmlenehan-gh",
+  "image": "title.png"
+}

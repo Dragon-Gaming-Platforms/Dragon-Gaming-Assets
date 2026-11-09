@@ -1,0 +1,13 @@
+{
+  "name": "Set Matching",
+  "desc": "Find every three-card set whose four attributes are each all the same or all different.",
+  "controls": "Mouse / touch; rules and controls linked in-game.",
+  "shelf": "Puzzle & Logic",
+  "tags": [
+    "games",
+    "html5",
+    "puzzle"
+  ],
+  "badge": "New",
+  "creator": "jparrpearson"
+}

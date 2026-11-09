@@ -1,0 +1,13 @@
+{
+  "name": "Fox and Hounds",
+  "desc": "Outrun four forward-only hounds, or trap the fox, with local two-player and configurable computer play.",
+  "controls": "Mouse / touch; rules and controls linked in-game.",
+  "shelf": "Puzzle & Logic",
+  "tags": [
+    "games",
+    "html5",
+    "board"
+  ],
+  "badge": "New",
+  "creator": "Jelmer van Arnhem"
+}

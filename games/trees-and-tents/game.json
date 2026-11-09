@@ -1,0 +1,13 @@
+{
+  "name": "Trees and Tents",
+  "desc": "Place non-touching tents beside trees and satisfy row and column clues across ten forest camps.",
+  "controls": "Mouse / touch; rules and controls linked in-game.",
+  "shelf": "Puzzle & Logic",
+  "tags": [
+    "games",
+    "html5",
+    "puzzle"
+  ],
+  "badge": "New",
+  "creator": "Pitkil"
+}
