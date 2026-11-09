@@ -1,0 +1,824 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Ramen Rush: The Great Ramen Festival 🍜</title>
+<style>
+  *{ box-sizing:border-box; -webkit-tap-highlight-color:transparent; }
+  html,body{ margin:0; padding:0; height:100%; overflow:hidden;
+    background:radial-gradient(120% 120% at 50% 0%, #2a1530 0%, #1a0e24 55%, #0d0813 100%);
+    font-family:'Segoe UI', system-ui, -apple-system, Roboto, sans-serif; color:#fff; }
+  #wrap{ position:relative; width:100vw; height:100vh; display:flex; align-items:center; justify-content:center; }
+  canvas{ display:block; touch-action:none; box-shadow:0 24px 70px rgba(0,0,0,.55); border-radius:14px; }
+
+  .overlay{ position:absolute; inset:0; display:none; flex-direction:column; align-items:center; justify-content:center;
+    text-align:center; padding:20px; background:rgba(10,6,18,.74); backdrop-filter:blur(3px); z-index:10; overflow-y:auto; }
+  .overlay.show{ display:flex; }
+  .card{ background:linear-gradient(160deg, rgba(44,28,70,.97), rgba(26,16,42,.97));
+    border:1px solid rgba(255,255,255,.13); border-radius:20px; padding:24px 28px; max-width:460px; width:100%;
+    box-shadow:0 20px 60px rgba(0,0,0,.5); }
+  .logo{ font-size:2.1rem; font-weight:800; line-height:1.05; margin:0 0 6px;
+    background:linear-gradient(90deg,#ffd36e,#ff8a5b,#ff5d73); -webkit-background-clip:text; background-clip:text; color:transparent; }
+  .logo small{ display:block; font-size:.62em; font-weight:700; letter-spacing:.04em; margin-top:4px;
+    background:linear-gradient(90deg,#8fd68f,#66d0ff); -webkit-background-clip:text; background-clip:text; color:transparent; }
+  .sub{ font-size:.95rem; opacity:.88; margin:0 0 16px; }
+  .story{ text-align:left; font-size:.9rem; line-height:1.65; margin:0 auto 16px; max-width:360px; opacity:.92; }
+  .story b{ color:#ffd36e; }
+  .how{ text-align:left; font-size:.9rem; line-height:1.7; margin:0 auto 16px; max-width:360px; opacity:.95; }
+  .how b{ color:#ffd36e; }
+  .btn{ cursor:pointer; border:none; border-radius:12px; padding:13px 24px; font-size:1rem; font-weight:800;
+    color:#2a1220; background:linear-gradient(90deg,#ffd36e,#ff8a5b); box-shadow:0 8px 22px rgba(255,138,91,.4); transition:transform .08s ease; }
+  .btn:hover{ transform:translateY(-2px); }
+  .btn.ghost{ background:rgba(255,255,255,.1); color:#fff; box-shadow:none; }
+  .btn.green{ background:linear-gradient(90deg,#8fd68f,#5bbf8f); box-shadow:0 8px 22px rgba(91,191,143,.4); }
+  .btn.blue{ background:linear-gradient(90deg,#66d0ff,#5b8fe0); box-shadow:0 8px 22px rgba(91,143,224,.4); }
+  .row{ display:flex; gap:10px; justify-content:center; flex-wrap:wrap; margin:6px 0 2px; }
+  .best{ margin-top:14px; font-size:.85rem; opacity:.78; }
+  .score{ font-size:2.5rem; font-weight:800; margin:6px 0; color:#ffd36e; }
+  .tag{ font-size:.78rem; letter-spacing:.14em; text-transform:uppercase; opacity:.7; margin:4px 0; }
+  .hint{ margin-top:14px; font-size:.78rem; opacity:.6; }
+  h2{ margin:0 0 4px; font-size:1.5rem; }
+  .trophy{ font-size:3rem; margin:6px 0; }
+  .board{ text-align:left; max-width:320px; margin:8px auto; font-size:.9rem; }
+  .board .brow{ display:flex; justify-content:space-between; padding:5px 8px; border-radius:8px; margin:3px 0; background:rgba(255,255,255,.05); }
+  .board .brow.me{ background:rgba(255,211,110,.18); }
+  .board .brow .rank{ opacity:.7; margin-right:8px; }
+  .board .brow .nm{ flex:1; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+  .board .brow .sc{ font-weight:800; color:#ffd36e; }
+  .namebox{ margin:10px 0; }
+  .namebox input{ width:200px; max-width:70%; padding:10px 12px; border-radius:10px; border:1px solid rgba(255,255,255,.2);
+    background:rgba(0,0,0,.3); color:#fff; font-size:1rem; text-align:center; }
+  .mode-pill{ display:inline-block; padding:3px 10px; border-radius:20px; font-size:.72rem; font-weight:800; letter-spacing:.06em;
+    background:rgba(255,211,110,.2); color:#ffd36e; margin-bottom:6px; }
+  #hud{ position:absolute; top:10px; left:50%; transform:translateX(-50%);
+    width:min(94vw, 540px); z-index:5; pointer-events:none; font-variant-numeric:tabular-nums; display:none; }
+  .hud-row{ display:flex; align-items:center; justify-content:space-between; gap:10px; padding:3px 6px; }
+  #hud-level{ font-weight:800; font-size:.85rem; color:#ffd36e; max-width:150px; }
+  .hud-mid{ flex:1; max-width:230px; }
+  .meter{ height:12px; border-radius:8px; background:rgba(255,255,255,.14); overflow:hidden; }
+  #hud-meter{ height:100%; width:0; border-radius:8px; background:linear-gradient(90deg,#ffd36e,#ff8a5b); transition:width .15s ease; }
+  #hud-count{ font-size:.72rem; opacity:.85; }
+  #hud-score{ font-weight:800; font-size:1.05rem; }
+  #hud-lives{ font-size:1rem; }
+  #hud-time{ font-size:.95rem; font-weight:800; }
+  #hud-power{ font-size:.82rem; color:#ffd36e; min-width:60px; text-align:center; }
+  .flash-banner{ position:absolute; top:38%; left:50%; transform:translate(-50%,-50%); z-index:8; pointer-events:none;
+    font-size:1.6rem; font-weight:800; color:#ffd36e; text-shadow:0 2px 12px rgba(0,0,0,.6); opacity:0; transition:opacity .3s ease; }
+  .flash-banner.show{ opacity:1; }
+</style>
+</head>
+<body>
+<div id="wrap">
+  <canvas id="game"></canvas>
+  <div class="flash-banner" id="banner"></div>
+  <div id="hud">
+    <div class="hud-row">
+      <span id="hud-level">Level 1</span>
+      <div class="hud-mid"><div class="meter"><div id="hud-meter"></div></div><span id="hud-count">0/8</span></div>
+      <span id="hud-score">0</span>
+    </div>
+    <div class="hud-row">
+      <span id="hud-lives">❤️❤️❤️</span>
+      <span id="hud-power"></span>
+      <span id="hud-time">60s</span>
+    </div>
+  </div>
+
+  <!-- TITLE -->
+  <div id="title" class="overlay show">
+    <div class="card">
+      <div class="logo">Ramen Rush<small>THE GREAT RAMEN FESTIVAL</small></div>
+      <p class="story">The <b>Great Ramen Festival</b> has arrived in Otonokizaka! You're <b>Rin</b>, the fastest ramen chef in the city. The <b>Golden Ladle</b> is on the line — steer your bowl, catch the good noodles, dodge the fish, grab power-ups, and fill your bowl across <b>8 festival stages</b>. Win the Golden Ladle, nya! 🏆</p>
+      <div class="how">
+        <b>← →</b> / <b>A D</b> / mouse / finger to steer.<br>
+        🥚🥩🎍🍄🌸🧅🍄 <b>Catch</b> to fill your bowl.<br>
+        🐟🪨🕸️🧂 <b>Dodge</b> — they cost a life.<br>
+        🧲⏳🛡️✨🌊🌈 <b>Grab</b> power-ups.<br>
+        Fill the <b>bowl meter</b> before the clock hits zero.
+      </div>
+      <div class="row">
+        <button class="btn" id="btn-story">Story Mode 🏁</button>
+        <button class="btn green" id="btn-endless">Endless 🌊</button>
+      </div>
+      <div class="row">
+        <button class="btn ghost" id="btn-board">Leaderboard 🏅</button>
+      </div>
+      <div class="best" id="best-title"></div>
+    </div>
+  </div>
+
+  <!-- LEVEL INTRO -->
+  <div id="levelintro" class="overlay">
+    <div class="card">
+      <div class="tag" id="li-tag">Level 1</div>
+      <h2 id="li-name">First Slurp</h2>
+      <p class="sub" id="li-story"></p>
+      <p class="sub" id="li-target" style="color:#ffd36e;font-weight:700"></p>
+      <div class="hint">Get ready… (tap or press space to skip)</div>
+    </div>
+  </div>
+
+  <!-- PAUSE -->
+  <div id="pause" class="overlay">
+    <div class="card">
+      <h2>Paused</h2>
+      <p class="sub">Take a breath, stretch those arms.</p>
+      <div class="row">
+        <button class="btn" id="btn-resume">Resume</button>
+        <button class="btn ghost" id="btn-quit">Quit</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- GAME OVER -->
+  <div id="gameover" class="overlay">
+    <div class="card">
+      <div class="logo" style="font-size:1.7rem">Oh no… 🍥</div>
+      <p class="sub" id="go-sub">Ran out of lives, nya.</p>
+      <div class="tag">Final score</div>
+      <div class="score" id="go-score">0</div>
+      <div class="namebox" id="go-namebox" style="display:none">
+        <div class="tag">Save your score</div>
+        <input id="go-name" maxlength="14" placeholder="Rin">
+        <div class="row" style="margin-top:8px">
+          <button class="btn" id="btn-save">Save</button>
+          <button class="btn ghost" id="btn-saveskip">Skip</button>
+        </div>
+      </div>
+      <div class="best" id="go-best"></div>
+      <div class="row" style="margin-top:14px">
+        <button class="btn" id="btn-retry">Play Again</button>
+        <button class="btn ghost" id="btn-gotitle">Menu</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- WIN -->
+  <div id="win" class="overlay">
+    <div class="card">
+      <div class="trophy">🏆</div>
+      <div class="logo" style="font-size:1.9rem">GOLDEN LADLE YOURS!</div>
+      <p class="sub">You conquered all 8 festival stages. Absolute legend, nya! The whole of Otonokizaka slursps your name.</p>
+      <div class="tag">Final score</div>
+      <div class="score" id="win-score">0</div>
+      <div class="namebox" id="win-namebox" style="display:none">
+        <div class="tag">Save your score</div>
+        <input id="win-name" maxlength="14" placeholder="Rin">
+        <div class="row" style="margin-top:8px">
+          <button class="btn" id="btn-winsave">Save</button>
+          <button class="btn ghost" id="btn-winskip">Skip</button>
+        </div>
+      </div>
+      <div class="best" id="win-best"></div>
+      <div class="row" style="margin-top:14px">
+        <button class="btn" id="btn-again">Play Again</button>
+        <button class="btn ghost" id="btn-wintitle">Menu</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- LEADERBOARD -->
+  <div id="board" class="overlay">
+    <div class="card">
+      <div class="logo" style="font-size:1.7rem">Leaderboard 🏅</div>
+      <div class="row" style="margin-bottom:8px">
+        <button class="btn" id="board-story" style="padding:8px 16px;font-size:.9rem">Story</button>
+        <button class="btn ghost" id="board-endless" style="padding:8px 16px;font-size:.9rem">Endless</button>
+      </div>
+      <div class="board" id="board-list"></div>
+      <div class="row" style="margin-top:14px">
+        <button class="btn ghost" id="btn-boardclose">Back</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+"use strict";
+/* ============================================================
+   Ramen Rush: The Great Ramen Festival — a single-file arcade game.
+   Steer a bowl (as Rin), catch good ingredients, dodge bad ones,
+   grab power-ups, and fill the bowl meter.
+   Modes: STORY (8 festival stages, win the Golden Ladle)
+          ENDLESS (survive, score as high as you can)
+   ============================================================ */
+
+const CW = 520, CH = 760;
+const canvas = document.getElementById('game');
+const ctx = canvas.getContext('2d');
+canvas.width = CW; canvas.height = CH;
+
+function fit(){
+  const pad = 8;
+  const scale = Math.min((window.innerWidth - pad) / CW, (window.innerHeight - pad) / CH);
+  canvas.style.width  = Math.floor(CW * scale) + 'px';
+  canvas.style.height = Math.floor(CH * scale) + 'px';
+}
+window.addEventListener('resize', fit); fit();
+
+// ---------- constants ----------
+const STATE = { TITLE:0, LEVELINTRO:1, PLAYING:2, PAUSED:3, GAMEOVER:4, WON:5, BOARD:6 };
+const MODE = { STORY:0, ENDLESS:1 };
+
+// 8 festival stages, each with a little story line.
+const LEVELS = [
+  { name:'Shoyu Opening',   tag:'Stage 1', story:'The festival opens with a classic shoyu crowd. Warm up, ya!', target:8,  spawn:0.98, speed:150, bad:0.10, power:0.06, time:60 },
+  { name:'Shio Breeze',     tag:'Stage 2', story:'Light, salty, a little faster. Keep your eyes up.', target:11, spawn:0.86, speed:175, bad:0.14, power:0.07, time:55 },
+  { name:'Miso Swirl',      tag:'Stage 3', story:'Thick miso + a few hungry fish. Watch the broth!', target:14, spawn:0.74, speed:210, bad:0.19, power:0.08, time:52 },
+  { name:'Tonkotsu Rush',   tag:'Stage 4', story:'Rich pork broth, heavy traffic. Power-ups are your friend.', target:17, spawn:0.64, speed:245, bad:0.23, power:0.10, time:50 },
+  { name:'Matsutake Mist',  tag:'Stage 5', story:'A fragrant mushroom fog slows things down… then it doesn\'t.', target:20, spawn:0.58, speed:275, bad:0.26, power:0.09, time:48 },
+  { name:'Spicy Firebreak', tag:'Stage 6', story:'The chili stall! Fast drops, lots of fish. Stay sharp, nya.', target:22, spawn:0.52, speed:305, bad:0.30, power:0.09, time:45 },
+  { name:'Golden Hour',     tag:'Stage 7', story:'The crowd is on its feet. One more push for the Ladle.', target:25, spawn:0.47, speed:335, bad:0.33, power:0.10, time:42 },
+  { name:'GOLDEN LADLE',    tag:'BOSS',    story:'THE GAUNTLET. The fastest, fishiest stage of all. Win it!', target:28, spawn:0.42, speed:370, bad:0.37, power:0.11, time:40 },
+];
+
+const GOOD = [
+  { e:'🥚' }, { e:'🥩' }, { e:'🎍' }, { e:'🍄' }, { e:'🌸' }, { e:'🧅' }, { e:'🍜' }, { e:'🥕' },
+];
+const BAD = [ { e:'🐟' }, { e:'🪨' }, { e:'🕸️' }, { e:'🧂' } ];
+const POWER = {
+  magnet:{ e:'🧲', dur:8,  label:'Magnet' },
+  slow:  { e:'⏳', dur:6,  label:'Slow-Mo' },
+  shield:{ e:'🛡️', dur:0,  label:'Shield' },
+  score: { e:'✨', dur:8,  label:'2× Score' },
+  big:   { e:'🌊', dur:8,  label:'Big Broth' },
+  rainbow:{ e:'🌈', dur:5, label:'Rainbow' },
+};
+
+// ---------- game state ----------
+let state = STATE.TITLE;
+let mode = MODE.STORY;
+let level = 0;
+let score = 0, lives = 3, combo = 0;
+let bowlProgress = 0, timer = 0, spawnTimer = 0;
+let now = 0, lastTime = 0, levelIntroUntil = 0;
+let items = [], particles = [], floaters = [];
+let shieldHits = 0;
+let effects = { magnet:0, slow:0, score:0, big:0, rainbow:0 };
+let hitFlash = 0, shake = 0;
+let keys = { left:false, right:false };
+const player = { x:CW/2, targetX:CW/2, y:CH-84, hw:46, hh:34 };
+
+function clamp(v,a,b){ return Math.max(a, Math.min(b, v)); }
+function rnd(a,b){ return a + Math.random()*(b-a); }
+function pick(arr){ return arr[(Math.random()*arr.length)|0]; }
+
+// ---------- leaderboard (localStorage) ----------
+const BOARD_KEY = 'ramenrush_board_v1';
+function loadBoard(){
+  try{ return JSON.parse(localStorage.getItem(BOARD_KEY)) || { story:[], endless:[] }; }
+  catch(e){ return { story:[], endless:[] }; }
+}
+function saveBoard(b){ localStorage.setItem(BOARD_KEY, JSON.stringify(b)); }
+function addScore(scoreVal, name, boardMode){
+  const b = loadBoard();
+  const arr = b[boardMode] || (b[boardMode]=[]);
+  arr.push({ name:(name||'Rin').slice(0,14), score:scoreVal, t:Date.now() });
+  arr.sort((a,c)=>c.score-a.score);
+  b[boardMode] = arr.slice(0,5);
+  saveBoard(b);
+  return arr.indexOf(b[boardMode].find(x=>x.t===arr.find(y=>y.score===scoreVal&&y.name===(name||'Rin')).t));
+}
+function getBest(boardMode){
+  const b = loadBoard();
+  const arr = b[boardMode] || [];
+  return arr.length ? arr[0].score : 0;
+}
+
+// ---------- overlays ----------
+const allOverlays = ['title','levelintro','pause','gameover','win','board'].map(id=>document.getElementById(id));
+function hideAll(){ allOverlays.forEach(o=>o.classList.remove('show')); }
+function show(id){ hideAll(); document.getElementById(id).classList.add('show'); }
+function hudVisible(v){ document.getElementById('hud').style.display = v ? 'block':'none'; }
+function banner(text, ms=900){
+  const el = document.getElementById('banner');
+  el.textContent = text; el.classList.add('show');
+  clearTimeout(el._t); el._t = setTimeout(()=>el.classList.remove('show'), ms);
+}
+
+// ---------- audio ----------
+let actx = null;
+function initAudio(){ if(!actx){ try{ actx = new (window.AudioContext||window.webkitAudioContext)(); }catch(e){} } }
+function tone(freq, dur, type='sine', vol=0.14, when=0){
+  if(!actx) return;
+  const t = actx.currentTime + when;
+  const o = actx.createOscillator(), g = actx.createGain();
+  o.type = type; o.frequency.value = freq;
+  g.gain.setValueAtTime(0.0001, t);
+  g.gain.exponentialRampToValueAtTime(vol, t + 0.012);
+  g.gain.exponentialRampToValueAtTime(0.0001, t + dur);
+  o.connect(g); g.connect(actx.destination);
+  o.start(t); o.stop(t + dur + 0.03);
+}
+const sfx = {
+  good:   ()=>{ tone(520,0.06,'triangle',0.12); },
+  bad:    ()=>{ tone(170,0.24,'sawtooth',0.16); tone(110,0.30,'sawtooth',0.13,0.05); },
+  shield: ()=>{ tone(320,0.14,'triangle',0.14); tone(480,0.16,'triangle',0.10,0.05); },
+  power:  ()=>{ [523,659,784,1047].forEach((f,i)=>tone(f,0.11,'triangle',0.13,i*0.055)); },
+  levelup:()=>{ [523,659,784,1047,1319].forEach((f,i)=>tone(f,0.13,'square',0.11,i*0.06)); },
+  win:    ()=>{ [523,659,784,1047,784,1047,1319,1568].forEach((f,i)=>tone(f,0.17,'square',0.12,i*0.085)); },
+  lose:   ()=>{ [440,349,262,196].forEach((f,i)=>tone(f,0.24,'sawtooth',0.13,i*0.11)); },
+  boss:   ()=>{ [196,262,330,392,494].forEach((f,i)=>tone(f,0.2,'square',0.13,i*0.09)); },
+};
+
+// ---------- spawning ----------
+function currentLevelConfig(){
+  if (mode === MODE.ENDLESS){
+    // Endless: difficulty scales with the (virtual) level.
+    const v = Math.min(level, 12);
+    return {
+      name:'Endless · '+level, target: 999999,
+      spawn: Math.max(0.28, 0.95 - v*0.05), speed: 150 + v*22,
+      bad: Math.min(0.45, 0.10 + v*0.03), power: 0.09, time: 999999,
+    };
+  }
+  return LEVELS[level];
+}
+function spawnItem(){
+  const L = currentLevelConfig();
+  const r = Math.random();
+  let type, def;
+  if (r < L.power){ type='power'; def = pick(Object.keys(POWER)); }
+  else if (r < L.power + L.bad){ type='bad'; def = pick(BAD); }
+  else { type='good'; def = pick(GOOD); }
+  const it = {
+    x: rnd(34, CW-34), y: -30, r: 21,
+    vy: L.speed * rnd(0.85, 1.2),
+    type, char: (type==='power'? POWER[def].e : def.e),
+    color: type==='good'? '#f5deb3' : (type==='power' ? '#ffd700' : '#ff5b5b'),
+    power: type==='power'? def : null,
+    rot: rnd(-0.3,0.3), rotV: rnd(-1.2,1.2),
+  };
+  items.push(it);
+}
+
+// ---------- effects ----------
+function bowlWidth(){ return player.hw * (effects.big > now ? 1.6 : 1); }
+function timeScale(){ return effects.slow > now ? 0.5 : 1; }
+
+function onCatch(it){
+  if (it.type === 'good'){
+    if (mode === MODE.STORY) bowlProgress++;
+    combo++;
+    const rainbow = effects.rainbow > now;
+    const mult = (effects.score > now ? 2 : 1) * (rainbow ? 3 : 1);
+    const pts = (10 + Math.min(combo,20)*2) * mult;
+    score += pts;
+    sfx.good();
+    burst(it.x, it.y, rainbow ? pick(['#ff5d73','#8fd68f','#66d0ff','#ffd36e','#c58fff']) : '#f5deb3');
+    addFloater(it.x, it.y, '+'+pts);
+  } else if (it.type === 'bad'){
+    if (shieldHits > 0){
+      shieldHits--; sfx.shield(); addFloater(it.x, it.y, 'Shield!');
+      burst(it.x, it.y, '#66d0ff');
+    } else {
+      lives--; combo = 0; score = Math.max(0, score-15);
+      hitFlash = 0.4; shake = 12; sfx.bad();
+    }
+  } else if (it.type === 'power'){
+    const p = it.power;
+    if (p === 'shield'){ shieldHits = Math.min(shieldHits+1, 2); addFloater(it.x, it.y, 'Shield!'); }
+    else { effects[p] = now + POWER[p].dur; addFloater(it.x, it.y, POWER[p].label); }
+    sfx.power();
+    burst(it.x, it.y, '#ffd700');
+  }
+  updateHUD();
+}
+
+// ---------- particles / floaters ----------
+function burst(x, y, color){
+  for (let i=0;i<12;i++){
+    const a = Math.random()*Math.PI*2, sp = rnd(70,240);
+    particles.push({ x, y, vx:Math.cos(a)*sp, vy:Math.sin(a)*sp - 40, life:0.55, max:0.55, color, size:rnd(2.5,5.5) });
+  }
+}
+function confetti(){
+  const cols = ['#ffd36e','#ff8a5b','#ff5d73','#8fd68f','#66d0ff','#c58fff'];
+  for (let i=0;i<180;i++){
+    particles.push({ x:rnd(0,CW), y:rnd(-CH,0), vx:rnd(-40,40), vy:rnd(120,360),
+      life:rnd(1.6,2.8), max:2.8, color:pick(cols), size:rnd(3,7), confetti:true });
+  }
+}
+function addFloater(x,y,text){ floaters.push({ x, y, vy:-55, life:0.9, max:0.9, text }); }
+
+// ---------- HUD ----------
+function updateHUD(){
+  const el = (id)=>document.getElementById(id);
+  const L = currentLevelConfig();
+  if (mode === MODE.ENDLESS){
+    el('hud-level').textContent = 'ENDLESS · ' + level;
+    el('hud-count').textContent = combo + ' combo';
+    el('hud-meter').style.width = '100%';
+  } else {
+    el('hud-level').textContent = (level+1) + ' · ' + L.name;
+    const t = L.target;
+    el('hud-count').textContent = Math.min(bowlProgress,t) + '/' + t;
+    el('hud-meter').style.width = clamp(bowlProgress / t * 100, 0, 100) + '%';
+  }
+  el('hud-score').textContent = score;
+  el('hud-lives').textContent = '❤️'.repeat(Math.max(0,lives)) + '🤍'.repeat(Math.max(0,3-lives));
+  if (mode === MODE.STORY) el('hud-time').textContent = Math.ceil(timer) + 's';
+  else el('hud-time').textContent = '∞';
+  const active = [];
+  if (effects.magnet>now) active.push('🧲');
+  if (effects.slow>now) active.push('⏳');
+  if (effects.score>now) active.push('✨2×');
+  if (effects.big>now) active.push('🌊');
+  if (effects.rainbow>now) active.push('🌈');
+  if (shieldHits>0) active.push('🛡️');
+  el('hud-power').textContent = active.join(' ');
+  const tcol = el('hud-time');
+  tcol.style.color = (mode===MODE.STORY && timer < 8) ? '#ff6b6b' : '#fff';
+}
+
+// ---------- flow ----------
+function startGame(m){
+  initAudio();
+  mode = m;
+  score = 0; lives = 3; combo = 0; shieldHits = 0;
+  effects = { magnet:0, slow:0, score:0, big:0, rainbow:0 };
+  startLevel(0);
+}
+function startLevel(idx){
+  level = idx;
+  if (mode === MODE.STORY){ bowlProgress = 0; combo = 0; timer = LEVELS[idx].time; }
+  else { combo = 0; }
+  spawnTimer = 0.6;
+  items = []; floaters = [];
+  player.x = player.targetX = CW/2;
+  state = STATE.LEVELINTRO;
+  levelIntroUntil = now + (mode===MODE.STORY ? 2.4 : 1.4);
+  const L = currentLevelConfig();
+  document.getElementById('li-tag').textContent = (mode===MODE.STORY) ? L.tag + ' · ' + L.name : 'ENDLESS MODE';
+  document.getElementById('li-name').textContent = (mode===MODE.STORY) ? L.name : 'Endless Ramen';
+  document.getElementById('li-story').textContent = (mode===MODE.STORY) ? L.story : 'Survive as long as you can. The broth only gets faster. Score high, nya!';
+  document.getElementById('li-target').textContent = (mode===MODE.STORY) ? 'Catch ' + L.target + ' ingredients before the clock runs out!' : 'No timer, no goal — just score. 3 lives. Go!';
+  if (mode===MODE.STORY && idx === LEVELS.length-1) sfx.boss();
+  hudVisible(false);
+  show('levelintro');
+  updateHUD();
+}
+function levelComplete(){
+  score += 50 * (level+1);
+  if (combo >= 8){ score += 50; }
+  if (level >= LEVELS.length-1){ winGame(); }
+  else { sfx.levelup(); banner('STAGE CLEAR! 🎉', 900); startLevel(level+1); }
+}
+function loseLife(){
+  if (lives <= 0){ gameOver(); return; }
+  sfx.bad();
+  if (mode === MODE.ENDLESS){
+    // Endless: lose a life, but keep playing (reset the current "level" segment).
+    startLevel(level);
+  } else {
+    startLevel(level);
+  }
+}
+function gameOver(){
+  state = STATE.GAMEOVER;
+  document.getElementById('go-score').textContent = score;
+  document.getElementById('go-best').textContent = 'Best: ' + getBest(mode===MODE.STORY?'story':'endless');
+  // Offer name entry if the score is worth saving (top-5).
+  const boardMode = mode===MODE.STORY?'story':'endless';
+  const b = loadBoard();
+  const arr = b[boardMode] || [];
+  const wouldQualify = score > 0 && (arr.length < 5 || score > (arr[arr.length-1]?.score || 0));
+  document.getElementById('go-namebox').style.display = wouldQualify ? 'block' : 'none';
+  document.getElementById('go-name').value = '';
+  document.getElementById('go-sub').textContent = (mode===MODE.ENDLESS) ? 'The broth got the best of you, nya.' : 'Ran out of lives, nya.';
+  sfx.lose(); hudVisible(false);
+  show('gameover');
+  window._pending = { score, boardMode };
+}
+function winGame(){
+  state = STATE.WON;
+  document.getElementById('win-score').textContent = score;
+  document.getElementById('win-best').textContent = 'Best: ' + getBest('story');
+  const b = loadBoard();
+  const arr = b.story || [];
+  const wouldQualify = score > 0 && (arr.length < 5 || score > (arr[arr.length-1]?.score || 0));
+  document.getElementById('win-namebox').style.display = wouldQualify ? 'block' : 'none';
+  document.getElementById('win-name').value = '';
+  sfx.win(); confetti(); hudVisible(false);
+  show('win');
+  window._pending = { score, boardMode:'story' };
+}
+function savePendingScore(inputId){
+  const p = window._pending; if(!p) return;
+  const name = (document.getElementById(inputId).value || 'Rin').trim() || 'Rin';
+  addScore(p.score, name, p.boardMode);
+  // Update the "best" label on the current screen.
+  if (p.boardMode === 'story'){
+    document.getElementById('go-best').textContent = 'Best: ' + getBest('story');
+    document.getElementById('win-best').textContent = 'Best: ' + getBest('story');
+  } else {
+    document.getElementById('go-best').textContent = 'Best: ' + getBest('endless');
+  }
+  document.getElementById(inputId+'-parent')?.style; // noop
+  // Hide the name box.
+  (inputId==='go-name' ? document.getElementById('go-namebox') : document.getElementById('win-namebox')).style.display='none';
+  banner('Score saved! 🏅', 1200);
+}
+function togglePause(){
+  if (state === STATE.PLAYING){ state = STATE.PAUSED; hudVisible(false); show('pause'); }
+  else if (state === STATE.PAUSED){ state = STATE.PLAYING; hideAll(); hudVisible(true); lastTime = performance.now(); }
+}
+function toTitle(){
+  state = STATE.TITLE;
+  const bestS = getBest('story'), bestE = getBest('endless');
+  document.getElementById('best-title').textContent =
+    (bestS>0 ? 'Story best: '+bestS : '') + (bestS>0&&bestE>0?' · ': (bestE>0?' · ':'')) + (bestE>0 ? 'Endless best: '+bestE : '');
+  hudVisible(false);
+  show('title');
+}
+function showBoard(which){
+  state = STATE.BOARD;
+  const b = loadBoard();
+  const arr = b[which] || [];
+  const list = document.getElementById('board-list');
+  list.innerHTML = arr.length ? arr.map((x,i)=>
+    `<div class="brow"><span class="rank">${i+1}.</span><span class="nm">${escapeHtml(x.name)}</span><span class="sc">${x.score}</span></div>`
+  ).join('') : '<div class="brow"><span class="nm" style="opacity:.6">No scores yet — be the first, nya!</span></div>';
+  // Toggle button styles.
+  document.getElementById('board-story').className = which==='story' ? 'btn' : 'btn ghost';
+  document.getElementById('board-endless').className = which==='endless' ? 'btn' : 'btn ghost';
+  show('board');
+}
+function escapeHtml(s){ return String(s).replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+
+// ---------- update ----------
+function update(dt){
+  const mv = 640 * dt;
+  if (keys.left)  player.targetX -= mv;
+  if (keys.right) player.targetX += mv;
+  player.targetX = clamp(player.targetX, player.hw, CW - player.hw);
+  const chase = 1250 * dt;
+  const dx = player.targetX - player.x;
+  player.x += clamp(dx, -chase, chase);
+
+  const ts = timeScale();
+  const L = currentLevelConfig();
+
+  // Endless: level up every N catches (score-driven).
+  if (mode === MODE.ENDLESS){
+    // Advance the "level" based on score milestones.
+    const targetLevel = Math.floor(score / 400) + 1;
+    if (targetLevel > level){ level = targetLevel; banner('Endless · ' + level + ' 🌊', 800); }
+  }
+
+  spawnTimer -= dt * ts;
+  if (spawnTimer <= 0){
+    spawnItem();
+    spawnTimer = L.spawn * rnd(0.7, 1.3);
+  }
+
+  const bw = bowlWidth();
+  for (let i = items.length-1; i >= 0; i--){
+    const it = items[i];
+    it.y += it.vy * ts * dt;
+    it.rot += it.rotV * dt;
+    if ((it.type==='good' || it.type==='power') && effects.magnet > now){
+      it.x += (player.x - it.x) * (1 - Math.exp(-4.5*dt));
+    }
+    if (it.y > player.y-16 && it.y < player.y+30 && Math.abs(it.x - player.x) < (bw + it.r - 8)){
+      onCatch(it); items.splice(i,1); continue;
+    }
+    if (it.y > CH + 40){
+      if (it.type==='good') combo = 0;
+      items.splice(i,1);
+    }
+  }
+
+  // particles
+  for (let i = particles.length-1; i >= 0; i--){
+    const p = particles[i];
+    p.x += p.vx*dt; p.y += p.vy*dt; p.vy += (p.confetti?120:300)*dt; p.life -= dt;
+    if (p.life <= 0) particles.splice(i,1);
+  }
+  for (let i = floaters.length-1; i >= 0; i--){
+    const f = floaters[i]; f.y += f.vy*dt; f.life -= dt; if (f.life <= 0) floaters.splice(i,1);
+  }
+
+  if (hitFlash > 0) hitFlash -= dt;
+  if (shake > 0) shake = Math.max(0, shake - 40*dt);
+
+  if (mode === MODE.STORY){
+    timer -= dt;
+    if (timer <= 0){ timer = 0; loseLife(); return; }
+    if (bowlProgress >= L.target){ levelComplete(); return; }
+  }
+  if (lives <= 0){ gameOver(); return; }
+  updateHUD();
+}
+
+// ---------- render ----------
+function drawBackground(){
+  const g = ctx.createLinearGradient(0,0,0,CH);
+  g.addColorStop(0, '#2a1530'); g.addColorStop(0.55, '#341a3e'); g.addColorStop(1, '#3a1e24');
+  ctx.fillStyle = g; ctx.fillRect(0,0,CW,CH);
+  // lantern glow at top (festival vibe)
+  const rg = ctx.createRadialGradient(CW/2, 40, 10, CW/2, 40, 300);
+  rg.addColorStop(0, 'rgba(255,120,80,0.16)'); rg.addColorStop(1, 'rgba(255,120,80,0)');
+  ctx.fillStyle = rg; ctx.fillRect(0,0,CW,CH);
+  // subtle "bunting" stripes at top
+  ctx.save(); ctx.globalAlpha = 0.12;
+  for (let i=0;i<10;i++){
+    ctx.fillStyle = i%2 ? '#ff5d73' : '#ffd36e';
+    ctx.beginPath();
+    const bx = (i/10)*CW;
+    ctx.moveTo(bx,0); ctx.lineTo(bx+CW/10,0); ctx.lineTo(bx+CW/20, 26);
+    ctx.closePath(); ctx.fill();
+  }
+  ctx.restore();
+}
+function drawItem(it){
+  ctx.save();
+  ctx.translate(it.x, it.y); ctx.rotate(it.rot);
+  let badge='rgba(255,255,255,0.10)', ring='rgba(255,255,255,0.4)', glow='rgba(255,255,255,0.5)';
+  if (it.type==='power'){ badge='rgba(255,214,64,0.22)'; ring='rgba(255,214,64,0.9)'; glow='#ffd700'; }
+  else if (it.type==='bad'){ badge='rgba(255,84,84,0.20)'; ring='rgba(255,100,100,0.75)'; glow='#ff5b5b'; }
+  ctx.shadowColor=glow; ctx.shadowBlur=(it.type==='power'?18:10);
+  ctx.fillStyle=badge;
+  ctx.beginPath(); ctx.arc(0,0,it.r,0,Math.PI*2); ctx.fill();
+  ctx.shadowBlur=0;
+  ctx.lineWidth=2; ctx.strokeStyle=ring;
+  ctx.beginPath(); ctx.arc(0,0,it.r,0,Math.PI*2); ctx.stroke();
+  ctx.font = `${Math.round(it.r*1.55)}px "Noto Color Emoji","Apple Color Emoji","Segoe UI Emoji",sans-serif`;
+  ctx.textAlign='center'; ctx.textBaseline='middle';
+  ctx.fillStyle='#ffffff';
+  ctx.fillText(it.char, 0, 1);
+  ctx.restore();
+}
+function drawPlayer(){
+  const bw = bowlWidth();
+  const px = player.x, py = player.y;
+  // steam
+  ctx.save(); ctx.globalAlpha = 0.55; ctx.strokeStyle='#fff'; ctx.lineWidth=3; ctx.lineCap='round';
+  for (let i=-1;i<=1;i++){
+    const bx = px + i*16;
+    const wob = Math.sin(now*3 + i)*3;
+    ctx.beginPath(); ctx.moveTo(bx, py-10);
+    ctx.quadraticCurveTo(bx+5+wob, py-26, bx-2, py-40); ctx.stroke();
+  }
+  ctx.restore();
+  // shield ring
+  if (shieldHits > 0){
+    ctx.save(); ctx.globalAlpha=0.6+0.3*Math.sin(now*6);
+    ctx.strokeStyle='#66d0ff'; ctx.lineWidth=3;
+    ctx.beginPath(); ctx.ellipse(px, py-2, bw+14, 30, 0, 0, Math.PI*2); ctx.stroke(); ctx.restore();
+  }
+  // rainbow aura
+  if (effects.rainbow > now){
+    ctx.save(); ctx.globalAlpha=0.5;
+    const rc = ['#ff5d73','#ffd36e','#8fd68f','#66d0ff','#c58fff'];
+    for (let i=0;i<rc.length;i++){
+      ctx.strokeStyle = rc[i]; ctx.lineWidth=3;
+      ctx.beginPath(); ctx.ellipse(px, py-2, bw+18+i*4, 32+i*2, 0, 0, Math.PI*2); ctx.stroke();
+    }
+    ctx.restore();
+  }
+  // chopsticks
+  ctx.strokeStyle='#e0b070'; ctx.lineWidth=4; ctx.lineCap='round';
+  ctx.beginPath(); ctx.moveTo(px+bw*0.2, py-2); ctx.lineTo(px+bw*0.9, py-46); ctx.stroke();
+  ctx.beginPath(); ctx.moveTo(px+bw*0.35, py-2); ctx.lineTo(px+bw*1.0, py-42); ctx.stroke();
+  // bowl body
+  ctx.fillStyle = '#e74c3c';
+  ctx.beginPath();
+  ctx.moveTo(px-bw, py-8);
+  ctx.lineTo(px+bw, py-8);
+  ctx.lineTo(px+bw*0.62, py+30);
+  ctx.lineTo(px-bw*0.62, py+30);
+  ctx.closePath(); ctx.fill();
+  // broth surface
+  ctx.fillStyle = '#f6e2b8';
+  ctx.beginPath(); ctx.ellipse(px, py-8, bw, 13, 0, 0, Math.PI*2); ctx.fill();
+  // rim
+  ctx.strokeStyle = '#c0392b'; ctx.lineWidth = 4;
+  ctx.beginPath(); ctx.ellipse(px, py-8, bw, 13, 0, 0, Math.PI*2); ctx.stroke();
+  // Rin's chef hat + face (a little character peeking over the bowl)
+  // hat
+  ctx.fillStyle = '#fff';
+  ctx.beginPath(); ctx.ellipse(px, py-40, 22, 12, 0, Math.PI, 0); ctx.fill();
+  ctx.fillRect(px-22, py-44, 44, 8);
+  // face
+  ctx.fillStyle = '#ffe0c2';
+  ctx.beginPath(); ctx.arc(px, py-30, 13, 0, Math.PI*2); ctx.fill();
+  // hair (pink-ish, Rin's color)
+  ctx.fillStyle = '#ff9ec4';
+  ctx.beginPath(); ctx.arc(px, py-34, 13, Math.PI, 0); ctx.fill();
+  // eyes
+  ctx.fillStyle = '#3a2a2a';
+  ctx.beginPath(); ctx.arc(px-5, py-30, 2, 0, Math.PI*2); ctx.fill();
+  ctx.beginPath(); ctx.arc(px+5, py-30, 2, 0, Math.PI*2); ctx.fill();
+  // smile
+  ctx.strokeStyle = '#c0392b'; ctx.lineWidth = 1.5;
+  ctx.beginPath(); ctx.arc(px, py-28, 4, 0.15*Math.PI, 0.85*Math.PI); ctx.stroke();
+}
+function drawParticles(){
+  for (const p of particles){
+    ctx.globalAlpha = clamp(p.life/p.max, 0, 1);
+    ctx.fillStyle = p.color;
+    ctx.beginPath(); ctx.arc(p.x, p.y, p.size, 0, Math.PI*2); ctx.fill();
+  }
+  ctx.globalAlpha = 1;
+}
+function drawFloaters(){
+  ctx.textAlign='center'; ctx.font='800 20px "Segoe UI",sans-serif';
+  for (const f of floaters){
+    ctx.globalAlpha = clamp(f.life/f.max, 0, 1);
+    ctx.fillStyle = '#fff';
+    ctx.strokeStyle = 'rgba(0,0,0,.5)'; ctx.lineWidth=3;
+    ctx.strokeText(f.text, f.x, f.y); ctx.fillText(f.text, f.x, f.y);
+  }
+  ctx.globalAlpha = 1;
+}
+function render(){
+  ctx.save();
+  if (shake > 0) ctx.translate(rnd(-shake,shake), rnd(-shake,shake));
+  drawBackground();
+  for (const it of items) drawItem(it);
+  drawPlayer();
+  drawParticles();
+  drawFloaters();
+  if (hitFlash > 0){ ctx.fillStyle = `rgba(255,60,60,${clamp(hitFlash,0,0.4)})`; ctx.fillRect(0,0,CW,CH); }
+  ctx.restore();
+}
+
+// ---------- main loop ----------
+function loop(t){
+  requestAnimationFrame(loop);
+  let dt = (t - lastTime)/1000; lastTime = t;
+  if (dt > 0.05) dt = 0.05;
+  if (state === STATE.PLAYING || state === STATE.LEVELINTRO) now += dt;
+  if (state === STATE.LEVELINTRO && now >= levelIntroUntil){
+    state = STATE.PLAYING; hideAll(); hudVisible(true); lastTime = performance.now();
+  }
+  if (state === STATE.PLAYING) update(dt);
+  if (state === STATE.WON){
+    for (let i = particles.length-1;i>=0;i--){ const p=particles[i]; p.y+=p.vy*0.016; p.vy+=120*0.016; p.life-=0.016; if(p.life<=0) particles.splice(i,1); }
+  }
+  render();
+}
+requestAnimationFrame(loop);
+
+// ---------- input ----------
+function canvasX(clientX){
+  const r = canvas.getBoundingClientRect();
+  return (clientX - r.left) * (CW / r.width);
+}
+canvas.addEventListener('mousemove', e=>{ player.targetX = clamp(canvasX(e.clientX), player.hw, CW-player.hw); });
+canvas.addEventListener('touchstart', e=>{ e.preventDefault(); player.targetX = clamp(canvasX(e.touches[0].clientX), player.hw, CW-player.hw); }, {passive:false});
+canvas.addEventListener('touchmove', e=>{ e.preventDefault(); player.targetX = clamp(canvasX(e.touches[0].clientX), player.hw, CW-player.hw); }, {passive:false});
+
+document.addEventListener('keydown', e=>{
+  const c = e.code;
+  if (['ArrowLeft','ArrowRight','ArrowUp','ArrowDown','Space'].includes(c)) e.preventDefault();
+  if (c==='ArrowLeft' || c==='KeyA') keys.left = true;
+  if (c==='ArrowRight' || c==='KeyD') keys.right = true;
+  if (c==='Space' || c==='Enter'){
+    if (state===STATE.TITLE) startGame(MODE.STORY);
+    else if (state===STATE.LEVELINTRO) levelIntroUntil = 0;
+    else if (state===STATE.PLAYING) togglePause();
+    else if (state===STATE.PAUSED) togglePause();
+    else if (state===STATE.GAMEOVER || state===STATE.WON) toTitle();
+    else if (state===STATE.BOARD) toTitle();
+  }
+  if (c==='KeyP' && (state===STATE.PLAYING || state===STATE.PAUSED)) togglePause();
+});
+document.addEventListener('keyup', e=>{
+  if (e.code==='ArrowLeft' || e.code==='KeyA') keys.left = false;
+  if (e.code==='ArrowRight' || e.code==='KeyD') keys.right = false;
+});
+
+// ---------- buttons ----------
+const on = (id, fn)=>document.getElementById(id).addEventListener('click', e=>{ e.stopPropagation(); fn(); });
+on('btn-story', ()=>startGame(MODE.STORY));
+on('btn-endless', ()=>startGame(MODE.ENDLESS));
+on('btn-board', ()=>showBoard('story'));
+on('board-story', ()=>showBoard('story'));
+on('board-endless', ()=>showBoard('endless'));
+on('btn-boardclose', toTitle);
+on('btn-resume', togglePause);
+on('btn-quit', toTitle);
+on('btn-retry', ()=>startGame(mode));
+on('btn-gotitle', toTitle);
+on('btn-again', ()=>startGame(mode));
+on('btn-wintitle', toTitle);
+on('btn-save', ()=>savePendingScore('go-name'));
+on('btn-saveskip', ()=>{ document.getElementById('go-namebox').style.display='none'; });
+on('btn-winsave', ()=>savePendingScore('win-name'));
+on('btn-winskip', ()=>{ document.getElementById('win-namebox').style.display='none'; });
+document.getElementById('levelintro').addEventListener('click', ()=>{ if(state===STATE.LEVELINTRO) levelIntroUntil = 0; });
+
+// init best label
+(function(){
+  const bestS = getBest('story'), bestE = getBest('endless');
+  const parts = [];
+  if (bestS>0) parts.push('Story best: '+bestS);
+  if (bestE>0) parts.push('Endless best: '+bestE);
+  document.getElementById('best-title').textContent = parts.join(' · ');
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,15 @@
+{
+  "name": "Neon Courier",
+  "desc": "A tiny neon arcade dodger built for Global Hack Week: fly your courier through the stream, avoid the pink data blocks, and snatch yellow sparks for bonus points. Your best score is saved in the browser. Vanilla HTML, CSS and JavaScript — one page, no build step, no dependencies.",
+  "controls": "Left/Right or A/D to move (the start button launches the run); your best score is kept in the browser",
+  "tags": [
+    "arcade",
+    "dodge",
+    "neon",
+    "highscore"
+  ],
+  "shelf": "Arcade & Action",
+  "badge": "New",
+  "image": "title.png",
+  "creator": "JaniDhruv"
+}
