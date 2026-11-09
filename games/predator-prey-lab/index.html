@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Predator &amp; Prey Lab</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <header>
+    <div>
+      <h1>Predator &amp; Prey Lab</h1>
+      <p>Grass, rabbits and foxes on a torus — an agent-based Lotka–Volterra cycle.</p>
+    </div>
+    <div class="hud">
+      <span id="rabbits-read">0 rabbits</span>
+      <span id="foxes-read">0 foxes</span>
+      <span id="grass-read">0% grass</span>
+    </div>
+  </header>
+
+  <main>
+    <section class="stage">
+      <canvas id="scene" width="760" height="540"></canvas>
+      <p class="caption">Rabbits eat grass and breed; foxes hunt rabbits. Remove either link and the cycle collapses.</p>
+    </section>
+
+    <aside class="panel">
+      <div class="row">
+        <button id="toggle" class="primary">Pause</button>
+        <button id="reset">Reseed</button>
+      </div>
+      <label>
+        <span>Grass regrowth <b id="grass-out">2.0%</b></span>
+        <input id="grass" type="range" min="2" max="60" step="1" value="20" />
+      </label>
+      <label>
+        <span>Rabbits at start <b id="start-rabbits-out">120</b></span>
+        <input id="start-rabbits" type="range" min="0" max="300" step="10" value="120" />
+      </label>
+      <label>
+        <span>Foxes at start <b id="start-foxes-out">12</b></span>
+        <input id="start-foxes" type="range" min="0" max="80" step="2" value="12" />
+      </label>
+      <label>
+        <span>Steps per frame <b id="speed-out">2</b></span>
+        <input id="speed" type="range" min="1" max="6" step="1" value="2" />
+      </label>
+      <div class="legend">
+        <span><i class="dot rabbit"></i>rabbit</span>
+        <span><i class="dot fox"></i>fox</span>
+        <span><i class="dot grass"></i>grass</span>
+      </div>
+      <p id="status" class="status">A stable run balances grass, rabbits and foxes.</p>
+      <p class="hint">Click the meadow to sow a grass patch. Space pauses, R reseeds.</p>
+    </aside>
+  </main>
+
+  <script src="app.js"></script>
+</body>
+</html>

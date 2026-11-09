@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Elementary Automata Lab</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <header>
+    <div>
+      <h1>Elementary Automata Lab</h1>
+      <p>All 256 one-dimensional rules, drawn one generation at a time.</p>
+    </div>
+    <div class="hud">
+      <span id="rule-read">rule 30</span>
+      <span id="live-read">0 live</span>
+    </div>
+  </header>
+
+  <main>
+    <section class="stage">
+      <canvas id="scene" width="760" height="540"></canvas>
+      <p class="caption">Each row is one generation. A cell's next state depends only on itself and its two neighbours.</p>
+    </section>
+
+    <aside class="panel">
+      <div class="row">
+        <button id="toggle" class="primary">Pause</button>
+        <button id="step">Step row</button>
+        <button id="reset">Restart</button>
+      </div>
+      <label>
+        <span>Rule <b id="rule-out">30</b></span>
+        <input id="rule" type="range" min="0" max="255" step="1" value="30" />
+      </label>
+      <label>
+        <span>Rows per frame <b id="speed-out">2</b></span>
+        <input id="speed" type="range" min="1" max="12" step="1" value="2" />
+      </label>
+      <label>
+        <span>Seed</span>
+        <select id="seed">
+          <option value="single">Single cell</option>
+          <option value="random">Random fill</option>
+          <option value="pair">Two cells</option>
+        </select>
+      </label>
+      <label class="check">
+        <input id="wrap" type="checkbox" checked />
+        <span>Wrap edges</span>
+      </label>
+      <div class="row wrap" id="presets">
+        <button class="preset" data-rule="30">30</button>
+        <button class="preset" data-rule="90">90</button>
+        <button class="preset" data-rule="110">110</button>
+        <button class="preset" data-rule="184">184</button>
+        <button class="preset" data-rule="22">22</button>
+        <button class="preset" data-rule="150">150</button>
+      </div>
+      <p id="bits" class="bits">30 = 00011110₂ · 111→0 110→0 101→0 100→1 011→1 010→1 001→1 000→0</p>
+      <p id="status" class="status">Rule 30 from a single cell.</p>
+      <p class="hint">Space pauses, S steps one generation, R restarts with the current seed.</p>
+    </aside>
+  </main>
+
+  <script src="app.js"></script>
+</body>
+</html>

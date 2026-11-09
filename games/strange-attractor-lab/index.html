@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Strange Attractor Lab</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <header>
+    <div>
+      <h1>Strange Attractor Lab</h1>
+      <p>Deterministic chaos: six systems that never repeat, drawn one point at a time.</p>
+    </div>
+    <div class="hud">
+      <span id="points-read">0 points</span>
+      <span id="rate-read">1.00×</span>
+    </div>
+  </header>
+
+  <main>
+    <section class="stage">
+      <canvas id="scene" width="760" height="540"></canvas>
+      <p class="caption">Drag to rotate the projection. The equations are fully deterministic, yet two nearby starting points drift apart exponentially.</p>
+    </section>
+
+    <aside class="panel">
+      <div class="row">
+        <button id="toggle" class="primary">Pause</button>
+        <button id="clear">Restart</button>
+      </div>
+      <label>
+        <span>System</span>
+        <select id="system">
+          <option value="lorenz">Lorenz</option>
+          <option value="rossler">Rössler</option>
+          <option value="thomas">Thomas</option>
+          <option value="aizawa">Aizawa</option>
+          <option value="clifford">Clifford map</option>
+          <option value="dejong">De Jong map</option>
+        </select>
+      </label>
+      <label>
+        <span>Steps per frame <b id="speed-out">6</b></span>
+        <input id="speed" type="range" min="1" max="30" step="1" value="6" />
+      </label>
+      <label>
+        <span>Trail fade <b id="fade-out">6%</b></span>
+        <input id="fade" type="range" min="1" max="30" step="1" value="6" />
+      </label>
+      <label>
+        <span>Hue drift <b id="hue-out">12</b></span>
+        <input id="hue" type="range" min="0" max="60" step="1" value="12" />
+      </label>
+      <p id="status" class="status">Lorenz system running — σ 10, ρ 28, β 8/3.</p>
+      <p class="hint">Space pauses, R restarts. Each preset auto-fits its own scale.</p>
+    </aside>
+  </main>
+
+  <script src="app.js"></script>
+</body>
+</html>

@@ -1,0 +1,15 @@
+{
+  "name": "Strange Attractor Lab",
+  "desc": "Six chaotic systems — Lorenz, Rössler, Thomas, Aizawa, Clifford and De Jong — integrated and projected in the browser.",
+  "controls": "Pick a system, drag to rotate, sliders for steps, trail fade and hue drift",
+  "shelf": "Interactive Stories & Experiments",
+  "tags": [
+    "games",
+    "html5",
+    "chaos",
+    "math",
+    "visualization"
+  ],
+  "badge": "New",
+  "creator": "Original build (Dragon Gaming Assets)"
+}

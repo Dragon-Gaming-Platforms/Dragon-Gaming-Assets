@@ -1,0 +1,15 @@
+{
+  "name": "Fourier Epicycles Lab",
+  "desc": "Draw a closed curve and watch a chain of rotating vectors rebuild it from its Fourier coefficients.",
+  "controls": "Drag to draw a curve; sliders for harmonics and speed; presets for triangle, square, star and heart",
+  "shelf": "Interactive Stories & Experiments",
+  "tags": [
+    "games",
+    "html5",
+    "math",
+    "fourier",
+    "drawing"
+  ],
+  "badge": "New",
+  "creator": "Original build (Dragon Gaming Assets)"
+}

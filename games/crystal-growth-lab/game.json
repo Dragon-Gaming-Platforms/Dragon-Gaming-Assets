@@ -1,0 +1,15 @@
+{
+  "name": "Crystal Growth Lab",
+  "desc": "Diffusion-limited aggregation: random walkers freeze on contact and grow branching fractal crystals.",
+  "controls": "Sliders for stickiness, walkers and speed; seed shape and palette selectors",
+  "shelf": "Interactive Stories & Experiments",
+  "tags": [
+    "games",
+    "html5",
+    "simulation",
+    "fractal",
+    "emergence"
+  ],
+  "badge": "New",
+  "creator": "Original build (Dragon Gaming Assets)"
+}
