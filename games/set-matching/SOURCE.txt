@@ -1,0 +1,10 @@
+Set Matching
+Source: https://github.com/jparrpearson/javascript-set-matching-game
+Revision: 79b0168ceb60c1c92e283827dc00b3569747d934
+License: MIT (see LICENSE)
+Retrieved: 2026-10-17
+
+Committed static runtime only; development tooling and screenshots omitted.
+Local English guide added. Runtime URLs are relative; optional saves are game-scoped.
+
+Local jQuery 3.7.1, Lodash 4.17.21 and Bootstrap 3.4.1 CSS (MIT; full licenses in vendor). No Bootstrap JavaScript or icon fonts needed. Added responsive sizing and a visible button for native hints. Validated shared game IDs as 12 distinct four-digit ternary cards with at least one valid set. No persistent saves.

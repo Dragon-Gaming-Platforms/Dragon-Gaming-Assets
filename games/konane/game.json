@@ -1,0 +1,13 @@
+{
+  "name": "K\u014dnane",
+  "desc": "Capture stones with straight orthogonal jumps in Hawaiian checkers; computer or local two-player play.",
+  "controls": "Mouse / touch; rules and controls linked in-game.",
+  "shelf": "Puzzle & Logic",
+  "tags": [
+    "games",
+    "html5",
+    "board"
+  ],
+  "badge": "New",
+  "creator": "Kyle Harrity"
+}

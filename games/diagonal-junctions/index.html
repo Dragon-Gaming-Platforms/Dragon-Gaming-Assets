@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta name="color-scheme" content="dark light">
+
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<meta name="theme-color" content="#080B16" />
+<title>Diagonal Junctions</title>
+<meta name="description" content="A count-only Slant variant. Draw one diagonal per cell to satisfy the numbered junctions. Loops are allowed.">
+<!-- Inline icon: without it the browser probes the Pages domain root for /favicon.ico and logs a 404. -->
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%23080B16'/%3E%3Cpath d='M5 15 L15 5 M17 27 L27 17' stroke='%237BB8FF' stroke-width='3.4' stroke-linecap='round'/%3E%3Cpath d='M5 17 L15 27' stroke='%238FA6CC' stroke-width='3.4' stroke-linecap='round'/%3E%3Ccircle cx='16' cy='16' r='4.4' fill='%23080B16' stroke='%23FFC85C' stroke-width='2'/%3E%3C/svg%3E" />
+<link rel="stylesheet" href="css/game.css" />
+
+
+
+
+
+  <link rel="stylesheet" href="css/studio.css" />
+<style>.hosting-guide{position:relative;z-index:60;text-align:center;padding:10px;font:14px system-ui;background:#edf3f5;color:#123}.hosting-guide a{color:#164c78;text-decoration:underline}</style>
+</head>
+<body>
+<div class="hosting-guide"><a href="help.html">Rules, controls &amp; source</a></div>
+<div id="app">
+  <header class="topbar">
+    <div class="brand">
+      <img class="brand-mark" src="./assets/icons/icon-192.png" alt="" width="40" height="40" />
+      <div class="brand-txt">
+        <h1>Diagonal Junctions</h1>
+        <p class="sub">Slant-inspired · count-only variant</p>
+      </div>
+    </div>
+    <div class="top-actions">
+      <button id="btn-help" class="ghost" type="button" aria-pressed="false" aria-label="Rules and gestures">Help</button>
+      <button id="btn-sound" class="ghost" type="button" aria-pressed="true">Sound on</button>
+      <button id="btn-motion" class="ghost" type="button" aria-pressed="false">Motion on</button>
+      <button type="button" id="btn-pause" class="ghost" aria-pressed="false" title="Pause (P)">Pause</button><button id="btn-fullscreen" class="ghost" type="button" aria-pressed="false" title="Fullscreen（F）">Fullscreen</button>
+    </div>
+  </header>
+
+  <main>
+    <section id="view-menu" class="view">
+      <div class="menu-hero"><h2>A diagonal in every cell. The right number of ends at every clue.</h2><p>Draw ╱ or ╲ in each cell. A numbered junction counts the lines ending there; unnumbered junctions are unrestricted. This is a count-only Slant variant: <strong>closed loops are allowed</strong>.</p></div>
+
+      <div class="menu-cols">
+        <div class="col">
+          <h3 class="col-title">Choose difficulty</h3>
+          <div id="tier-list" class="tiers"></div>
+          <div id="resume-card" class="resume" hidden>
+            <div class="resume-txt">
+              <strong id="resume-name">Unfinished puzzle</strong>
+              <span id="resume-meta"></span>
+            </div>
+            <button id="btn-resume" class="primary" type="button">Resume</button>
+          </div>
+        </div>
+
+        <div class="col">
+          <h3 class="col-title">Records: fewer hints, then moves, then time</h3>
+          <ul id="record-list" class="records"></ul>
+
+          <h3 class="col-title">Four counting rules</h3>
+          <ol class="rules"><li><b>Zero:</b> no neighboring diagonal may end at this junction.</li><li><b>All:</b> if the clue equals the number of adjacent cells, every diagonal must end here.</li><li><b>Still needed:</b> if all remaining cells are needed, their lines must end here.</li><li><b>Already enough:</b> once a clue is met, other neighboring lines must point away.</li></ol>
+          <p class="rules-note">These are local counting deductions. Every diagonal placed by a deduction is shared by every solution.</p>
+        </div>
+      </div>
+    </section>
+
+    <section id="view-game" class="view" hidden>
+      <div class="stage">
+        <div class="stage-head">
+          <span id="stat-name" class="puzzle-name">—</span>
+          <span id="stat-tier" class="chip">—</span>
+          <span id="stat-time" class="chip mono">00:00</span>
+        </div>
+        <div id="board-wrap">
+          <canvas id="board" data-mode="slash" role="img" aria-label="五寸钉棋盘：拖动给格子放斜线"></canvas>
+          <canvas id="fx" aria-hidden="true"></canvas>
+          <div id="win-veil" hidden>
+            <div class="win-card">
+              <h3>All junctions satisfied!</h3>
+              <p id="win-meta"></p>
+              <p id="win-record" class="win-record"></p>
+              <div class="win-actions">
+                <button id="btn-again" class="primary" type="button">Play again</button>
+                <button id="btn-menu-2" class="ghost" type="button">Difficulty menu</button>
+              </div>
+            </div>
+          </div>
+          <div id="pause-veil" hidden>
+            <div class="pause-card">
+              <h3>Paused</h3>
+              <p id="pause-meta" class="mono"></p>
+              <div class="win-actions">
+                <button id="btn-resume-play" class="primary" type="button">Resume puzzle</button>
+              </div>
+            </div>
+          </div>
+        </div>
+        <p id="state-line" class="conflict-line" aria-live="polite"></p>
+      </div>
+
+      <aside class="panel">
+        <div class="modes" role="group" aria-label="斜线方向">
+          <button id="btn-mode-slash" class="mode" type="button" aria-pressed="true" aria-label="Draw / from bottom-left to top-right">╱ Slash</button>
+          <button id="btn-mode-back" class="mode" type="button" aria-pressed="false" aria-label="Draw backslash from top-left to bottom-right">╲ Backslash</button>
+        </div>
+        <div class="acts">
+          <button id="btn-hint" class="primary" type="button">Hints<span class="mono" id="hint-count">0</span></button>
+          <button id="btn-undo" class="ghost" type="button">Undo</button>
+          <button id="btn-restart" class="ghost" type="button" title="Restart this puzzle (R)">Restart</button>
+          <button id="btn-new" class="ghost" type="button">New puzzle</button>
+          <button id="btn-menu" class="ghost wide" type="button">Difficulty menu</button>
+        </div>
+
+        <div class="stats">
+          <div class="stat"><span>Moves</span><b id="stat-moves" class="mono">0</b></div>
+          <div class="stat"><span>Hints</span><b id="stat-hints" class="mono">0</b></div>
+          <div class="stat"><span>Filled cells</span><b id="stat-filled" class="mono">0/0</b></div>
+          <div class="stat"><span>Empty cells</span><b id="stat-remaining" class="mono">0</b></div>
+          <div class="stat"><span>Satisfied clues</span><b id="stat-satisfied" class="mono">0/0</b></div>
+          <div class="stat"><span>Conflicts</span><b id="stat-conflicts" class="mono">0</b></div>
+          <div class="stat"><span>Measured difficulty</span><b id="stat-score" class="mono">—</b></div>
+        </div>
+
+        <div class="hint-box">
+          <h4 id="hint-rule">Hint explanation</h4>
+          <p id="hint-line">A <b>Hint</b> explains one counting deduction.</p>
+        </div>
+
+        <div class="legend">
+          <span><i class="sw sw-good"></i>Useful line</span>
+          <span><i class="sw sw-pending"></i>Pending ends</span>
+          <span><i class="sw sw-bad"></i>Conflicting clue</span>
+          <span><i class="sw sw-empty"></i>Empty cell</span>
+          <span><i class="sw sw-done"></i>Satisfied junction</span>
+        </div>
+        <p class="keyhint">Tap a cell to place the selected diagonal; tap a matching diagonal to erase. Choose ╱ or ╲, then drag to draw; start on a matching line to erase. <b>H</b> hint · <b>Z</b> undo · <b>X</b> direction · <b>P</b>/Space pause · <b>R</b> restart · <b>M</b> mute · <b>F</b> fullscreen · <b>Esc</b> close help.</p>
+      </aside>
+    </section>
+  </main>
+
+  <footer class="foot">
+    <span>Generated puzzles, counting hints, and optional local records. Count-only variant: loops are allowed.</span>
+    <button id="btn-reset" class="link" type="button">Clear local records</button>
+  </footer>
+
+  <div id="help-veil" hidden role="dialog" aria-modal="true" aria-labelledby="help-title">
+    <div class="help-card">
+      <h3 id="help-title">Rules and controls</h3>
+      <ol class="rules"><li><b>Zero:</b> no neighboring diagonal may end at this junction.</li><li><b>All:</b> if the clue equals the number of adjacent cells, every diagonal must end here.</li><li><b>Still needed:</b> if all remaining cells are needed, their lines must end here.</li><li><b>Already enough:</b> once a clue is met, other neighboring lines must point away.</li></ol>
+      <p class="rules-note">These are local counting deductions. Every diagonal placed by a deduction is shared by every solution.</p>
+      <p class="keyhint">Tap a cell to place the selected diagonal; tap a matching diagonal to erase. Choose ╱ or ╲, then drag to draw; start on a matching line to erase. <b>H</b> hint · <b>Z</b> undo · <b>X</b> direction · <b>P</b>/Space pause · <b>R</b> restart · <b>M</b> mute · <b>F</b> fullscreen · <b>Esc</b> close help.</p>
+      <p class="keyhint">Tap a cell to place the selected diagonal; tap a matching diagonal to erase. Choose ╱ or ╲, then drag to draw; start on a matching line to erase. <b>H</b> hint · <b>Z</b> undo · <b>X</b> direction · <b>P</b>/Space pause · <b>R</b> restart · <b>M</b> mute · <b>F</b> fullscreen · <b>Esc</b> close help.</p>
+      <div class="win-actions">
+        <button id="btn-help-close" class="primary" type="button">Got it</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script type="module" src="js/main.js"></script>
+
+
+  <div class="studio-atmosphere" aria-hidden="true"></div>
+</body>
+</html>

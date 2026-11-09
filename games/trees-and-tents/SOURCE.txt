@@ -1,0 +1,12 @@
+Trees and Tents
+Source: https://github.com/Pitkil/tents-and-trees
+Revision: a26efc675442dfcf139793952dc46bb013a8b753
+License: MIT (see LICENSE)
+Retrieved: 2026-10-17
+
+Committed static runtime only; development tooling and screenshots omitted.
+Local English guide added. Runtime URLs are relative; optional saves are game-scoped.
+
+Google font links removed; system fallbacks used. Optional locale/completion storage namespaced, guarded against denied access and validated against malformed JSON and schemas. Progress records completion, not intermediate positions. Native English/Chinese UI retained.
+Latched solved boards, cancelled pending win cards on restart/level changes, and rechecked completion after corrective removal hints.
+Bound decorative sky shapes to the viewport to prevent desktop horizontal overflow.

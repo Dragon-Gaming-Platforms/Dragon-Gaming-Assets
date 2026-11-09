@@ -1,0 +1,13 @@
+{
+  "name": "Diagonal Junctions",
+  "desc": "Draw diagonals so every numbered junction has exactly the required number of line ends; a count-only Slant variant.",
+  "controls": "Mouse / touch; rules and controls linked in-game.",
+  "shelf": "Puzzle & Logic",
+  "tags": [
+    "games",
+    "html5",
+    "puzzle"
+  ],
+  "badge": "New",
+  "creator": "z-biz-game"
+}

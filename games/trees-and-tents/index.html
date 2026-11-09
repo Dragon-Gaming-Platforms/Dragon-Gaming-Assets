@@ -1,0 +1,145 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#eef8e9" />
+    <meta name="description" content="林间营地：一款卡通可爱的 Trees and Tents 逻辑游戏。" />
+    <title>林间营地 · Trees & Tents</title>
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Ccircle cx='32' cy='32' r='30' fill='%23fff8e8'/%3E%3Cpath d='M10 51 31 13a1 1 0 0 1 2 0l21 38H10Z' fill='%23eb805a'/%3E%3Cpath d='M32 14v37M32 28 20 51' fill='none' stroke='%23fff8e8' stroke-width='3'/%3E%3C/svg%3E" />
+    <link rel="stylesheet" href="styles.css" />
+  <style>.hosting-guide{position:relative;z-index:60;text-align:center;padding:10px;font:14px system-ui;background:#edf3f5;color:#123}.hosting-guide a{color:#164c78;text-decoration:underline}</style>
+</head>
+  <body>
+<div class="hosting-guide"><a href="help.html">Rules, controls &amp; source</a></div>
+    <div class="sky-decor sky-decor--left" aria-hidden="true"></div>
+    <div class="sky-decor sky-decor--right" aria-hidden="true"></div>
+
+    <header class="site-header">
+      <a class="brand" href="#" aria-label="林间营地首页">
+        <span class="brand-mark" aria-hidden="true">
+          <svg viewBox="0 0 48 48"><path d="M8 37.5 23.3 10a1 1 0 0 1 1.8 0L40 37.5H8Z" fill="#f28f5b"/><path d="M24 11v26.5M24 21l-8.8 16.5" fill="none" stroke="#fff9e9" stroke-width="2.4" stroke-linecap="round"/><path d="M24 21l9 16.5" fill="none" stroke="#ba583c" stroke-width="2.4" stroke-linecap="round"/></svg>
+        </span>
+        <span><strong id="brand-name">林间营地</strong><small>TREES &amp; TENTS</small></span>
+      </a>
+      <div class="header-actions">
+        <button class="icon-button language-button" type="button" aria-label="Switch to English" title="English">EN</button>
+        <button class="icon-button sound-button" type="button" aria-label="关闭音效" aria-pressed="true" title="音效">
+          <svg class="sound-on" viewBox="0 0 24 24"><path d="M5 10v4h3l4 3V7l-4 3H5Zm10.4-2.4a6 6 0 0 1 0 8.8M14 10a3 3 0 0 1 0 4"/></svg>
+          <svg class="sound-off" viewBox="0 0 24 24"><path d="M5 10v4h3l4 3V7l-4 3H5Zm10-1 5 6m0-6-5 6"/></svg>
+        </button>
+        <button class="rules-button" type="button" data-open-rules>
+          <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 17h.01M9.3 9a2.8 2.8 0 1 1 4.3 2.36c-1.04.68-1.6 1.15-1.6 2.14"/></svg>
+          <span id="rules-button-label">游戏规则</span>
+        </button>
+      </div>
+    </header>
+
+    <main class="page-shell">
+      <section class="intro" aria-labelledby="page-title">
+        <div class="eyebrow"><span></span><b id="intro-eyebrow">今日林间任务</b></div>
+        <h1 id="page-title">给每棵小树，<br />搭一顶<span>专属帐篷</span></h1>
+        <p id="intro-description">观察行列提示，在不打扰邻居的情况下安排营地。慢慢想，森林不催你。</p>
+        <div class="trail-note" aria-hidden="true">
+          <svg viewBox="0 0 140 68"><path d="M3 60c34 3 23-28 56-28 28 0 25 25 48 15 13-5 7-22 28-28"/><path d="m128 13 8 6-9 5"/></svg>
+          <span id="trail-copy">从简单的<br />小营地开始吧</span>
+        </div>
+      </section>
+
+      <section class="game-area" aria-label="游戏区域">
+        <aside class="level-panel" aria-label="关卡选择">
+          <div class="level-panel__top">
+            <span class="map-pin" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M12 21s7-6 7-12A7 7 0 0 0 5 9c0 6 7 12 7 12Z"/><circle cx="12" cy="9" r="2.3"/></svg></span>
+            <div><small id="map-label">探险地图</small><strong id="map-title">选择营地</strong></div>
+          </div>
+          <nav class="level-list" aria-label="关卡列表"></nav>
+          <div class="level-panel__footer">
+            <div class="mini-landscape" aria-hidden="true">
+              <span class="hill hill--one"></span><span class="hill hill--two"></span>
+              <span class="tiny-tree t1"></span><span class="tiny-tree t2"></span><span class="tiny-tree t3"></span>
+            </div>
+            <span><b id="completed-count">0</b> / <b id="total-count">10</b><small id="completed-label">营地已完成</small></span>
+          </div>
+        </aside>
+
+        <article class="game-card">
+          <div class="game-card__header">
+            <div>
+              <div class="level-kicker"><span></span><b id="difficulty-label">新手</b></div>
+              <h2 id="level-title">晨雾林地</h2>
+            </div>
+            <div class="game-stats" aria-label="游戏状态">
+              <div><small id="time-label">用时</small><strong id="timer">00:00</strong></div>
+              <span></span>
+              <div><small id="tents-label">帐篷</small><strong><b id="tent-count">0</b>/<b id="tent-total">5</b></strong></div>
+            </div>
+          </div>
+
+          <div class="board-wrap">
+            <div class="board-note board-note--row" id="row-note" aria-hidden="true">每行帐篷数</div>
+            <div class="board-note board-note--col" id="col-note" aria-hidden="true">每列帐篷数</div>
+            <div id="game-board" class="game-board" role="grid" aria-label="Trees and Tents 棋盘"></div>
+          </div>
+
+          <div class="tool-row">
+            <div class="draw-tools" role="group" aria-label="放置工具">
+              <button class="tool-button is-active" type="button" data-tool="tent" aria-pressed="true">
+                <span class="tool-icon tool-icon--tent" aria-hidden="true"><svg viewBox="0 0 44 44"><path d="M5 35 20.7 8a1.5 1.5 0 0 1 2.6 0L39 35H5Z"/><path d="M22 9v26M22 18l-9 17M22 18l9 17"/></svg></span>
+                <span><strong id="tent-tool-title">搭帐篷</strong><small id="tent-tool-help">放置 / 移除</small></span>
+                <kbd>1</kbd>
+              </button>
+              <button class="tool-button" type="button" data-tool="grass" aria-pressed="false">
+                <span class="tool-icon tool-icon--grass" aria-hidden="true"><svg viewBox="0 0 44 44"><path d="M8 34c5-1 7-4 9-10 2 4 3 7 3 10 3-8 8-13 15-15-4 6-5 10-5 15M5 35h34"/></svg></span>
+                <span><strong id="grass-tool-title">标记草地</strong><small id="grass-tool-help">排除空格</small></span>
+                <kbd>2</kbd>
+              </button>
+            </div>
+            <div class="utility-tools">
+              <button type="button" class="text-button" id="hint-button"><svg viewBox="0 0 24 24"><path d="M9 18h6M10 21h4M8.5 14.5a6 6 0 1 1 7 0c-.9.7-1.4 1.4-1.5 2.5h-4c-.1-1.1-.6-1.8-1.5-2.5Z"/></svg><span id="hint-label">提示</span> <small id="hint-count">3</small></button>
+              <button type="button" class="text-button" id="reset-button"><svg viewBox="0 0 24 24"><path d="M4 12a8 8 0 1 0 2.3-5.7L4 8.5M4 4v4.5h4.5"/></svg><span id="reset-label">重置</span></button>
+            </div>
+          </div>
+
+          <div class="rule-strip">
+            <span><i class="rule-dot rule-dot--tree"></i><b id="strip-rule-one">每棵树对应 1 顶帐篷</b></span>
+            <span><i class="rule-dot rule-dot--tent"></i><b id="strip-rule-two">帐篷只能上下左右靠近树</b></span>
+            <span><i class="rule-dot rule-dot--no"></i><b id="strip-rule-three">帐篷之间不能相邻</b></span>
+          </div>
+        </article>
+      </section>
+    </main>
+
+    <footer><span id="footer-copy">在森林里，聪明比速度更重要。</span><span>MADE FOR QUIET EXPLORERS</span></footer>
+
+    <div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+    <dialog id="rules-dialog" class="modal rules-modal">
+      <button class="modal-close" type="button" data-close-modal aria-label="关闭">×</button>
+      <div class="modal-leaf" aria-hidden="true"></div>
+      <p class="modal-eyebrow" id="rules-eyebrow">出发前读一读</p>
+      <h2 id="rules-title">怎样安排营地？</h2>
+      <div class="rules-list">
+        <div><span class="rule-number">01</span><div><strong id="rule-one-title">树与帐篷，一一结伴</strong><p id="rule-one-copy">每棵树四周的 4 个正邻格（上、下、左、右）中，合计恰好有 1 顶帐篷；不是每个方向各放 1 顶。每顶帐篷也只与一棵树配对。</p></div></div>
+        <div><span class="rule-number">02</span><div><strong id="rule-two-title">给彼此留点空间</strong><p id="rule-two-copy">两顶帐篷不能挨在一起，就连斜对角也不可以。</p></div></div>
+        <div><span class="rule-number">03</span><div><strong id="rule-three-title">听从路标数字</strong><p id="rule-three-copy">棋盘外的数字表示这一行或这一列需要放置的帐篷总数。</p></div></div>
+      </div>
+      <button class="primary-button" type="button" id="rules-confirm" data-close-modal>明白了，出发！</button>
+    </dialog>
+
+    <dialog id="win-dialog" class="modal win-modal">
+      <div class="win-illustration" aria-hidden="true">
+        <span class="moon"></span><span class="win-tree wt1"></span><span class="win-tree wt2"></span>
+        <span class="win-tent"></span><span class="campfire"><i></i></span>
+      </div>
+      <p class="modal-eyebrow" id="win-eyebrow">营地安排完成</p>
+      <h2 id="win-title">这片森林住得很舒服！</h2>
+      <p id="win-summary">你在 00:00 内完成了晨雾林地。</p>
+      <div class="win-actions">
+        <button class="secondary-button" type="button" id="replay-button">再玩一次</button>
+        <button class="primary-button" type="button" id="next-button">前往下一站 <span>→</span></button>
+      </div>
+    </dialog>
+
+    <script src="app.js"></script>
+  </body>
+</html>

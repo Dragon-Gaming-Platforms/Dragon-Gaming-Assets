@@ -1,0 +1,11 @@
+Fox and Hounds
+Source: https://github.com/Jelmerro/fox-and-hounds-ai
+Revision: 00660d2cf452e90190a8213760ae0936ab24b40d
+License: MIT (see LICENSE)
+Retrieved: 2026-10-17
+
+Committed static runtime only; development tooling and screenshots omitted.
+Local English guide added. Runtime URLs are relative; optional saves are game-scoped.
+
+MIT code; animal icons by Pixel perfect are CC BY 3.0 (original attribution and full img/LICENSE retained). Corrected fox-escape return, latched wins until New board by default, guarded terminal AI advancement, bounded integer AI depth to 1-4, default human fox versus biased-minimax hounds. Responsive board scaling. No persistent saves.
+Corrected Board.possibleMoves to evaluate the actual board instance, not the live global board, so AI simulation terminal checks respect simulated positions.

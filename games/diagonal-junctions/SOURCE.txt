@@ -1,0 +1,14 @@
+Diagonal Junctions
+Source: https://github.com/z-biz-game/z-biz-game-slant-cos
+Revision: 7477d7460b6316a020b05227ffcb17da120c2166
+License: MIT (see LICENSE)
+Retrieved: 2026-10-17
+
+Committed static runtime only; development tooling and screenshots omitted.
+Local English guide added. Runtime URLs are relative; optional saves are game-scoped.
+
+Service workers, PWA registration/manifest, and device haptics omitted for shared-origin hosting. Save key namespaced. Shipped only referenced procedurally generated art. English guide and English-facing controls added; rule/generation logic retained; hint text translated.
+
+Named as a count-only Slant variant: the upstream rules do not prohibit loops. Loops are deliberately allowed here; do not describe this edition as classic no-loop Slant.
+Removed duplicate appended pause/fullscreen event bindings so controls toggle once. Resume records must match a supported tier and exact board size.
+Stored best-record board size as a cell count to match the decoder, so best records survive reload; the menu still displays board dimensions.
