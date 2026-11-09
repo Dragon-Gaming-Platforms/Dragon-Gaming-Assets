@@ -1,0 +1,15 @@
+{
+  "name": "Ricochet Reaper",
+  "desc": "A frantic arena shooter where your scythe laser bounces off the arena walls and pillars — the best shots are complicated ricochets, and a bounced shot scores more, releases more souls and is the only way to hit a shielded knight from the front. Every kill releases souls that fly back to you and refill your limited laser charge; chain kills multiply your score and survive ever more aggressive waves. An original Arcade Phantasm game.",
+  "controls": "WASD move, mouse aims, click fires (or arrows + Q/E aim + Space); P pause, M mute",
+  "tags": [
+    "arcade",
+    "arena",
+    "shooter",
+    "ricochet"
+  ],
+  "shelf": "Arcade & Action",
+  "badge": "New",
+  "creator": "CursedPrograms",
+  "image": "title.png"
+}
