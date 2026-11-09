@@ -1,0 +1,15 @@
+{
+  "name": "Predator & Prey Lab",
+  "desc": "Grass, rabbits and foxes share a wrapping meadow in an agent-based ecosystem with population charts.",
+  "controls": "Play or pause, reseed, tune grass regrowth and starting populations; click to sow grass",
+  "shelf": "Interactive Stories & Experiments",
+  "tags": [
+    "games",
+    "html5",
+    "ecosystem",
+    "agents",
+    "simulation"
+  ],
+  "badge": "New",
+  "creator": "Original build (Dragon Gaming Assets)"
+}

@@ -1,0 +1,15 @@
+{
+  "name": "Elementary Automata Lab",
+  "desc": "Explore all 256 Wolfram one-dimensional cellular automata generation by generation.",
+  "controls": "Rule slider and presets, step or play, seed choice and edge wrapping toggle",
+  "shelf": "Interactive Stories & Experiments",
+  "tags": [
+    "games",
+    "html5",
+    "cellular-automata",
+    "math",
+    "visualization"
+  ],
+  "badge": "New",
+  "creator": "Original build (Dragon Gaming Assets)"
+}

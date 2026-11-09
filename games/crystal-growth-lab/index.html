@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Crystal Growth Lab</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <header>
+    <div>
+      <h1>Crystal Growth Lab</h1>
+      <p>Diffusion-limited aggregation: random walkers freeze on contact and build fractal crystals.</p>
+    </div>
+    <div class="hud">
+      <span id="mass-read">0 cells</span>
+      <span id="walkers-read">0 walkers</span>
+    </div>
+  </header>
+
+  <main>
+    <section class="stage">
+      <canvas id="scene" width="720" height="540"></canvas>
+      <p class="caption">Particles wander blindly until they touch the crystal. Low stickiness makes sparser, branchier growth.</p>
+    </section>
+
+    <aside class="panel">
+      <div class="row">
+        <button id="toggle" class="primary">Pause</button>
+        <button id="reset">Regrow</button>
+      </div>
+      <label>
+        <span>Stickiness <b id="stick-out">100%</b></span>
+        <input id="stick" type="range" min="5" max="100" step="5" value="100" />
+      </label>
+      <label>
+        <span>Walkers <b id="walkers-out">260</b></span>
+        <input id="walkers" type="range" min="20" max="700" step="20" value="260" />
+      </label>
+      <label>
+        <span>Steps per frame <b id="speed-out">3</b></span>
+        <input id="speed" type="range" min="1" max="10" step="1" value="3" />
+      </label>
+      <label>
+        <span>Seed shape</span>
+        <select id="seed">
+          <option value="point">Single point</option>
+          <option value="line">Horizontal line</option>
+          <option value="triple">Three seeds</option>
+        </select>
+      </label>
+      <label>
+        <span>Palette</span>
+        <select id="palette">
+          <option value="ice">Ice</option>
+          <option value="copper">Copper</option>
+          <option value="moss">Moss</option>
+        </select>
+      </label>
+      <p id="status" class="status">Single seed at the centre, 260 walkers.</p>
+      <p class="hint">Space pauses, R regrows. Crystals grow faster as the cluster gets bigger.</p>
+    </aside>
+  </main>
+
+  <script src="app.js"></script>
+</body>
+</html>

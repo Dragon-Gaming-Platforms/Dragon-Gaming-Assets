@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Fourier Epicycles Lab</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <header>
+    <div>
+      <h1>Fourier Epicycles Lab</h1>
+      <p>Draw any closed curve, then watch spinning circles reconstruct it.</p>
+    </div>
+    <div class="hud">
+      <span id="terms-read">0 terms</span>
+      <span id="error-read">error 0.000</span>
+    </div>
+  </header>
+
+  <main>
+    <section class="stage">
+      <canvas id="scene" width="720" height="560"></canvas>
+      <p class="caption">The trace is decomposed into rotating vectors. Big circles set the rough shape; small ones carve the corners.</p>
+    </section>
+
+    <aside class="panel">
+      <div class="row">
+        <button id="toggle" class="primary">Pause</button>
+        <button id="clear">Clear</button>
+      </div>
+      <label>
+        <span>Harmonics <b id="harmonics-out">48</b></span>
+        <input id="harmonics" type="range" min="1" max="128" step="1" value="48" />
+      </label>
+      <label>
+        <span>Drawing speed <b id="speed-out">1.0×</b></span>
+        <input id="speed" type="range" min="0.2" max="3" step="0.1" value="1" />
+      </label>
+      <label class="check">
+        <input id="circles" type="checkbox" checked />
+        <span>Show epicycles</span>
+      </label>
+      <div class="row wrap">
+        <button class="preset" data-preset="triangle">Triangle</button>
+        <button class="preset" data-preset="square">Square</button>
+        <button class="preset" data-preset="star">Star</button>
+        <button class="preset" data-preset="heart">Heart</button>
+      </div>
+      <p id="status" class="status">Triangle preset loaded. Drag on the canvas to draw your own curve.</p>
+      <p class="hint">Space pauses, C clears. Longer strokes are resampled to 128 points.</p>
+    </aside>
+  </main>
+
+  <script src="app.js"></script>
+</body>
+</html>
