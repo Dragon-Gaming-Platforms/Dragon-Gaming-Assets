@@ -1,0 +1,15 @@
+{
+  "name": "Séance",
+  "desc": "A side-view time-rewind platformer where you summon your own past: run a dangerous room, press R, and time runs back — your last run rises as a pale blue ghost that repeats it frame by frame. Ghosts hold pressure plates, ride lifts and lend you their heads to stand on, so the living you (solid pink) can get through. Each room grants only a few spirits, counted on the Ouija board in the corner, and the fixed 60-step physics makes every ghost repeat its run exactly. An original Arcade Phantasm game with touch controls and synthesized sound; pure HTML5, no dependencies.",
+  "controls": "Arrows or A/D move, Up/W/Space/Z jump (hold for higher), R rewind and summon your run as a ghost, T rewind and try again, X banish all ghosts and restart the room, [ / ] skip between solved rooms, P pause, M mute (phone: on-screen buttons)",
+  "tags": [
+    "arcade",
+    "platformer",
+    "rewind",
+    "ghost"
+  ],
+  "shelf": "Arcade & Action",
+  "badge": "New",
+  "image": "title.png",
+  "creator": "CursedPrograms"
+}
