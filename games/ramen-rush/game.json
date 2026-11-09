@@ -1,0 +1,15 @@
+{
+  "name": "Ramen Rush: The Great Ramen Festival",
+  "desc": "A fast, cute, single-file arcade game: steer your bowl as Rin, catch the good noodles, dodge the fish, grab power-ups and fill your bowl across 8 festival stages — each with its own flavor and rising difficulty — to win the Golden Ladle. Entirely canvas-drawn: no assets, no build step, no dependencies. Works with keyboard, mouse or touch.",
+  "controls": "Arrows or A/D, mouse or finger to steer the bowl, Space/Enter to start, skip the intro or pause, P pause",
+  "tags": [
+    "arcade",
+    "catch",
+    "festival",
+    "single-file"
+  ],
+  "shelf": "Arcade & Action",
+  "badge": "New",
+  "image": "title.png",
+  "creator": "rinlives"
+}
