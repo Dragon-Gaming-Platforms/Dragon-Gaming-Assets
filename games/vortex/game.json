@@ -1,0 +1,15 @@
+{
+  "name": "Vortex",
+  "desc": "You're falling through a collapsing dimension: run along the inside of a rotating tunnel, dodge obstacles and collect energy fragments while the tunnel twists, turns and finally breaks apart — faster every level. The glitchy, flickering blocks reverse your left and right for a few seconds; the screen turns green and tears while you're reversed. An original Arcade Phantasm game; pure HTML5, no dependencies.",
+  "controls": "Left/Right or A/D run around the tunnel, Space/Up/W jump, P/Esc pause, M mute, Space/Enter to run again after game over",
+  "tags": [
+    "arcade",
+    "tunnel",
+    "runner",
+    "glitch"
+  ],
+  "shelf": "Arcade & Action",
+  "badge": "New",
+  "image": "title.png",
+  "creator": "CursedPrograms"
+}

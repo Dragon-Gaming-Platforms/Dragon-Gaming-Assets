@@ -1,0 +1,15 @@
+{
+  "name": "Devourer",
+  "desc": "You're a tiny black hole: eat asteroids, satellites, moons and stars, grow, and finally swallow whole planetary systems while hostile celestial creatures hunt you and the screen falls into chaos. Your size decides what you can eat, but bigger is slower — and the matter you've swallowed trails behind you and gets in your way. Switch between forms, each with its own power. An original Arcade Phantasm game with phone support; pure HTML5, no dependencies.",
+  "controls": "Arrows/WASD move (or hold the mouse button to steer toward the pointer), Space uses your current form's power, Q/E or 1-4 change form, P pause",
+  "tags": [
+    "arcade",
+    "black-hole",
+    "space",
+    "devour"
+  ],
+  "shelf": "Arcade & Action",
+  "badge": "New",
+  "image": "title.png",
+  "creator": "CursedPrograms"
+}
