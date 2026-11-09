@@ -1,0 +1,15 @@
+{
+  "name": "Overdrive",
+  "desc": "A high-octane neon cyberpunk arcade dodger: weave through the stream, dodge the pink hazards, grab green cores and keep the score climbing. A single HTML page built with Canvas — no build step, no dependencies.",
+  "controls": "Arrows or WASD to steer, Space to start or restart after game over",
+  "tags": [
+    "arcade",
+    "dodge",
+    "cyberpunk",
+    "neon"
+  ],
+  "shelf": "Arcade & Action",
+  "badge": "New",
+  "image": "title.png",
+  "creator": "ranataimoor97150-source"
+}

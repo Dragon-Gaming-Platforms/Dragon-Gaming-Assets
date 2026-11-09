@@ -1,0 +1,129 @@
+/* Devourer: the canvas fills the window; the splash and the touch buttons sit over it.
+   Cursed colours, solid only: no gradients, no shadows (the glow is drawn inside the canvas). */
+html,
+body {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+    overflow: hidden;
+    background-color: #020611;
+    font-family: 'Arial', sans-serif;
+    color: #ffffff;
+    touch-action: none;
+    user-select: none;
+    -webkit-user-select: none;
+}
+
+#game {
+    display: block;
+    width: 100%;
+    height: 100%;
+}
+
+#splash {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 14px;
+    background-color: rgba(2, 6, 17, 0.45);
+    cursor: pointer;
+    text-align: center;
+    transition: opacity 0.5s;
+}
+
+#splash.gone {
+    opacity: 0;
+    pointer-events: none;
+}
+
+#splash .title {
+    margin: 0;
+    font-family: 'Arial Black', 'Arial', sans-serif;
+    font-size: min(110px, 15vw);
+    letter-spacing: 0.08em;
+    color: #020611;
+    -webkit-text-stroke: 3px #f088e9;
+}
+
+#splash .tag {
+    margin: 0 0 10px;
+    color: #39ff6a;
+    font-size: 18px;
+    font-weight: bold;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+}
+
+#splash .cursed-logo {
+    width: min(260px, 50vw);
+}
+
+#splash .copyright {
+    margin: 0;
+    color: #c2c2c2;
+    font-size: 15px;
+}
+
+#splash .press {
+    margin: 18px 0 0;
+    color: #f088e9;
+    font-size: 20px;
+    font-weight: bold;
+    letter-spacing: 0.08em;
+    animation: pulse 1.2s ease-in-out infinite alternate;
+}
+
+#splash .keys {
+    margin: 0 12px;
+    color: #34a9e3;
+    font-size: 13px;
+}
+
+@keyframes pulse {
+    to { opacity: 0.3; }
+}
+
+/* touch buttons: only on phones and tablets, after the first touch (drag anywhere to move) */
+#touch {
+    display: none;
+}
+
+body.touch.playing #touch {
+    display: block;
+}
+
+#touch button {
+    position: absolute;
+    border: 2px solid #f088e9;
+    border-radius: 50%;
+    background-color: rgba(0, 23, 37, 0.6);
+    color: #f088e9;
+    font-weight: bold;
+    font-size: 14px;
+}
+
+#tPower {
+    right: 22px;
+    bottom: 30px;
+    width: 90px;
+    height: 90px;
+}
+
+#tForm {
+    right: 124px;
+    bottom: 22px;
+    width: 62px;
+    height: 62px;
+    border-color: #34a9e3 !important;
+    color: #34a9e3 !important;
+}
+
+#tPause {
+    right: 18px;
+    top: 70px;
+    width: 46px;
+    height: 46px;
+}

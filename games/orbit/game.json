@@ -1,0 +1,15 @@
+{
+  "name": "Orbit",
+  "desc": "A tiny spacecraft caught between gravitational fields: orbit planets to dodge enemies, slingshot between gravity wells and collect energy orbs, while planets explode around you. The twist — enemies have their own gravity, pulling you off course. An original Arcade Phantasm game; pure HTML5, no dependencies.",
+  "controls": "Left/Right or A/D turn, Up/W thrust, Down/S brake, P/Esc pause, M mute",
+  "tags": [
+    "arcade",
+    "gravity",
+    "space",
+    "dodge"
+  ],
+  "shelf": "Arcade & Action",
+  "badge": "New",
+  "image": "title.png",
+  "creator": "CursedPrograms"
+}

@@ -1,0 +1,15 @@
+{
+  "name": "Protocol.hex",
+  "desc": "You're a virus loose inside a computer system: slide along the glowing pathways of the circuit board, infect every node — each one turns pink and becomes yours — and keep away from the green antivirus programs that patrol the traces and chase you down. Infection energy lets you corrupt the system itself: rot a wall into a new pathway to break into a sealed vault, cut a shortcut or escape a hunter. Rotted cells are invisible to the firewall and the scanner, and security escalates sector by sector. An original Arcade Phantasm game; pure HTML5, no dependencies.",
+  "controls": "Arrows/WASD move, Space rots the wall ahead, Shift speed burst, C plant a trap, Q cloak, F split off a copy, P pause, M mute",
+  "tags": [
+    "arcade",
+    "virus",
+    "circuit",
+    "maze"
+  ],
+  "shelf": "Arcade & Action",
+  "badge": "New",
+  "image": "title.png",
+  "creator": "CursedPrograms"
+}

@@ -26,11 +26,19 @@ jobs:
   deploy:
     environment:
       name: github-pages
-      url: ${{ steps.deployment.outputs.page_url }}
+      url: ${{ steps.deployment1.outputs.page_url || steps.deployment2.outputs.page_url }}
     runs-on: ubuntu-latest
+    # Fail fast instead of burning the 6-hour runner default; with
+    # cancel-in-progress: false a stuck run would otherwise block every
+    # subsequent deployment queued behind it in the "pages" group.
+    timeout-minutes: 45
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          # Only the tree at HEAD is deployed; the full history of this
+          # repo is large and just slows the run down.
+          fetch-depth: 1
       - name: Setup Pages
         uses: actions/configure-pages@v5
       # Repo plumbing stays in the repository but must not ship to the site.
@@ -48,6 +56,17 @@ jobs:
         with:
           # Upload entire repository
           path: '.'
+      # GitHub Pages enforces a 10-minute deployment limit and a 1GB
+      # recommended ceiling; this site sits near the ceiling, so a
+      # deployment occasionally times out. Retry once before giving up.
       - name: Deploy to GitHub Pages
-        id: deployment
+        id: deployment1
+        uses: actions/deploy-pages@v5
+        continue-on-error: true
+      - name: Wait before retry
+        if: steps.deployment1.outcome == 'failure'
+        run: sleep 30
+      - name: Deploy to GitHub Pages (retry)
+        id: deployment2
+        if: steps.deployment1.outcome == 'failure'
         uses: actions/deploy-pages@v5
