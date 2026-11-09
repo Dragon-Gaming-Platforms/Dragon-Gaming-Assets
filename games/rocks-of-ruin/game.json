@@ -1,0 +1,15 @@
+{
+  "name": "Rocks of Ruin",
+  "desc": "Navigate an enormous asteroid field where asteroids split into smaller pieces and some rocks hide alien creatures — skitters, spitters, leeches and wraiths — that crawl out and hunt you. Pick up salvage from what you destroy and spend it in the salvage bay on weapon upgrades, while the field turns nastier the deeper you go. An original Arcade Phantasm game with a minimap and synthesized sound; pure HTML5, no dependencies.",
+  "controls": "Arrows/WASD fly, Space fire, U opens the salvage bay to spend collected salvage on weapon upgrades, P pause, M mute",
+  "tags": [
+    "arcade",
+    "shooter",
+    "asteroids",
+    "salvage"
+  ],
+  "shelf": "Arcade & Action",
+  "badge": "New",
+  "creator": "CursedPrograms",
+  "image": "title.png"
+}
