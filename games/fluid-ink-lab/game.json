@@ -1,0 +1,9 @@
+{
+  "name": "Fluid Ink Lab",
+  "desc": "Fluid diffusion simulation where ink drops spread and fade over time.",
+  "controls": "Mouse / Touch to paint; Space to pause; C to clear",
+  "shelf": "Interactive Stories & Experiments",
+  "tags": ["games", "html5", "simulation", "fluid"],
+  "badge": "New",
+  "creator": "Original build (Dragon Gaming Assets)"
+}

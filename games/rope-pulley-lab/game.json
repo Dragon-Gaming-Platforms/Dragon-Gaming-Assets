@@ -1,0 +1,9 @@
+{
+  "name": "Rope Pulley Lab",
+  "desc": "Physics contraption toy with Verlet integration rope simulation and anchor dragging.",
+  "controls": "Drag anchor; Space to pause; C to clear",
+  "shelf": "Interactive Stories & Experiments",
+  "tags": ["games", "html5", "physics", "contraption"],
+  "badge": "New",
+  "creator": "Original build (Dragon Gaming Assets)"
+}
