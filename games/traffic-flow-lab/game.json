@@ -1,0 +1,14 @@
+{
+  "name": "Traffic Flow Lab",
+  "desc": "A single-lane Nagel–Schreckenberg ring road where jams appear on their own.",
+  "controls": "Mouse / slider controls; Space to pause; S to step; R to reseed",
+  "shelf": "Interactive Stories & Experiments",
+  "tags": [
+    "games",
+    "html5",
+    "simulation",
+    "traffic"
+  ],
+  "badge": "New",
+  "creator": "Original build (Dragon Gaming Assets)"
+}

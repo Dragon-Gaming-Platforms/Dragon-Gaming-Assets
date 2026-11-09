@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Boids Flocking Lab</title>
+  <style>
+    body{margin:0;background:#0b0e14;color:#c7d0dd;font:14px/1.45 system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;display:flex;flex-direction:column;height:100vh;overflow:hidden}
+    header{display:flex;align-items:baseline;justify-content:space-between;padding:10px 16px;border-bottom:1px solid #1d2431}
+    h1{font:700 15px/1 ui-monospace,SFMono-Regular,Menlo,Consolas,"Liberation Mono",monospace;letter-spacing:.42em;text-transform:uppercase;background:linear-gradient(90deg,#ffd86b,#ff9e2c 55%,#ff5a13);-webkit-background-clip:text;background-clip:text;color:transparent}
+    #stage{flex:1 1 auto;position:relative;min-height:0;overflow:hidden;background:#0d1017}
+    #cv{position:absolute;inset:0;width:100%;height:100%;touch-action:none;cursor:crosshair;image-rendering:pixelated}
+    #toolbar{flex:0 0 auto;display:flex;flex-wrap:wrap;align-items:center;gap:6px;padding:10px 14px 8px;border-top:1px solid #1d2431;background:#0d1118}
+    .act{padding:7px 12px;background:#151a24;border:1px solid #232b3a;border-radius:8px;color:#c7d0dd;font-size:12px;cursor:pointer}
+    .act:hover{background:#1a2231;border-color:#2e3a4f}
+    .act.on{border-color:#ff9e2c;color:#ff9e2c;box-shadow:0 0 0 1px #ff9e2c,0 0 14px -4px #ff9e2c}
+    #hint{order:99;flex-basis:100%;color:#48515f;font-size:11px;padding-top:6px;letter-spacing:.02em}
+  </style>
+</head>
+<body>
+  <header>
+    <div class="brand"><h1>Boids Flocking Lab</h1></div>
+    <div class="stats"><span><b id="fps">--</b> fps</span><span><b id="count">0</b> boids</span></div>
+  </header>
+  <div id="stage"><canvas id="cv"></canvas></div>
+  <div id="toolbar">
+    <button id="pause" class="act" title="pause (space)">pause</button>
+    <button id="spawn" class="act" title="spawn boids">spawn</button>
+    <button id="clear" class="act danger" title="clear (C)">clear</button>
+    <div id="hint">click to attract · space pause · C clear · boids follow separation, alignment, cohesion</div>
+  </div>
+  <script>
+    'use strict';
+    const canvas=document.getElementById('cv'),ctx=canvas.getContext('2d');
+    let w=canvas.width=400,h=canvas.height=300,scale=2;
+    canvas.style.width=w*scale+'px';canvas.style.height=h*scale+'px';
+    let boids=[],pause=false,fps=0,last=performance.now();
+    class Boid{constructor(x,y){this.x=x;this.y=y;this.vx=(Math.random()-.5)*4;this.vy=(Math.random()-.5)*4}}
+    function spawn(n=20){for(let i=0;i<n;i++)boids.push(new Boid(Math.random()*w,Math.random()*h))}
+    function clear(){boids=[]}
+    function draw(){
+      ctx.clearRect(0,0,w,h);
+      ctx.fillStyle='#ff9e2c';
+      for(const b of boids){
+        ctx.beginPath();ctx.arc(b.x,b.y,3,0,Math.PI*2);ctx.fill()
+      }
+    }
+    function step(){
+      if(pause)return;
+      for(const b of boids){
+        // separation, alignment, cohesion simplified
+        let sx=0,sy=0,ax=0,ay=0,cx=0,cy=0,cnt=0;
+        for(const o of boids){
+          const dx=o.x-b.x,dy=o.y-b.y,d=dx*dx+dy*dy;
+          if(d>0&&d<1000){sx-=dx;sy-=dy;ax+=o.vx;ay+=o.vy;cx+=o.x;cy+=o.y;cnt++}
+        }
+        if(cnt>0){
+          b.vx+=(sx/cnt)*.05+(ax/cnt)*.01+(cx/cnt-b.x)*.001;
+          b.vy+=(sy/cnt)*.05+(ay/cnt)*.01+(cy/cnt-b.y)*.001
+        }
+        b.vx*=0.98;b.vy*=0.98;
+        b.x+=b.vx;b.y+=b.vy;
+        if(b.x<0)b.x=w;if(b.x>w)b.x=0;if(b.y<0)b.y=h;if(b.y>h)b.y=0
+      }
+      draw();fps++;const now=performance.now();if(now-last>1000){document.getElementById('fps').textContent=fps;fps=0;last=now}
+      document.getElementById('count').textContent=boids.length
+    }
+    function init(){
+      spawn(50);
+      document.getElementById('pause').onclick=()=>(pause=!pause,document.getElementById('pause').textContent=pause?'▶ Resume':'⏸ Pause')
+      document.getElementById('spawn').onclick=()=>spawn(20)
+      document.getElementById('clear').onclick=clear
+      let mx=-1,my=-1;
+      canvas.onmousedown=e=>{(mx=e.offsetX/scale|0,my=e.offsetY/scale|0);boids.push(new Boid(mx,my))}
+      canvas.onmousemove=e=>{(mx=e.offsetX/scale|0,my=e.offsetY/scale|0)}
+      document.onkeydown=e=>{(e.code==='Space'&&!e.repeat)&&(pause=!pause,document.getElementById('pause').textContent=pause?'▶ Resume':'⏸ Pause');(e.code==='KeyC'&&!e.repeat)&&clear()}
+      setInterval(()=>step(),16)
+    }
+    init()
+  </script>
+</body>
+</html>

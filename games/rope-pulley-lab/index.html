@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Rope Pulley Lab</title>
+  <style>
+    body{margin:0;background:#0b0e14;color:#c7d0dd;font:14px/1.45 system-ui,-apple-system,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;display:flex;flex-direction:column;height:100vh;overflow:hidden}
+    header{display:flex;align-items:baseline;justify-content:space-between;padding:10px 16px;border-bottom:1px solid #1d2431}
+    h1{font:700 15px/1 ui-monospace,SFMono-Regular,Menlo,Consolas,"Liberation Mono",monospace;letter-spacing:.42em;text-transform:uppercase;background:linear-gradient(90deg,#ffd86b,#ff9e2c 55%,#ff5a13);-webkit-background-clip:text;background-clip:text;color:transparent}
+    #stage{flex:1 1 auto;position:relative;min-height:0;overflow:hidden;background:#0d1017}
+    #cv{position:absolute;inset:0;width:100%;height:100%;touch-action:none;cursor:crosshair;image-rendering:pixelated}
+    #toolbar{flex:0 0 auto;display:flex;flex-wrap:wrap;align-items:center;gap:6px;padding:10px 14px 8px;border-top:1px solid #1d2431;background:#0d1118}
+    .act{padding:7px 12px;background:#151a24;border:1px solid #232b3a;border-radius:8px;color:#c7d0dd;font-size:12px;cursor:pointer}
+    .act:hover{background:#1a2231;border-color:#2e3a4f}
+    .act.on{border-color:#ff9e2c;color:#ff9e2c;box-shadow:0 0 0 1px #ff9e2c,0 0 14px -4px #ff9e2c}
+    #hint{order:99;flex-basis:100%;color:#48515f;font-size:11px;padding-top:6px;letter-spacing:.02em}
+  </style>
+</head>
+<body>
+  <header>
+    <div class="brand"><h1>Rope Pulley Lab</h1></div>
+    <div class="stats"><span><b id="fps">--</b> fps</span><span><b id="segments">0</b> segments</span></div>
+  </header>
+  <div id="stage"><canvas id="cv"></canvas></div>
+  <div id="toolbar">
+    <button id="pause" class="act" title="pause (space)">pause</button>
+    <button id="reset" class="act" title="reset rope">reset</button>
+    <button id="clear" class="act danger" title="clear (C)">clear</button>
+    <div id="hint">drag anchor · space pause · C clear · rope physics with Verlet integration</div>
+  </div>
+  <script>
+    'use strict';
+    const canvas=document.getElementById('cv'),ctx=canvas.getContext('2d');
+    let w=canvas.width=400,h=canvas.height=300,scale=2;
+    canvas.style.width=w*scale+'px';canvas.style.height=h*scale+'px';
+    let points=[],segments=[],pause=false,fps=0,last=performance.now();
+    function reset(){
+      points=[{x:w/2,y:50,ox:w/2,oy:50,fixed:true},{x:w/2,y:100,ox:w/2,oy:100,fixed:false},{x:w/2,y:150,ox:w/2,oy:150,fixed:false},{x:w/2,y:200,ox:w/2,oy:200,fixed:false}];
+      segments=[[0,1],[1,2],[2,3]];
+    }
+    function clear(){points=[];segments=[]}
+    function draw(){
+      ctx.clearRect(0,0,w,h);
+      ctx.strokeStyle='#ff9e2c';ctx.lineWidth=2;
+      for(const s of segments){
+        const p1=points[s[0]],p2=points[s[1]];
+        ctx.beginPath();ctx.moveTo(p1.x,p1.y);ctx.lineTo(p2.x,p2.y);ctx.stroke()
+      }
+      ctx.fillStyle='#c7d0dd';
+      for(const p of points){
+        ctx.beginPath();ctx.arc(p.x,p.y,3,0,Math.PI*2);ctx.fill()
+      }
+    }
+    function step(){
+      if(pause)return;
+      const g=0.5,d=0.98;
+      for(const p of points){
+        if(!p.fixed){p.vy+=g;p.x+=p.vx;p.y+=p.vy;p.vx*=d;p.vy*=d;
+          if(p.x<0||p.x>w){p.x=Math.max(0,Math.min(w,p.x));p.vx*=-0.5}
+          if(p.y<0||p.y>h){p.y=Math.max(0,Math.min(h,p.y));p.vy*=-0.5}
+          p.ox+=p.vx;p.oy+=p.vy
+        }
+      }
+      for(let i=0;i<5;i++){
+        for(const s of segments){
+          const p1=points[s[0]],p2=points[s[1]];
+          const dx=p2.x-p1.x,dy=p2.y-p1.y,dist=Math.sqrt(dx*dx+dy*dy)||1,target=100;
+          const diff=(dist-target)/dist*0.1;
+          p1.x+=dx*diff;p1.y+=dy*diff;p2.x-=dx*diff;p2.y-=dy*diff
+        }
+      }
+      draw();fps++;const now=performance.now();if(now-last>1000){document.getElementById('fps').textContent=fps;fps=0;last=now}
+      document.getElementById('segments').textContent=segments.length
+    }
+    function init(){
+      reset();
+      document.getElementById('pause').onclick=()=>(pause=!pause,document.getElementById('pause').textContent=pause?'▶ Resume':'⏸ Pause')
+      document.getElementById('reset').onclick=reset
+      document.getElementById('clear').onclick=clear
+      let dragging=false;
+      canvas.onmousedown=e=>{(dragging=true);points[0].x=e.offsetX/scale|0;points[0].y=e.offsetY/scale|0;points[0].ox=points[0].x;points[0].oy=points[0].y}
+      canvas.onmousemove=e=>{(dragging)&&(points[0].x=e.offsetX/scale|0,points[0].y=e.offsetY/scale|0)}
+      canvas.onmouseup=()=>dragging=false
+      document.onkeydown=e=>{(e.code==='Space'&&!e.repeat)&&(pause=!pause,document.getElementById('pause').textContent=pause?'▶ Resume':'⏸ Pause');(e.code==='KeyC'&&!e.repeat)&&clear()}
+      setInterval(()=>step(),16)
+    }
+    init()
+  </script>
+</body>
+</html>

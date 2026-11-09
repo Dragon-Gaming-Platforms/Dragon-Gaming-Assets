@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Traffic Flow Lab</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <header>
+    <div>
+      <h1>Traffic Flow Lab</h1>
+      <p>A single-lane ring road with a Nagel–Schreckenberg rule set.</p>
+    </div>
+    <div class="hud">
+      <span id="clock-read">step 0</span>
+      <span id="flow-read">flow 0.00</span>
+    </div>
+  </header>
+
+  <main>
+    <section class="stage">
+      <canvas id="scene" width="880" height="420"></canvas>
+      <p class="caption">Density raises the odds of a jam; a small random braking chance turns smooth flow into stop-and-go waves.</p>
+    </section>
+
+    <aside class="panel">
+      <div class="row">
+        <button id="toggle" class="primary">Pause</button>
+        <button id="step">Step</button>
+        <button id="reset">Reset</button>
+      </div>
+      <label>
+        <span>Density <b id="density-out">0.28</b></span>
+        <input id="density" type="range" min="0.05" max="0.9" step="0.01" value="0.28" />
+      </label>
+      <label>
+        <span>Braking chance <b id="brake-out">0.15</b></span>
+        <input id="brake" type="range" min="0" max="0.6" step="0.01" value="0.15" />
+      </label>
+      <label>
+        <span>Speed limit <b id="limit-out">5</b></span>
+        <input id="limit" type="range" min="2" max="8" step="1" value="5" />
+      </label>
+      <label>
+        <span>Simulation speed <b id="speed-out">2×</b></span>
+        <input id="speed" type="range" min="0" max="6" step="1" value="2" />
+      </label>
+      <div class="stats">
+        <div><span>Cars</span><b id="cars-read">0</b></div>
+        <div><span>Avg speed</span><b id="avg-read">0.00</b></div>
+        <div><span>Stopped</span><b id="stopped-read">0</b></div>
+      </div>
+      <p id="status" class="status">Ring road seeded at 28% density.</p>
+      <p class="hint">Space pauses, S steps one tick, R reseeds the road.</p>
+    </aside>
+  </main>
+
+  <script src="app.js"></script>
+</body>
+</html>

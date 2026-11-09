@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Slime Network Lab</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <header>
+    <div>
+      <h1>Slime Network Lab</h1>
+      <p>A physarum-style transport network grown by thousands of simple foragers.</p>
+    </div>
+    <div class="hud">
+      <span id="agents-read">0 agents</span>
+      <span id="coverage-read">0% covered</span>
+    </div>
+  </header>
+
+  <main>
+    <section class="stage">
+      <canvas id="scene" width="720" height="480"></canvas>
+      <p class="caption">Agents leave a trail, steer toward the strongest scent ahead, and reinforce the paths they share.</p>
+    </section>
+
+    <aside class="panel">
+      <div class="row">
+        <button id="toggle" class="primary">Pause</button>
+        <button id="reset">Reset</button>
+      </div>
+      <label>
+        <span>Population <b id="agents-out">1400</b></span>
+        <input id="agents" type="range" min="200" max="4000" step="100" value="1400" />
+      </label>
+      <label>
+        <span>Sensor angle <b id="sensor-out">34°</b></span>
+        <input id="sensor" type="range" min="5" max="90" step="1" value="34" />
+      </label>
+      <label>
+        <span>Turn angle <b id="turn-out">28°</b></span>
+        <input id="turn" type="range" min="5" max="80" step="1" value="28" />
+      </label>
+      <label>
+        <span>Trail decay <b id="decay-out">4%</b></span>
+        <input id="decay" type="range" min="1" max="12" step="1" value="4" />
+      </label>
+      <label>
+        <span>Speed <b id="speed-out">1.0×</b></span>
+        <input id="speed" type="range" min="0" max="3" step="1" value="1" />
+      </label>
+      <div class="row wrap">
+        <button class="preset" data-preset="network">Network</button>
+        <button class="preset" data-preset="coral">Coral</button>
+        <button class="preset" data-preset="veins">Veins</button>
+      </div>
+      <p id="status" class="status">Network preset running.</p>
+      <p class="hint">Click the canvas to drop a food cluster and watch trails reorganize.</p>
+    </aside>
+  </main>
+
+  <script src="app.js"></script>
+</body>
+</html>

@@ -1,0 +1,14 @@
+{
+  "name": "Slime Network Lab",
+  "desc": "Grow a living transport network from thousands of physarum-style foragers.",
+  "controls": "Mouse / Touch to place food; Space to pause; R to reset",
+  "shelf": "Interactive Stories & Experiments",
+  "tags": [
+    "games",
+    "html5",
+    "simulation",
+    "emergence"
+  ],
+  "badge": "New",
+  "creator": "Original build (Dragon Gaming Assets)"
+}
