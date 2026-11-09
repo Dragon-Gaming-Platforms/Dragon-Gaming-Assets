@@ -1,0 +1,15 @@
+{
+  "name": "Yin-Yang",
+  "desc": "Complete a two-color grid so black and white each connect without any monochrome 2×2 square.",
+  "controls": "Mouse / touch. Arrows navigate; 1 shades, 0 clears; Space cycles; Backspace erases.",
+  "shelf": "Puzzle & Logic",
+  "tags": [
+    "games",
+    "html5",
+    "puzzle",
+    "logic",
+    "original"
+  ],
+  "badge": "New",
+  "creator": "Dragon Gaming Platforms"
+}

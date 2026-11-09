@@ -1,0 +1,15 @@
+{
+  "name": "Aquarium",
+  "desc": "Fill connected rooms with level water, matching the shaded-cell totals outside each row and column.",
+  "controls": "Mouse / touch. Arrows navigate; 1 shades, 0 clears; Space cycles; Backspace erases.",
+  "shelf": "Puzzle & Logic",
+  "tags": [
+    "games",
+    "html5",
+    "puzzle",
+    "logic",
+    "original"
+  ],
+  "badge": "New",
+  "creator": "Dragon Gaming Platforms"
+}

@@ -1,0 +1,15 @@
+{
+  "name": "Tapa",
+  "desc": "Interpret cyclic run clues around white cells to build one connected shaded wall without solid 2×2 blocks.",
+  "controls": "Mouse / touch. Arrows navigate; 1 shades, 0 clears; Space cycles; Backspace erases.",
+  "shelf": "Puzzle & Logic",
+  "tags": [
+    "games",
+    "html5",
+    "puzzle",
+    "logic",
+    "original"
+  ],
+  "badge": "New",
+  "creator": "Dragon Gaming Platforms"
+}
