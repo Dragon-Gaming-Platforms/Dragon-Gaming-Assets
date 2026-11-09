@@ -1,0 +1,105 @@
+/* RICOCHET REAPER: the canvas fills the window; the splash sits over it in solid Cursed colours. */
+html,
+body {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+    overflow: hidden;
+    background-color: #020611;
+    font-family: Arial, Helvetica, sans-serif;
+    touch-action: none;
+    user-select: none;
+    -webkit-user-select: none;
+}
+
+#game {
+    display: block;
+    width: 100%;
+    height: 100%;
+    cursor: crosshair;
+}
+
+#splash {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    padding: 16px;
+    box-sizing: border-box;
+    background-color: rgba(2, 6, 17, 0.72);
+    text-align: center;
+    cursor: pointer;
+    transition: opacity 0.5s;
+}
+
+#splash.gone {
+    opacity: 0;
+    pointer-events: none;
+}
+
+#splash .title {
+    margin: 0;
+    color: #f088e9;
+    font-family: 'Arial Black', Arial, sans-serif;
+    font-size: min(96px, 13vw);
+    line-height: 0.95;
+    letter-spacing: 0.06em;
+    border-top: 4px solid #34a9e3;
+    border-bottom: 4px solid #34a9e3;
+    padding: 14px 10px;
+}
+
+#splash .tag {
+    margin: 0;
+    color: #39ff6a;
+    font-size: 18px;
+    font-weight: bold;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+}
+
+#splash .cursed-logo {
+    width: min(260px, 50vw);
+    margin-top: 8px;
+}
+
+#splash .copyright {
+    margin: 0;
+    color: #c2c2c2;
+    font-size: 14px;
+}
+
+#splash .how {
+    max-width: 560px;
+    margin: 8px 0 0;
+    color: #34a9e3;
+    font-size: 15px;
+}
+
+#splash .keys {
+    max-width: 640px;
+    margin: 0;
+    color: #8aa4b8;
+    font-size: 13px;
+}
+
+#splash .press {
+    margin: 16px 0 0;
+    color: #f088e9;
+    font-size: 20px;
+    font-weight: bold;
+    letter-spacing: 0.08em;
+    animation: blink 1.2s steps(2, start) infinite;
+}
+
+@keyframes blink {
+    to { visibility: hidden; }
+}
+
+@media (max-width: 600px) {
+    #splash .keys { display: none; }
+    #splash .how { font-size: 13px; }
+}

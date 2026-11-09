@@ -1,0 +1,15 @@
+{
+  "name": "Grave Danger",
+  "desc": "A necromancer's survival arcade game: every monster you destroy rises from the ground as a skeleton on your side. Your followers swarm the nearest threat on their own, you upgrade your army in the Bone Merchant's shop between waves, and you face enormous bosses — your horde of the dead grows as the difficulty does. An original Arcade Phantasm game.",
+  "controls": "WASD/arrows move; casting is automatic — hold the mouse to aim your spells and hold Space to rally the army; P pause, M mute",
+  "tags": [
+    "arcade",
+    "survival",
+    "horde",
+    "necromancer"
+  ],
+  "shelf": "Arcade & Action",
+  "badge": "New",
+  "creator": "CursedPrograms",
+  "image": "title.png"
+}
