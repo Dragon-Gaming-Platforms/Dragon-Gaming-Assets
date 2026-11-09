@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Firefly Sync Lab</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <header>
+    <div>
+      <h1>Firefly Sync Lab</h1>
+      <p>Kuramoto oscillators: independent fireflies that drift into one rhythm.</p>
+    </div>
+    <div class="hud">
+      <span id="order-read">order 0.00</span>
+      <span id="flash-read">0 flashes</span>
+    </div>
+  </header>
+
+  <main>
+    <section class="stage">
+      <canvas id="scene" width="820" height="480"></canvas>
+      <p class="caption">Each firefly nudges its phase toward the average of its neighbours. Coupling strength decides whether a crowd becomes a chorus.</p>
+    </section>
+
+    <aside class="panel">
+      <div class="row">
+        <button id="toggle" class="primary">Pause</button>
+        <button id="reset">Reset</button>
+      </div>
+      <label>
+        <span>Fireflies <b id="count-out">220</b></span>
+        <input id="count" type="range" min="40" max="600" step="20" value="220" />
+      </label>
+      <label>
+        <span>Coupling <b id="coupling-out">1.60</b></span>
+        <input id="coupling" type="range" min="0" max="6" step="0.1" value="1.6" />
+      </label>
+      <label>
+        <span>Natural spread <b id="spread-out">1.40</b></span>
+        <input id="spread" type="range" min="0" max="3" step="0.05" value="1.4" />
+      </label>
+      <label>
+        <span>Flash length <b id="flash-out">0.10</b></span>
+        <input id="flash" type="range" min="0.02" max="0.3" step="0.01" value="0.1" />
+      </label>
+      <div class="row wrap">
+        <button class="preset" data-preset="chorus">Chorus</button>
+        <button class="preset" data-preset="scatter">Scatter</button>
+        <button class="preset" data-preset="drift">Drift</button>
+      </div>
+      <p id="status" class="status">Starting from scattered phases.</p>
+      <p class="hint">Click the meadow to startle nearby fireflies out of phase. Space pauses.</p>
+    </aside>
+  </main>
+
+  <script src="app.js"></script>
+</body>
+</html>

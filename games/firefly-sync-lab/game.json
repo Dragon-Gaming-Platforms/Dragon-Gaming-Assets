@@ -1,0 +1,14 @@
+{
+  "name": "Firefly Sync Lab",
+  "desc": "Kuramoto fireflies settle into a shared rhythm as coupling rises.",
+  "controls": "Mouse / Touch to startle fireflies; Space to pause; R to scatter phases",
+  "shelf": "Interactive Stories & Experiments",
+  "tags": [
+    "games",
+    "html5",
+    "simulation",
+    "oscillators"
+  ],
+  "badge": "New",
+  "creator": "Original build (Dragon Gaming Assets)"
+}
