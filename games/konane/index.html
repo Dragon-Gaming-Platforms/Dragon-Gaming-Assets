@@ -1,0 +1,593 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+		<title>Kōnane</title>
+		<script>
+			document.addEventListener("DOMContentLoaded", function(){
+				const canvas = document.getElementById("canvas");
+				const ctx = canvas.getContext("2d");
+
+				const PIECE_MASK = 0x0F;
+				const W = 0x01; //white color piece
+				const B = 0x02; //black color piece
+				const E = 0x00; //empty tile
+
+				const COLOR_NAME = [];
+				COLOR_NAME[W] = "White";
+				COLOR_NAME[B] = "Black";
+
+
+				const ANNOTATION_MASK = 0xF0;
+				const AVAILABLE_MOVE = 0x10;
+				const CURSOR = 0x20;
+				const SELECTED_PIECE = 0x40;
+
+				var size = 8; //allow user to se this somewhere
+
+				//now draw the board anywhere from 6x6 to 14x14, or 9x13, 14x17, and 13x20
+				//we'll start with 14x14
+				var board = [];
+				//init columns
+				for(let i=0; i < size; i++){
+					if( i % 2 === 0){
+						board.push(genRow(W, B, size));
+					}else{
+						board.push(genRow(B, W, size));
+					}
+				}
+
+				function genRow(startColor, secondColor, length){
+					let row = [];
+					let isStartColor = true;
+					for(let i=0; i < length; i++){
+						row[i] = isStartColor ? startColor : secondColor;
+						isStartColor = !isStartColor;
+					}
+					return row;
+				}
+
+				//remove first 2 from corner so game can start without first move logic
+				//board[0][0] = E;
+				//board[1][0] = E;
+
+				function drawBoard(board, canvas, ctx, lastMove=false){
+					let size = canvas.width /  board.length;
+					//TODO will need x and y dimensions separately in the future
+
+					//color the background
+					ctx.fillStyle="#AAA";
+					ctx.fillRect(0,0,canvas.width,canvas.height);
+
+					//draw outer tile square then round occupying piece (if it exists)
+					for(let i=0; i < board.length; i++){
+						for(let j=0; j < board[i].length; j++){
+							//check for cursor
+							if( isCursored(board[i][j]) ){
+								ctx.fillStyle = "#0F0";
+								ctx.fillRect(i*size, j*size, size, size);
+
+							}
+
+
+
+							//draw box outline
+							ctx.strokeStyle="#000";
+							ctx.beginPath();
+							ctx.rect(i*size, j*size, size, size);
+							ctx.stroke();
+
+							let cx = i*size + size/2;
+							let cy = j*size + size/2;
+
+							if( isAnnotated(board[i][j]) ){
+
+								ctx.fillStyle = '#096';
+								ctx.arc(cx, cy, size*0.2, 0, Math.PI*2);
+								ctx.fill();
+							}
+							if(lastMove){
+								if(lastMove.sx == i && lastMove.sy == j){
+									ctx.fillStyle = "#0F0";
+									ctx.fillRect(i*size, j*size, size, size);
+								}
+								else if(lastMove.ex == i && lastMove.ey == j){
+									ctx.fillStyle = "#096";
+									ctx.fillRect(i*size, j*size, size, size);
+								}
+							}
+
+
+							if( (board[i][j] & PIECE_MASK) === W){
+								ctx.fillStyle = "#EEE";
+							}
+							else if( (board[i][j] & PIECE_MASK) === B){
+								ctx.fillStyle = "#333";
+							}else{//empty
+								continue;
+							}
+
+							ctx.beginPath();
+							ctx.arc(cx, cy, size*0.4, 0, Math.PI*2);
+							ctx.fill();
+
+							if( (board[i][j] & AVAILABLE_MOVE) == AVAILABLE_MOVE ){
+
+							}
+
+
+
+						}
+					}
+				}
+
+				function isAnnotated(pos){
+					return (pos & AVAILABLE_MOVE) === AVAILABLE_MOVE;
+				}
+
+				function isCursored(pos){
+					return (pos & CURSOR) === CURSOR && currentPlayer === humanPlayer;
+				}
+
+				drawBoard(board, canvas, ctx);
+
+				var moveCount = 0; //move 1 & 2 remove a stone then the capturing begins
+				var currentPlayer = B;
+                const versusAI = new URLSearchParams(location.search).get('mode') !== 'two-player';
+                let ended = false;
+                function updateStatus() {
+                    if (ended) return true;
+                    if (moveCount >= 2 && getAllMoves(board, currentPlayer).length === 0) {
+                        ended = true;
+                        selectedPiece = null;
+                        clearAnnotations(board);
+                        document.getElementById('status').innerText = COLOR_NAME[currentPlayer === B ? W : B] + ' wins!';
+                        return true;
+                    }
+                    document.getElementById('status').innerText = COLOR_NAME[currentPlayer] +
+                        (versusAI && currentPlayer === B ? ' (computer)' : '') +
+                        (moveCount < 2 ? ' to play. Select a stone to remove' : ' to play. Select a stone, then a highlighted landing');
+                    return false;
+                }
+
+				var humanPlayer = W;
+				var aiPlayer = B;//W;
+
+				let gameLoop = setInterval(function(){
+                    if (updateStatus() || !versusAI) return;
+					var m = false; //last move
+					if(aiPlayer != currentPlayer){
+
+						if(moveCount >= 2){document.getElementById("status").innerText = COLOR_NAME[humanPlayer]+" to play";}
+						//check if player has lost
+						if(getAllMoves(board, currentPlayer).length == 0 && moveCount >= 2){
+							document.getElementById("status").innerText = COLOR_NAME[aiPlayer]+" (AI) wins!";
+						}
+						return;
+					}else{
+						if(moveCount >= 2){document.getElementById("status").innerText = COLOR_NAME[aiPlayer]+" (AI) to play"};
+					}
+
+					if(moveCount < 2){
+
+						board = aiFirstMove(board, currentPlayer, moveCount);
+						currentPlayer = currentPlayer === B ? W : B;
+						moveCount++;
+
+						document.getElementById("status").innerText = COLOR_NAME[currentPlayer]+" to play. Select a stone to remove";
+					}else{
+						//otherwise find a move
+						let moves = getAllMoves(board, currentPlayer);
+						let bestMoveIndex = 0;
+						let mostUsMoves = -1000;
+						let leastThemMoves = 1000;
+						let bestMetric = -1000;
+						let bestMetricIndex = 0;
+						for(let i=0; i < moves.length; i++){
+							let postMoveState = simulateMove(board, moves[i], currentPlayer);
+							let usMovesCount = getAllMoves(postMoveState, currentPlayer).length;
+							let themMovesCount = getAllMoves(postMoveState, humanPlayer).length;
+
+
+							if(usMovesCount > mostUsMoves){
+								mostUsMoves = usMovesCount;
+								bestMoveIndex = i;
+							}
+							let metric = usMovesCount + (usMovesCount - themMovesCount);
+							if(metric > bestMetric){
+								bestMetric = metric;
+								bestMetricIndex = i;
+							}
+						}
+
+
+
+
+						//perform move
+						m = moves[bestMetricIndex];
+						if(!m){
+
+							document.getElementById("status").innerText = COLOR_NAME[humanPlayer]+" wins!";
+							return;
+						}
+						board[m.sx][m.sy] &= ~currentPlayer;
+						board[m.ex][m.ey] |= currentPlayer;
+						removeJumpedPieces(board, m);
+						currentPlayer = currentPlayer === B ? W : B;
+						moveCount++; //just for stats here not rules
+
+						clearCursor(board);
+					}
+
+					updateStatus();
+                    drawBoard(board, canvas, ctx, m);
+				}, 350);
+
+
+				function aiFirstMove(board, currentPlayer, moveCount){
+					if(moveCount == 0){
+						let selectedValidPiece = false;
+						while(true){
+							let x = getRandomInt(0,board.length);
+							let y = getRandomInt(0,board[x].length);
+							if( (board[x][y] & PIECE_MASK) == currentPlayer){
+								board[x][y] &= E;
+								return board;
+							}
+						}
+					}
+					else if(moveCount == 1){
+						//find empty square first
+						let choices = [];
+						for(let i=0; i < board.length; i++){
+							for(let j=0; j < board[i].length; j++){
+								if( (board[i][j] & PIECE_MASK) == E){
+									if(i-1 >= 0){
+										choices.push({x:i-1,y:j});
+									}
+									if(i+1 < board.length){
+										choices.push({x:i+1,y:j});
+									}
+									if(j-1 >= 0){
+										choices.push({x:i,y:j-1});
+									}
+									if(j+1 < board[i].length){
+										choices.push({x:i,y:j+1});
+									}
+								}
+							}
+						}
+						//then pick from availabe spots randomly, can also change this to check for move counts...
+						let choice = choices[getRandomInt(0, choices.length)];
+						board[choice.x][choice.y] &= E;
+						return board;
+					}
+
+				}
+
+				function getRandomInt(min, max) {
+					min = Math.ceil(min);
+					max = Math.floor(max);
+					return Math.floor(Math.random() * (max - min) + min); //The maximum is exclusive and the minimum is inclusive
+				}
+
+
+				canvas.addEventListener("mousemove", function(e){
+					//if(curentPlayer != humanPlayer){
+						                    const bounds = canvas.getBoundingClientRect();
+                    const x = (e.clientX - bounds.left) * canvas.width / bounds.width;
+                    const y = (e.clientY - bounds.top) * canvas.height / bounds.height;
+                    const tileX = Math.floor(x / (canvas.width / size));
+                    const tileY = Math.floor(y / (canvas.height / size));
+                    if (tileX < 0 || tileY < 0 || tileX >= size || tileY >= size) return;
+
+
+						clearCursor(board);
+						board[tileX][tileY] |= CURSOR;
+					//}
+				});
+
+				canvas.addEventListener("mouseout", function(){
+					clearCursor(board);
+				});
+
+				var selectedPiece = null;
+				canvas.addEventListener("click", function(e){
+					//only run this for humans
+					if(ended || (versusAI && currentPlayer != humanPlayer)){return;}
+
+					                    const bounds = canvas.getBoundingClientRect();
+                    const x = (e.clientX - bounds.left) * canvas.width / bounds.width;
+                    const y = (e.clientY - bounds.top) * canvas.height / bounds.height;
+                    const tileX = Math.floor(x / (canvas.width / size));
+                    const tileY = Math.floor(y / (canvas.height / size));
+                    if (tileX < 0 || tileY < 0 || tileX >= size || tileY >= size) return;
+
+
+					/*let selectedPiece = */
+					let selection = {
+						x: tileX,
+						y: tileY
+					};
+
+
+					let moves = [];
+					var m = false;
+					//now determine moves, etc
+					if(moveCount < 2){
+						selectedPiece = selection;
+
+						let allowed = firstMove(board, selectedPiece, currentPlayer, moveCount);
+
+						if(allowed){
+
+							currentPlayer = currentPlayer === B ? W : B;
+							moveCount++;
+						}
+						selectedPiece = null;
+					}else{
+						if(selectedPiece && tileX === selectedPiece.x && tileY === selectedPiece.y){
+							selectedPiece = null;
+						}else if( (currentPlayer === (board[tileX][tileY] & PIECE_MASK) ) && (board[tileX][tileY] !== E) ){
+							selectedPiece = selection;
+							let moves = getMoves(board, selectedPiece, currentPlayer);
+							clearAnnotations(board);
+							for(let i=0; i < moves.length; i++){
+								board[moves[i].ex][moves[i].ey] |= AVAILABLE_MOVE;
+							}
+						}else if(selectedPiece){
+							clearAnnotations(board);
+							let moves = getMoves(board, selectedPiece, currentPlayer);
+							//console.log('TOTAL MOVES: ', getAllMoves(board, currentPlayer));
+
+
+							if(selectedPiece && isValidMove(selection, moves) ){
+								board[selectedPiece.x][selectedPiece.y] &= ~currentPlayer;
+								board[tileX][tileY] |= currentPlayer;
+								m = {
+									sx: selectedPiece.x,
+									sy: selectedPiece.y,
+									ex: tileX,
+									ey: tileY
+								};
+								removeJumpedPieces(board, m);
+								currentPlayer = currentPlayer === B ? W : B;
+								moveCount++; //just for stats here not rules
+							}
+						}
+					}
+
+					updateStatus();
+                    drawBoard(board, canvas, ctx, m);
+				});
+
+				function showTurn(isBlack){
+					let span = document.getElementById("turn-color");
+					if(isBlack){
+						span.innerText = "Black";
+					}else{
+						span.innerText = "White";
+					}
+				}
+
+				function simulateMove(board, move, currentPlayer){
+					let cloneBoard = JSON.parse(JSON.stringify(board));
+					cloneBoard[move.sx][move.sy] &= ~currentPlayer;
+					cloneBoard[move.ex][move.ey] |= currentPlayer;
+					removeJumpedPieces(cloneBoard, move);
+					return cloneBoard;
+				}
+				//then run getMoves() for each player if aiPlayer count > before or enemy player < before good move
+				function scoreMove(board, move, currentPlayer){
+					let movedBoard = simulateMove(board, move);
+					let numMoves = getAllMoves(movedBoard, currentPlayer);
+					//let numOpponenetMoves
+				}
+
+				function removeJumpedPieces(board, move){
+					//wait don't be stupid just find the direction with a change and delete everything between start and end
+					let start, end;
+					if(move.ex !== move.sx){
+						start = Math.min(move.ex, move.sx);
+						end = Math.max(move.ex, move.sx);
+						for(let i=start+1; i < end; i++){
+							board[i][move.ey] &= E;
+						}
+					}else{
+						start = Math.min(move.ey, move.sy);
+						end = Math.max(move.ey, move.sy);
+						for(let i=start+1; i < end; i++){
+							board[move.ex][i] &= E;
+						}
+					}
+
+				}
+
+				function isValidMove(pos, moves){
+					if(!pos){return false; }
+					for(let i=0; i < moves.length; i++){
+						if( (pos.x == moves[i].ex) && (pos.y == moves[i].ey) ){
+							return true;
+						}
+					}
+					return false;
+				}
+
+				function clearAnnotations(board){
+					for(let i=0; i < board.length; i++){
+						for(let j=0; j < board[i].length; j++){
+							if(isAnnotated(board[i][j])){
+								board[i][j] &= ~AVAILABLE_MOVE;
+							}
+						}
+					}
+				}
+
+				function annotateBoard(board, moves){
+					if(moves.length <= 0){
+						return board;
+					}
+					let m = moves[0];
+					board[m.sx][m.sy] = SELECTED_PIECE;
+					for(let i=0; i < moves.length; i++){
+						board[moves[i].ex][moves[i].ey] = AVAILABLE_MOVE;
+					}
+				}
+
+				function clearCursor(board){
+					for(let i=0; i < size; i++){
+						for(let j=0; j < size; j++){
+							board[i][j] &= (0xdf); //!CURSOR
+						}
+					}
+				}
+
+				function offset(el){
+					//if(!el) el = this;
+
+					var x = el.offsetLeft;
+					var y = el.offsetTop;
+
+					while(el = el.offsetParent){
+						x += el.offsetLeft;
+						y += el.offsetTop;
+					}
+					return { left: x, top : y};
+				}
+
+				function firstMove(board, selectedPiece, player, moveCount){
+					let pos = board[selectedPiece.x][selectedPiece.y];
+					if(player === (pos & PIECE_MASK) ){
+
+
+						//first move any piece can be selected
+						if(moveCount == 0){//first move no restrictions on selection
+
+							board[selectedPiece.x][selectedPiece.y] = E;
+							return true;
+						}else{
+
+							//find empty space
+							let empty = {};
+							for(let i=0; i < board.length; i++){
+								for(let j=0; j < board[i].length; j++){
+									if( (board[i][j] & PIECE_MASK) === E ){
+										empty = {x: i, y: j};
+										break;
+									}
+								}
+							}
+							if(empty !== {}){
+								if(( (selectedPiece.x === empty.x-1) && (selectedPiece.y === empty.y) )
+								|| ( (selectedPiece.x === empty.x+1) && (selectedPiece.y === empty.y) )
+								|| ( (selectedPiece.x === empty.x) && (selectedPiece.y === empty.y-1) )
+								|| ( (selectedPiece.x === empty.x) && (selectedPiece.y === empty.y+1) ) ){
+									board[selectedPiece.x][selectedPiece.y] = E;
+									return true;
+								}else{
+
+									return false;
+								}
+							}
+							//then check that selected piece is adjacent
+							//second move may only select adjacent to first move
+						}
+					}else{
+						return false;
+					}
+				}
+
+				function getAllMoves(board, currentPlayer){
+					let totalMoves = [];
+					for(let i=0; i < board.length; i++){
+						for(let j=0; j < board[i].length; j++){
+							if( (board[i][j] & PIECE_MASK) === currentPlayer){
+								totalMoves = totalMoves.concat(getMoves(board, {x:i, y:j}, currentPlayer));
+							}
+						}
+					}
+					return totalMoves;
+				}
+
+				function getMoves(board, selectedPiece, currentPlayer){
+                    if (!selectedPiece || selectedPiece.x < 0 || selectedPiece.y < 0 || selectedPiece.x >= board.length || selectedPiece.y >= board[0].length) return [];
+					if( (board[selectedPiece.x][selectedPiece.y] & PIECE_MASK) === E){
+						return []; //no piece selected
+					}
+					//check if wrong turn and quit
+
+					let moves = [];
+					//error check selected piece
+					if(selectedPiece.x > board.length || selectedPiece.x < 0
+					|| selectedPiece.y > board[0].length || selectedPiece.y < 0){
+						return moves;
+					};
+
+
+					//move : {sx: a, sy: b, ex: a2, ey: b2}
+
+					//jump to that position
+					let sp = selectedPiece;
+					let player = (board[sp.x][sp.y] & PIECE_MASK);
+					//now search up, down, left, right to find capture moves
+					//all start at a +/- 2 offset so that the else{break;} doesn't trigger immediately because we are on the selectedPiece
+					for(let i=sp.x+2; i < board.length; i+=2){
+						//if landing one is empty and zone before is not empty and is opponent
+						if( (board[i][sp.y] & PIECE_MASK) === E && ( (board[i-1][sp.y] & PIECE_MASK) !== player && (board[i-1][sp.y] & PIECE_MASK) !== E ) ){
+							//add move
+							moves.push({
+								sx: sp.x, sy: sp.y,
+								ex: i, ey: sp.y
+							});
+						}else{break;}//path blocked
+					}
+					for(let i=sp.x-2; i >= 0; i-=2){
+						if( (board[i][sp.y] & PIECE_MASK) === E && ( (board[i+1][sp.y] & PIECE_MASK) !== player && (board[i+1][sp.y] & PIECE_MASK) !== E ) ){
+							moves.push({
+								sx: sp.x, sy: sp.y,
+								ex: i, ey: sp.y
+							});
+						}else{break;}//path blocked
+					}
+					for(let i=sp.y+2; i < board[sp.x].length; i+=2){
+						if( (board[sp.x][i] & PIECE_MASK) === E && ( (board[sp.x][i-1] & PIECE_MASK) !== player && (board[sp.x][i-1] & PIECE_MASK) !== E) ){
+							moves.push({
+								sx: sp.x, sy: sp.y,
+								ex: sp.x, ey: i
+							});
+						}else{break;}//path blocked
+					}
+					for(let i=sp.y-2; i >= 0; i-=2){
+						if( (board[sp.x][i] & PIECE_MASK) === E && ( (board[sp.x][i+1] & PIECE_MASK) !== player && (board[sp.x][i+1] & PIECE_MASK) !== E) ){
+							moves.push({
+								sx: sp.x, sy: sp.y,
+								ex: sp.x, ey: i
+							});
+						}else{break;}//path blocked
+					}
+
+					return moves;
+				}
+			});
+		</script>
+	<style>.hosting-guide{position:relative;z-index:60;text-align:center;padding:10px;font:14px system-ui;background:#edf3f5;color:#123}.hosting-guide a{color:#164c78;text-decoration:underline}</style>
+<style>body{font-family:system-ui;margin:8px;background:#f5f2e8;color:#202b34}canvas{max-width:100%;height:auto;touch-action:manipulation}#status{font-size:1.15rem}button{padding:10px}</style></head>
+	<body>
+<div class="hosting-guide"><a href="help.html">Rules, controls &amp; source</a></div>
+		<center>
+			<h1>Kōnane</h1>
+            <p>Free-opening variant · Black starts. In computer mode you play White.</p>
+            <p><a href="?mode=computer">Play computer</a> · <a href="?mode=two-player">Two players</a> · <button type="button" onclick="location.reload()">Restart</button></p>
+			<canvas id="canvas" width="800" height="800"></canvas>
+			<h2 id="status">Black to play. Select a stone to remove</h2>
+
+			<details style="margin-left:10%;margin-right:10%;">
+				<summary style="cursor:pointer;"><h3 style="display:inline-block;">Rules</h3></summary>
+				<p>
+					The initial board state is filled with white and black stones in an alternating checkered pattern. On the first move black removes one of their own stones from the board. Often they remove it from a corner or the center, but they may remove it from anywhere. Then white removes a stone directly adjacent but not diagonally adacent to the stone removed by the first player. Subsequent moves are made by leaping over the opponents stones in order to remove them from play. It is legal to jump multiple stones in one move as long as this can be accomplished without changing direction. Diagonal jumps are not allowed. The game ends when one player has no moves to play on their turn. It is impossible to draw, the game will always have a winner.
+				</p>
+			</details>
+		</center>
+
+	</body>
+</html>

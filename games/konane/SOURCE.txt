@@ -1,0 +1,10 @@
+Kōnane
+Source: https://github.com/K-Francis-H/konane
+Revision: f1e76cb2c704a2192e4282cb80afb94d4337a17b
+License: MIT (see LICENSE)
+Retrieved: 2026-10-17
+
+Committed static runtime only; development tooling and screenshots omitted.
+Local English guide added. Runtime URLs are relative; optional saves are game-scoped.
+
+Native free-opening rule variant retained: Black may remove any own stone first. Root now supports computer (human White) and two-player query modes. Corrected canvas client/scaled/bounds coordinates, annotation masks, move bounds, terminal status/latch, and responsive sizing. Added restart; removed debug logging. No persistent saves.
