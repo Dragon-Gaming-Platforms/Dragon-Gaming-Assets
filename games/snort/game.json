@@ -1,0 +1,15 @@
+{
+  "name": "Snort",
+  "desc": "Place stones on a 7×7 grid without touching the opponent orthogonally. Same-color neighbors are allowed; no legal placement loses.",
+  "controls": "Mouse / touch; arrows navigate, Enter / Space activate, Escape cancels. In-game rules and guide.",
+  "shelf": "Puzzle & Logic",
+  "tags": [
+    "games",
+    "html5",
+    "board",
+    "strategy",
+    "original"
+  ],
+  "badge": "New",
+  "creator": "Dragon Gaming Platforms"
+}

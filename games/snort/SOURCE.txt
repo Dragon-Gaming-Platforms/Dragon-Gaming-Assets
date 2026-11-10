@@ -1,0 +1,15 @@
+Snort — original independent static implementation, version 1.0
+Created: 2026-10-17
+License: MIT; full notice in LICENSE.
+Source: https://github.com/Dragon-Gaming-Platforms/Dragon-Gaming-Assets/tree/main/games/snort
+
+Original rules and computer policies; adapted first-party replay-validated board
+controller/CSS from this repository's previous abstract-board collection.
+No upstream mirror or borrowed external art, sounds, fonts or libraries.
+Established game mechanics are not claimed as new inventions; no affiliation
+with any game publisher is implied. Exact board sizes, variants, house rules
+and computer limits are documented in index.html and help.html.
+
+Computer: Tactical uses a one-ply legal-space heuristic, not an expert search.
+Casual chooses a random legal action. No accounts, backend, build or packages.
+Every runtime dependency lives in this folder. No service worker is installed.
