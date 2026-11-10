@@ -1,0 +1,17 @@
+Mini Amazons — original independent static implementation, version 1.0
+Created: 2026-10-17
+License: MIT; full notice in LICENSE.
+Source: https://github.com/Dragon-Gaming-Platforms/Dragon-Gaming-Assets/tree/main/games/mini-amazons
+
+Original game engine, bounded one-ply computer player, replay-validated local
+saving, interface and CSS artwork for Dragon Gaming Platforms. No upstream
+mirror, borrowed code, art, sounds or fonts. All five games in this batch use
+independent self-contained copies of this collection's new shared engine/UI.
+Established game mechanics are not claimed as new inventions; no affiliation
+with any game publisher is implied. Board sizes, variants and house limits
+are explicitly documented in index.html and help.html.
+
+No build step, packages, accounts or runtime network dependencies. Everything
+needed lives in this folder. Suggestion and Tactical computer evaluate at most
+512 candidate complete turns, not a deep/expert search. Casual is random.
+See help.html for exact rules, controls, undo, pause and storage semantics.

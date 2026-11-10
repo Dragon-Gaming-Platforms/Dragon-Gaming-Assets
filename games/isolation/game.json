@@ -1,0 +1,15 @@
+{
+  "name": "Isolation",
+  "desc": "Move your runner one king step, then remove an empty floor cell on a 7×7 board. Trap the other runner to win.",
+  "controls": "Mouse / touch; arrows navigate; Enter / Space select; Escape cancels. In-game rules and guide.",
+  "shelf": "Puzzle & Logic",
+  "tags": [
+    "games",
+    "html5",
+    "board",
+    "strategy",
+    "original"
+  ],
+  "badge": "New",
+  "creator": "Dragon Gaming Platforms"
+}

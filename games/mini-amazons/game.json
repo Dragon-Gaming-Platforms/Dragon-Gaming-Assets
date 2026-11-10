@@ -1,0 +1,15 @@
+{
+  "name": "Mini Amazons",
+  "desc": "A compact 6×6 Amazons variant with two queens per player. Move a queen, fire a blocking arrow, and leave your opponent without a move.",
+  "controls": "Mouse / touch; arrows navigate; Enter / Space select; Escape cancels. In-game rules and guide.",
+  "shelf": "Puzzle & Logic",
+  "tags": [
+    "games",
+    "html5",
+    "board",
+    "strategy",
+    "original"
+  ],
+  "badge": "New",
+  "creator": "Dragon Gaming Platforms"
+}
