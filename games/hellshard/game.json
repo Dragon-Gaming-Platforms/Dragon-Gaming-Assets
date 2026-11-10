@@ -1,0 +1,15 @@
+{
+  "name": "Hellshard",
+  "desc": "A pixel-perfect dark-fantasy action roguelite: descend through the Cinder Cemetery and the Ashen Cathedral as one of four vessels, claim two Hellshards, and silence both wardens. Three.js-rendered with vanilla ES modules; original code, UI and generated sprites, with CC0 and freely-licensed tilesets credited in CREDITS.md.",
+  "controls": "A/D or arrows move, Space/W/Up jump, Shift dash (i-frames), J basic attack, K heavy attack, L character ability, E interact, Esc pause, 1-3 choose level-up cards",
+  "shelf": "Arcade & Action",
+  "badge": "New",
+  "creator": "JaynusHUB",
+  "image": "title.png",
+  "tags": [
+    "action",
+    "roguelite",
+    "dark-fantasy",
+    "3d"
+  ]
+}
