@@ -1,0 +1,15 @@
+{
+  "name": "Turing Machine Lab",
+  "desc": "A single tape, a finite state table and one head that reads, writes and moves \u2014 the simplest complete computer.",
+  "controls": "Program presets or a JSON rule table; tape input and start-cell field; Run, Step and Reset; speed slider; Space runs or pauses, S steps, R resets",
+  "shelf": "Interactive Stories & Experiments",
+  "tags": [
+    "games",
+    "html5",
+    "computing",
+    "turing-machine",
+    "simulation"
+  ],
+  "badge": "New",
+  "creator": "Original build (Dragon Gaming Assets)"
+}

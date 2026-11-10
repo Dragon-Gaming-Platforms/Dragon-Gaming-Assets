@@ -1,0 +1,15 @@
+{
+  "name": "Ising Model Lab",
+  "desc": "Metropolis Monte Carlo on a square lattice: heat it up, cool it down, and watch order appear and dissolve.",
+  "controls": "Temperature slider and presets, lattice size, Run, Sweep and Reset; Space runs or pauses, S sweeps, R resets",
+  "shelf": "Interactive Stories & Experiments",
+  "tags": [
+    "games",
+    "html5",
+    "physics",
+    "statistical-mechanics",
+    "monte-carlo"
+  ],
+  "badge": "New",
+  "creator": "Original build (Dragon Gaming Assets)"
+}

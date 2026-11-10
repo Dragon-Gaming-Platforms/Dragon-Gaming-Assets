@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Penrose Tiling Lab</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <header>
+    <div>
+      <h1>Penrose Tiling Lab</h1>
+      <p>Five families of parallel lines cut a patch of rhombi that never repeats.</p>
+    </div>
+    <div class="hud">
+      <span id="tiles-read">0 rhombi</span>
+      <span id="ratio-read">thick/thin 0.000</span>
+    </div>
+  </header>
+
+  <main>
+    <section class="stage">
+      <canvas id="scene" width="760" height="600"></canvas>
+      <p class="caption">Thick rhombi (72°) outnumber thin rhombi (36°) by the golden ratio φ ≈ 1.618. Shift the grid and the pattern rearranges without ever repeating.</p>
+    </section>
+
+    <aside class="panel">
+      <div class="row">
+        <button id="shuffle" class="primary">Shift grid</button>
+        <button id="reset">Reset</button>
+      </div>
+      <label>
+        <span>Patch size <b id="patch-out">6</b></span>
+        <input id="patch" type="range" min="5" max="11" step="1" value="6" />
+      </label>
+      <label>
+        <span>Rotation <b id="rotation-out">0°</b></span>
+        <input id="rotation" type="range" min="0" max="72" step="1" value="0" />
+      </label>
+      <label>
+        <span>Zoom <b id="zoom-out">1.00×</b></span>
+        <input id="zoom" type="range" min="0.6" max="2.4" step="0.05" value="1" />
+      </label>
+      <label>
+        <span>Palette</span>
+        <select id="palette">
+          <option value="ink">Ink &amp; gold</option>
+          <option value="sunset">Sunset</option>
+          <option value="emerald">Emerald</option>
+          <option value="frost">Frost</option>
+        </select>
+      </label>
+      <label class="check">
+        <input id="outline" type="checkbox" checked />
+        <span>Draw seam lines</span>
+      </label>
+      <label class="check">
+        <input id="colourByFamily" type="checkbox" />
+        <span>Colour by line family</span>
+      </label>
+      <p id="status" class="status">Laying out the pentagrid patch.</p>
+      <p class="hint">Click the canvas to move the grid origin. Space reshuffles, R resets.</p>
+    </aside>
+  </main>
+
+  <script src="app.js"></script>
+</body>
+</html>

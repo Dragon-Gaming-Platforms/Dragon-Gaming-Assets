@@ -1,0 +1,229 @@
+:root {
+  --bg: #0b0f14;
+  --panel: #121821;
+  --line: #24303d;
+  --ink: #e8eef6;
+  --muted: #8fa3b8;
+  --accent: #4fd1c5;
+  --hot: #f6ad55;
+  --dim: #1a2330;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  background: radial-gradient(circle at 18% 0%, #16212d 0%, var(--bg) 58%);
+  color: var(--ink);
+  font: 15px/1.5 "Inter", "Segoe UI", system-ui, sans-serif;
+}
+
+header {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+  align-items: flex-end;
+  justify-content: space-between;
+  padding: 26px 28px 10px;
+}
+
+h1 {
+  margin: 0;
+  font-size: 24px;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+header p {
+  margin: 4px 0 0;
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.hud {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  font: 12px/1 ui-monospace, "SFMono-Regular", Menlo, monospace;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.hud span {
+  padding: 6px 10px;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  background: var(--panel);
+  color: var(--muted);
+}
+
+#verdict-read { color: var(--accent); }
+
+main {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 340px;
+  gap: 20px;
+  padding: 12px 28px 32px;
+  align-items: start;
+}
+
+.stage {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  padding: 14px;
+}
+
+canvas {
+  display: block;
+  width: 100%;
+  height: auto;
+  border-radius: 10px;
+  background: #070a0e;
+}
+
+.caption {
+  margin: 10px 2px 0;
+  color: var(--muted);
+  font-size: 12.5px;
+}
+
+.tape-controls {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  align-items: center;
+  margin-top: 12px;
+  padding-top: 12px;
+  border-top: 1px solid var(--line);
+}
+
+label.inline {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  color: var(--muted);
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+}
+
+input[type="text"], input[type="number"] {
+  width: 120px;
+  padding: 7px 9px;
+  border-radius: 8px;
+  border: 1px solid var(--line);
+  background: #0b1118;
+  color: var(--ink);
+  font: 13px/1 ui-monospace, Menlo, monospace;
+}
+
+input[type="number"] { width: 56px; }
+
+.panel {
+  background: var(--panel);
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  padding: 14px;
+  display: grid;
+  gap: 12px;
+}
+
+.row {
+  display: flex;
+  gap: 8px;
+}
+
+button {
+  flex: 1;
+  padding: 9px 10px;
+  border-radius: 9px;
+  border: 1px solid var(--line);
+  background: #16202b;
+  color: var(--ink);
+  font: 600 12.5px/1 "Inter", system-ui, sans-serif;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  cursor: pointer;
+}
+
+button:hover { border-color: var(--accent); }
+
+button.primary { background: #123c3b; border-color: #1f6f6a; color: #c9fbf4; }
+
+textarea {
+  width: 100%;
+  resize: vertical;
+  padding: 9px;
+  border-radius: 9px;
+  border: 1px solid var(--line);
+  background: #0b1118;
+  color: #cfe4f3;
+  font: 12px/1.5 ui-monospace, Menlo, monospace;
+}
+
+select {
+  width: 100%;
+  padding: 8px 9px;
+  border-radius: 9px;
+  border: 1px solid var(--line);
+  background: #0b1118;
+  color: var(--ink);
+  font: 13px/1 "Inter", system-ui, sans-serif;
+}
+
+label { display: grid; gap: 6px; font-size: 12px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.06em; }
+label.stack { gap: 6px; }
+
+b { color: var(--hot); font-weight: 600; }
+
+input[type="range"] {
+  -webkit-appearance: none;
+  appearance: none;
+  width: 100%;
+  height: 4px;
+  border-radius: 999px;
+  background: linear-gradient(90deg, var(--accent), #1b5560);
+  outline: none;
+}
+
+input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  width: 15px;
+  height: 15px;
+  border-radius: 50%;
+  background: #d9fbf6;
+  border: 2px solid #0b0f14;
+  cursor: pointer;
+}
+
+input[type="range"]::-moz-range-thumb {
+  width: 13px;
+  height: 13px;
+  border-radius: 50%;
+  background: #d9fbf6;
+  border: 2px solid #0b0f14;
+  cursor: pointer;
+}
+
+.status {
+  margin: 0;
+  min-height: 40px;
+  padding: 9px 10px;
+  border-radius: 9px;
+  background: #0b1118;
+  border: 1px solid var(--line);
+  color: #bfe9e4;
+  font-size: 12.5px;
+}
+
+.hint {
+  margin: 0;
+  color: #6f8398;
+  font-size: 11.5px;
+}
+
+@media (max-width: 860px) {
+  main { grid-template-columns: 1fr; }
+}
