@@ -1,0 +1,16 @@
+{
+  "name": "Ant Colony Lab",
+  "desc": "Hundreds of foragers with no map and no leader build a pheromone highway between nest and food.",
+  "controls": "Forager count, deposit strength and evaporation sliders; presets; click the field to move the food; Space runs or pauses, S scatters, C clears trails",
+  "shelf": "Interactive Stories & Experiments",
+  "tags": [
+    "games",
+    "html5",
+    "simulation",
+    "ants",
+    "stigmergy",
+    "emergence"
+  ],
+  "badge": "New",
+  "creator": "Original build (Dragon Gaming Assets)"
+}

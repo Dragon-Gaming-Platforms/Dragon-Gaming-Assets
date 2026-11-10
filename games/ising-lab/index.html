@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Ising Model Lab</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <header>
+    <div>
+      <h1>Ising Model Lab</h1>
+      <p>Metropolis Monte Carlo on a square lattice of up and down spins.</p>
+    </div>
+    <div class="hud">
+      <span id="temp-read">T 2.27</span>
+      <span id="sweep-read">0 sweeps</span>
+      <span id="magnet-read">|M| 0.00</span>
+    </div>
+  </header>
+
+  <main>
+    <section class="stage">
+      <canvas id="scene" width="820" height="440"></canvas>
+      <p class="caption">Below the critical temperature, domains grow and the lattice magnetises. Above it, thermal noise keeps flipping whole regions.</p>
+    </section>
+
+    <aside class="panel">
+      <div class="row">
+        <button id="toggle" class="primary">Run</button>
+        <button id="sweep">Sweep</button>
+        <button id="reset">Reset</button>
+      </div>
+      <label>
+        <span>Temperature <b id="temp-out">2.27</b></span>
+        <input id="temperature" type="range" min="0.4" max="4" step="0.01" value="2.27" />
+      </label>
+      <label>
+        <span>Cooling preset</span>
+        <select id="preset">
+          <option value="critical">Critical point (2.269)</option>
+          <option value="ordered">Cold and ordered (1.2)</option>
+          <option value="hot">Hot and disordered (3.4)</option>
+          <option value="sweepUp">Slow sweep from cold to hot</option>
+        </select>
+      </label>
+      <label>
+        <span>Lattice</span>
+        <select id="size">
+          <option value="48">48 × 48</option>
+          <option value="72">72 × 72</option>
+          <option value="96" selected>96 × 96</option>
+          <option value="128">128 × 128</option>
+        </select>
+      </label>
+      <div class="readouts">
+        <div><span>Energy / spin</span><b id="energy-read">0.000</b></div>
+        <div><span>Susceptibility</span><b id="chi-read">0.00</b></div>
+        <div><span>Accepted</span><b id="accept-read">0%</b></div>
+        <div><span>Spins</span><b id="count-read">9,216</b></div>
+      </div>
+      <p id="status" class="status">Ready at the critical temperature. Press Run.</p>
+      <p class="hint">Space runs or pauses, S performs one sweep, R resets to a cold start.</p>
+    </aside>
+  </main>
+
+  <script src="app.js"></script>
+</body>
+</html>

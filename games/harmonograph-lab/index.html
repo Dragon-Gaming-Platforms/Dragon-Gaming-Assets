@@ -1,0 +1,63 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Harmonograph Lab</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <header>
+    <div>
+      <h1>Harmonograph Lab</h1>
+      <p>Two damped pendulums per axis, drawn as one continuous curve.</p>
+    </div>
+    <div class="hud">
+      <span id="samples-read">0 samples</span>
+      <span id="ratio-read">3:2 · 3:2</span>
+    </div>
+  </header>
+
+  <main>
+    <section class="stage">
+      <canvas id="scene" width="720" height="600"></canvas>
+      <p class="caption">Each axis sums two decaying sines. Near-equal frequencies drift into slow beats; incommensurate ones weave webs.</p>
+    </section>
+
+    <aside class="panel">
+      <div class="row">
+        <button id="toggle" class="primary">Pause</button>
+        <button id="restart">Redraw</button>
+      </div>
+      <label>
+        <span>Damping <b id="damping-out">0.6%</b></span>
+        <input id="damping" type="range" min="1" max="60" step="1" value="6" />
+      </label>
+      <label>
+        <span>Speed <b id="speed-out">1.0×</b></span>
+        <input id="speed" type="range" min="0.2" max="3" step="0.1" value="1" />
+      </label>
+      <label>
+        <span>Line weight <b id="weight-out">1.2</b></span>
+        <input id="weight" type="range" min="0.4" max="3" step="0.2" value="1.2" />
+      </label>
+      <label class="check">
+        <input id="fade" type="checkbox" />
+        <span>Fade the tail</span>
+      </label>
+      <div class="row wrap">
+        <button class="preset" data-preset="classic">Classic</button>
+        <button class="preset" data-preset="butterfly">Butterfly</button>
+        <button class="preset" data-preset="web">Web</button>
+        <button class="preset" data-preset="rose">Rose</button>
+        <button class="preset" data-preset="orbit">Orbit</button>
+        <button class="preset" data-preset="chaos">Beat</button>
+      </div>
+      <p id="status" class="status">Classic 3:2 · 3:2 figure drawing.</p>
+      <p class="hint">Space pauses, R redraws, S saves a PNG. The curve ends when both axes settle.</p>
+    </aside>
+  </main>
+
+  <script src="app.js"></script>
+</body>
+</html>

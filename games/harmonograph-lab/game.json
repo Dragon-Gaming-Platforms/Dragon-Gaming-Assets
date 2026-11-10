@@ -1,0 +1,15 @@
+{
+  "name": "Harmonograph Lab",
+  "desc": "Two damped pendulums per axis draw a single decaying curve \u2014 change the frequency ratios and the figure changes character.",
+  "controls": "Damping, speed and line weight sliders; six presets; fade-tail toggle; Space pauses, R redraws, S saves a PNG",
+  "shelf": "Interactive Stories & Experiments",
+  "tags": [
+    "games",
+    "html5",
+    "math",
+    "harmonograph",
+    "generative"
+  ],
+  "badge": "New",
+  "creator": "Original build (Dragon Gaming Assets)"
+}

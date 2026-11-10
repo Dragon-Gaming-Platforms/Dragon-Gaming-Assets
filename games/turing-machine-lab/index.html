@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Turing Machine Lab</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <header>
+    <div>
+      <h1>Turing Machine Lab</h1>
+      <p>A single tape, a finite state table, and one step at a time.</p>
+    </div>
+    <div class="hud">
+      <span id="state-read">state A</span>
+      <span id="step-read">0 steps</span>
+      <span id="verdict-read">running</span>
+    </div>
+  </header>
+
+  <main>
+    <section class="stage">
+      <canvas id="scene" width="820" height="330"></canvas>
+      <p class="caption">The head reads a symbol, writes a symbol, moves one cell, and switches state. Everything else is bookkeeping.</p>
+      <div class="tape-controls">
+        <label class="inline">Tape
+          <input id="tape-input" type="text" value="1011" spellcheck="false" autocomplete="off" />
+        </label>
+        <button id="load">Load tape</button>
+        <label class="inline">Start cell
+          <input id="start-cell" type="number" value="0" min="0" max="60" />
+        </label>
+      </div>
+    </section>
+
+    <aside class="panel">
+      <div class="row">
+        <button id="toggle" class="primary">Run</button>
+        <button id="step">Step</button>
+        <button id="reset">Reset</button>
+      </div>
+      <label>
+        <span>Program</span>
+        <select id="program">
+          <option value="increment">Binary +1</option>
+          <option value="beaver">Busy beaver (3-state)</option>
+          <option value="complement">Binary complement</option>
+          <option value="custom">Custom rules</option>
+        </select>
+      </label>
+      <label>
+        <span>Steps per second <b id="speed-out">8</b></span>
+        <input id="speed" type="range" min="1" max="40" step="1" value="8" />
+      </label>
+      <label class="stack">
+        <span>Rule table (JSON)</span>
+        <textarea id="rules-json" rows="10" spellcheck="false"></textarea>
+      </label>
+      <button id="apply">Apply rules</button>
+      <p id="status" class="status">Binary +1 loaded. Tape reads 1011.</p>
+      <p class="hint">Symbols are 0, 1 and _ for blank. Space runs or pauses, S steps, R resets.</p>
+    </aside>
+  </main>
+
+  <script src="app.js"></script>
+</body>
+</html>

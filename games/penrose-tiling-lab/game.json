@@ -1,0 +1,16 @@
+{
+  "name": "Penrose Tiling Lab",
+  "desc": "Five families of parallel lines are cut into a patch of thick and thin rhombi that never repeats.",
+  "controls": "Patch size, rotation and zoom sliders; palette and colour-mode options; click to shift the grid; Space reshuffles, R resets",
+  "shelf": "Interactive Stories & Experiments",
+  "tags": [
+    "games",
+    "html5",
+    "math",
+    "geometry",
+    "penrose",
+    "tiling"
+  ],
+  "badge": "New",
+  "creator": "Original build (Dragon Gaming Assets)"
+}

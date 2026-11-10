@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Ant Colony Lab</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <header>
+    <div>
+      <h1>Ant Colony Lab</h1>
+      <p>No leader, no map — just pheromone, evaporation and a few hundred foragers.</p>
+    </div>
+    <div class="hud">
+      <span id="trips-read">0 trips</span>
+      <span id="carrying-read">0 carrying</span>
+      <span id="food-read">0 delivered</span>
+    </div>
+  </header>
+
+  <main>
+    <section class="stage">
+      <canvas id="scene" width="820" height="520"></canvas>
+      <p class="caption">Returning ants lay a trail; searchers climb it. Click anywhere on the field to move the food and watch the colony rebuild its highway.</p>
+    </section>
+
+    <aside class="panel">
+      <div class="row">
+        <button id="toggle" class="primary">Run</button>
+        <button id="scatter">Scatter</button>
+        <button id="clear">Clear trails</button>
+      </div>
+      <label>
+        <span>Foragers <b id="ants-out">90</b></span>
+        <input id="ants" type="range" min="10" max="320" step="10" value="90" />
+      </label>
+      <label>
+        <span>Deposit strength <b id="deposit-out">1.0</b></span>
+        <input id="deposit" type="range" min="0.2" max="3" step="0.1" value="1" />
+      </label>
+      <label>
+        <span>Evaporation per frame <b id="evap-out">1.0%</b></span>
+        <input id="evaporation" type="range" min="0.2" max="6" step="0.1" value="1" />
+      </label>
+      <label>
+        <span>Preset</span>
+        <select id="preset">
+          <option value="classic">Classic trail</option>
+          <option value="swarm">Dense swarm</option>
+          <option value="volatile">Volatile world (fast decay)</option>
+          <option value="sparse">Few scouts</option>
+        </select>
+      </label>
+      <div class="readouts">
+        <div><span>Ants</span><b id="count-read">90</b></div>
+        <div><span>Trail covered</span><b id="coverage-read">0.0%</b></div>
+        <div><span>Best trip</span><b id="best-read">—</b></div>
+        <div><span>Food left</span><b id="left-read">∞</b></div>
+      </div>
+      <label class="check">
+        <input id="show-field" type="checkbox" checked />
+        <span>Show pheromone field</span>
+      </label>
+      <p id="status" class="status">Ready. Ants are leaving the nest in a fan.</p>
+      <p class="hint">Space runs or pauses, S scatters scouts, C clears the trail field.</p>
+    </aside>
+  </main>
+
+  <script src="app.js"></script>
+</body>
+</html>
