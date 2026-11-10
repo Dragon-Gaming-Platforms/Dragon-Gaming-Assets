@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Hyperbolic Tiling Lab</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <header>
+    <div>
+      <h1>Hyperbolic Tiling Lab</h1>
+      <p>Regular tilings of the hyperbolic plane, drawn inside a Poincaré disc.</p>
+    </div>
+    <div class="hud">
+      <span id="schlafli-read">{4, 5}</span>
+      <span id="tiles-read">0 tiles</span>
+      <span id="angle-read">72.0° corners</span>
+    </div>
+  </header>
+
+  <main>
+    <section class="stage">
+      <canvas id="scene" width="680" height="680"></canvas>
+      <p class="caption">Straight edges in the hyperbolic plane are circular arcs here. In {4, 5} five squares meet at every corner — impossible in flat space, ordinary inside the disc.</p>
+    </section>
+
+    <aside class="panel">
+      <div class="row">
+        <button id="toggle" class="primary">Pause</button>
+        <button id="reset">Reset view</button>
+      </div>
+      <label>
+        <span>Tiling</span>
+        <select id="tiling">
+          <option value="4,5">{4, 5} · five squares per corner</option>
+          <option value="5,4">{5, 4} · four pentagons per corner</option>
+          <option value="6,4">{6, 4} · four hexagons per corner</option>
+          <option value="3,7">{3, 7} · seven triangles per corner</option>
+          <option value="5,5">{5, 5} · five pentagons per corner</option>
+        </select>
+      </label>
+      <label>
+        <span>Depth <b id="depth-out">6</b></span>
+        <input id="depth" type="range" min="2" max="8" step="1" value="6" />
+      </label>
+      <label>
+        <span>Spin <b id="spin-out">0.05</b></span>
+        <input id="spin" type="range" min="0" max="0.4" step="0.01" value="0.05" />
+      </label>
+      <label>
+        <span>Zoom <b id="zoom-out">1.00×</b></span>
+        <input id="zoom" type="range" min="0.35" max="1" step="0.01" value="1" />
+      </label>
+      <label>
+        <span>Palette</span>
+        <select id="palette">
+          <option value="lagoon">Lagoon</option>
+          <option value="orchid">Orchid</option>
+          <option value="moss">Moss</option>
+          <option value="paper">Paper</option>
+        </select>
+      </label>
+      <label class="check">
+        <input id="outline" type="checkbox" checked />
+        <span>Draw edges</span>
+      </label>
+      <label class="check">
+        <input id="fade" type="checkbox" checked />
+        <span>Fade towards the rim</span>
+      </label>
+      <p id="status" class="status">Building the {4, 5} tiling.</p>
+      <p class="hint">Drag to pan, scroll or pinch to zoom. Space pauses the spin, R resets the view.</p>
+    </aside>
+  </main>
+
+  <script src="app.js"></script>
+</body>
+</html>
