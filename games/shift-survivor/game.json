@@ -1,0 +1,15 @@
+{
+  "name": "Shift Survivor",
+  "desc": "A dual-world survivor shooter: two overlapping planes — a bright DAY and a dark NIGHT — and every monster belongs to one or the other. Bullets only damage same-plane enemies, and only same-plane enemies can hurt you; the others fade to 30% opacity and phase straight through you. Press Shift to swap planes instantly (0.6s cooldown); bait a hit and phase out at the last possible moment for a PERFECT SHIFT (+100 and 2.5s of doubled fire rate). Every 60 seconds a World Shift swaps all enemies' planes at once. Survive 8 minutes and the Eclipse Lord will find you. 300+ enemies at 60 FPS; Canvas 2D, no engine, no art assets — everything is procedural.",
+  "controls": "WASD/arrows move, mouse aims, click/Space shoots, Shift/Q/E/right-click phases between the DAY and NIGHT planes (phase at the last moment near a same-plane enemy for a Perfect Shift); touch: virtual stick + shift button",
+  "shelf": "Arcade & Action",
+  "badge": "New",
+  "creator": "LutherJmss",
+  "image": "title.png",
+  "tags": [
+    "arcade",
+    "survivor",
+    "shooter",
+    "phasing"
+  ]
+}
