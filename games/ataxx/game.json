@@ -1,0 +1,15 @@
+{
+  "name": "Ataxx",
+  "desc": "Clone or jump discs and convert neighboring opponents in a 7×7 territory battle. Local two-player or bounded computer opponent.",
+  "controls": "Mouse / touch; arrows navigate; Enter / Space select; Escape cancels. In-game rules and guide.",
+  "shelf": "Puzzle & Logic",
+  "tags": [
+    "games",
+    "html5",
+    "board",
+    "strategy",
+    "original"
+  ],
+  "badge": "New",
+  "creator": "Dragon Gaming Platforms"
+}

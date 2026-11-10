@@ -1,0 +1,15 @@
+{
+  "name": "Breakthrough",
+  "desc": "Race pawns across an 8×8 board, advancing straight or diagonally and capturing diagonally. Two-player or computer play.",
+  "controls": "Mouse / touch; arrows navigate; Enter / Space select; Escape cancels. In-game rules and guide.",
+  "shelf": "Puzzle & Logic",
+  "tags": [
+    "games",
+    "html5",
+    "board",
+    "strategy",
+    "original"
+  ],
+  "badge": "New",
+  "creator": "Dragon Gaming Platforms"
+}
