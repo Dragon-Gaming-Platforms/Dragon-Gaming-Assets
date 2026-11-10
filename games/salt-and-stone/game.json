@@ -1,0 +1,15 @@
+{
+  "name": "Salt and Stone",
+  "desc": "A small browser climbing game: two sandstone towers above the sea, one hand-built route to the top. Tap a hold, see the projected trajectory and strength cost, then commit to a reach, a jump or a step back — and spend your strength wisely. A hand-designed route with no generator, a body with fixed bone lengths and whole-body collision against the rock, stamina, rest ledges and falls. Made for phones in portrait mode; plain ES modules and Canvas 2D, no runtime dependencies, no network requests.",
+  "controls": "Tap/click a hold in a ring to preview its trajectory and strength cost, then press the move button to confirm; rest ledges recover strength",
+  "shelf": "Arcade & Action",
+  "badge": "New",
+  "creator": "tslava",
+  "image": "title.png",
+  "tags": [
+    "climbing",
+    "physics",
+    "portrait",
+    "mobile"
+  ]
+}
