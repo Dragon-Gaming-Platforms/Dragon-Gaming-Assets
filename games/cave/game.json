@@ -1,0 +1,15 @@
+{
+  "name": "Cave",
+  "desc": "Carve a connected cave with numbered white sightlines and shaded walls that all reach the outside edge.",
+  "controls": "Mouse / touch. Arrows navigate; 1 shades, 0 clears; Space cycles; Backspace erases.",
+  "shelf": "Puzzle & Logic",
+  "tags": [
+    "games",
+    "html5",
+    "puzzle",
+    "logic",
+    "original"
+  ],
+  "badge": "New",
+  "creator": "Dragon Gaming Platforms"
+}

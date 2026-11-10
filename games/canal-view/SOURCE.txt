@@ -1,0 +1,17 @@
+Canal View — original independent implementation, version 1.0
+Created: 2026-10-17
+License: MIT (see LICENSE).
+Source: https://github.com/Dragon-Gaming-Platforms/Dragon-Gaming-Assets/tree/main/games/canal-view
+
+Original rule evaluator, puzzle instances and CSS visuals. Reuses the first-party
+pencil-puzzle controller/styles from this repository, adapted to the new clues.
+No upstream mirror, borrowed puzzle boards, external art, fonts or libraries.
+Established puzzle mechanics are not claimed as new inventions; no affiliation
+with any puzzle publisher is implied. No runtime services or build step.
+
+Pack: 15 original boards, five each at 4x4, 5x5 and 6x6. Locally generated
+using seed family 151017. All boards verified uniquely solvable by a symbolic
+constraint solver and a separately implemented direct-rule search.
+puzzles.js SHA-256: 86139effa34be08106731aecdf0885f192d4b5b5c4259aaf3a8aafbffe70c31d
+
+See help.html for exact rules, controls, answer-reveal hints, timing and storage.
