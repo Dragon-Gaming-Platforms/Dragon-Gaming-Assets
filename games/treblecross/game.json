@@ -1,0 +1,15 @@
+{
+  "name": "Treblecross",
+  "desc": "Alternate adding a shared X to a nine-cell line. Complete three consecutive X marks to win; Tactical plays the fully solved game.",
+  "controls": "Mouse / touch; arrows navigate, Enter / Space activate, Escape cancels. In-game rules and guide.",
+  "shelf": "Puzzle & Logic",
+  "tags": [
+    "games",
+    "html5",
+    "board",
+    "strategy",
+    "original"
+  ],
+  "badge": "New",
+  "creator": "Dragon Gaming Platforms"
+}
