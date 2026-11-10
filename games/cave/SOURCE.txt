@@ -1,0 +1,17 @@
+Cave — original independent implementation, version 1.0
+Created: 2026-10-17
+License: MIT (see LICENSE).
+Source: https://github.com/Dragon-Gaming-Platforms/Dragon-Gaming-Assets/tree/main/games/cave
+
+Original rule evaluator, puzzle instances and CSS visuals. Reuses the first-party
+pencil-puzzle controller/styles from this repository, adapted to the new clues.
+No upstream mirror, borrowed puzzle boards, external art, fonts or libraries.
+Established puzzle mechanics are not claimed as new inventions; no affiliation
+with any puzzle publisher is implied. No runtime services or build step.
+
+Pack: 15 original boards, five each at 4x4, 5x5 and 6x6. Locally generated
+using seed family 151017. All boards verified uniquely solvable by a symbolic
+constraint solver and a separately implemented direct-rule search.
+puzzles.js SHA-256: eee2a4211a12c76484f0276488b26df0aa7ce032ae15eaa7fd6eb6bfa3209741
+
+See help.html for exact rules, controls, answer-reveal hints, timing and storage.
