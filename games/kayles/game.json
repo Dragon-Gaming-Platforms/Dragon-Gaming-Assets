@@ -1,0 +1,15 @@
+{
+  "name": "Kayles",
+  "desc": "Play normal-play Kayles on independent rows of 3, 5 and 7 pins. Remove one pin or two neighboring pins; the last removal wins.",
+  "controls": "Mouse / touch; arrows navigate, Enter / Space activate, Escape cancels. In-game rules and guide.",
+  "shelf": "Puzzle & Logic",
+  "tags": [
+    "games",
+    "html5",
+    "board",
+    "strategy",
+    "original"
+  ],
+  "badge": "New",
+  "creator": "Dragon Gaming Platforms"
+}

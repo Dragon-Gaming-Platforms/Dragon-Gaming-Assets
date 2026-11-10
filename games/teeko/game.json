@@ -1,0 +1,15 @@
+{
+  "name": "Teeko",
+  "desc": "Place four stones each on a 5×5 board, then move one stone a king step. Make four in a line or a filled 2×2 square.",
+  "controls": "Mouse / touch; arrows navigate, Enter / Space activate, Escape cancels. In-game rules and guide.",
+  "shelf": "Puzzle & Logic",
+  "tags": [
+    "games",
+    "html5",
+    "board",
+    "strategy",
+    "original"
+  ],
+  "badge": "New",
+  "creator": "Dragon Gaming Platforms"
+}

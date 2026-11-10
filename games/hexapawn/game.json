@@ -1,0 +1,15 @@
+{
+  "name": "Hexapawn",
+  "desc": "A solved 3×3 pawn game: advance straight, capture diagonally, and reach the back rank or leave the other side without a move.",
+  "controls": "Mouse / touch; arrows navigate, Enter / Space activate, Escape cancels. In-game rules and guide.",
+  "shelf": "Puzzle & Logic",
+  "tags": [
+    "games",
+    "html5",
+    "board",
+    "strategy",
+    "original"
+  ],
+  "badge": "New",
+  "creator": "Dragon Gaming Platforms"
+}
