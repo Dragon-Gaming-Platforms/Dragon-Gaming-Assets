@@ -1,0 +1,15 @@
+{
+  "name": "Gloomdelve",
+  "desc": "A roguelike built for one thumb: swipe to step or tap to walk through generated dungeon floors, where every move gives the monsters a turn. Sleeping monsters wake to noise, archers need a clear line of sight; death is permanent, but the embers you earn buy upgrades for the next run. Ten generated floors end in a boss fight with the Gloom Warden, with 9 monster types, 6 runes, 6 relics and fog of war, a daily delve with the same dungeon for everyone, and an Ember Shrine of permanent upgrades. No ads, no accounts, no tracking, no network use after the first load; installable as a PWA that works offline.",
+  "controls": "Swipe to step, tap to walk — one thumb; embers earned on runs buy Ember Shrine upgrades between delves",
+  "shelf": "Arcade & Action",
+  "badge": "New",
+  "creator": "Apurba94",
+  "image": "title.png",
+  "tags": [
+    "roguelike",
+    "one-thumb",
+    "dungeon",
+    "pwa"
+  ]
+}

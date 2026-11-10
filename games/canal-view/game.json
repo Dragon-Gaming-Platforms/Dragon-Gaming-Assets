@@ -1,0 +1,15 @@
+{
+  "name": "Canal View",
+  "desc": "Connect a shaded canal without solid 2\u00d72 blocks, using sightline totals on the clear banks.",
+  "controls": "Mouse / touch. Arrows navigate; 1 shades, 0 clears; Space cycles; Backspace erases.",
+  "shelf": "Puzzle & Logic",
+  "tags": [
+    "games",
+    "html5",
+    "puzzle",
+    "logic",
+    "original"
+  ],
+  "badge": "New",
+  "creator": "Dragon Gaming Platforms"
+}
