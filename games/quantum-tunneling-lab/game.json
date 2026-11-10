@@ -1,0 +1,16 @@
+{
+  "name": "Quantum Tunneling Lab",
+  "desc": "A Gaussian wave packet hits a rectangular barrier and part of it comes out the other side.",
+  "controls": "Energy, barrier height, barrier width and speed sliders; four setups; Space pauses, R relaunches",
+  "shelf": "Interactive Stories & Experiments",
+  "tags": [
+    "games",
+    "html5",
+    "physics",
+    "quantum",
+    "wave-packet",
+    "simulation"
+  ],
+  "badge": "New",
+  "creator": "Original build (Dragon Gaming Assets)"
+}

@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Sandpile Lab</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <header>
+    <div>
+      <h1>Sandpile Lab</h1>
+      <p>Drop grains one at a time and watch avalanches of every size fall out of a four-rule system.</p>
+    </div>
+    <div class="hud">
+      <span id="grains-read">0 grains</span>
+      <span id="topples-read">0 topplings</span>
+      <span id="last-read">last: —</span>
+    </div>
+  </header>
+
+  <main>
+    <section class="stage">
+      <canvas id="scene" width="760" height="560"></canvas>
+      <p class="caption">A cell holding four grains gives one grain to each neighbour. That is the whole rule — yet the pile reaches a critical slope where a single grain can topple a hundred cells.</p>
+    </section>
+
+    <aside class="panel">
+      <div class="row">
+        <button id="toggle" class="primary">Pause</button>
+        <button id="drop" >Drop 100</button>
+        <button id="reset">Reset</button>
+      </div>
+      <label>
+        <span>Grains per frame <b id="rate-out">2</b></span>
+        <input id="rate" type="range" min="1" max="40" step="1" value="2" />
+      </label>
+      <label>
+        <span>Source</span>
+        <select id="source">
+          <option value="center">Centre of the pile</option>
+          <option value="random">Random cell</option>
+          <option value="edge">Fixed edge point</option>
+        </select>
+      </label>
+      <label>
+        <span>Palette</span>
+        <select id="palette">
+          <option value="sand">Desert sand</option>
+          <option value="dusk">Dusk</option>
+          <option value="ice">Ice</option>
+        </select>
+      </label>
+      <label class="check">
+        <input id="chart" type="checkbox" checked />
+        <span>Show avalanche chart</span>
+      </label>
+      <div class="readouts">
+        <div><span>Grains</span><b id="count-read">0</b></div>
+        <div><span>Topplings</span><b id="cells-read">0</b></div>
+        <div><span>Largest avalanche</span><b id="max-read">—</b></div>
+        <div><span>Big avalanches</span><b id="big-read">0</b></div>
+      </div>
+      <p id="status" class="status">Empty table. Grains are dropping at the centre.</p>
+      <p class="hint">Click the heap to move the source. Space pauses, R resets, C re-centres.</p>
+    </aside>
+  </main>
+
+  <script src="app.js"></script>
+</body>
+</html>

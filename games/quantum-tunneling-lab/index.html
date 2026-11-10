@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Quantum Tunneling Lab</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <header>
+    <div>
+      <h1>Quantum Tunneling Lab</h1>
+      <p>A wave packet hits a barrier. Sometimes part of it comes out the other side.</p>
+    </div>
+    <div class="hud">
+      <span id="time-read">t 0.0</span>
+      <span id="trans-read">T 0.0%</span>
+      <span id="norm-read">in field 100%</span>
+    </div>
+  </header>
+
+  <main>
+    <section class="stage">
+      <canvas id="scene" width="820" height="420"></canvas>
+      <p class="caption">The band under the curve is |ψ|², the chance of finding the particle; the hue tracks its phase. When the packet meets the amber wall, part of it leaks through. The prediction averages the barrier formula over the packet's own energy spread, so it should land close to the measured value.</p>
+    </section>
+
+    <aside class="panel">
+      <div class="row">
+        <button id="toggle" class="primary">Pause</button>
+        <button id="reset">Reset</button>
+      </div>
+      <label>
+        <span>Packet energy <b id="energy-out">0.50</b></span>
+        <input id="energy" type="range" min="0.15" max="2" step="0.01" value="0.5" />
+      </label>
+      <label>
+        <span>Barrier height <b id="height-out">1.00</b></span>
+        <input id="height" type="range" min="0.2" max="2" step="0.01" value="1" />
+      </label>
+      <label>
+        <span>Barrier width <b id="width-out">3.0</b></span>
+        <input id="width" type="range" min="0.6" max="6" step="0.1" value="3" />
+      </label>
+      <label>
+        <span>Simulation speed <b id="speed-out">10</b></span>
+        <input id="speed" type="range" min="2" max="24" step="1" value="10" />
+      </label>
+      <label>
+        <span>Setup</span>
+        <select id="preset">
+          <option value="tunnel">Tunnelling (E below the wall)</option>
+          <option value="over">Over the top (E above the wall)</option>
+          <option value="thin">Thin wall</option>
+          <option value="broad">Broad wall</option>
+        </select>
+      </label>
+      <div class="readouts">
+        <div><span>Transmitted</span><b id="t-read">0.0%</b></div>
+        <div><span>Reflected</span><b id="r-read">0.0%</b></div>
+        <div><span>Packet theory</span><b id="analytic-read">0.0%</b></div>
+        <div><span>E / V₀</span><b id="ratio-read">0.50</b></div>
+      </div>
+      <p id="status" class="status">Wave packet launched. The barrier is taller than the packet energy.</p>
+      <p class="hint">Space pauses, R relaunches. Energy, barrier height and width restart the packet.</p>
+    </aside>
+  </main>
+
+  <script src="app.js"></script>
+</body>
+</html>

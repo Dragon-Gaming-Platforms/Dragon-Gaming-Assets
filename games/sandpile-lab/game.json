@@ -1,0 +1,16 @@
+{
+  "name": "Sandpile Lab",
+  "desc": "Drop grains one at a time and watch avalanches of every size fall out of four simple rules.",
+  "controls": "Grains-per-frame slider, source and palette options, Drop 100, chart toggle; click the heap to move the source; Space pauses, R resets, C re-centres",
+  "shelf": "Interactive Stories & Experiments",
+  "tags": [
+    "games",
+    "html5",
+    "physics",
+    "complexity",
+    "sandpile",
+    "emergence"
+  ],
+  "badge": "New",
+  "creator": "Original build (Dragon Gaming Assets)"
+}

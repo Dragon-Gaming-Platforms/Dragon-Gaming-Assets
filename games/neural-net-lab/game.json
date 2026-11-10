@@ -1,0 +1,15 @@
+{
+  "name": "Neural Net Lab",
+  "desc": "A two-layer network learns where to draw the boundary between two colours of dots, and you can watch it think.",
+  "controls": "Dataset, hidden units, learning rate, label noise and activation options; Run, Epoch and New run; Space runs or pauses, S trains one epoch, R restarts",
+  "shelf": "Interactive Stories & Experiments",
+  "tags": [
+    "games",
+    "html5",
+    "machine-learning",
+    "neural-network",
+    "visualisation"
+  ],
+  "badge": "New",
+  "creator": "Original build (Dragon Gaming Assets)"
+}

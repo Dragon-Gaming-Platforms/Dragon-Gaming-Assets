@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Neural Net Lab</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <header>
+    <div>
+      <h1>Neural Net Lab</h1>
+      <p>A two-layer network learning to draw a boundary between two colours of dots.</p>
+    </div>
+    <div class="hud">
+      <span id="epoch-read">epoch 0</span>
+      <span id="loss-read">loss 0.693</span>
+      <span id="acc-read">50.0% accurate</span>
+    </div>
+  </header>
+
+  <main>
+    <section class="stage">
+      <canvas id="scene" width="820" height="560"></canvas>
+      <p class="caption">The shaded background is the network's own guess everywhere in the plane; the dots are the training set. Watch the boundary bend, split and wrap as the weights settle.</p>
+    </section>
+
+    <aside class="panel">
+      <div class="row">
+        <button id="toggle" class="primary">Run</button>
+        <button id="step">Epoch</button>
+        <button id="reset">New run</button>
+      </div>
+      <label>
+        <span>Dataset</span>
+        <select id="dataset">
+          <option value="circle">Circle inside a ring</option>
+          <option value="moons">Two moons</option>
+          <option value="xor">XOR quadrants</option>
+          <option value="spiral">Twin spirals</option>
+        </select>
+      </label>
+      <label>
+        <span>Hidden units <b id="hidden-out">16</b></span>
+        <input id="hidden" type="range" min="2" max="32" step="2" value="16" />
+      </label>
+      <label>
+        <span>Learning rate <b id="lr-out">0.30</b></span>
+        <input id="lr" type="range" min="1" max="100" step="1" value="30" />
+      </label>
+      <label>
+        <span>Label noise <b id="noise-out">0.08</b></span>
+        <input id="noise" type="range" min="0" max="0.4" step="0.01" value="0.08" />
+      </label>
+      <label>
+        <span>Activation</span>
+        <select id="activation">
+          <option value="tanh">tanh</option>
+          <option value="relu">ReLU</option>
+          <option value="sine">sin</option>
+        </select>
+      </label>
+      <div class="readouts">
+        <div><span>Epoch</span><b id="count-read">0</b></div>
+        <div><span>Loss</span><b id="loss2-read">0.693</b></div>
+        <div><span>Accuracy</span><b id="acc2-read">50%</b></div>
+        <div><span>Weights</span><b id="params-read">0</b></div>
+      </div>
+      <p id="status" class="status">Weights randomised. Press Run or Epoch to train.</p>
+      <p class="hint">Space runs or pauses, S trains one epoch, R starts a fresh run with new weights.</p>
+    </aside>
+  </main>
+
+  <script src="app.js"></script>
+</body>
+</html>

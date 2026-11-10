@@ -1,0 +1,16 @@
+{
+  "name": "Hyperbolic Tiling Lab",
+  "desc": "Regular {p, q} tilings of the hyperbolic plane, spun inside a Poincar\u00e9 disc.",
+  "controls": "Tiling family, depth, spin and zoom sliders; palette, edge and fade toggles; drag to rotate, scroll to zoom; Space pauses the spin, R resets the view",
+  "shelf": "Interactive Stories & Experiments",
+  "tags": [
+    "games",
+    "html5",
+    "math",
+    "geometry",
+    "hyperbolic",
+    "tiling"
+  ],
+  "badge": "New",
+  "creator": "Original build (Dragon Gaming Assets)"
+}
