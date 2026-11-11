@@ -1,0 +1,15 @@
+{
+  "name": "NoGo",
+  "desc": "A 7×7 no-capture Go variant: captures, suicide and passing are forbidden. Leave your opponent without a legal placement.",
+  "controls": "Mouse / touch; arrows navigate, Enter / Space select; Escape cancels. In-game rules.",
+  "shelf": "Puzzle & Logic",
+  "tags": [
+    "games",
+    "html5",
+    "board",
+    "strategy",
+    "original"
+  ],
+  "badge": "New",
+  "creator": "Dragon Gaming Platforms"
+}

@@ -1,0 +1,2 @@
+/* Original configuration. MIT; see LICENSE. */
+window.GAME_CONFIG={"name": "Traffic Lights", "slug": "traffic-lights", "piece": "●", "unit": "light", "players": ["Blue", "Amber"], "stats": ["Green lights", "Yellow lights"], "verb": "advance a light", "prompt": "Choose any non-red light: off → green → yellow → red. A line of three equal colors wins for the mover.", "illegal": "That light is red and cannot advance. Choose a marked cell.", "aiNote": "Bounded two-ply heuristic with immediate terminal checks; not expert or optimal play."};

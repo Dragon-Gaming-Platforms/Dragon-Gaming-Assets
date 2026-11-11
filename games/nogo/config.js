@@ -1,0 +1,2 @@
+/* Original configuration. MIT; see LICENSE. */
+window.GAME_CONFIG={"name": "NoGo", "slug": "nogo", "piece": "●", "unit": "stone", "players": ["Blue", "Amber"], "stats": ["Blue stones", "Amber stones"], "verb": "place a stone", "prompt": "Place on a marked cell. Every connected group of either color must keep at least one liberty.", "illegal": "Illegal placement: occupied, suicide, or it would capture a group. Choose a marked cell.", "aiNote": "One-ply mobility heuristic; not expert or optimal play."};

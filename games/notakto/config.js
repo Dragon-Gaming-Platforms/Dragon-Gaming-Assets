@@ -1,0 +1,2 @@
+/* Original configuration. MIT; see LICENSE. */
+window.GAME_CONFIG={"name": "Notakto", "slug": "notakto", "piece": "X", "unit": "X", "players": ["Blue", "Amber"], "stats": ["Shared X marks", "Live boards"], "verb": "place a shared X", "prompt": "Place X on any empty cell of a live board. Making three kills that board; killing the last live board loses.", "illegal": "That cell is occupied or its board is dead. Choose a marked cell on a live board.", "aiNote": "Bounded two-ply heuristic with immediate terminal checks; not expert or optimal play."};
