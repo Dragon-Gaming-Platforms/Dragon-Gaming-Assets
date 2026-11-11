@@ -1,0 +1,15 @@
+{
+  "name": "Shiftbound",
+  "desc": "A tiny two-world platformer: run and jump through 3 levels while pressing SHIFT to flip between two parallel worlds — platforms and hazards only exist in one world at a time, so the way forward is always in the other world. Chain jumps up to 5 in a row, each one stronger than the last, so any step can be climbed. Made for GitHub Game Off 2026 (theme: SHIFT); Canvas 2D, no engine, no dependencies.",
+  "controls": "Arrows or A/D move, Up/W/Z jump (press again mid-air to chain jumps, up to 5), Shift/Space/X flips between the two worlds, R restarts the level",
+  "shelf": "Arcade & Action",
+  "badge": "New",
+  "creator": "kiki347zz",
+  "image": "title.png",
+  "tags": [
+    "arcade",
+    "platformer",
+    "two-world",
+    "game-off"
+  ]
+}
