@@ -1,0 +1,2 @@
+/* Original configuration. MIT; see LICENSE. */
+window.GAME_CONFIG={"name": "Order and Chaos", "slug": "order-and-chaos", "piece": "●", "unit": "mark", "players": ["Order", "Chaos"], "stats": ["X marks", "O marks"], "verb": "choose X or O", "prompt": "Choose X or O, then an empty cell. Order wants five equal marks; Chaos must prevent all such lines until the board is full.", "illegal": "That cell is occupied. Choose an empty marked cell.", "aiNote": "Bounded two-ply heuristic with immediate terminal checks; not expert or optimal play."};

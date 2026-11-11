@@ -1,0 +1,15 @@
+{
+  "name": "Traffic Lights",
+  "desc": "Advance shared lights from off to green to yellow to red on a 3×4 board. Make three of one color in a straight line to win.",
+  "controls": "Mouse / touch; arrows navigate, Enter / Space select; Escape cancels. In-game rules.",
+  "shelf": "Puzzle & Logic",
+  "tags": [
+    "games",
+    "html5",
+    "board",
+    "strategy",
+    "original"
+  ],
+  "badge": "New",
+  "creator": "Dragon Gaming Platforms"
+}

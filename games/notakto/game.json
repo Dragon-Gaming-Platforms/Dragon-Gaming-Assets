@@ -1,0 +1,15 @@
+{
+  "name": "Notakto",
+  "desc": "Misère three-board tic-tac-toe: both players place shared X marks. Three in a row kills a board; killing the final board loses.",
+  "controls": "Mouse / touch; arrows navigate, Enter / Space select; Escape cancels. In-game rules.",
+  "shelf": "Puzzle & Logic",
+  "tags": [
+    "games",
+    "html5",
+    "board",
+    "strategy",
+    "original"
+  ],
+  "badge": "New",
+  "creator": "Dragon Gaming Platforms"
+}

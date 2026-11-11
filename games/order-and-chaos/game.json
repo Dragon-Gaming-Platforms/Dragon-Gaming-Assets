@@ -1,0 +1,15 @@
+{
+  "name": "Order and Chaos",
+  "desc": "Asymmetric 6×6 strategy. Both players can place X or O; Order wants five identical marks in a line, Chaos wants a full board without one.",
+  "controls": "Mouse / touch; arrows navigate, Enter / Space select; Escape cancels. In-game rules.",
+  "shelf": "Puzzle & Logic",
+  "tags": [
+    "games",
+    "html5",
+    "board",
+    "strategy",
+    "original"
+  ],
+  "badge": "New",
+  "creator": "Dragon Gaming Platforms"
+}

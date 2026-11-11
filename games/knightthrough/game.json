@@ -1,0 +1,15 @@
+{
+  "name": "Knightthrough",
+  "desc": "An 8×8 forward-knight race with captures. Leap over blockers and reach the enemy back rank before your opponent.",
+  "controls": "Mouse / touch; arrows navigate, Enter / Space select; Escape cancels. In-game rules.",
+  "shelf": "Puzzle & Logic",
+  "tags": [
+    "games",
+    "html5",
+    "board",
+    "strategy",
+    "original"
+  ],
+  "badge": "New",
+  "creator": "Dragon Gaming Platforms"
+}
