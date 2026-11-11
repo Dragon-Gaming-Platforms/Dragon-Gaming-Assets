@@ -1,0 +1,2 @@
+/* Original configuration. MIT; see LICENSE. */
+window.GAME_CONFIG={"name": "Knightthrough", "slug": "knightthrough", "piece": "♞", "unit": "knight", "players": ["Blue", "Amber"], "stats": ["Blue knights", "Amber knights"], "verb": "move a knight", "prompt": "Select your knight, then a marked forward L-shaped destination. Blue moves down toward the bottom; Amber moves up.", "illegal": "Select a movable knight, then a marked destination.", "aiNote": "Bounded two-ply heuristic with immediate terminal checks; not expert or optimal play."};

@@ -1,0 +1,12 @@
+NoGo — original independent implementation, version 1.0
+Created: 2026-10-17
+License: MIT; see LICENSE.
+Source: https://github.com/Dragon-Gaming-Platforms/Dragon-Gaming-Assets/tree/main/games/nogo
+
+Original rules/computer code, first-party controller/CSS adapted from this
+repository's board collection. No external code, art, fonts or runtime packages.
+Established game mechanics are not claimed as original inventions.
+No publisher affiliation. Exact edition and bounded AI limits: help.html.
+Rule reference only (not code/assets): https://webdocs.cs.ualberta.ca/~mmueller/nogo/rules.html
+
+Self-contained static browser game. No build, backend, service worker or account.
