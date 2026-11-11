@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Pathfinding Lab</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <header>
+    <div>
+      <h1>Pathfinding Lab</h1>
+      <p>Four search strategies race across the same map. Watch the frontier spill out, then see which route survives.</p>
+    </div>
+    <div class="hud">
+      <span id="algo-hud">A*</span>
+      <span id="visited-hud">0 cells</span>
+      <span id="cost-hud">cost —</span>
+    </div>
+  </header>
+
+  <main>
+    <section class="stage">
+      <canvas id="scene" width="800" height="600"></canvas>
+      <p class="caption">Pick a brush and drag on the map. Sand is slow, water is slower, walls are impassable. The bright trail is the route the current search returns.</p>
+      <div class="legend">
+        <span><i class="sw-plain"></i>plain · 1</span>
+        <span><i class="sw-sand"></i>sand · 3</span>
+        <span><i class="sw-water"></i>water · 8</span>
+        <span><i class="sw-wall"></i>wall</span>
+        <span><i class="sw-start"></i>start</span>
+        <span><i class="sw-goal"></i>goal</span>
+      </div>
+    </section>
+
+    <aside class="panel">
+      <div class="group">
+        <h2>Algorithm</h2>
+        <div class="row">
+          <button id="algo-bfs">BFS</button>
+          <button id="algo-dijkstra">Dijkstra</button>
+        </div>
+        <div class="row">
+          <button id="algo-astar" class="active">A*</button>
+          <button id="algo-greedy">Greedy</button>
+        </div>
+      </div>
+
+      <div class="group">
+        <h2>Brush</h2>
+        <div class="row">
+          <button id="b-wall" class="active">Wall</button>
+          <button id="b-sand">Sand</button>
+          <button id="b-water">Water</button>
+        </div>
+        <div class="row">
+          <button id="b-plain">Plain</button>
+          <button id="b-start">Start</button>
+          <button id="b-goal">Goal</button>
+        </div>
+      </div>
+
+      <label>
+        <span>Search speed <b id="speed-out">6</b></span>
+        <input id="speed" type="range" min="1" max="40" step="1" value="6" />
+      </label>
+
+      <div class="row">
+        <button id="run" class="primary">Run search</button>
+        <button id="maze">Maze</button>
+        <button id="clear">Clear</button>
+      </div>
+
+      <div class="readouts">
+        <div><span>Expanded</span><b id="visited-read">0</b></div>
+        <div><span>Path cells</span><b id="path-read">—</b></div>
+        <div><span>Path cost</span><b id="cost-read">—</b></div>
+        <div><span>Peak frontier</span><b id="frontier-read">0</b></div>
+        <div><span>Search time</span><b id="time-read">0.0 ms</b></div>
+        <div><span>Efficiency</span><b id="eff-read">—</b></div>
+      </div>
+
+      <p id="status" class="status">Ready. A* is selected; press Run search or hit Space.</p>
+      <p class="hint">1–4 switch algorithms, Space reruns, M builds a maze, C clears the map. Walls are free to draw — try sealing the goal and watch every algorithm give up.</p>
+    </aside>
+  </main>
+
+  <script src="app.js"></script>
+</body>
+</html>

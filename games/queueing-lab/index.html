@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Queueing Lab</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <header>
+    <div>
+      <h1>Queueing Lab</h1>
+      <p>One server, random arrivals, random service. Push utilisation past 80% and watch the waiting time stop being polite.</p>
+    </div>
+    <div class="hud">
+      <span id="rho-hud">ρ = 0.60</span>
+      <span id="wq-hud">Wq = 2.5</span>
+      <span id="served-hud">0 served</span>
+    </div>
+  </header>
+
+  <main>
+    <section class="stage">
+      <canvas id="scene" width="880" height="600"></canvas>
+      <p class="caption">Customers arrive from the left, wait in line, and leave after service. The lower chart compares the measured wait with the M/M/1 prediction Wq = ρ / (μ − λ).</p>
+      <div class="legend">
+        <span><i class="sw-wait"></i>waiting</span>
+        <span><i class="sw-serve"></i>in service</span>
+        <span><i class="sw-theory"></i>theory</span>
+        <span><i class="sw-measured"></i>measured</span>
+      </div>
+    </section>
+
+    <aside class="panel">
+      <label>
+        <span>Arrival rate λ <b id="lambda-out">0.60</b></span>
+        <input id="lambda" type="range" min="0.10" max="0.95" step="0.01" value="0.60" />
+      </label>
+      <label>
+        <span>Service rate μ <b id="mu-out">1.00</b></span>
+        <input id="mu" type="range" min="0.50" max="1.50" step="0.05" value="1.00" />
+      </label>
+      <label>
+        <span>Simulation speed <b id="speed-out">0.20</b></span>
+        <input id="speed" type="range" min="0.02" max="1.00" step="0.02" value="0.20" />
+      </label>
+
+      <div class="row">
+        <button id="toggle" class="primary">Pause</button>
+        <button id="burn">Burn in 500</button>
+      </div>
+      <div class="row">
+        <button id="light">Light 0.3</button>
+        <button id="busy">Busy 0.8</button>
+        <button id="critical">Edge 0.93</button>
+      </div>
+      <div class="row">
+        <button id="reset">Reset</button>
+      </div>
+
+      <div class="readouts">
+        <div><span>Utilisation ρ</span><b id="rho-read">0.60</b></div>
+        <div><span>Queue Lq</span><b id="lq-read">0.00</b></div>
+        <div><span>Wait Wq</span><b id="wq-read">0.00</b></div>
+        <div><span>Theory Wq</span><b id="theory-read">1.50</b></div>
+        <div><span>Little L = λW</span><b id="little-read">0.00</b></div>
+        <div><span>In queue</span><b id="qlen-read">0</b></div>
+        <div><span>Served</span><b id="served-read">0</b></div>
+        <div><span>Sim time</span><b id="time-read">0</b></div>
+      </div>
+
+      <p id="status" class="status">λ = 0.60, μ = 1.00. The server is busy 60% of the time and the queue is usually short.</p>
+      <p class="hint">Space pauses, R resets, B burns in 500 time units. Try 0.80 then 0.93 — the same 13% extra load multiplies the wait by more than five.</p>
+    </aside>
+  </main>
+
+  <script src="app.js"></script>
+</body>
+</html>

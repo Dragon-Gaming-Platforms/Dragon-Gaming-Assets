@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Percolation Lab</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <header>
+    <div>
+      <h1>Percolation Lab</h1>
+      <p>Fill a grid at random and ask a sharp question: does one connected cluster reach all the way from top to bottom?</p>
+    </div>
+    <div class="hud">
+      <span id="p-hud">p = 0.593</span>
+      <span id="span-hud">not spanning</span>
+      <span id="largest-hud">largest 0%</span>
+    </div>
+  </header>
+
+  <main>
+    <section class="stage">
+      <canvas id="scene" width="760" height="780"></canvas>
+      <p class="caption">Each cell is open with probability p. Below p ≈ 0.593 the grid is a scatter of islands; above it a spanning cluster appears. That sharp switch is a phase transition.</p>
+      <div class="legend">
+        <span><i class="sw-open"></i>open cluster</span>
+        <span><i class="sw-largest"></i>largest cluster</span>
+        <span><i class="sw-span"></i>spanning cluster</span>
+        <span><i class="sw-closed"></i>closed</span>
+      </div>
+    </section>
+
+    <aside class="panel">
+      <label>
+        <span>Open probability p <b id="p-out">0.593</b></span>
+        <input id="p" type="range" min="0.20" max="0.90" step="0.002" value="0.593" />
+      </label>
+
+      <label class="check">
+        <input id="solo" type="checkbox" />
+        <span>Highlight only the spanning cluster</span>
+      </label>
+
+      <div class="row">
+        <button id="sweep" class="primary">Sweep p</button>
+        <button id="reseed">New sample</button>
+      </div>
+      <div class="row">
+        <button id="coarse">Coarse 80²</button>
+        <button id="fine" class="active">Fine 120²</button>
+      </div>
+      <div class="row">
+        <button id="estimate">Estimate p<sub>c</sub></button>
+      </div>
+
+      <div class="readouts">
+        <div><span>Occupied</span><b id="occ-read">0%</b></div>
+        <div><span>Clusters</span><b id="clusters-read">0</b></div>
+        <div><span>Largest</span><b id="largest-read">0%</b></div>
+        <div><span>Spanning</span><b id="span-read">no</b></div>
+        <div><span>Grid</span><b id="size-read">120²</b></div>
+        <div><span>Critical p</span><b id="pc-read">—</b></div>
+      </div>
+
+      <p id="status" class="status">p = 0.593, close to the critical point. A few cells decide whether the whole grid is connected.</p>
+      <p class="hint">Drag p slowly through 0.55–0.65 to feel the transition. Space draws a fresh sample, S sweeps p, E estimates the critical point. Click any cell to flip it.</p>
+    </aside>
+  </main>
+
+  <script src="app.js"></script>
+</body>
+</html>

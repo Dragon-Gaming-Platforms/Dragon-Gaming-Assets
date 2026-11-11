@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Color Lab</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <header>
+    <div>
+      <h1>Color Lab</h1>
+      <p>Build a palette, then check it honestly: WCAG contrast for text, and what the same colours look like with colour-vision deficiency.</p>
+    </div>
+    <div class="hud">
+      <span id="ratio-hud">12.6 : 1</span>
+      <span id="grade-hud">AAA</span>
+      <span id="base-hud">#3f8fd0</span>
+    </div>
+  </header>
+
+  <main>
+    <section class="stage">
+      <canvas id="scene" width="880" height="620"></canvas>
+      <p class="caption">Click any palette swatch to use it as text; shift-click to use it as the background. The meters update immediately, including the simulated vision strips.</p>
+      <div class="legend">
+        <span><i class="sw-fg"></i>text</span>
+        <span><i class="sw-bg"></i>background</span>
+        <span><i class="sw-pass"></i>passes AA</span>
+        <span><i class="sw-fail"></i>fails</span>
+      </div>
+    </section>
+
+    <aside class="panel">
+      <div class="group">
+        <h2>Palette base</h2>
+        <label>
+          <span>Hue <b id="hue-out">210°</b></span>
+          <input id="hue" type="range" min="0" max="359" step="1" value="210" />
+        </label>
+        <label>
+          <span>Saturation <b id="sat-out">70%</b></span>
+          <input id="sat" type="range" min="10" max="100" step="1" value="70" />
+        </label>
+        <label>
+          <span>Lightness <b id="light-out">55%</b></span>
+          <input id="light" type="range" min="15" max="90" step="1" value="55" />
+        </label>
+      </div>
+
+      <div class="group">
+        <h2>Harmony</h2>
+        <div class="row">
+          <button id="comp">Complement</button>
+          <button id="analog">Analogous</button>
+        </div>
+        <div class="row">
+          <button id="triad" class="active">Triadic</button>
+          <button id="tetrad">Tetradic</button>
+          <button id="split">Split</button>
+        </div>
+      </div>
+
+      <div class="group">
+        <h2>Colour vision</h2>
+        <div class="row">
+          <button id="cvd-none" class="active">Normal</button>
+          <button id="cvd-protan">Protan</button>
+        </div>
+        <div class="row">
+          <button id="cvd-deutan">Deutan</button>
+          <button id="cvd-tritan">Tritan</button>
+        </div>
+      </div>
+
+      <div class="group">
+        <h2>Text and background</h2>
+        <div class="row colors">
+          <label class="mini">Text <input id="fg" type="color" value="#f4efe6" /></label>
+          <label class="mini">Background <input id="bg" type="color" value="#0b0e14" /></label>
+        </div>
+        <div class="row">
+          <button id="swap">Swap</button>
+          <button id="random">Surprise me</button>
+        </div>
+      </div>
+
+      <div class="group">
+        <h2>Themes</h2>
+        <div class="row">
+          <button id="night">Night</button>
+          <button id="paper">Paper</button>
+          <button id="sunset">Sunset</button>
+        </div>
+      </div>
+
+      <div class="readouts">
+        <div><span>Contrast</span><b id="ratio-read">12.6</b></div>
+        <div><span>Grade</span><b id="grade-read">AAA</b></div>
+        <div><span>Text</span><b id="fg-read">#F4EFE6</b></div>
+        <div><span>Background</span><b id="bg-read">#0B0E14</b></div>
+        <div><span>Luminance</span><b id="luma-read">0.91 / 0.01</b></div>
+        <div><span>Base</span><b id="base-read">#3F8FD0</b></div>
+      </div>
+
+      <p id="status" class="status">Cream on near-black scores high enough for AAA body text. Most pairs do not.</p>
+      <p class="hint">Keys 1–5 switch harmony, S swaps, R randomises. Try the same palette with deutan simulation — red/green pairs that look distinct often collapse.</p>
+    </aside>
+  </main>
+
+  <script src="app.js"></script>
+</body>
+</html>

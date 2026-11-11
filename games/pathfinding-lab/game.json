@@ -1,0 +1,16 @@
+{
+  "name": "Pathfinding Lab",
+  "desc": "Four search algorithms race across the same weighted grid — paint terrain, build mazes, and compare every route they find.",
+  "controls": "Click and drag to paint walls, sand, water or the start and goal; algorithm and brush buttons; speed slider; Space reruns, M builds a maze, C clears, 1-4 switch algorithm",
+  "shelf": "Interactive Stories & Experiments",
+  "tags": [
+    "games",
+    "html5",
+    "algorithms",
+    "pathfinding",
+    "computer-science",
+    "visualisation"
+  ],
+  "badge": "New",
+  "creator": "Original build (Dragon Gaming Assets)"
+}

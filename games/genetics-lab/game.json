@@ -1,0 +1,16 @@
+{
+  "name": "Genetics Lab",
+  "desc": "Run replicate Wright–Fisher populations and watch drift, selection and mutation fight over allele frequencies.",
+  "controls": "Population size, selection, mutation, replicate and speed sliders; pause, step, restart and three presets; Space pauses, R restarts, S advances 100 generations",
+  "shelf": "Interactive Stories & Experiments",
+  "tags": [
+    "games",
+    "html5",
+    "biology",
+    "evolution",
+    "genetics",
+    "simulation"
+  ],
+  "badge": "New",
+  "creator": "Original build (Dragon Gaming Assets)"
+}
