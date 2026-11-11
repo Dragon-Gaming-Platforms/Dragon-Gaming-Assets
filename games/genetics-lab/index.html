@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Genetics Lab</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <header>
+    <div>
+      <h1>Genetics Lab</h1>
+      <p>A population of alleles, a coin flip every generation. Run replicate lineages side by side and watch drift beat selection on small populations.</p>
+    </div>
+    <div class="hud">
+      <span id="gen-hud">gen 0</span>
+      <span id="mean-hud">p̄ = 0.500</span>
+      <span id="fixed-hud">0 fixed</span>
+    </div>
+  </header>
+
+  <main>
+    <section class="stage">
+      <canvas id="scene" width="880" height="580"></canvas>
+      <p class="caption">Each thin line is one independent population. The bright line is their mean. Once a line reaches 0 or 1 it is fixed and stops moving — drift only ever removes variation.</p>
+      <div class="legend">
+        <span><i class="sw-line"></i>replicate</span>
+        <span><i class="sw-mean"></i>mean</span>
+        <span><i class="sw-expect"></i>expected heterozygosity</span>
+        <span><i class="sw-fix"></i>fixation</span>
+      </div>
+    </section>
+
+    <aside class="panel">
+      <label>
+        <span>Population size N <b id="N-out">60</b></span>
+        <input id="N" type="range" min="10" max="400" step="5" value="60" />
+      </label>
+      <label>
+        <span>Selection s <b id="sel-out">0.00</b></span>
+        <input id="sel" type="range" min="-0.20" max="0.20" step="0.01" value="0" />
+      </label>
+      <label>
+        <span>Mutation μ <b id="mut-out">0.001</b></span>
+        <input id="mut" type="range" min="0" max="0.02" step="0.0005" value="0.001" />
+      </label>
+      <label>
+        <span>Replicates <b id="reps-out">10</b></span>
+        <input id="reps" type="range" min="2" max="24" step="1" value="10" />
+      </label>
+      <label>
+        <span>Speed <b id="speed-out">3</b></span>
+        <input id="speed" type="range" min="1" max="20" step="1" value="3" />
+      </label>
+
+      <div class="row">
+        <button id="toggle" class="primary">Pause</button>
+        <button id="step">+100 gens</button>
+      </div>
+      <div class="row">
+        <button id="reset">Restart</button>
+        <button id="neutral">Neutral preset</button>
+      </div>
+      <div class="row">
+        <button id="strong">Strong selection</button>
+        <button id="balance">Mutation balance</button>
+      </div>
+
+      <div class="readouts">
+        <div><span>Generation</span><b id="gen-read">0</b></div>
+        <div><span>Mean p</span><b id="mean-read">0.500</b></div>
+        <div><span>Heterozygosity</span><b id="het-read">0.500</b></div>
+        <div><span>H if drift only</span><b id="exp-read">0.500</b></div>
+        <div><span>Fixed A</span><b id="fixedA-read">0</b></div>
+        <div><span>Fixed a</span><b id="fixeda-read">0</b></div>
+      </div>
+
+      <p id="status" class="status">Ten replicates at p = 0.5, N = 60, no selection. Drift alone will take them apart.</p>
+      <p class="hint">Space pauses, R restarts, S jumps 100 generations. Try N = 20 with s = 0.10 — drift still wins often. Then set μ = 0.01 for a mutation–drift balance.</p>
+    </aside>
+  </main>
+
+  <script src="app.js"></script>
+</body>
+</html>

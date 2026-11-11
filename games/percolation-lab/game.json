@@ -1,0 +1,16 @@
+{
+  "name": "Percolation Lab",
+  "desc": "Fill a lattice at random and watch a spanning cluster appear at the critical probability — a hands-on phase transition.",
+  "controls": "p slider, click cells to flip them, sweep and estimate buttons, 80²/120² resolution, highlight toggle; Space reseeds, S sweeps, E estimates the critical point",
+  "shelf": "Interactive Stories & Experiments",
+  "tags": [
+    "games",
+    "html5",
+    "physics",
+    "probability",
+    "phase-transition",
+    "simulation"
+  ],
+  "badge": "New",
+  "creator": "Original build (Dragon Gaming Assets)"
+}

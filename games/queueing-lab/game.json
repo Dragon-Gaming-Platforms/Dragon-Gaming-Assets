@@ -1,0 +1,16 @@
+{
+  "name": "Queueing Lab",
+  "desc": "An M/M/1 queue you can push into saturation, with the measured wait time plotted against the theory.",
+  "controls": "Arrival and service rate sliders, simulation speed, pause, burn-in and three load presets; Space pauses, R resets, B burns in 500 time units",
+  "shelf": "Interactive Stories & Experiments",
+  "tags": [
+    "games",
+    "html5",
+    "math",
+    "statistics",
+    "queueing",
+    "simulation"
+  ],
+  "badge": "New",
+  "creator": "Original build (Dragon Gaming Assets)"
+}

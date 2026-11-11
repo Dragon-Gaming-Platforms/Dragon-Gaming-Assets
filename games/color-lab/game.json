@@ -1,0 +1,16 @@
+{
+  "name": "Color Lab",
+  "desc": "Build an HSL harmony, then test it for WCAG contrast and simulated colour-vision deficiency.",
+  "controls": "Hue, saturation and lightness sliders; harmony and vision-simulation buttons; colour pickers, swap, random and theme presets; click a swatch for text, shift-click for background; keys 1-5, S, R",
+  "shelf": "Tools & Utilities",
+  "tags": [
+    "tools",
+    "html5",
+    "design",
+    "accessibility",
+    "color",
+    "wcag"
+  ],
+  "badge": "New",
+  "creator": "Original build (Dragon Gaming Assets)"
+}
