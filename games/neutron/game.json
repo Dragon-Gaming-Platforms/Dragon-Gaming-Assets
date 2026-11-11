@@ -1,0 +1,15 @@
+{
+  "name": "Neutron",
+  "desc": "Slide a neutral neutron and your own pawns on a 5×5 board. Bring the neutron to your home row or leave it immobile for the opponent.",
+  "controls": "Mouse / touch; arrows navigate, Enter / Space select; Escape cancels. In-game rules and guide.",
+  "shelf": "Puzzle & Logic",
+  "tags": [
+    "games",
+    "html5",
+    "board",
+    "strategy",
+    "original"
+  ],
+  "badge": "New",
+  "creator": "Dragon Gaming Platforms"
+}

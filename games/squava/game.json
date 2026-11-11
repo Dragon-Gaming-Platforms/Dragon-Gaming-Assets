@@ -1,0 +1,15 @@
+{
+  "name": "Squava",
+  "desc": "Place stones on a 5×5 grid: four in a straight line wins, but making three without a four loses. Four takes precedence.",
+  "controls": "Mouse / touch; arrows navigate, Enter / Space select; Escape cancels. In-game rules and guide.",
+  "shelf": "Puzzle & Logic",
+  "tags": [
+    "games",
+    "html5",
+    "board",
+    "strategy",
+    "original"
+  ],
+  "badge": "New",
+  "creator": "Dragon Gaming Platforms"
+}

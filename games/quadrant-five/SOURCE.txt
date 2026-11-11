@@ -1,0 +1,16 @@
+Quadrant Five — original independent static implementation, version 1.0
+Created: 2026-10-17
+License: MIT; full notice in LICENSE.
+Source: https://github.com/Dragon-Gaming-Platforms/Dragon-Gaming-Assets/tree/main/games/quadrant-five
+
+Original rules/computer code; first-party board controller and CSS adapted from
+this repository's previous collections. No upstream mirror, borrowed external
+code, art, sounds, fonts or runtime packages. Established mechanics are not
+claimed as new inventions; no affiliation with any publisher is implied.
+Exact edition, board sizes, house rules and AI limits are documented in-game.
+Rules are documented fully in help.html.
+
+Computer: random legal complete turns or a bounded 512-candidate one-ply
+heuristic, not expert/optimal search. Saved action replays are revalidated.
+Everything needed lives in this folder; no build step, accounts, backend,
+network dependencies or service worker.
