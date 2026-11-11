@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>IFS Fractal Lab</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <header>
+    <div>
+      <h1>IFS Fractal Lab</h1>
+      <p>Pick a transform at random, apply it, repeat forever. That is the whole recipe.</p>
+    </div>
+    <div class="hud">
+      <span id="points-read">0 points</span>
+      <span id="maps-read">4 maps</span>
+      <span id="dim-read">D ≈ 1.00</span>
+    </div>
+  </header>
+
+  <main>
+    <section class="stage">
+      <canvas id="scene" width="780" height="600"></canvas>
+      <p class="caption">An iterated function system is a handful of contractive affine maps. Choosing one at random each step and plotting the result traces the unique set every one of those maps leaves invariant.</p>
+    </section>
+
+    <aside class="panel">
+      <div class="row">
+        <button id="toggle" class="primary">Pause</button>
+        <button id="burst">+Infinity burst</button>
+        <button id="clear">Clear</button>
+      </div>
+      <label>
+        <span>Fractal</span>
+        <select id="preset">
+          <option value="fern">Barnsley fern</option>
+          <option value="leaf">Fern leaf</option>
+          <option value="sierpinski">Sierpiński triangle</option>
+          <option value="carpet">Sierpiński carpet</option>
+          <option value="dragon">Heighway dragon</option>
+          <option value="spiral">Barspiral</option>
+        </select>
+      </label>
+      <label>
+        <span>Points per frame <b id="speed-out">4,000</b></span>
+        <input id="speed" type="range" min="500" max="20000" step="500" value="4000" />
+      </label>
+      <label>
+        <span>Map weights <b id="bias-out">balanced</b></span>
+        <input id="bias" type="range" min="-1" max="1" step="0.1" value="0" />
+      </label>
+      <label>
+        <span>Palette</span>
+        <select id="palette">
+          <option value="snow">Snow</option>
+          <option value="ember">Ember</option>
+          <option value="cyan">Cyan</option>
+          <option value="violet">Violet</option>
+        </select>
+      </label>
+      <label class="check">
+        <input id="colourByMap" type="checkbox" checked />
+        <span>Colour each map separately</span>
+      </label>
+      <label class="check">
+        <input id="fit" type="checkbox" checked />
+        <span>Fit the canvas to the attractor</span>
+      </label>
+      <div class="readouts">
+        <div><span>Points</span><b id="count-read">0</b></div>
+        <div><span>Maps</span><b id="maps2-read">4</b></div>
+        <div><span>Contractivity</span><b id="contract-read">0.85</b></div>
+        <div><span>Escape radius</span><b id="radius-read">—</b></div>
+      </div>
+      <p id="status" class="status">Barnsley fern loaded. Points are accumulating.</p>
+      <p class="hint">Space pauses, R restarts the fractal, C clears the canvas, S saves a PNG. Drag the bias slider to starve or favour a map.</p>
+    </aside>
+  </main>
+
+  <script src="app.js"></script>
+</body>
+</html>

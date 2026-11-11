@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Magnetic Pendulum Lab</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <header>
+    <div>
+      <h1>Magnetic Pendulum Lab</h1>
+      <p>One bob, three magnets, and a chaos map hiding under every starting point.</p>
+    </div>
+    <div class="hud">
+      <span id="drops-read">0 drops</span>
+      <span id="chaos-read">chaos 0%</span>
+      <span id="energy-read">E 0.00</span>
+    </div>
+  </header>
+
+  <main>
+    <section class="stage">
+      <canvas id="scene" width="820" height="600"></canvas>
+      <p class="caption">The left panel is the real pendulum swinging above the magnets. The right panel colours every release point by the magnet the bob finally settles over — its basin of attraction.</p>
+    </section>
+
+    <aside class="panel">
+      <div class="row">
+        <button id="toggle" class="primary">Pause</button>
+        <button id="drop">Drop bob</button>
+        <button id="reset">Reset map</button>
+      </div>
+      <label>
+        <span>Magnets <b id="magnets-out">3</b></span>
+        <input id="magnets" type="range" min="2" max="6" step="1" value="3" />
+      </label>
+      <label>
+        <span>Magnet strength <b id="strength-out">1.00</b></span>
+        <input id="strength" type="range" min="0.4" max="2" step="0.02" value="1" />
+      </label>
+      <label>
+        <span>Damping <b id="damping-out">0.20</b></span>
+        <input id="damping" type="range" min="0.02" max="0.6" step="0.01" value="0.2" />
+      </label>
+      <label>
+        <span>Gravity <b id="gravity-out">0.40</b></span>
+        <input id="gravity" type="range" min="0.1" max="1.2" step="0.02" value="0.4" />
+      </label>
+      <label>
+        <span>Map resolution <b id="res-out">110</b></span>
+        <input id="res" type="range" min="60" max="200" step="10" value="110" />
+      </label>
+      <div class="readouts">
+        <div><span>Map filled</span><b id="filled-read">0%</b></div>
+        <div><span>Boundary cells</span><b id="boundary-read">0%</b></div>
+        <div><span>Longest flight</span><b id="flight-read">0</b></div>
+        <div><span>Last magnet</span><b id="last-read">—</b></div>
+      </div>
+      <p id="status" class="status">Three magnets, one bob. Press Drop bob or click a starting point.</p>
+      <p class="hint">Space pauses, D drops the bob, R clears the map. Click the left panel to release from that point; click the right panel to zoom in later.</p>
+    </aside>
+  </main>
+
+  <script src="app.js"></script>
+</body>
+</html>

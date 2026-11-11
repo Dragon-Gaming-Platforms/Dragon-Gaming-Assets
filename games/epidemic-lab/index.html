@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Epidemic Lab</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <header>
+    <div>
+      <h1>Epidemic Lab</h1>
+      <p>A contact network of twenty thousand people, one infection, and the curves that follow.</p>
+    </div>
+    <div class="hud">
+      <span id="infected-read">0 infected</span>
+      <span id="peak-read">peak 0%</span>
+      <span id="r0-read">R₀ 0.0</span>
+    </div>
+  </header>
+
+  <main>
+    <section class="stage">
+      <canvas id="scene" width="820" height="600"></canvas>
+      <p class="caption">Each cell is one person: pale grey susceptible, amber infectious, green recovered. Infection spreads to neighbours, people wander, and the epidemic either burns out or takes off.</p>
+    </section>
+
+    <aside class="panel">
+      <div class="row">
+        <button id="toggle" class="primary">Pause</button>
+        <button id="seed">Seed 20</button>
+        <button id="reset">Reset</button>
+      </div>
+      <label>
+        <span>Contact rate <b id="beta-out">0.010</b></span>
+        <input id="beta" type="range" min="1" max="120" step="1" value="10" />
+      </label>
+      <label>
+        <span>Infectious period <b id="period-out">40 ticks</b></span>
+        <input id="period" type="range" min="5" max="120" step="1" value="40" />
+      </label>
+      <label>
+        <span>Movement <b id="move-out">0.40</b></span>
+        <input id="move" type="range" min="0" max="1" step="0.01" value="0.4" />
+      </label>
+      <label>
+        <span>Vaccinated at start <b id="vax-out">0%</b></span>
+        <input id="vax" type="range" min="0" max="92" step="1" value="0" />
+      </label>
+      <label>
+        <span>Scenario</span>
+        <select id="preset">
+          <option value="flu">Seasonal flu (R₀ ≈ 1.6)</option>
+          <option value="measles">Measles (R₀ ≈ 14)</option>
+          <option value="lockdown">Lockdown (low movement)</option>
+          <option value="herd">Herd immunity (60% vaccinated)</option>
+          <option value="wildfire">Wildfire (fast contacts)</option>
+        </select>
+      </label>
+      <div class="readouts">
+        <div><span>Susceptible</span><b id="s-read">100%</b></div>
+        <div><span>Infectious</span><b id="i-read">0%</b></div>
+        <div><span>Recovered</span><b id="r-read">0%</b></div>
+        <div><span>Ever infected</span><b id="ever-read">0%</b></div>
+      </div>
+      <p id="status" class="status">Population susceptible. Press Seed or Run to start an outbreak.</p>
+      <p class="hint">Space pauses, R resets, I seeds twenty cases. Vaccination applies on reset.</p>
+    </aside>
+  </main>
+
+  <script src="app.js"></script>
+</body>
+</html>
