@@ -1,0 +1,16 @@
+{
+  "name": "IFS Fractal Lab",
+  "desc": "Six iterated function systems drawn point by point, with the map weights under your thumb.",
+  "controls": "Fractal presets, points per frame, map-weight bias, palette and colour options; burst, clear and save; Space pauses, R restarts, C clears, S saves a PNG",
+  "shelf": "Interactive Stories & Experiments",
+  "tags": [
+    "games",
+    "html5",
+    "math",
+    "fractals",
+    "ifs",
+    "generative"
+  ],
+  "badge": "New",
+  "creator": "Original build (Dragon Gaming Assets)"
+}

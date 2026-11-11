@@ -1,0 +1,16 @@
+{
+  "name": "Diffusion Lab",
+  "desc": "Hundreds of random walkers, with the mean squared displacement measured live against time.",
+  "controls": "Walker count, step length, drift sliders, walk type and pattern presets; click to move the release point; Space pauses, R resets, C clears the paths",
+  "shelf": "Interactive Stories & Experiments",
+  "tags": [
+    "games",
+    "html5",
+    "physics",
+    "statistics",
+    "random-walk",
+    "diffusion"
+  ],
+  "badge": "New",
+  "creator": "Original build (Dragon Gaming Assets)"
+}

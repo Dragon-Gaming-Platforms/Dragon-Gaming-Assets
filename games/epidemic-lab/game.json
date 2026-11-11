@@ -1,0 +1,16 @@
+{
+  "name": "Epidemic Lab",
+  "desc": "A stochastic SIR outbreak on a contact lattice, with the curves and the herd-immunity threshold.",
+  "controls": "Contact rate, infectious period, movement and vaccination sliders; five scenarios; Seed, Reset and pause; Space pauses, R resets, I seeds cases",
+  "shelf": "Interactive Stories & Experiments",
+  "tags": [
+    "games",
+    "html5",
+    "simulation",
+    "epidemiology",
+    "sir",
+    "networks"
+  ],
+  "badge": "New",
+  "creator": "Original build (Dragon Gaming Assets)"
+}

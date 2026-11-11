@@ -1,0 +1,16 @@
+{
+  "name": "Chladni Lab",
+  "desc": "Sand on a vibrating plate, settling into the nodal lines of mode (n, m).",
+  "controls": "Mode n and m sliders, shake strength, grain count, field and overlay toggles; next-mode button; Space pauses, R re-sprinkles, N advances the mode",
+  "shelf": "Interactive Stories & Experiments",
+  "tags": [
+    "games",
+    "html5",
+    "physics",
+    "acoustics",
+    "waves",
+    "emergence"
+  ],
+  "badge": "New",
+  "creator": "Original build (Dragon Gaming Assets)"
+}

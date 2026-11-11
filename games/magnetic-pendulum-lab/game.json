@@ -1,0 +1,16 @@
+{
+  "name": "Magnetic Pendulum Lab",
+  "desc": "A swinging bob over two to six magnets, and the fractal basin map that decides where it lands.",
+  "controls": "Magnet count, strength, damping, gravity and map resolution sliders; Drop bob, Reset map; click the plate to release from a point; Space pauses, D drops, R clears the map",
+  "shelf": "Interactive Stories & Experiments",
+  "tags": [
+    "games",
+    "html5",
+    "physics",
+    "chaos",
+    "fractals",
+    "dynamics"
+  ],
+  "badge": "New",
+  "creator": "Original build (Dragon Gaming Assets)"
+}

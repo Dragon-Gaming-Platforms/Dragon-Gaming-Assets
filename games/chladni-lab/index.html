@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Chladni Lab</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <header>
+    <div>
+      <h1>Chladni Lab</h1>
+      <p>Standing waves on a square plate, with sand collecting on the lines that never move.</p>
+    </div>
+    <div class="hud">
+      <span id="mode-read">n = 3 · m = 5</span>
+      <span id="nodes-read">0 nodes</span>
+      <span id="freq-read">f ∝ 5.83</span>
+    </div>
+  </header>
+
+  <main>
+    <section class="stage">
+      <canvas id="scene" width="700" height="620"></canvas>
+      <p class="caption">Sand bounces off the vibrating regions and settles along the nodal lines. Press Run to shake the plate and watch the grains find them.</p>
+    </section>
+
+    <aside class="panel">
+      <div class="flex">
+        <div class="row">
+          <button id="toggle" class="primary">Pause</button>
+          <button id="sprinkle">Sprinkle sand</button>
+          <button id="clear">Clear sand</button>
+        </div>
+        <div class="row">
+          <button id="coarse">−</button>
+          <button id="preset">Next mode</button>
+          <button id="fine">+</button>
+        </div>
+      </div>
+      <label>
+        <span>Mode n <b id="node-n-out">3</b></span>
+        <input id="nodeN" type="range" min="1" max="9" step="1" value="3" />
+      </label>
+      <label>
+        <span>Mode m <b id="node-m-out">5</b></span>
+        <input id="nodeM" type="range" min="1" max="9" step="1" value="5" />
+      </label>
+      <label>
+        <span>Shake strength <b id="shake-out">1.0</b></span>
+        <input id="shake" type="range" min="0.2" max="3" step="0.1" value="1" />
+      </label>
+      <label class="check">
+        <input id="field" type="checkbox" />
+        <span>Show the vibration field</span>
+      </label>
+      <label>
+        <span>Sand grains <b id="grains-out">6,000</b></span>
+        <input id="grains" type="range" min="1000" max="20000" step="500" value="6000" />
+      </label>
+      <label class="check">
+        <input id="overlay" type="checkbox" checked />
+        <span>Draw nodal lines</span>
+      </label>
+      <div class="readouts">
+        <div><span>Grains</span><b id="count-read">6,000</b></div>
+        <div><span>Settled</span><b id="settled-read">0%</b></div>
+        <div><span>Nodes</span><b id="nodes2-read">0</b></div>
+        <div><span>Frequency</span><b id="freq2-read">5.83</b></div>
+      </div>
+      <p id="status" class="status">Plate still. Sand is scattered evenly across it.</p>
+      <p class="hint">Space pauses, R restarts the sand, N jumps to the next mode. Try (1,2), (2,3) and (3,5) — symmetric pairs look completely different.</p>
+    </aside>
+  </main>
+
+  <script src="app.js"></script>
+</body>
+</html>
