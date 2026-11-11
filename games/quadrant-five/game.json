@@ -1,0 +1,15 @@
+{
+  "name": "Quadrant Five",
+  "desc": "An independent place-and-rotate alignment game: place on a 6×6 board, twist a 3×3 quadrant 90°, and make five in a row.",
+  "controls": "Mouse / touch; arrows navigate, Enter / Space select; Escape cancels. In-game rules and guide.",
+  "shelf": "Puzzle & Logic",
+  "tags": [
+    "games",
+    "html5",
+    "board",
+    "strategy",
+    "original"
+  ],
+  "badge": "New",
+  "creator": "Dragon Gaming Platforms"
+}

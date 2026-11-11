@@ -1,0 +1,15 @@
+{
+  "name": "Neon Swarm",
+  "desc": "A wave-survival arena shooter where your ship fires automatically at the nearest enemy, so the real job is positioning: kite the swarm, grab XP gems, and dash (with i-frames) through danger. Six enemy types with distinct behaviours — drones swarm, dashers telegraph a charge line, gunners strafe at ring distance, splitters break into three minis, brutes shrug off knockback — and the Hive Mother boss arrives every fifth wave with radial bursts and drone summons, enraging below half health. Twelve stackable upgrades (fire rate, damage, split shot, piercing, crits, orbiting blades, regen, magnet, dash cooldown and more) are offered three at a time each level-up. Hit-stop, trauma screen shake and a synthesized sound for every event; vector-drawn graphics, no engine, no assets. Deterministic seeded runs (?seed=).",
+  "controls": "WASD/arrows move, Space dash (i-frames), 1-3 or click picks a level-up card, Esc pause, M mute (touch: floating joystick + DASH button + tap cards)",
+  "shelf": "Arcade & Action",
+  "badge": "New",
+  "creator": "Alexden28",
+  "image": "title.png",
+  "tags": [
+    "arcade",
+    "survivor",
+    "arena-shooter",
+    "roguelite"
+  ]
+}

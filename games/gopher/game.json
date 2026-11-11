@@ -1,0 +1,15 @@
+{
+  "name": "Gopher",
+  "desc": "The 6×6 square-grid Gopher edition: after the free opening, place next to exactly one enemy and no friendly stones.",
+  "controls": "Mouse / touch; arrows navigate, Enter / Space select; Escape cancels. In-game rules and guide.",
+  "shelf": "Puzzle & Logic",
+  "tags": [
+    "games",
+    "html5",
+    "board",
+    "strategy",
+    "original"
+  ],
+  "badge": "New",
+  "creator": "Dragon Gaming Platforms"
+}

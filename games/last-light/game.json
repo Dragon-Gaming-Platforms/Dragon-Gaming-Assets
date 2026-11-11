@@ -1,0 +1,15 @@
+{
+  "name": "Last Light: One More Shift",
+  "desc": "Everybody went home. The building didn't. You are the last janitor in a building that changes after dark: close the boiler valves, leave Gary his forgotten lunch, water the rooftop plants — and find your way home. Gold machinery works by day, blue shadow bridges exist at night, and the Shift key flips the building between its two rhythms. A small puzzle platformer with touch controls, local progress, forgiving checkpoints, coyote time and jump buffering. English and Chinese story text with an in-game language toggle (defaults to English). No runtime dependencies, no network requests.",
+  "controls": "A/D or arrows move, Space/W/Up jump (release for a shorter jump), Shift flips the day/night shift, click or tap to interact; in-game language toggle (EN/中文)",
+  "shelf": "Arcade & Action",
+  "badge": "New",
+  "creator": "Tomhao10225101490",
+  "image": "title.png",
+  "tags": [
+    "arcade",
+    "platformer",
+    "puzzle",
+    "day-night"
+  ]
+}
