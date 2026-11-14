@@ -1,0 +1,2 @@
+/* Original configuration. MIT; see LICENSE. */
+window.GAME_CONFIG={"slug": "wythoffs-game", "name": "Wythoff’s Game", "players": ["Blue", "Amber"], "setups": ["7 / 11", "13 / 21", "18 / 29"], "selectPrompt": "Select heap 1, heap 2, or Both heaps, then choose a removal amount.", "prompt": "Remove one or more counters from ONE heap, or the SAME positive number from BOTH heaps.", "method": "Exact finite-state win/loss search over the two heap sizes."};

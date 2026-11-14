@@ -1,0 +1,13 @@
+Toads and Frogs — original independent implementation, version 1.0
+Created: 2026-10-17
+License: MIT; see LICENSE.
+Source: https://github.com/Dragon-Gaming-Platforms/Dragon-Gaming-Assets/tree/main/games/toads-and-frogs
+
+Original rules, exact solvers and accessible interface; first-party collection
+lifecycle/styles adapted from this repository's board games. No external code,
+art, sounds, fonts or runtime packages. Established mechanics and mathematical
+methods are not claimed as new inventions. No publisher affiliation.
+Method: Exact memoized normal-play search keyed by the full strip AND the player to move.
+Rules/math reference only, not code/assets: https://mathstrek.blog/2012/08/18/combinatorial-game-theory-viii/
+Three starting setups and exact rules: help.html.
+Self-contained static game: no build, accounts, backend or service worker.

@@ -1,0 +1,16 @@
+{
+  "name": "Toads and Frogs",
+  "desc": "A partisan strip game: Blue toads move right, Amber frogs left. Step into a space or jump one opponent; the player unable to move loses.",
+  "controls": "Mouse / touch; Tab, Enter, Space; left/right arrows navigate; Escape cancels. In-game rules.",
+  "shelf": "Puzzle & Logic",
+  "tags": [
+    "games",
+    "html5",
+    "board",
+    "strategy",
+    "math",
+    "original"
+  ],
+  "badge": "New",
+  "creator": "Dragon Gaming Platforms"
+}
