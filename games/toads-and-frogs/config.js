@@ -1,0 +1,2 @@
+/* Original configuration. MIT; see LICENSE. */
+window.GAME_CONFIG={"slug": "toads-and-frogs", "name": "Toads and Frogs", "players": ["Blue toads", "Amber frogs"], "setups": ["2 each / 3 gaps", "3 each / 3 gaps", "4 each / 3 gaps"], "selectPrompt": "Select one of YOUR movable creatures, then a marked destination.", "prompt": "Blue toads move RIGHT; Amber frogs move LEFT. Step one cell or jump over ONE opponent into an empty cell.", "method": "Exact memoized normal-play search keyed by the full strip AND the player to move."};
