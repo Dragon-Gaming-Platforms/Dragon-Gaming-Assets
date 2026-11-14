@@ -1,0 +1,15 @@
+{
+  "name": "Void Patrol",
+  "desc": "A free-roaming space arcade. Hunt six-cannon fortress stations across the sectors: destroy all six gun pods, or thread one shot through the reactor core while its hatch is open. Interceptors fly in V formations (break the leader to scatter them), gunships strafe with plasma bolts at range, and mines detonate wide. Every fifth sector a dreadnought arrives — its shield is powered by gun batteries you must destroy before the hull can break. Your ship flies at all times: point where you want to fly for smooth 360° turns (WASD or a stick takes over while used), hold the trigger to fire, boost and pulse. Upgrade your ship between sectors, pick your difficulty, and chase the local best score. Canvas 2D, no engine, no build step, no network — bundled OFL-licensed fonts and short WAV audio.",
+  "controls": "mouse steers the ship, arrow keys/WASD take over while used, Space or click fires, Shift boosts, E fires a pulse, P pauses, F fullscreen (gamepad: stick steers, A fires, B boosts, X pulses; touch: on-screen joystick + fire/boost/pulse buttons)",
+  "shelf": "Arcade & Action",
+  "badge": "New",
+  "creator": "huntermixhunter",
+  "image": "title.png",
+  "tags": [
+    "arcade",
+    "shooter",
+    "space",
+    "upgrades"
+  ]
+}
