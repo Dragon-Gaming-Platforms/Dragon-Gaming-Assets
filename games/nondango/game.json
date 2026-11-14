@@ -1,0 +1,15 @@
+{
+  "name": "Nondango",
+  "desc": "Color circles so every room has one black circle and no three consecutive circles share a color, including diagonals. 24 original unique puzzles.",
+  "controls": "Mouse / touch; select Black / White brush then paint; arrows navigate; 1 black, 0 white, Z undo, Y redo, H reveal; Delete erases.",
+  "shelf": "Puzzle & Logic",
+  "tags": [
+    "games",
+    "html5",
+    "puzzle",
+    "logic",
+    "original"
+  ],
+  "badge": "New",
+  "creator": "Dragon Gaming Platforms"
+}

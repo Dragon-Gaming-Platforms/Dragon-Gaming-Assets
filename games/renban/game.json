@@ -1,0 +1,15 @@
+{
+  "name": "Renban",
+  "desc": "Fill a Latin grid while every outlined room contains distinct consecutive digits in any order. 24 original uniquely solvable puzzles.",
+  "controls": "Mouse / touch; keypad / digits; arrows navigate; N notes, Z undo, Y redo, H answer reveal; Delete erases.",
+  "shelf": "Puzzle & Logic",
+  "tags": [
+    "games",
+    "html5",
+    "puzzle",
+    "logic",
+    "original"
+  ],
+  "badge": "New",
+  "creator": "Dragon Gaming Platforms"
+}
