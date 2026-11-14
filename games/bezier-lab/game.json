@@ -1,0 +1,15 @@
+{
+  "name": "B\u00e9zier Lab",
+  "desc": "A draggable B\u00e9zier curve with de Casteljau's construction, the control hull, curvature and the osculating circle \u2014 all checked against each other.",
+  "controls": "Parameter, degree and curvature-scale sliders, three shape presets, hull and construction toggles, draggable control points, click to pick a parameter; keys 1\u20133 load presets, H and D toggle overlays",
+  "shelf": "Interactive Stories & Experiments",
+  "tags": [
+    "games",
+    "html5",
+    "geometry",
+    "graphics",
+    "mathematics"
+  ],
+  "badge": "New",
+  "creator": "Original build (Dragon Gaming Assets)"
+}

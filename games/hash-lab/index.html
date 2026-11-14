@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Hash Lab</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <header>
+    <div>
+      <h1>Hash Lab</h1>
+      <p>Insert real keys into a real table: linear probing, quadratic probing and double hashing, with measured probe counts against the textbook formulas.</p>
+    </div>
+    <div class="hud">
+      <span id="load-hud">load —</span>
+      <span id="probe-hud">probes —</span>
+      <span id="cluster-hud">cluster —</span>
+    </div>
+  </header>
+
+  <main>
+    <section class="stage">
+      <canvas id="scene" width="880" height="660"></canvas>
+      <p class="caption">Every cell is a slot in the table; bright cells hold keys, dim cells are empty. Run the cursor over the table to trace the probe sequence for a key.</p>
+      <div class="legend">
+        <span><i class="sw-one"></i>linear</span>
+        <span><i class="sw-two"></i>quadratic</span>
+        <span><i class="sw-chain"></i>chaining</span>
+      </div>
+    </section>
+
+    <aside class="panel">
+      <label>
+        <span>Table size <b id="size-out">97</b></span>
+        <input id="size" type="range" min="31" max="211" step="2" value="97" />
+      </label>
+      <label>
+        <span>Insertions <b id="keys-out">70</b></span>
+        <input id="keys" type="range" min="0" max="190" step="1" value="70" />
+      </label>
+      <label>
+        <span>Hash quality <b id="quality-out">good</b></span>
+        <input id="quality" type="range" min="0" max="100" step="5" value="80" />
+      </label>
+
+      <div class="row">
+        <button id="scheme-linear" class="active">Linear</button>
+        <button id="scheme-quadratic">Quadratic</button>
+        <button id="scheme-double">Double</button>
+      </div>
+      <div class="row">
+        <button id="insert" class="primary">Insert one</button>
+        <button id="fill">Fill to 80%</button>
+        <button id="clear">Clear</button>
+      </div>
+
+      <div class="readouts">
+        <div><span>Load factor</span><b id="alpha-read">—</b></div>
+        <div><span>Collisions</span><b id="coll-read">—</b></div>
+        <div><span>Avg probes (hit)</span><b id="hit-read">—</b></div>
+        <div><span>Theory (hit)</span><b id="hit-theory">—</b></div>
+        <div><span>Avg probes (miss)</span><b id="miss-read">—</b></div>
+        <div><span>Theory (miss)</span><b id="miss-theory">—</b></div>
+        <div><span>Longest run</span><b id="run-read">—</b></div>
+        <div><span>Failed inserts</span><b id="fail-read">—</b></div>
+      </div>
+
+      <p id="status" class="status">Linear probing is simple and cache-friendly but suffers primary clustering: long runs of occupied slots that make every nearby insert slower. The formulas shown are the classic Knuth results for uniform hashing.</p>
+      <p class="hint">Space inserts a key, C clears, 1–3 switch probes. Lower the hash quality to watch clustering go badly wrong even at a modest load factor.</p>
+    </aside>
+  </main>
+
+  <script src="app.js"></script>
+</body>
+</html>

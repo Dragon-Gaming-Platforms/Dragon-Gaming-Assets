@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Auction Lab</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <header>
+    <div>
+      <h1>Auction Lab</h1>
+      <p>First price, second price and an English clock on the same bidders — with revenue measured over thousands of auctions and checked against revenue equivalence.</p>
+    </div>
+    <div class="hud">
+      <span id="winner-hud">winner —</span>
+      <span id="price-hud">price —</span>
+      <span id="revenue-hud">revenue —</span>
+    </div>
+  </header>
+
+  <main>
+    <section class="stage">
+      <canvas id="scene" width="880" height="660"></canvas>
+      <p class="caption">Each bar is a bidder: the pale column is their private value, the bright column is what they actually bid under the selected rule. Drag a bidder's value to change the profile.</p>
+      <div class="legend">
+        <span><i class="sw-value"></i>private value</span>
+        <span><i class="sw-first"></i>first price</span>
+        <span><i class="sw-second"></i>second price</span>
+        <span><i class="sw-clock"></i>English</span>
+      </div>
+    </section>
+
+    <aside class="panel">
+      <label>
+        <span>Bidders <b id="bidders-out">5</b></span>
+        <input id="bidders" type="range" min="2" max="12" step="1" value="5" />
+      </label>
+      <label>
+        <span>Bid shading <b id="shade-out">equilibrium</b></span>
+        <input id="shade" type="range" min="0" max="100" step="1" value="100" />
+      </label>
+      <label>
+        <span>Reserve price <b id="reserve-out">0</b></span>
+        <input id="reserve" type="range" min="0" max="60" step="1" value="0" />
+      </label>
+
+      <div class="row">
+        <button id="rule-first" class="active">First price</button>
+        <button id="rule-second">Second price</button>
+        <button id="rule-clock">English</button>
+      </div>
+      <div class="row">
+        <button id="redraw" class="primary">New values</button>
+        <button id="run" >Run 2,000</button>
+      </div>
+
+      <div class="readouts">
+        <div><span>Winner value</span><b id="value-read">—</b></div>
+        <div><span>Winning bid</span><b id="bid-read">—</b></div>
+        <div><span>Price paid</span><b id="price-read">—</b></div>
+        <div><span>Winner surplus</span><b id="surplus-read">—</b></div>
+        <div><span>Revenue (mean)</span><b id="mean-read">—</b></div>
+        <div><span>Theory</span><b id="theory-read">—</b></div>
+      </div>
+
+      <p id="status" class="status">With private values drawn uniformly and symmetric risk-neutral bidders, first-price, second-price and English auctions all raise the same expected revenue — the revenue equivalence theorem. The bars show one auction; the chart shows the average of thousands.</p>
+      <p class="hint">Space redraws values, R reruns the sample, 1–3 switch rules. Push shading below equilibrium and watch first-price revenue fall while second price ignores it entirely.</p>
+    </aside>
+  </main>
+
+  <script src="app.js"></script>
+</body>
+</html>

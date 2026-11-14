@@ -1,0 +1,15 @@
+{
+  "name": "Error Correction Lab",
+  "desc": "An extended Hamming(8,4) code you can corrupt by hand, with a real decoder and exact vs simulated failure statistics.",
+  "controls": "Channel error-rate slider, flip/random-data buttons, clean/noisy/bad presets, clickable data and transmitted bits; Space flips a bit, R redraws data, C repairs",
+  "shelf": "Interactive Stories & Experiments",
+  "tags": [
+    "games",
+    "html5",
+    "coding-theory",
+    "errors",
+    "education"
+  ],
+  "badge": "New",
+  "creator": "Original build (Dragon Gaming Assets)"
+}

@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Error Correction Lab</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <header>
+    <div>
+      <h1>Error Correction Lab</h1>
+      <p>Hamming(8,4) with a parity bit: flip any transmitted bit by hand, then let the decoder find it. A channel slider turns this into a measured reliability lab.</p>
+    </div>
+    <div class="hud">
+      <span id="rate-hud">rate 1/2</span>
+      <span id="dist-hud">distance 4</span>
+      <span id="correct-hud">corrects 1, detects 2</span>
+    </div>
+  </header>
+
+  <main>
+    <section class="stage">
+      <canvas id="scene" width="880" height="660"></canvas>
+      <p class="caption">Blue cells carry parity, green cells carry data. Click any transmitted bit to inject an error; the syndrome panel shows the decoder working it out from check bits alone.</p>
+      <div class="legend">
+        <span><i class="sw-data"></i>data</span>
+        <span><i class="sw-parity"></i>parity</span>
+        <span><i class="sw-bad"></i>bit in error</span>
+      </div>
+    </section>
+
+    <aside class="panel">
+      <label>
+        <span>Channel bit error rate <b id="p-out">0.050</b></span>
+        <input id="p" type="range" min="0.005" max="0.2" step="0.005" value="0.05" />
+      </label>
+      <div class="row">
+        <button id="flip" class="primary">Flip a bit</button>
+        <button id="random-data">Random data</button>
+      </div>
+      <label>
+        <span>Errors per flip <b id="errors-out">1</b></span>
+        <input id="errors" type="range" min="1" max="4" step="1" value="1" />
+      </label>
+
+      <div class="row">
+        <button id="preset-clean">Clean</button>
+        <button id="preset-noisy" class="active">Noisy</button>
+        <button id="preset-bad">Bad</button>
+      </div>
+
+      <div class="readouts">
+        <div><span>Data word</span><b id="data-read">—</b></div>
+        <div><span>Codeword</span><b id="code-read">—</b></div>
+        <div><span>Received</span><b id="rx-read">—</b></div>
+        <div><span>Syndrome</span><b id="syn-read">—</b></div>
+        <div><span>Verdict</span><b id="verdict-read">—</b></div>
+        <div><span>Silent failures</span><b id="silent-read">—</b></div>
+      </div>
+
+      <p id="status" class="status">The extended Hamming code is a real (8,4) code with minimum distance 4, so it corrects any single-bit error and detects any double-bit error. Click a transmitted bit to prove it.</p>
+      <p class="hint">Space flips a random bit, R draws new data, C repairs the codeword. The simulator below runs 20,000 blocks per recompute and compares against an exact enumeration of all 256 error patterns.</p>
+    </aside>
+  </main>
+
+  <script src="app.js"></script>
+</body>
+</html>
