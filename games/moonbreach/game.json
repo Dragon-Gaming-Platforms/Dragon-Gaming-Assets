@@ -1,0 +1,15 @@
+{
+  "name": "Moonbreach",
+  "desc": "You are a narwhal with two minutes and one ambition: the moon. Dive and swing back up, burst through the surface, chain flips and twists in the air, then turn yourself nose-first to re-enter — a clean entry keeps your speed, adds a boost for every trick and raises your combo, while belly flops cost you both. The slingshot is the heart of it: press down as you reach a drifting light (its ring turns white) and you are flung wherever your tusk points. A skill-run canvas arcade with synthesized audio, trick toasts and a local three-letter high-score board. Single-file game with no external dependencies.",
+  "controls": "←/→ (or A/D) steer underwater and flip in the air, ↑ (W) swim forward, ↓ (S) twist in the air and slingshot on a white light ring, Space pause, M mute, Esc main menu (touch: on-screen four-way buttons)",
+  "shelf": "Arcade & Action",
+  "badge": "New",
+  "creator": "Niuslar",
+  "image": "moonbreach-thumbnail.jpeg",
+  "tags": [
+    "arcade",
+    "skill",
+    "tricks",
+    "single-file"
+  ]
+}
