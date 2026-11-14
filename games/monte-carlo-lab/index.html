@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Monte Carlo Lab</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <header>
+    <div>
+      <h1>Monte Carlo Lab</h1>
+      <p>Three ways to estimate π by throwing darts at randomness — and an honest look at how quickly the answer settles.</p>
+    </div>
+    <div class="hud">
+      <span id="est-hud">π ≈ 3.14</span>
+      <span id="err-hud">error 0.0%</span>
+      <span id="n-hud">0 samples</span>
+    </div>
+  </header>
+
+  <main>
+    <section class="stage">
+      <canvas id="scene" width="880" height="690"></canvas>
+      <p class="caption">Dots inside the quarter circle count towards 4 × inside / total. The estimate improves like 1/√N, which is why the last digit is always expensive.</p>
+      <div class="legend">
+        <span><i class="sw-in"></i>inside</span>
+        <span><i class="sw-out"></i>outside</span>
+        <span><i class="sw-fit"></i>±1 standard error</span>
+        <span><i class="sw-truth"></i>true π</span>
+      </div>
+    </section>
+
+    <aside class="panel">
+      <div class="group">
+        <h2>Experiment</h2>
+        <div class="row">
+          <button id="exp-pi" class="active">Darts → π</button>
+          <button id="exp-integral">Integral → π</button>
+        </div>
+        <div class="row">
+          <button id="exp-buffon">Buffon's needle</button>
+        </div>
+      </div>
+
+      <label>
+        <span>Samples per frame <b id="rate-out">400</b></span>
+        <input id="rate" type="range" min="20" max="4000" step="20" value="400" />
+      </label>
+
+      <label id="needle-wrap">
+        <span>Needle length / gap <b id="needle-out">0.80</b></span>
+        <input id="needle" type="range" min="0.1" max="1" step="0.05" value="0.8" />
+      </label>
+
+      <div class="row">
+        <button id="toggle" class="primary">Pause</button>
+        <button id="burst">+1 million</button>
+      </div>
+      <div class="row">
+        <button id="repeat">200 repeats</button>
+        <button id="reset">Reset</button>
+      </div>
+
+      <div class="readouts">
+        <div><span>Samples</span><b id="n-read">0</b></div>
+        <div><span>Estimate</span><b id="est-read">—</b></div>
+        <div><span>True value</span><b id="true-read">π</b></div>
+        <div><span>Error</span><b id="err-read">—</b></div>
+        <div><span>Standard error</span><b id="se-read">—</b></div>
+        <div><span>Error / σ</span><b id="z-read">—</b></div>
+        <div><span>Scaling ratio</span><b id="slope-read">—</b></div>
+        <div><span>Repeats</span><b id="rep-read">0</b></div>
+      </div>
+
+      <p id="status" class="status">Fresh run. Every dart is independent, so the only thing that improves is the count.</p>
+      <p class="hint">Space pauses, R resets, B throws a million more. Compare the three experiments: same statistics, very different geometry.</p>
+    </aside>
+  </main>
+
+  <script src="app.js"></script>
+</body>
+</html>

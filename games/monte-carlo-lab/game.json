@@ -1,0 +1,16 @@
+{
+  "name": "Monte Carlo Lab",
+  "desc": "Estimate π three ways — darts, an integral and Buffon's needle — and watch the error fall like 1/√N.",
+  "controls": "Pick an experiment, set samples per frame and needle length, pause, burst a million throws or run 200 repeats; Space pauses, R resets, B throws a million",
+  "shelf": "Interactive Stories & Experiments",
+  "tags": [
+    "games",
+    "html5",
+    "statistics",
+    "probability",
+    "simulation",
+    "numerics"
+  ],
+  "badge": "New",
+  "creator": "Original build (Dragon Gaming Assets)"
+}

@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Cipher Lab</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <header>
+    <div>
+      <h1>Cipher Lab</h1>
+      <p>Encrypt, decrypt, and then break what you just made. Frequency analysis and a Vigenère cracker, both running locally.</p>
+    </div>
+    <div class="hud">
+      <span id="mode-hud">Caesar</span>
+      <span id="len-hud">0 chars</span>
+      <span id="key-hud">key 3</span>
+    </div>
+  </header>
+
+  <main>
+    <section class="stage">
+      <canvas id="scene" width="860" height="700"></canvas>
+      <p class="caption">The bottom panel is the letter histogram of the ciphertext, with the English baseline in grey. Ciphers that preserve letter order are easy to break; ciphers that flatten the histogram are not.</p>
+      <div class="legend">
+        <span><i class="sw-cipher"></i>ciphertext</span>
+        <span><i class="sw-english"></i>English baseline</span>
+        <span><i class="sw-key"></i>recovered key</span>
+      </div>
+    </section>
+
+    <aside class="panel">
+      <div class="group">
+        <h2>Cipher</h2>
+        <div class="row">
+          <button id="c-caesar" class="active">Caesar</button>
+          <button id="c-vigenere">Vigenère</button>
+        </div>
+        <div class="row">
+          <button id="c-atbash">Atbash</button>
+          <button id="c-railfence">Rail fence</button>
+        </div>
+      </div>
+
+      <label>
+        <span>Key <b id="key-out">3</b></span>
+        <input id="key" type="range" min="1" max="12" step="1" value="3" />
+      </label>
+
+      <label class="check">
+        <input id="autokey" type="checkbox" />
+        <span>Vigenère: use a word key instead</span>
+      </label>
+
+      <div class="row">
+        <button id="encrypt" class="primary">Encrypt</button>
+        <button id="decrypt">Decrypt</button>
+      </div>
+      <div class="row">
+        <button id="crack">Break it</button>
+        <button id="sample">Sample text</button>
+      </div>
+
+      <label>
+        <span>Plaintext / ciphertext <b id="chars-out">0</b></span>
+        <textarea id="input" rows="4" spellcheck="false">The quick brown fox jumps over the lazy dog and then asks why the dog was sleeping in the sun.</textarea>
+      </label>
+
+      <label>
+        <span>Output</span>
+        <textarea id="output" rows="4" readonly></textarea>
+      </label>
+
+      <div class="readouts">
+        <div><span>Index of coincidence</span><b id="ic-read">—</b></div>
+        <div><span>Key length guess</span><b id="klen-read">—</b></div>
+        <div><span>Recovered key</span><b id="keyguess-read">—</b></div>
+        <div><span>Chi-squared match</span><b id="chi-read">—</b></div>
+        <div><span>Letters scored</span><b id="score-read">—</b></div>
+        <div><span>Entropy (bits)</span><b id="ent-read">—</b></div>
+      </div>
+
+      <p id="status" class="status">Type something and press Encrypt. Then press Break it and watch the ciphertext give up its key.</p>
+      <p class="hint">Keys: E encrypts, D decrypts, B breaks, R loads the sample. Try a Vigenère key of 5 and see how the index of coincidence finds it.</p>
+    </aside>
+  </main>
+
+  <script src="app.js"></script>
+</body>
+</html>

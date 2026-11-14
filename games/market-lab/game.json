@@ -1,0 +1,16 @@
+{
+  "name": "Market Lab",
+  "desc": "A supply-and-demand market with price controls, unit taxes and a monopoly — surplus shaded, deadweight loss measured.",
+  "controls": "Demand and supply intercept sliders, slope, intervention buttons, control size and price line; Space cycles interventions, R resets, S shifts demand",
+  "shelf": "Interactive Stories & Experiments",
+  "tags": [
+    "games",
+    "html5",
+    "economics",
+    "markets",
+    "visualisation",
+    "education"
+  ],
+  "badge": "New",
+  "creator": "Original build (Dragon Gaming Assets)"
+}
