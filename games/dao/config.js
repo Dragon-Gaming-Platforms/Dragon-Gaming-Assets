@@ -1,0 +1,2 @@
+/* Original configuration. MIT; see LICENSE. */
+window.GAME_CONFIG={"slug": "dao", "name": "Dao", "players": ["Blue", "Amber"], "piece": "●", "unit": "stone", "verb": "slide a stone", "prompt": "Select a stone, then a maximal slide endpoint. Form a row, column, 2×2 square or all corners; do not trap an enemy corner piece.", "aiNote": "Two-ply heuristic, not expert or optimal play.", "illegal": "That placement is not legal. Choose an empty hex."};

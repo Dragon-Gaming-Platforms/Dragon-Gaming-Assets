@@ -1,0 +1,15 @@
+{
+  "name": "Yavalath",
+  "desc": "Place stones on a 61-cell hexagon. Four in a straight hex line wins, but three without four loses. No-swap two-player practice edition.",
+  "controls": "Mouse / touch; arrows navigate; Enter / Space select; Escape cancels. In-game rules.",
+  "shelf": "Puzzle & Logic",
+  "tags": [
+    "games",
+    "html5",
+    "board",
+    "strategy",
+    "original"
+  ],
+  "badge": "New",
+  "creator": "Dragon Gaming Platforms"
+}

@@ -1,0 +1,2 @@
+/* Original configuration. MIT; see LICENSE. */
+window.GAME_CONFIG={"slug": "neutreeko", "name": "Neutreeko", "players": ["Blue", "Amber"], "piece": "●", "unit": "stone", "verb": "slide a stone", "prompt": "Select one of your three stones, then a maximal slide endpoint. Make three ADJACENT own stones in a straight line.", "aiNote": "Two-ply heuristic, not expert or optimal play.", "illegal": "That placement is not legal. Choose an empty hex."};

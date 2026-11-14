@@ -1,0 +1,2 @@
+/* Original configuration. MIT; see LICENSE. */
+window.GAME_CONFIG={"slug": "dodo", "name": "Dodo", "players": ["Blue", "Amber"], "piece": "●", "unit": "checker", "verb": "move forward", "prompt": "Select your checker, then one of the three forward neighboring cells. Blue moves downward; Amber upward. No moves on your turn means you WIN.", "aiNote": "Two-ply heuristic, not expert or optimal play.", "illegal": "That placement is not legal. Choose an empty hex."};
