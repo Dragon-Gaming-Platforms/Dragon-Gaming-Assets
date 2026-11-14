@@ -1,0 +1,14 @@
+Sukoro — original independent implementation and 24-puzzle pack
+Created: 2026-10-17
+License: MIT; see LICENSE.
+Source: https://github.com/Dragon-Gaming-Platforms/Dragon-Gaming-Assets/tree/main/games/sukoro
+
+Original rules/controller/data. First-party lifecycle/styles adapted from this
+repository's pencil collection. All 24 boards independently checked for full-rule
+validity and uniqueness with offline Z3 constraints. No external puzzle data,
+code, art, fonts, runtime solver packages or network services are shipped.
+Established mechanics are not claimed as new inventions; no publisher affiliation.
+Rule reference only: https://wpcunofficial.miraheze.org/wiki/Sukoro
+Pack: 8 each at 4x4, 5x5 and 6x6; not human-rated difficulty levels.
+Daily selection repeats the local pack every 24 UTC days.
+Exact rules, answer-reveal hints and save behavior: help.html.

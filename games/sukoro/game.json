@@ -1,0 +1,15 @@
+{
+  "name": "Sukoro",
+  "desc": "Build one connected numbered network. Each digit counts its numbered edge-neighbors, and equal digits cannot touch. 24 original unique puzzles.",
+  "controls": "Mouse / touch; keypad / digits; arrows navigate; N notes, Z undo, Y redo, H answer reveal; Delete erases.",
+  "shelf": "Puzzle & Logic",
+  "tags": [
+    "games",
+    "html5",
+    "puzzle",
+    "logic",
+    "original"
+  ],
+  "badge": "New",
+  "creator": "Dragon Gaming Platforms"
+}

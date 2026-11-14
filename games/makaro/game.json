@@ -1,0 +1,15 @@
+{
+  "name": "Makaro",
+  "desc": "Fill each room with 1 through its size, avoid equal edge-neighbors, and make each arrow point to its largest neighbor. 24 original unique puzzles.",
+  "controls": "Mouse / touch; keypad / digits; arrows navigate; N notes, Z undo, Y redo, H answer reveal; Delete erases.",
+  "shelf": "Puzzle & Logic",
+  "tags": [
+    "games",
+    "html5",
+    "puzzle",
+    "logic",
+    "original"
+  ],
+  "badge": "New",
+  "creator": "Dragon Gaming Platforms"
+}
