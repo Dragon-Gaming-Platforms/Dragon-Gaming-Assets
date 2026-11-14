@@ -1,0 +1,2 @@
+/* Original configuration. MIT; see LICENSE. */
+window.GAME_CONFIG={"slug": "yavalath", "name": "Yavalath", "players": ["Blue", "Amber"], "piece": "●", "unit": "stone", "verb": "place a stone", "prompt": "Place on an empty hex. Make four in a straight line to win; three without four loses. This practice edition has no pie/swap.", "aiNote": "Two-ply heuristic, not expert or optimal play.", "illegal": "That placement is not legal. Choose an empty hex."};

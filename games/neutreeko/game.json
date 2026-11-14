@@ -1,0 +1,15 @@
+{
+  "name": "Neutreeko",
+  "desc": "Slide three pieces on a 5×5 board as far as possible. Make three adjacent stones in any straight horizontal, vertical or diagonal line.",
+  "controls": "Mouse / touch; arrows navigate; Enter / Space select; Escape cancels. In-game rules.",
+  "shelf": "Puzzle & Logic",
+  "tags": [
+    "games",
+    "html5",
+    "board",
+    "strategy",
+    "original"
+  ],
+  "badge": "New",
+  "creator": "Dragon Gaming Platforms"
+}

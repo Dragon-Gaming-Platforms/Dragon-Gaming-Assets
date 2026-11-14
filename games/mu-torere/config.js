@@ -1,0 +1,2 @@
+/* Original configuration. MIT; see LICENSE. */
+window.GAME_CONFIG={"slug": "mu-torere", "name": "Mū Tōrere", "players": ["Blue", "Amber"], "piece": "●", "unit": "piece", "verb": "move to the gap", "prompt": "Select your piece, then the empty connected point. Center entry requires an enemy neighbor on the outer ring.", "aiNote": "Two-ply heuristic, not expert or optimal play.", "illegal": "That placement is not legal. Choose an empty hex."};
