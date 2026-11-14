@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Compression Lab</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <header>
+    <div>
+      <h1>Compression Lab</h1>
+      <p>Run-length, Huffman and LZ78 over the same text, counted in real bits — including headers — against Shannon's entropy floor.</p>
+    </div>
+    <div class="hud">
+      <span id="best-hud">best —</span>
+      <span id="ratio-hud">ratio —</span>
+      <span id="size-hud">— bits</span>
+    </div>
+  </header>
+
+  <main>
+    <section class="stage">
+      <canvas id="scene" width="880" height="660"></canvas>
+      <p class="caption">Bars are measured bitstreams, not estimates. The gold line is the first-order entropy of the text — no coder that ignores context can beat it.</p>
+      <div class="legend">
+        <span><i class="sw-raw"></i>raw 8-bit</span>
+        <span><i class="sw-huff"></i>Huffman</span>
+        <span><i class="sw-lz"></i>LZ78</span>
+        <span><i class="sw-rle"></i>run-length</span>
+      </div>
+    </section>
+
+    <aside class="panel">
+      <label>
+        <span>Text</span>
+        <textarea id="input" rows="5" spellcheck="false"></textarea>
+      </label>
+
+      <div class="row">
+        <button id="preset-english" class="active">English</button>
+        <button id="preset-repeat">Repeats</button>
+        <button id="preset-dna">DNA</button>
+        <button id="preset-random">Random</button>
+      </div>
+
+      <label>
+        <span>Repeat the base text <b id="repeat-out">1×</b></span>
+        <input id="repeat" type="range" min="1" max="6" step="1" value="1" />
+      </label>
+      <label>
+        <span>Corrupt characters <b id="noise-out">0%</b></span>
+        <input id="noise" type="range" min="0" max="40" step="5" value="0" />
+      </label>
+
+      <div class="readouts">
+        <div><span>Raw</span><b id="raw-read">—</b></div>
+        <div><span>Entropy floor</span><b id="ent-read">—</b></div>
+        <div><span>Huffman</span><b id="huff-read">—</b></div>
+        <div><span>LZ78</span><b id="lz-read">—</b></div>
+        <div><span>Run-length</span><b id="rle-read">—</b></div>
+        <div><span>Bits per char</span><b id="bpc-read">—</b></div>
+      </div>
+
+      <p id="status" class="status">Type in the box or pick a corpus. Every count below is the exact number of bits each coder would emit, headers included.</p>
+      <p class="hint">Keys 1–4 swap corpora. Drag the repeat slider up to see LZ78 pull ahead, and add corruption to watch its dictionary stop paying for itself.</p>
+    </aside>
+  </main>
+
+  <script src="app.js"></script>
+</body>
+</html>

@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Kalman Lab</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <header>
+    <div>
+      <h1>Kalman Lab</h1>
+      <p>A Kalman filter and a particle filter tracking the same noisy sensor — live, with honest uncertainty bands and a consistency check.</p>
+    </div>
+    <div class="hud">
+      <span id="kf-hud">σ —</span>
+      <span id="nis-hud">NIS —</span>
+      <span id="step-hud">step 0</span>
+    </div>
+  </header>
+
+  <main>
+    <section class="stage">
+      <canvas id="scene" width="880" height="660"></canvas>
+      <p class="caption">Click the upper plot to drop a wild measurement at that height. The bright line is the Kalman estimate, the dotted line the particle cloud's mean, and the shaded band is ±2σ.</p>
+      <div class="legend">
+        <span><i class="sw-truth"></i>true state</span>
+        <span><i class="sw-meas"></i>measurements</span>
+        <span><i class="sw-kf"></i>Kalman</span>
+        <span><i class="sw-pf"></i>particles</span>
+      </div>
+    </section>
+
+    <aside class="panel">
+      <label>
+        <span>Process noise q <b id="q-out">0.50</b></span>
+        <input id="q" type="range" min="0.02" max="4" step="0.02" value="0.5" />
+      </label>
+      <label>
+        <span>Measurement noise r <b id="r-out">6.0</b></span>
+        <input id="r" type="range" min="0.5" max="40" step="0.5" value="6" />
+      </label>
+      <label>
+        <span>Particles <b id="n-out">200</b></span>
+        <input id="n" type="range" min="30" max="400" step="10" value="200" />
+      </label>
+
+      <div class="row">
+        <button id="toggle" class="primary">Pause</button>
+        <button id="reset">Reset</button>
+        <button id="spike">Outlier</button>
+      </div>
+      <div class="row">
+        <button id="preset-calm">Calm</button>
+        <button id="preset-noisy" class="active">Noisy</button>
+        <button id="preset-jumpy">Jumpy</button>
+      </div>
+
+      <div class="readouts">
+        <div><span>Kalman x̂</span><b id="kf-read">—</b></div>
+        <div><span>Kalman σ</span><b id="kf-sigma">—</b></div>
+        <div><span>Truth</span><b id="truth-read">—</b></div>
+        <div><span>KF error</span><b id="kf-err">—</b></div>
+        <div><span>Particle x̂</span><b id="pf-read">—</b></div>
+        <div><span>Particle σ</span><b id="pf-sigma">—</b></div>
+        <div><span>RMSE Kalman</span><b id="kf-rmse">—</b></div>
+        <div><span>RMSE particles</span><b id="pf-rmse">—</b></div>
+      </div>
+
+      <p id="status" class="status">Grey is the truth, orange dots are what the sensor reports, and the two filters see nothing else. Watch how the bands narrow once the filters settle, and how a single outlier pulls them off track.</p>
+      <p class="hint">Space pauses, R rebuilds the filters, O injects an outlier. Raising q widens the bands; raising r makes both filters trust the model over the sensor.</p>
+    </aside>
+  </main>
+
+  <script src="app.js"></script>
+</body>
+</html>

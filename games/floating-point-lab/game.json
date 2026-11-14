@@ -1,0 +1,15 @@
+{
+  "name": "Floating Point Lab",
+  "desc": "IEEE-754 bit patterns, unit-in-the-last-place, catastrophic cancellation and a million additions of 0.1, all measured rather than illustrated.",
+  "controls": "Value slider with 0.1, 1/3, \u03c0 and 1e16 presets, terms slider from 1k to 1M, cancellation exponent slider; keys 1\u20134 load the value presets",
+  "shelf": "Interactive Stories & Experiments",
+  "tags": [
+    "games",
+    "html5",
+    "numerics",
+    "visualisation",
+    "education"
+  ],
+  "badge": "New",
+  "creator": "Original build (Dragon Gaming Assets)"
+}

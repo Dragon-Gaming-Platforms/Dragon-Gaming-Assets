@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Floating Point Lab</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <header>
+    <div>
+      <h1>Floating Point Lab</h1>
+      <p>Where 0.1 + 0.2 stops being 0.3 — bit patterns, unit-in-the-last-place, and two classic ways to lose digits.</p>
+    </div>
+    <div class="hud">
+      <span id="ulp-hud">ulp —</span>
+      <span id="err-hud">error —</span>
+      <span id="mode-hud">float64</span>
+    </div>
+  </header>
+
+  <main>
+    <section class="stage">
+      <canvas id="scene" width="880" height="660"></canvas>
+      <p class="caption">The bit strips are the actual IEEE-754 encodings. The ruler shows the four representable neighbours of the current value, so you can see the gap widen as the number grows.</p>
+      <div class="legend">
+        <span><i class="sw-naive"></i>naive sum</span>
+        <span><i class="sw-kahan"></i>Kahan sum</span>
+        <span><i class="sw-f32"></i>float32 sum</span>
+      </div>
+    </section>
+
+    <aside class="panel">
+      <label>
+        <span>Value <b id="value-out">0.1</b></span>
+        <input id="value" type="range" min="0.1" max="4" step="0.05" value="0.1" />
+      </label>
+      <div class="row">
+        <button id="preset-tenth" class="active">0.1</button>
+        <button id="preset-third">1/3</button>
+        <button id="preset-pi">π</button>
+        <button id="preset-big">1e16</button>
+      </div>
+
+      <label>
+        <span>Terms <b id="terms-out">100k</b></span>
+        <input id="terms" type="range" min="0" max="60" step="1" value="50" />
+      </label>
+
+      <label>
+        <span>Cancellation x <b id="x-out">1e6</b></span>
+        <input id="x" type="range" min="2" max="9" step="0.1" value="6" />
+      </label>
+
+      <div class="readouts">
+        <div><span>float64 ulp</span><b id="ulp64-read">—</b></div>
+        <div><span>float32 ulp</span><b id="ulp32-read">—</b></div>
+        <div><span>Naive sum</span><b id="naive-read">—</b></div>
+        <div><span>Kahan sum</span><b id="kahan-read">—</b></div>
+        <div><span>float32 sum</span><b id="f32-read">—</b></div>
+        <div><span>Cancelling error</span><b id="cancel-read">—</b></div>
+      </div>
+
+      <p id="status" class="status">Every value here is a real double or float; nothing is faked with formatting. Drag the value slider to watch the mantissa fill with 1s, and watch the gap to the next number change size.</p>
+      <p class="hint">Keys 1–4 load the value presets. The terms slider goes up to a million additions of 0.1; the error curves are computed, not drawn from a formula.</p>
+    </aside>
+  </main>
+
+  <script src="app.js"></script>
+</body>
+</html>

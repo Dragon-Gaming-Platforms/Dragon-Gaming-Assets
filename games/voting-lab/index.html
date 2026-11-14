@@ -1,0 +1,67 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Voting Lab</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <header>
+    <div>
+      <h1>Voting Lab</h1>
+      <p>One profile of voters, five reasonable rules, and four different answers. Plurality, IRV, Borda, approval and Condorcet side by side.</p>
+    </div>
+    <div class="hud">
+      <span id="plurality-hud">plurality —</span>
+      <span id="irv-hud">IRV —</span>
+      <span id="condorcet-hud">Condorcet —</span>
+    </div>
+  </header>
+
+  <main>
+    <section class="stage">
+      <canvas id="scene" width="880" height="660"></canvas>
+      <p class="caption">The matrix counts how many voters prefer the row candidate to the column candidate. Green means the row wins that head-to-head; click a bar to highlight their row.</p>
+      <div class="legend">
+        <span><i class="sw-a"></i>Alice</span>
+        <span><i class="sw-b"></i>Bob</span>
+        <span><i class="sw-c"></i>Cleo</span>
+        <span><i class="sw-d"></i>Dev</span>
+      </div>
+    </section>
+
+    <aside class="panel">
+      <div class="row">
+        <button id="preset-spoiler" class="active">Spoiler</button>
+        <button id="preset-cycle">Cycle</button>
+        <button id="preset-borda">Borda push</button>
+        <button id="preset-consensus">Consensus</button>
+      </div>
+
+      <label>
+        <span>Third bloc share <b id="share-out">33%</b></span>
+        <input id="share" type="range" min="10" max="50" step="1" value="33" />
+      </label>
+      <label>
+        <span>Voters <b id="voters-out">1000</b></span>
+        <input id="voters" type="range" min="100" max="2000" step="100" value="1000" />
+      </label>
+
+      <div class="readouts">
+        <div><span>Plurality</span><b id="plurality-read">—</b></div>
+        <div><span>IRV</span><b id="irv-read">—</b></div>
+        <div><span>Borda</span><b id="borda-read">—</b></div>
+        <div><span>Approval</span><b id="approval-read">—</b></div>
+        <div><span>Condorcet</span><b id="condorcet-read">—</b></div>
+        <div><span>Agreement</span><b id="agree-read">—</b></div>
+      </div>
+
+      <p id="status" class="status">Pick a profile and watch the winners disagree. Approval counts each voter's top two, Borda awards 4-3-2-1, and Condorcet simply asks who wins every head-to-head.</p>
+      <p class="hint">Keys 1–4 switch profiles; click a first-choice bar to highlight that candidate's pairwise row. Slide the third bloc's share to break a rule that looked stable.</p>
+    </aside>
+  </main>
+
+  <script src="app.js"></script>
+</body>
+</html>

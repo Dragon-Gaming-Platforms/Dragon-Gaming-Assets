@@ -1,0 +1,15 @@
+{
+  "name": "TSP Lab",
+  "desc": "Nearest neighbour, 2-opt and simulated annealing on the same cities, measured against a minimum spanning tree lower bound.",
+  "controls": "City count, start temperature and cooling sliders, run/pause, restart, grid/scatter/cluster layouts, click to add cities and drag to move them; Space pauses, R restarts, S rescatters",
+  "shelf": "Interactive Stories & Experiments",
+  "tags": [
+    "games",
+    "html5",
+    "optimisation",
+    "algorithms",
+    "graphs"
+  ],
+  "badge": "New",
+  "creator": "Original build (Dragon Gaming Assets)"
+}
