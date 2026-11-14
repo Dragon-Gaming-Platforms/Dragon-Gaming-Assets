@@ -1,0 +1,13 @@
+Wythoff’s Game — original independent implementation, version 1.0
+Created: 2026-10-17
+License: MIT; see LICENSE.
+Source: https://github.com/Dragon-Gaming-Platforms/Dragon-Gaming-Assets/tree/main/games/wythoffs-game
+
+Original rules, exact solvers and accessible interface; first-party collection
+lifecycle/styles adapted from this repository's board games. No external code,
+art, sounds, fonts or runtime packages. Established mechanics and mathematical
+methods are not claimed as new inventions. No publisher affiliation.
+Method: Exact finite-state win/loss search over the two heap sizes.
+Rules/math reference only, not code/assets: https://en.wikipedia.org/wiki/Wythoff%27s_game
+Three starting setups and exact rules: help.html.
+Self-contained static game: no build, accounts, backend or service worker.

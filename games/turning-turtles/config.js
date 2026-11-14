@@ -1,0 +1,2 @@
+/* Original configuration. MIT; see LICENSE. */
+window.GAME_CONFIG={"slug": "turning-turtles", "name": "Turning Turtles", "players": ["Blue", "Amber"], "setups": ["8 coins", "10 coins", "12 coins"], "selectPrompt": "Select a HEAD coin, then Flip only or an optional second coin to its LEFT.", "prompt": "Flip one HEAD to tails, optionally flipping ONE other coin strictly to its LEFT in the same move.", "method": "Exact coin-turning invariant: XOR the 1-based positions of all heads."};

@@ -1,0 +1,2 @@
+/* Original configuration. MIT; see LICENSE. */
+window.GAME_CONFIG={"slug": "grundys-game", "name": "Grundy’s Game", "players": ["Blue", "Amber"], "setups": ["One heap: 9", "One heap: 15", "Two heaps: 25 + 17"], "selectPrompt": "Select a heap of size 3 or larger, then choose an unequal split.", "prompt": "Split ONE heap into TWO positive, unequal parts. Equal splits are forbidden; nothing is removed.", "method": "Exact Sprague–Grundy values: mex of unequal-split XOR values, then XOR across heaps."};

@@ -1,0 +1,16 @@
+{
+  "name": "Turning Turtles",
+  "desc": "Flip one head to tails and optionally any coin to its left. The rightmost flipped coin must be heads; turn the last head to win.",
+  "controls": "Mouse / touch; Tab, Enter, Space; left/right arrows navigate; Escape cancels. In-game rules.",
+  "shelf": "Puzzle & Logic",
+  "tags": [
+    "games",
+    "html5",
+    "board",
+    "strategy",
+    "math",
+    "original"
+  ],
+  "badge": "New",
+  "creator": "Dragon Gaming Platforms"
+}

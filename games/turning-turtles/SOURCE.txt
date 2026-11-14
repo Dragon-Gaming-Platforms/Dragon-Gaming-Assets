@@ -1,0 +1,13 @@
+Turning Turtles — original independent implementation, version 1.0
+Created: 2026-10-17
+License: MIT; see LICENSE.
+Source: https://github.com/Dragon-Gaming-Platforms/Dragon-Gaming-Assets/tree/main/games/turning-turtles
+
+Original rules, exact solvers and accessible interface; first-party collection
+lifecycle/styles adapted from this repository's board games. No external code,
+art, sounds, fonts or runtime packages. Established mechanics and mathematical
+methods are not claimed as new inventions. No publisher affiliation.
+Method: Exact coin-turning invariant: XOR the 1-based positions of all heads.
+Rules/math reference only, not code/assets: https://ocw.mit.edu/courses/es-268-the-mathematics-in-toys-and-games-spring-2010/403b38e26e810396764745e0ebdc0b29_MITES_268S10_ses1_handout.pdf
+Three starting setups and exact rules: help.html.
+Self-contained static game: no build, accounts, backend or service worker.
