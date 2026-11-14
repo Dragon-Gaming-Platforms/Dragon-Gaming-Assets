@@ -1,0 +1,15 @@
+{
+  "name": "Auction Lab",
+  "desc": "First-price, second-price and English auctions on the same private values, with revenue measured over thousands of draws against revenue equivalence.",
+  "controls": "Bidder count, bid-shading and reserve-price sliders, three formats, new-values and run-2,000 buttons, draggable value bars; Space redraws, R reruns, 1\u20133 switch format",
+  "shelf": "Interactive Stories & Experiments",
+  "tags": [
+    "games",
+    "html5",
+    "economics",
+    "game-theory",
+    "statistics"
+  ],
+  "badge": "New",
+  "creator": "Original build (Dragon Gaming Assets)"
+}

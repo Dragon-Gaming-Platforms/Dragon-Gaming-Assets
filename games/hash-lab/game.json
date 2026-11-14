@@ -1,0 +1,15 @@
+{
+  "name": "Hash Lab",
+  "desc": "Linear, quadratic and double hashing on a real table, with measured probe counts against Knuth's formulas and a hash-quality slider.",
+  "controls": "Table size, insertion count and hash-quality sliders, three probe schemes, insert/fill/clear buttons, hover inspection; Space inserts, C clears, 1\u20133 switch schemes",
+  "shelf": "Interactive Stories & Experiments",
+  "tags": [
+    "games",
+    "html5",
+    "data-structures",
+    "algorithms",
+    "performance"
+  ],
+  "badge": "New",
+  "creator": "Original build (Dragon Gaming Assets)"
+}

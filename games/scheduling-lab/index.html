@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Scheduling Lab</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <header>
+    <div>
+      <h1>Scheduling Lab</h1>
+      <p>One set of jobs, five dispatch rules, identical machines. Watch SPT and EDD trade makespan against lateness on a live Gantt chart.</p>
+    </div>
+    <div class="hud">
+      <span id="rule-hud">rule —</span>
+      <span id="makespan-hud">makespan —</span>
+      <span id="tardy-hud">late jobs —</span>
+    </div>
+  </header>
+
+  <main>
+    <section class="stage">
+      <canvas id="scene" width="880" height="660"></canvas>
+      <p class="caption">Each row is a machine; each block is a job placed by the selected dispatch rule. A red outline means the job finished after its due date. Click a block to inspect the job.</p>
+      <div class="legend">
+        <span><i class="sw-ok"></i>on time</span>
+        <span><i class="sw-late"></i>tardy</span>
+        <span><i class="sw-lb"></i>lower bound</span>
+      </div>
+    </section>
+
+    <aside class="panel">
+      <label>
+        <span>Jobs <b id="jobs-out">14</b></span>
+        <input id="jobs" type="range" min="4" max="24" step="1" value="14" />
+      </label>
+      <label>
+        <span>Machines <b id="machines-out">3</b></span>
+        <input id="machines" type="range" min="1" max="4" step="1" value="3" />
+      </label>
+      <label>
+        <span>Processing spread <b id="spread-out">60%</b></span>
+        <input id="spread" type="range" min="0" max="100" step="5" value="60" />
+      </label>
+      <label>
+        <span>Deadline slack <b id="slack-out">1.20×</b></span>
+        <input id="slack" type="range" min="0.7" max="1.8" step="0.05" value="1.2" />
+      </label>
+
+      <div class="row">
+        <button id="preset-balanced" class="active">Balanced</button>
+        <button id="preset-tight">Tight</button>
+        <button id="preset-single">One machine</button>
+      </div>
+      <div class="row">
+        <button id="reshuffle">Reshuffle</button>
+        <button id="rule" class="primary">Next rule</button>
+      </div>
+
+      <div class="readouts">
+        <div><span>Rule</span><b id="rule-read">—</b></div>
+        <div><span>Makespan</span><b id="makespan-read">—</b></div>
+        <div><span>Total flow</span><b id="flow-read">—</b></div>
+        <div><span>Total tardiness</span><b id="tard-read">—</b></div>
+        <div><span>Late jobs</span><b id="late-read">—</b></div>
+        <div><span>Max lateness</span><b id="maxlate-read">—</b></div>
+      </div>
+
+      <p id="status" class="status">Pick a rule and compare. With one machine SPT is provably optimal for total flow, and EDD is provably optimal for maximum lateness — everything else is a heuristic.</p>
+      <p class="hint">Space cycles the rule, R reshuffles, 1–5 jump straight to a rule. Click any block or job chip to see when that job runs on every rule.</p>
+    </aside>
+  </main>
+
+  <script src="app.js"></script>
+</body>
+</html>

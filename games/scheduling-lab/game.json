@@ -1,0 +1,15 @@
+{
+  "name": "Scheduling Lab",
+  "desc": "Five dispatch rules over identical machines with live Gantt charts, tardiness accounting and a makespan lower bound.",
+  "controls": "Job count, machines, processing spread and deadline slack sliders, four preset profiles, reshuffle and next-rule buttons, clickable Gantt blocks and job chips; Space cycles the rule, R reshuffles, 1\u20135 pick a rule",
+  "shelf": "Interactive Stories & Experiments",
+  "tags": [
+    "games",
+    "html5",
+    "algorithms",
+    "operations",
+    "optimisation"
+  ],
+  "badge": "New",
+  "creator": "Original build (Dragon Gaming Assets)"
+}
