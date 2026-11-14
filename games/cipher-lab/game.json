@@ -1,0 +1,16 @@
+{
+  "name": "Cipher Lab",
+  "desc": "Four classical ciphers with two real attacks: chi-squared Caesar cracking and a Vigenère cracker that finds the key length first.",
+  "controls": "Cipher buttons, key slider or word key, encrypt, decrypt and break buttons, editable text boxes; E encrypts, D decrypts, B breaks, R loads the sample",
+  "shelf": "Interactive Stories & Experiments",
+  "tags": [
+    "games",
+    "html5",
+    "cryptography",
+    "puzzles",
+    "statistics",
+    "security"
+  ],
+  "badge": "New",
+  "creator": "Original build (Dragon Gaming Assets)"
+}

@@ -1,0 +1,16 @@
+{
+  "name": "Bayes Lab",
+  "desc": "A rare-disease test and a biased coin: watch Bayes' rule turn a scary positive into a modest probability, and belief tighten flip by flip.",
+  "controls": "Prevalence, sensitivity, false-positive rate and repeat-test sliders; true bias and prior strength; flip 1, 10 or 100 times; Space flips, H flips ten, R resets the coin",
+  "shelf": "Interactive Stories & Experiments",
+  "tags": [
+    "games",
+    "html5",
+    "statistics",
+    "probability",
+    "bayes",
+    "education"
+  ],
+  "badge": "New",
+  "creator": "Original build (Dragon Gaming Assets)"
+}

@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Optimizer Lab</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <header>
+    <div>
+      <h1>Optimizer Lab</h1>
+      <p>Four descent methods, one landscape, identical start. Watch momentum overshoot, Adam adapt, and everyone get stuck somewhere different.</p>
+    </div>
+    <div class="hud">
+      <span id="best-hud">best loss 0.00</span>
+      <span id="iter-hud">0 steps</span>
+      <span id="state-hud">running</span>
+    </div>
+  </header>
+
+  <main>
+    <section class="stage">
+      <canvas id="scene" width="860" height="660"></canvas>
+      <p class="caption">Click anywhere on the map to drop all four optimizers at that point. Lines are their trajectories; the marks are where each one currently sits.</p>
+      <div class="legend">
+        <span><i class="sw-sgd"></i>SGD</span>
+        <span><i class="sw-mom"></i>momentum</span>
+        <span><i class="sw-rms"></i>RMSProp</span>
+        <span><i class="sw-adam"></i>Adam</span>
+        <span><i class="sw-min"></i>minimum</span>
+      </div>
+    </section>
+
+    <aside class="panel">
+      <div class="group">
+        <h2>Landscape</h2>
+        <div class="row">
+          <button id="land-himmel" class="active">Himmelblau</button>
+          <button id="land-rosen">Rosenbrock</button>
+        </div>
+        <div class="row">
+          <button id="land-bowl">Bowl</button>
+          <button id="land-ripple">Ripples</button>
+        </div>
+      </div>
+
+      <label>
+        <span>Learning rate <b id="lr-out">0.010</b></span>
+        <input id="lr" type="range" min="-3.5" max="0" step="0.05" value="-2" />
+      </label>
+      <label>
+        <span>Steps per frame <b id="speed-out">3</b></span>
+        <input id="speed" type="range" min="1" max="20" step="1" value="3" />
+      </label>
+      <label class="check">
+        <input id="trails" type="checkbox" checked />
+        <span>Draw trajectories</span>
+      </label>
+
+      <div class="row">
+        <button id="step">One step</button>
+        <button id="toggle" class="primary">Pause</button>
+      </div>
+      <div class="row">
+        <button id="restart">Restart</button>
+        <button id="stuck">Random start</button>
+      </div>
+
+      <div class="readouts">
+        <div><span>Iteration</span><b id="iter-read">0</b></div>
+        <div><span>Best loss</span><b id="loss-read">—</b></div>
+        <div><span>SGD</span><b id="sgd-read">—</b></div>
+        <div><span>Momentum</span><b id="mom-read">—</b></div>
+        <div><span>RMSProp</span><b id="rms-read">—</b></div>
+        <div><span>Adam</span><b id="adam-read">—</b></div>
+        <div><span>Gradient checks</span><b id="grad-read">exact</b></div>
+        <div><span>Nearest minimum</span><b id="min-read">—</b></div>
+      </div>
+
+      <p id="status" class="status">Four optimizers at the same start. Watch Adam's step size adapt while plain SGD crawls along the ravine floor.</p>
+      <p class="hint">Space pauses, R restarts, N steps once, X random start. Raise the learning rate until momentum diverges, then compare with Adam at the same rate.</p>
+    </aside>
+  </main>
+
+  <script src="app.js"></script>
+</body>
+</html>

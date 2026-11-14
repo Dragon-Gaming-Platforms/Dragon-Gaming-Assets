@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Bayes Lab</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <header>
+    <div>
+      <h1>Bayes Lab</h1>
+      <p>A test for a rare disease, a biased coin, and the number everyone gets wrong. Watch belief move as evidence arrives.</p>
+    </div>
+    <div class="hud">
+      <span id="post-hud">P(disease | +) = 1.9%</span>
+      <span id="flips-hud">0 flips</span>
+      <span id="mode-hud">coin mode 0.50</span>
+    </div>
+  </header>
+
+  <main>
+    <section class="stage">
+      <canvas id="scene" width="880" height="680"></canvas>
+      <p class="caption">Left: the posterior after a positive test, as the prior and test accuracy move. Right: a coin's bias learned one flip at a time — the curve is the whole belief, not just a number.</p>
+      <div class="legend">
+        <span><i class="sw-prior"></i>prior</span>
+        <span><i class="sw-post"></i>posterior</span>
+        <span><i class="sw-like"></i>likelihood curve</span>
+        <span><i class="sw-truth"></i>truth</span>
+      </div>
+    </section>
+
+    <aside class="panel">
+      <div class="group">
+        <h2>Disease test</h2>
+        <label>
+          <span>Prevalence (prior) <b id="prev-out">1.0%</b></span>
+          <input id="prev" type="range" min="0.001" max="0.20" step="0.001" value="0.01" />
+        </label>
+        <label>
+          <span>Sensitivity (true positive) <b id="sens-out">99%</b></span>
+          <input id="sens" type="range" min="0.5" max="0.999" step="0.001" value="0.99" />
+        </label>
+        <label>
+          <span>False positive rate <b id="fpr-out">5%</b></span>
+          <input id="fpr" type="range" min="0.001" max="0.30" step="0.001" value="0.05" />
+        </label>
+        <label>
+          <span>Positive tests in a row <b id="reps-out">1</b></span>
+          <input id="reps" type="range" min="1" max="4" step="1" value="1" />
+        </label>
+      </div>
+
+      <div class="group">
+        <h2>Coin</h2>
+        <label>
+          <span>True bias <b id="bias-out">0.50</b></span>
+          <input id="bias" type="range" min="0.05" max="0.95" step="0.01" value="0.5" />
+        </label>
+        <div class="row">
+          <button id="flip">Flip 1</button>
+          <button id="flip10">Flip 10</button>
+          <button id="flip100">Flip 100</button>
+        </div>
+        <label>
+          <span>Prior strength (imaginary flips) <b id="priorout-out">2</b></span>
+          <input id="prior" type="range" min="0" max="40" step="1" value="2" />
+        </label>
+      </div>
+
+      <div class="readouts">
+        <div><span>P(disease)</span><b id="post-read">1.9%</b></div>
+        <div><span>Positive predictive</span><b id="ppv-read">1.9%</b></div>
+        <div><span>Odds after test</span><b id="odds-read">1 : 52</b></div>
+        <div><span>Heads / flips</span><b id="heads-read">0 / 0</b></div>
+        <div><span>Posterior mean</span><b id="mean-read">0.500</b></div>
+        <div><span>95% credible</span><b id="ci-read">0.09–0.91</b></div>
+      </div>
+
+      <p id="status" class="status">A 1% disease tested with 99% sensitivity and 5% false positives returns a positive that is right only 1 time in 6.</p>
+      <p class="hint">Space flips once, H flips ten, R resets. Drag the prevalence down to 0.1% and the same positive test becomes close to worthless.</p>
+    </aside>
+  </main>
+
+  <script src="app.js"></script>
+</body>
+</html>

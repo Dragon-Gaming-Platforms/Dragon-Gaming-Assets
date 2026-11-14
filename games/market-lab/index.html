@@ -1,0 +1,92 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Market Lab</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <header>
+    <div>
+      <h1>Market Lab</h1>
+      <p>A supply-and-demand market you can actually watch clear. Move a curve, change a tax, or hand someone market power.</p>
+    </div>
+    <div class="hud">
+      <span id="p-hud">P* = 50</span>
+      <span id="q-hud">Q* = 50</span>
+      <span id="welfare-hud">welfare 2,500</span>
+    </div>
+  </header>
+
+  <main>
+    <section class="stage">
+      <canvas id="scene" width="860" height="680"></canvas>
+      <p class="caption">The crossing point is the equilibrium. Drag the price line to see what a price control does: quantity is the short side of the market, and the coloured wedges are surplus that either exists or is destroyed.</p>
+      <div class="legend">
+        <span><i class="sw-cs"></i>consumer surplus</span>
+        <span><i class="sw-ps"></i>producer surplus</span>
+        <span><i class="sw-dwl"></i>deadweight loss</span>
+        <span><i class="sw-tax"></i>tax revenue</span>
+      </div>
+    </section>
+
+    <aside class="panel">
+      <label>
+        <span>Demand intercept <b id="a-out">100</b></span>
+        <input id="a" type="range" min="60" max="160" step="1" value="100" />
+      </label>
+      <label>
+        <span>Supply intercept <b id="c-out">0</b></span>
+        <input id="c" type="range" min="-40" max="60" step="1" value="0" />
+      </label>
+      <label>
+        <span>Slope steepness <b id="slope-out">1.00</b></span>
+        <input id="slope" type="range" min="0.4" max="2.4" step="0.05" value="1" />
+      </label>
+
+      <div class="group">
+        <h2>Intervention</h2>
+        <div class="row">
+          <button id="mode-none" class="active">Free market</button>
+          <button id="mode-price">Price control</button>
+        </div>
+        <div class="row">
+          <button id="mode-tax">Unit tax</button>
+          <button id="mode-monopoly">Monopoly</button>
+        </div>
+      </div>
+
+      <label>
+        <span>Control / tax size <b id="ctrl-out">0</b></span>
+        <input id="ctrl" type="range" min="0" max="60" step="1" value="0" />
+      </label>
+      <label>
+        <span>Drag price line to <b id="pin-out">P*</b></span>
+        <input id="pin" type="range" min="0" max="160" step="1" value="50" />
+      </label>
+
+      <div class="row">
+        <button id="reset" class="primary">Reset</button>
+        <button id="shock">Demand shock</button>
+      </div>
+
+      <div class="readouts">
+        <div><span>Price</span><b id="price-read">50</b></div>
+        <div><span>Quantity</span><b id="qty-read">50</b></div>
+        <div><span>Consumer surplus</span><b id="cs-read">1,250</b></div>
+        <div><span>Producer surplus</span><b id="ps-read">1,250</b></div>
+        <div><span>Deadweight loss</span><b id="dwl-read">0</b></div>
+        <div><span>Revenue</span><b id="rev-read">0</b></div>
+        <div><span>Elasticity at P*</span><b id="elast-read">1.00</b></div>
+        <div><span>Total welfare</span><b id="wel-read">2,500</b></div>
+      </div>
+
+      <p id="status" class="status">Free market: price 50, quantity 50, no deadweight loss. Every mutually beneficial trade happens.</p>
+      <p class="hint">Space cycles the intervention, R resets, S shocks demand. Set a price control at 30 and compare the deadweight loss with a 30-unit tax — different wedges, different losers.</p>
+    </aside>
+  </main>
+
+  <script src="app.js"></script>
+</body>
+</html>

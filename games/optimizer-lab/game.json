@@ -1,0 +1,16 @@
+{
+  "name": "Optimizer Lab",
+  "desc": "SGD, momentum, RMSProp and Adam descending the same landscape from the same point — with the gradients checked against finite differences.",
+  "controls": "Four landscapes, log learning-rate slider, steps per frame, trajectory toggle, single step, restart and random start; Space pauses, R restarts, N steps once, X random start",
+  "shelf": "Interactive Stories & Experiments",
+  "tags": [
+    "games",
+    "html5",
+    "machine-learning",
+    "optimisation",
+    "mathematics",
+    "visualisation"
+  ],
+  "badge": "New",
+  "creator": "Original build (Dragon Gaming Assets)"
+}
