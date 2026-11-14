@@ -1,0 +1,15 @@
+{
+  "name": "Voting Lab",
+  "desc": "One voter profile, five counting rules, and four different winners: plurality, IRV, Borda, approval and Condorcet side by side.",
+  "controls": "Four profile presets, third-bloc share and voter-count sliders, click a first-choice bar to highlight that candidate in the matrix; keys 1\u20134 switch profiles",
+  "shelf": "Interactive Stories & Experiments",
+  "tags": [
+    "games",
+    "html5",
+    "civics",
+    "algorithms",
+    "game-theory"
+  ],
+  "badge": "New",
+  "creator": "Original build (Dragon Gaming Assets)"
+}

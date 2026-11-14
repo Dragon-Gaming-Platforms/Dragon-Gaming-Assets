@@ -1,0 +1,15 @@
+{
+  "name": "Compression Lab",
+  "desc": "Run-length, Huffman and LZ78 applied to the same text, counted in exact bits including headers, against Shannon's entropy floor.",
+  "controls": "Editable text box, four corpus presets, repeat and corruption sliders; keys 1\u20134 load the corpora",
+  "shelf": "Interactive Stories & Experiments",
+  "tags": [
+    "games",
+    "html5",
+    "algorithms",
+    "information-theory",
+    "text"
+  ],
+  "badge": "New",
+  "creator": "Original build (Dragon Gaming Assets)"
+}

@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>TSP Lab</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <header>
+    <div>
+      <h1>TSP Lab</h1>
+      <p>Nearest neighbour, 2-opt and simulated annealing on the same cities — with a real lower bound to measure the gap against.</p>
+    </div>
+    <div class="hud">
+      <span id="best-hud">best —</span>
+      <span id="gap-hud">gap —</span>
+      <span id="cities-hud">0 cities</span>
+    </div>
+  </header>
+
+  <main>
+    <section class="stage">
+      <canvas id="scene" width="880" height="660"></canvas>
+      <p class="caption">Click to place cities, drag to move them. The dashed tour is nearest neighbour's first guess; the bright tour is what the optimiser has found so far.</p>
+      <div class="legend">
+        <span><i class="sw-greedy"></i>nearest neighbour</span>
+        <span><i class="sw-two"></i>2-opt</span>
+        <span><i class="sw-sa"></i>annealing</span>
+        <span><i class="sw-bound"></i>MST bound</span>
+      </div>
+    </section>
+
+    <aside class="panel">
+      <label>
+        <span>Cities <b id="count-out">24</b></span>
+        <input id="count" type="range" min="5" max="80" step="1" value="24" />
+      </label>
+      <label>
+        <span>Start temperature <b id="temp-out">0.40</b> × mean edge</span>
+        <input id="temp" type="range" min="0.05" max="1.5" step="0.05" value="0.4" />
+      </label>
+      <label>
+        <span>Cooling per sweep <b id="cool-out">0.970</b></span>
+        <input id="cool" type="range" min="0.9" max="0.999" step="0.001" value="0.97" />
+      </label>
+
+      <div class="row">
+        <button id="toggle" class="primary">Pause</button>
+        <button id="run" >Restart</button>
+      </div>
+      <div class="row">
+        <button id="grid" class="active">Grid</button>
+        <button id="scatter">Scatter</button>
+        <button id="cluster">Clusters</button>
+      </div>
+      <div class="row">
+        <button id="clear">Clear cities</button>
+      </div>
+
+      <div class="readouts">
+        <div><span>Nearest neighbour</span><b id="greedy-read">—</b></div>
+        <div><span>2-opt</span><b id="two-read">—</b></div>
+        <div><span>Annealing</span><b id="sa-read">—</b></div>
+        <div><span>MST lower bound</span><b id="bound-read">—</b></div>
+        <div><span>Best gap to bound</span><b id="gap-read">—</b></div>
+        <div><span>Sweep</span><b id="sweep-read">0</b></div>
+        <div><span>Temperature</span><b id="t-read">—</b></div>
+        <div><span>2-opt moves</span><b id="moves-read">0</b></div>
+      </div>
+
+      <p id="status" class="status">Ready. Nearest neighbour builds a tour, 2-opt untangles it, and annealing wanders deliberately uphill to escape local minima.</p>
+      <p class="hint">Space pauses, R restarts, S rescatters. Small clusters of cities are the hard case — annealing earns its keep there.</p>
+    </aside>
+  </main>
+
+  <script src="app.js"></script>
+</body>
+</html>

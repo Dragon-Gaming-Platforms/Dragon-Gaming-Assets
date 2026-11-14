@@ -1,0 +1,15 @@
+{
+  "name": "Kalman Lab",
+  "desc": "A Kalman filter and a particle filter tracking the same noisy 1-D sensor, with \u00b12\u03c3 bands and a normalised-innovation consistency check.",
+  "controls": "Process and measurement noise sliders, particle-count slider, pause/reset/outlier buttons, calm/noisy/jumpy presets; Space pauses, R resets, O injects an outlier, click the plot to drop a wild measurement",
+  "shelf": "Interactive Stories & Experiments",
+  "tags": [
+    "games",
+    "html5",
+    "statistics",
+    "estimation",
+    "simulation"
+  ],
+  "badge": "New",
+  "creator": "Original build (Dragon Gaming Assets)"
+}
