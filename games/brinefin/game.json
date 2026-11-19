@@ -1,0 +1,16 @@
+{
+  "name": "Brinefin",
+  "desc": "Steer a small shark through a procedurally built 3D ocean and climb the food chain. Hunger drains over time: bite smaller creatures to refill it, avoid larger predators and hazards, and chain meals to build combos and trigger Gold Rush. Explore three depth zones, meet 28 kinds of wildlife and bosses, unlock seven shark species, and spend coins in the local shop; progress is saved in your browser. The game generates its models and audio at runtime and bundles Three.js locally—no build step, account, or network connection.",
+  "controls": "Move the mouse or use WASD/arrows to swim; hold left mouse, Space, or Left Shift to boost; bites happen automatically on contact; P/Esc pauses (touch: drag the left half to steer and hold the on-screen boost button)",
+  "shelf": "Arcade & Action",
+  "badge": "New",
+  "creator": "Weiping Yan",
+  "image": "assets/title.png",
+  "tags": [
+    "arcade",
+    "survival",
+    "shark",
+    "3d",
+    "underwater"
+  ]
+}
