@@ -1,0 +1,21 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="description" content="Play English draughts against a computer opponent with three strength levels, mandatory captures, multi-jumps and kings. Original implementation, MIT."><title>Checkers vs Computer · Board games</title><link rel="stylesheet" href="style.css"><script defer src="app.js"></script></head><body>
+<header><div><p class="eyebrow">Dragon Gaming · Original board games</p><h1>Checkers vs Computer</h1><p class="subtitle">English draughts. You are red and move first.</p></div><nav><button id="rules-open" type="button">How to play</button></nav></header>
+<main>
+<section class="card play" aria-label="Game">
+<div class="toolbar"><label>Computer<select id="difficulty" aria-label="Computer strength"><option value="easy">Easy</option><option value="medium" selected>Medium</option><option value="hard">Hard</option></select></label><button id="new" type="button" class="primary">New game</button><button id="undo" type="button">Undo</button></div>
+<div class="board-wrap"><div id="board" role="group" aria-label="Checkers board, 8 by 8"></div></div>
+<p id="count" class="count"></p>
+<p id="message" role="status" aria-live="polite"></p>
+</section>
+<aside class="card"><p class="eyebrow">Rules</p><h2>English draughts</h2><ol>
+<li>Red moves first. Men move one square diagonally forward; kings move one square in any diagonal direction.</li>
+<li>Capturing is mandatory. Jump over an adjacent opponent piece onto an empty square; men may also jump backward.</li>
+<li>A jump can continue in the same turn to capture more pieces. There is no maximum-capture rule.</li>
+<li>A man that ends its move on the far row becomes a king. Win by capturing every opposing piece or leaving the opponent no legal move.</li>
+</ol>
+<p class="tip">Click a red piece, then a highlighted square. The computer answers after each move. Undo takes back your move and the computer’s reply. Medium and Hard search several moves ahead, so the computer may take a moment.</p></aside>
+</main>
+<footer><span>Original implementation · <a href="LICENSE">MIT license</a> · <a href="SOURCE.txt">Source record</a></span></footer>
+<dialog id="rules"><h2>Checkers rules</h2><ol><li>Red moves first; men move forward diagonally, kings move in any diagonal direction.</li><li>Capturing is mandatory; men may capture backward as well.</li><li>Jumps may continue in the same turn.</li><li>Reaching the far row makes a king. Leave the opponent with no legal move to win.</li></ol><form method="dialog"><button id="rules-close" type="button">Back to game</button></form></dialog>
+<script>document.getElementById('rules-open').onclick=()=>document.getElementById('rules').showModal();document.getElementById('rules-close').onclick=()=>document.getElementById('rules').close();</script>
+</body></html>
