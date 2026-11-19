@@ -1,0 +1,15 @@
+{
+  "name": "Bloom Lab",
+  "desc": "A Bloom filter visualizer: bit-array size, hash count and item count sliders drive occupancy and the false-positive rate, checked against theory.",
+  "controls": "Bit-array, hash-count and item-count sliders, four presets, insert/query/reset buttons; keys 1–4 load presets, I inserts, Q queries, R resets",
+  "shelf": "Interactive Stories & Experiments",
+  "tags": [
+    "games",
+    "html5",
+    "data-structures",
+    "probability",
+    "mathematics"
+  ],
+  "badge": "New",
+  "creator": "Original build (Dragon Gaming Assets)"
+}

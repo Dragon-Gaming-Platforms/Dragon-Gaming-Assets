@@ -1,0 +1,15 @@
+{
+  "name": "Sat Lab",
+  "desc": "A Keplerian orbit simulator: semi-major axis, eccentricity and inclination sliders drive the period, apoapsis/periapsis velocities and a live ground track.",
+  "controls": "Semi-major axis, eccentricity, inclination and time-scale sliders, five orbit presets (LEO, ISS, GEO, Molniya, GTO), play/pause and ground-track toggles; keys 1–5 load presets, Space pauses, T toggles the track",
+  "shelf": "Interactive Stories & Experiments",
+  "tags": [
+    "games",
+    "html5",
+    "physics",
+    "space",
+    "mathematics"
+  ],
+  "badge": "New",
+  "creator": "Original build (Dragon Gaming Assets)"
+}

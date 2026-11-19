@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>K-Means Lab</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <header>
+    <div>
+      <h1>K-Means Lab</h1>
+      <p>Points from Gaussian blobs, k centres, and Lloyd's algorithm: assign each point to its nearest centre, move each centre to its cluster's mean, repeat until the inertia stops falling.</p>
+    </div>
+    <div class="hud">
+      <span id="inertia-hud">inertia —</span>
+      <span id="iter-hud">iteration —</span>
+      <span id="conv-hud">status —</span>
+    </div>
+  </header>
+
+  <main>
+    <section class="stage">
+      <canvas id="scene" width="880" height="660"></canvas>
+      <p class="caption">Each point is coloured by its cluster; ✕ marks the centres. Faint lines show the latest assignment. Try the rings preset — k-means only finds convex, spherical clusters.</p>
+      <div class="legend">
+        <span><i class="sw-points"></i>points (by cluster)</span>
+        <span><i class="sw-centre"></i>centres</span>
+        <span><i class="sw-assign"></i>assignment</span>
+      </div>
+    </section>
+
+    <aside class="panel">
+      <label>
+        <span>Clusters k <b id="k-out">3</b></span>
+        <input id="k" type="range" min="2" max="8" step="1" value="3" />
+      </label>
+      <label>
+        <span>Points <b id="n-out">300</b></span>
+        <input id="n" type="range" min="100" max="600" step="20" value="300" />
+      </label>
+      <label>
+        <span>Blob spread <b id="spread-out">0.10</b></span>
+        <input id="spread" type="range" min="0.04" max="0.25" step="0.01" value="0.1" />
+      </label>
+
+      <div class="row">
+        <button id="preset-blobs2">2 blobs</button>
+        <button id="preset-blobs3" class="active">3 blobs</button>
+        <button id="preset-blobs4">4 blobs</button>
+        <button id="preset-rings">Rings</button>
+      </div>
+      <div class="row">
+        <button id="btn-step" class="primary">Step</button>
+        <button id="btn-run">Run</button>
+        <button id="btn-reset">Reset</button>
+      </div>
+
+      <div class="readouts">
+        <div><span>Inertia</span><b id="inertia-read">—</b></div>
+        <div><span>Iterations</span><b id="iter-read">—</b></div>
+        <div><span>Cluster sizes</span><b id="sizes-read">—</b></div>
+        <div><span>Converged</span><b id="conv-read">—</b></div>
+        <div><span>Empty clusters</span><b id="empty-read">—</b></div>
+        <div><span>Mean dist</span><b id="dist-read">—</b></div>
+      </div>
+
+      <p id="status" class="status">Lloyd's algorithm always decreases inertia, but it converges to a local optimum — where the centres start decides which one.</p>
+      <p class="hint">Drag a centre to move it. Keys 1–4 load presets, S steps, G runs to convergence, R resets. Rings defeat k-means: it splits the ring instead of finding the hole.</p>
+    </aside>
+  </main>
+
+  <script src="app.js"></script>
+</body>
+</html>

@@ -1,0 +1,86 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Spring Lab</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <header>
+    <div>
+      <h1>Spring Lab</h1>
+      <p>A driven mass-spring-damper: tune mass, stiffness, damping and drive frequency, and watch the displacement trace settle into resonance or die away.</p>
+    </div>
+    <div class="hud">
+      <span id="wn-hud">ωₙ —</span>
+      <span id="zeta-hud">ζ —</span>
+      <span id="amp-hud">amplitude —</span>
+    </div>
+  </header>
+
+  <main>
+    <section class="stage">
+      <canvas id="scene" width="880" height="660"></canvas>
+      <p class="caption">Top: the spring and mass (the wall is on the left, the mass rides the spring). Bottom: displacement vs time, scrolling — the drive force is the faint sine behind it.</p>
+      <div class="legend">
+        <span><i class="sw-mass"></i>mass</span>
+        <span><i class="sw-trace"></i>displacement</span>
+        <span><i class="sw-drive"></i>drive force</span>
+      </div>
+    </section>
+
+    <aside class="panel">
+      <label>
+        <span>Mass m <b id="m-out">1.0 kg</b></span>
+        <input id="m" type="range" min="0.5" max="5" step="0.1" value="1" />
+      </label>
+      <label>
+        <span>Stiffness k <b id="k-out">40 N/m</b></span>
+        <input id="k" type="range" min="10" max="200" step="2" value="40" />
+      </label>
+      <label>
+        <span>Damping c <b id="c-out">0.5 N·s/m</b></span>
+        <input id="c" type="range" min="0" max="20" step="0.1" value="0.5" />
+      </label>
+      <label>
+        <span>Drive frequency <b id="freq-out">1.0 Hz</b></span>
+        <input id="freq" type="range" min="0.2" max="5" step="0.05" value="1" />
+      </label>
+      <label>
+        <span>Drive amplitude <b id="amp-out">5 N</b></span>
+        <input id="amp" type="range" min="0" max="20" step="0.5" value="5" />
+      </label>
+
+      <div class="row">
+        <button id="preset-undamped">Undamped</button>
+        <button id="preset-under">Underdamped</button>
+        <button id="preset-critical" class="active">Critical</button>
+        <button id="preset-over">Overdamped</button>
+        <button id="preset-resonant">Resonant</button>
+      </div>
+      <div class="row">
+        <button id="toggle-play" class="active">Pause</button>
+        <button id="btn-kick">Kick</button>
+        <button id="btn-reset">Reset</button>
+      </div>
+
+      <div class="readouts">
+        <div><span>Natural freq ωₙ</span><b id="wn-read">—</b></div>
+        <div><span>Natural freq fₙ</span><b id="fn-read">—</b></div>
+        <div><span>Damping ratio ζ</span><b id="zeta-read">—</b></div>
+        <div><span>Steady amplitude</span><b id="steady-read">—</b></div>
+        <div><span>Phase lag</span><b id="phase-read">—</b></div>
+        <div><span>Displacement x</span><b id="x-read">—</b></div>
+        <div><span>Velocity v</span><b id="v-read">—</b></div>
+        <div><span>Energy</span><b id="energy-read">—</b></div>
+      </div>
+
+      <p id="status" class="status">Resonance: when the drive frequency matches the natural frequency, the amplitude grows until damping balances the input — the steady-state amplitude is F₀ / √( (k − mω²)² + (cω)² ).</p>
+      <p class="hint">Keys 1–5 load presets, Space pauses, K kicks the mass, R resets. Kick gives the mass a shove to see the free oscillation.</p>
+    </aside>
+  </main>
+
+  <script src="app.js"></script>
+</body>
+</html>
