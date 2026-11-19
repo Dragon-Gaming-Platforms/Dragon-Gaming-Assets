@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Markov Lab</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <header>
+    <div>
+      <h1>Markov Lab</h1>
+      <p>A word-level Markov chain trained on a small built-in corpus. The next word depends only on the last few words — enough to fake the rhythm of English, not enough to understand it.</p>
+    </div>
+    <div class="hud">
+      <span id="vocab-hud">vocab —</span>
+      <span id="trans-hud">transitions —</span>
+      <span id="order-hud">order —</span>
+    </div>
+  </header>
+
+  <main>
+    <section class="stage">
+      <canvas id="scene" width="880" height="660"></canvas>
+      <p class="caption">The heatmap shows the transition matrix: each row is a context (the last word or two), each column the next word, brightness the probability. The generated text appears below the matrix.</p>
+      <div class="legend">
+        <span><i class="sw-hot"></i>likely next word</span>
+        <span><i class="sw-cold"></i>unlikely</span>
+        <span><i class="sw-text"></i>generated text</span>
+      </div>
+    </section>
+
+    <aside class="panel">
+      <label>
+        <span>Chain order <b id="order-out">1</b></span>
+        <input id="order" type="range" min="1" max="3" step="1" value="1" />
+      </label>
+      <label>
+        <span>Temperature <b id="temp-out">1.00</b></span>
+        <input id="temp" type="range" min="0.5" max="2" step="0.05" value="1" />
+      </label>
+      <label>
+        <span>Words to generate <b id="len-out">40</b></span>
+        <input id="len" type="range" min="10" max="100" step="5" value="40" />
+      </label>
+
+      <div class="row">
+        <button id="preset-order1" class="active">Order 1</button>
+        <button id="preset-order2">Order 2</button>
+        <button id="preset-order3">Order 3</button>
+      </div>
+      <div class="row">
+        <button id="btn-generate" class="primary">Generate</button>
+        <button id="btn-retrain">Retrain</button>
+        <button id="toggle-heat" class="active">Heatmap</button>
+      </div>
+
+      <div class="readouts">
+        <div><span>Vocabulary</span><b id="vocab-read">—</b></div>
+        <div><span>Contexts</span><b id="ctx-read">—</b></div>
+        <div><span>Transitions</span><b id="trans-read">—</b></div>
+        <div><span>Avg log prob</span><b id="logp-read">—</b></div>
+        <div><span>Unique words</span><b id="uniq-read">—</b></div>
+        <div><span>Repeats</span><b id="rep-read">—</b></div>
+      </div>
+
+      <p id="status" class="status">Order 1 remembers one word, so it rambles. Order 2 and 3 remember phrases — the text gets more coherent but starts copying the corpus verbatim.</p>
+      <p class="hint">Keys 1–3 set the order, G generates, R retrains on a fresh seed. Temperature above 1 flattens the distribution (wilder text); below 1 sharpens it (safer text).</p>
+    </aside>
+  </main>
+
+  <script src="app.js"></script>
+</body>
+</html>

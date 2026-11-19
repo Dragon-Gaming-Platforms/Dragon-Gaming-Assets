@@ -1,0 +1,15 @@
+{
+  "name": "Entropy Lab",
+  "desc": "A Shannon entropy lab: four outcome sliders drive the entropy, KL divergence from uniform and perplexity, with a probability bar chart and a sampling check.",
+  "controls": "Four outcome-probability sliders, four presets (uniform/biased/skewed/certain), flip-100 and reset buttons; keys 1–4 load presets, F flips, R resets",
+  "shelf": "Interactive Stories & Experiments",
+  "tags": [
+    "games",
+    "html5",
+    "information-theory",
+    "probability",
+    "mathematics"
+  ],
+  "badge": "New",
+  "creator": "Original build (Dragon Gaming Assets)"
+}

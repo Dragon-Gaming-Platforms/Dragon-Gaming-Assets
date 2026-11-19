@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Lens Lab</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <header>
+    <div>
+      <h1>Lens Lab</h1>
+      <p>Thin-lens ray optics: move the object, change the focal length, and watch the three principal rays meet (or diverge) at the image.</p>
+    </div>
+    <div class="hud">
+      <span id="si-hud">sᵢ —</span>
+      <span id="mag-hud">m —</span>
+      <span id="type-hud">image —</span>
+    </div>
+  </header>
+
+  <main>
+    <section class="stage">
+      <canvas id="scene" width="880" height="660"></canvas>
+      <p class="caption">Blue is the object, teal the image. The three principal rays — parallel-then-focal, focal-then-parallel, and through-the-centre — meet at the image tip. Dashed extensions mark a virtual image.</p>
+      <div class="legend">
+        <span><i class="sw-object"></i>object</span>
+        <span><i class="sw-image"></i>image</span>
+        <span><i class="sw-ray"></i>principal rays</span>
+        <span><i class="sw-virtual"></i>virtual extensions</span>
+      </div>
+    </section>
+
+    <aside class="panel">
+      <label>
+        <span>Focal length f <b id="f-out">+100 px</b></span>
+        <input id="f" type="range" min="-200" max="200" step="5" value="100" />
+      </label>
+      <label>
+        <span>Object distance sₒ <b id="so-out">250 px</b></span>
+        <input id="so" type="range" min="60" max="380" step="5" value="250" />
+      </label>
+      <label>
+        <span>Object height hₒ <b id="ho-out">80 px</b></span>
+        <input id="ho" type="range" min="30" max="140" step="5" value="80" />
+      </label>
+
+      <div class="row">
+        <button id="preset-converging" class="active">Converging</button>
+        <button id="preset-diverging">Diverging</button>
+        <button id="preset-telephoto">Telephoto</button>
+        <button id="preset-closeup">Close-up</button>
+      </div>
+      <div class="row">
+        <button id="toggle-rays" class="active">Rays</button>
+        <button id="toggle-focal" class="active">Focal points</button>
+      </div>
+
+      <div class="readouts">
+        <div><span>Image distance sᵢ</span><b id="si-read">—</b></div>
+        <div><span>Magnification m</span><b id="mag-read">—</b></div>
+        <div><span>Image height hᵢ</span><b id="hi-read">—</b></div>
+        <div><span>Image type</span><b id="type-read">—</b></div>
+        <div><span>Object side</span><b id="side-read">—</b></div>
+        <div><span>1/f check</span><b id="check-read">—</b></div>
+      </div>
+
+      <p id="status" class="status">The lens equation 1/f = 1/sₒ + 1/sᵢ ties them together. Drag the object tip on the canvas to move it, or use the sliders.</p>
+      <p class="hint">Drag the object tip to move it. Keys 1–4 load presets, R toggles rays, F toggles focal points. Negative f is a diverging lens.</p>
+    </aside>
+  </main>
+
+  <script src="app.js"></script>
+</body>
+</html>

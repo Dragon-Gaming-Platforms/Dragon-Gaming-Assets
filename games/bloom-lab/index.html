@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Bloom Lab</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <header>
+    <div>
+      <h1>Bloom Lab</h1>
+      <p>A Bloom filter trades certainty for space: a bit array plus k hash functions remembers membership with no false negatives — but other items' bits can fake a yes.</p>
+    </div>
+    <div class="hud">
+      <span id="occ-hud">occupancy —</span>
+      <span id="fpr-hud">false-positive —</span>
+      <span id="theory-hud">theory —</span>
+    </div>
+  </header>
+
+  <main>
+    <section class="stage">
+      <canvas id="scene" width="880" height="660"></canvas>
+      <p class="caption">Each cell is one bit. Inserting a word sets k bits (one per hash); querying checks whether all k are set. Lit cells are the filter's memory — the last query's k bits flash in amber.</p>
+      <div class="legend">
+        <span><i class="sw-set"></i>set bit</span>
+        <span><i class="sw-clear"></i>clear bit</span>
+        <span><i class="sw-query"></i>last query</span>
+      </div>
+    </section>
+
+    <aside class="panel">
+      <label>
+        <span>Bit array m <b id="m-out">5000</b></span>
+        <input id="m" type="range" min="500" max="10000" step="100" value="5000" />
+      </label>
+      <label>
+        <span>Hash functions k <b id="k-out">5</b></span>
+        <input id="k" type="range" min="1" max="10" step="1" value="5" />
+      </label>
+      <label>
+        <span>Items n <b id="n-out">500</b></span>
+        <input id="n" type="range" min="50" max="2000" step="10" value="500" />
+      </label>
+
+      <div class="row">
+        <button id="preset-small">Small</button>
+        <button id="preset-medium" class="active">Medium</button>
+        <button id="preset-large">Large</button>
+        <button id="preset-optimal">Optimal</button>
+      </div>
+      <div class="row">
+        <button id="btn-insert" class="primary">Insert batch</button>
+        <button id="btn-query">Query random</button>
+        <button id="btn-reset">Reset</button>
+      </div>
+
+      <div class="readouts">
+        <div><span>Bits set</span><b id="set-read">—</b></div>
+        <div><span>Occupancy</span><b id="occ-read">—</b></div>
+        <div><span>Measured FPR</span><b id="fpr-read">—</b></div>
+        <div><span>Theory FPR</span><b id="theory-read">—</b></div>
+        <div><span>Optimal k</span><b id="optk-read">—</b></div>
+        <div><span>Last query</span><b id="query-read">—</b></div>
+      </div>
+
+      <p id="status" class="status">A Bloom filter never says no to a member — but bits set by other items can make a stranger look like a member. That false-positive rate is (1 − e^(−kn/m))^k.</p>
+      <p class="hint">Insert batch fills the filter with n words, Query random tests a stranger. Keys 1–4 load presets, I inserts, Q queries, R resets.</p>
+    </aside>
+  </main>
+
+  <script src="app.js"></script>
+</body>
+</html>

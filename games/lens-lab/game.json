@@ -1,0 +1,15 @@
+{
+  "name": "Lens Lab",
+  "desc": "Thin-lens ray optics: focal length, object distance and height sliders drive the image distance, magnification and real/virtual classification.",
+  "controls": "Focal length, object distance and height sliders, four presets, ray and focal-point toggles, draggable object tip; keys 1–4 load presets, R toggles rays, F toggles focal points",
+  "shelf": "Interactive Stories & Experiments",
+  "tags": [
+    "games",
+    "html5",
+    "physics",
+    "optics",
+    "mathematics"
+  ],
+  "badge": "New",
+  "creator": "Original build (Dragon Gaming Assets)"
+}

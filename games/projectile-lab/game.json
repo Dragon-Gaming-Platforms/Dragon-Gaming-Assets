@@ -1,0 +1,15 @@
+{
+  "name": "Projectile Lab",
+  "desc": "A projectile-motion lab: launch speed, angle and quadratic air drag drive the flight, with the no-drag parabola shown for comparison and four planetary gravities.",
+  "controls": "Launch-speed, angle and drag sliders, four gravity presets (Earth/Mars/Moon/Jupiter), launch/reset buttons, trail toggle, click-to-aim; keys 1–4 switch planets, Space launches, R resets",
+  "shelf": "Interactive Stories & Experiments",
+  "tags": [
+    "games",
+    "html5",
+    "physics",
+    "kinematics",
+    "mathematics"
+  ],
+  "badge": "New",
+  "creator": "Original build (Dragon Gaming Assets)"
+}
