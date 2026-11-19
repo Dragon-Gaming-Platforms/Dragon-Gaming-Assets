@@ -1,0 +1,16 @@
+{
+  "name": "Rush Hour",
+  "desc": "Slide cars one cell at a time to clear the red car through the exit. 24 original 6×6 puzzles in three tiers, each solvable.",
+  "controls": "Mouse / touch: click a car, then ◀ ▶ ▲ ▼; arrow keys move; Tab cycles cars",
+  "shelf": "Puzzle & Logic",
+  "tags": [
+    "games",
+    "html5",
+    "puzzle",
+    "logic",
+    "sliding",
+    "original"
+  ],
+  "badge": "New",
+  "creator": "Dragon Gaming Platforms"
+}

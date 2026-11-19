@@ -1,0 +1,21 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="description" content="Hot-seat hexagonal push-out game: move one to three marbles in a line and push six opposing marbles off the board. Original implementation, MIT."><title>Abalone · Board games</title><link rel="stylesheet" href="style.css"><script defer src="app.js"></script></head><body>
+<header><div><p class="eyebrow">Dragon Gaming · Original board games</p><h1>Abalone</h1><p class="subtitle">Push six out to win. Two players, one screen.</p></div><nav><button id="rules-open" type="button">How to play</button></nav></header>
+<main>
+<section class="card play" aria-label="Game">
+<div class="toolbar"><span id="turn" class="turn"></span><span class="grow"></span><button id="clear" type="button">Clear selection</button><button id="undo" type="button">Undo</button><button id="new" type="button" class="primary">New game</button></div>
+<div class="board-wrap"><svg id="svg" viewBox="0 0 400 400" role="group" aria-label="Hexagonal board, 61 cells"></svg></div>
+<p id="score" class="score"></p>
+<p id="message" role="status" aria-live="polite"></p>
+</section>
+<aside class="card"><p class="eyebrow">Rules</p><h2>Push six out</h2><ol>
+<li>Black moves first. Each turn, select one, two or three of your marbles in a straight, touching line.</li>
+<li>Move them one cell: along the line (inline), or sideways into empty cells (broadside). A single marble moves into an empty cell only.</li>
+<li>An inline move may push opposing marbles that sit directly ahead, but only when you have more marbles in the line than they do. Pushed marbles that leave the board count as pushed out.</li>
+<li>Push six opposing marbles out to win. If 100 moves pass without a marble being pushed out, the game is a draw.</li>
+</ol>
+<p class="tip">Click a marble to select it. Highlighted cells are legal destinations. Clicking a non-highlighted cell next to the selection makes no move.</p></aside>
+</main>
+<footer><span>Original implementation · <a href="LICENSE">MIT license</a> · <a href="SOURCE.txt">Source record</a></span></footer>
+<dialog id="rules"><h2>Abalone rules</h2><ol><li>Select 1–3 of your marbles in a straight, touching line.</li><li>Move inline (along the line, pushing weaker lines) or broadside (sideways into empty cells).</li><li>Push six opposing marbles out to win; 100 moves without a push is a draw.</li></ol><form method="dialog"><button id="rules-close" type="button">Back to game</button></form></dialog>
+<script>document.getElementById('rules-open').onclick=()=>document.getElementById('rules').showModal();document.getElementById('rules-close').onclick=()=>document.getElementById('rules').close();</script>
+</body></html>
