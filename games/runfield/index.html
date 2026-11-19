@@ -744,17 +744,10 @@
                   var rcw = ctx.measureText('New Record!').width;
                   ctx.fillText('New Record!', 512-rcw/2, 288);
                 }
-                var src = (
-                  'http://platform.twitter.com/widgets/tweet_button.html?via=mozhacks&count=horizontal&lang=en'
-                  + '&url=' + encodeURIComponent(document.location.toString())
-                ) + '&text='+encodeURIComponent('Ran into a ditch after amassing '+points+' points in #Runfield');
-                if (tweeter.currentSrc != src) {
-                  tweeter.currentSrc = src;
-                  tweeter.contentWindow.location.replace(src);
-                }
-                tweeter.style.display = a == 1 ? 'inline' : 'none';
+                // Twitter widget removed for offline build (was platform.twitter.com tweet button).
+                if (tweeter) tweeter.style.display = 'none';
               } else {
-                tweeter.style.display = 'none';
+                if (tweeter) tweeter.style.display = 'none';
                 if (!titleScreenTime) {
                   titleScreenTime = st;
                 }
@@ -807,7 +800,7 @@
               offset += elapsed*speed;
               speed = speed + (0.2-speed)*0.02;
             } else {
-              tweeter.style.display = 'none';
+              if (tweeter) tweeter.style.display = 'none';
               var ground = 40+fn(offset+50+116);
               if (y > 512) {
                 ctx.fillStyle = 'rgba(255,255,255,'+((y-512) / 1024)+')';
@@ -1027,7 +1020,7 @@
       You're using a browser that doesn't support the canvas element.
       Here's <a href="http://getfirefox.com">one that does</a>.
     </canvas>
-    <iframe id="tweeter"></iframe>
+    <!-- Twitter widget iframe removed for offline build -->
     <img id="leaves_right" src="leaves_right.png">
     <div id="musicToggle">The Music is On</div>
     <div><a href="#" onclick="var s=document.getElementById('editor').style;s.display=s.display!='block'?'block':'none';return false;">Toggle Editor</a></div>
