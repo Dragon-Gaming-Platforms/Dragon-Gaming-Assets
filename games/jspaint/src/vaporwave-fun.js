@@ -22,20 +22,10 @@ import { onKonamiCodeEntered } from "./konami.js";
 		$window = $();
 	}
 
-	const wait_for_youtube_api = (callback) => {
-		if (typeof YT !== "undefined") {
-			callback();
-		} else {
-			const tag = document.createElement("script");
-			tag.src = "https://www.youtube.com/player_api";
-			const firstScriptTag = document.getElementsByTagName("script")[0];
-			firstScriptTag.parentNode.insertBefore(tag, firstScriptTag);
-
-			// The YouTube API will call this global function when loaded and ready.
-			window.onYouTubeIframeAPIReady = () => {
-				callback();
-			};
-		}
+	// Offline build: YouTube player API removed (was https://www.youtube.com/player_api).
+	// The visual vaporwave effect (rotating logo + 3D window) still runs; no video/music.
+	const wait_for_youtube_api = (_callback) => {
+		// Intentionally do not load external script or invoke callback.
 	};
 
 	const stop_vaporwave = () => {
@@ -157,14 +147,16 @@ import { onKonamiCodeEntered } from "./konami.js";
 			// some number of those things or something like that
 		});
 
-		// The API will call this function when the video player is ready.
+		// Offline build: YouTube player removed; these handlers are inert.
 		function onPlayerReady(_event) {
+			if (!player) return;
 			player.playVideo();
 			player.unMute();
 		}
 
 		// The API calls this function when the player's state changes.
 		function onPlayerStateChange(event) {
+			if (typeof YT === "undefined" || !player) return;
 			if (event.data == YT.PlayerState.PLAYING) {
 				// @TODO: pause and resume this timer with the video
 				setTimeout(() => {
@@ -189,19 +181,13 @@ import { onKonamiCodeEntered } from "./konami.js";
 		space_phase_key_handler = (e) => {
 			// press space to phase in and out of space phase スペース相 - windows 98 マイクロソフト 『ＷＩＮＴＲＡＰ』 X 将来のオペレーティングシステムサウンド 1998 VAPORWAVE
 			if (e.which === 32) {
-				// @TODO: record player SFX
+				// Offline build: no video player; just toggle the logo visibility.
 				if (is_theoretically_playing) {
-					player.pauseVideo();
 					is_theoretically_playing = false;
-					$(player.getIframe())
-						.add(rotologo)
-						.css({ opacity: "0" });
+					$(rotologo).css({ opacity: "0" });
 				} else {
-					player.playVideo();
 					is_theoretically_playing = true;
-					$(player.getIframe())
-						.add(rotologo)
-						.css({ opacity: "" });
+					$(rotologo).css({ opacity: "" });
 				}
 				e.preventDefault();
 				// player.getIframe().focus();

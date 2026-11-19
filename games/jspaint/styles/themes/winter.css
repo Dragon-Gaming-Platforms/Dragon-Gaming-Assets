@@ -1,6 +1,6 @@
 @import "./classic.css";
 @import "../../lib/os-gui/build/blue.css";
-@import url("https://fonts.googleapis.com/css?family=Charm|Princess+Sofia&display=swap");
+/* Google Fonts (Charm, Princess Sofia) removed for offline build; cursive fallback used */
 
 :root {
 	--theme-loaded: "winter.css";

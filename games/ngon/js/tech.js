@@ -159,6 +159,7 @@ const tech = {
                 }
                 const subject = tech.tech[index].name
                 getWikipediaIntro(subject).then(intro => {
+                    if (!intro) return; // offline build: Wikipedia fetch failed, skip quiz
                     let tab = window.open(`https://en.wikipedia.org/w/index.php?search=${encodeURIComponent(subject).replace(/' /g, '%27')}&title=Special:Search`, "_blank");
                     if (tab) {
                         let checkInterval = setInterval(() => {
@@ -14129,7 +14130,7 @@ const tech = {
                         requestAnimationFrame(loop)
                     });
                 };
-                script.src = 'https://unpkg.com/stats.js@0.17.0/build/stats.min.js';
+                script.src = 'lib/stats.min.js'; // vendored locally (was unpkg stats.js@0.17.0)
                 document.head.appendChild(script);
             })()
             //move health to the right

@@ -6987,7 +6987,7 @@ Object.assign(moreLevels, {
         document.body.style.backgroundColor = "#061026" //"#061026";
 
         var yy = new Image();
-        yy.src = 'https://raw.githubusercontent.com/Whyisthisnotavalable/image-yy/main/Hotpot6.png';
+        yy.src = 'assets/hotpot.png'; // local placeholder (upstream hotlink removed: unlicensed)
         color.map = "#FFFFFF11";
         color.bullet = "#FFFFFF";
         level.custom = () => {
@@ -10045,15 +10045,15 @@ Object.assign(moreLevels, {
 
 
         //SOUNDS
-        let thunder1 = new Audio('https://github.com/des-boot/n-gon-downpour-sound-effects/blob/main/thunder1.mp3?raw=true');
-        let chemicalLove = new Audio('https://github.com/des-boot/n-gon-downpour-sound-effects/blob/main/Chemical%20Love%20thunder.mp3?raw=true');
+        let thunder1 = new Audio('assets/silent.wav'); // local silence (upstream audio unlicensed, not vendored)
+        let chemicalLove = new Audio('assets/silent.wav');
         chemicalLove.play();
-        let thunder2 = new Audio('https://github.com/des-boot/n-gon-downpour-sound-effects/blob/main/thunder2.mp3?raw=true');
-        let thunder3 = new Audio('https://github.com/des-boot/n-gon-downpour-sound-effects/blob/main/thunder3.wav?raw=true');
-        let thunder4 = new Audio('https://github.com/des-boot/n-gon-downpour-sound-effects/blob/main/thunder4.wav?raw=true');
-        let ambiance1 = new Audio('https://github.com/des-boot/n-gon-downpour-sound-effects/blob/main/buzz%20(1).wav?raw=true');
-        let rain1 = new Audio('https://github.com/des-boot/n-gon-downpour-sound-effects/blob/main/light-rain-109591.mp3?raw=true');
-        let rain3 = new Audio('https://github.com/des-boot/n-gon-downpour-sound-effects/blob/main/8mb.video-ggm-Jd62jXAH.m4a?raw=true');
+        let thunder2 = new Audio('assets/silent.wav');
+        let thunder3 = new Audio('assets/silent.wav');
+        let thunder4 = new Audio('assets/silent.wav');
+        let ambiance1 = new Audio('assets/silent.wav');
+        let rain1 = new Audio('assets/silent.wav');
+        let rain3 = new Audio('assets/silent.wav');
         rain1.volume = 0.125;
         rain3.volume = 0.125;
         thunder1.volume = 0.25;
@@ -14083,7 +14083,7 @@ Object.assign(moreLevels, {
                 const omega = new Image(); //the seal hehe
                 let width = Math.random() * 40; //Math.max(Math.sin(m.cycle * 0.05), Math.cos(m.cycle * 0.05)) * 
                 let length = Math.random() * 40; //Math.max(Math.sin(m.cycle * 0.05), Math.cos(m.cycle * 0.05)) * 
-                omega.src = "https://raw.githubusercontent.com/Whyisthisnotavalable/image-yy/main/MOSHED-2023-4-20-12-55-58-removebg-preview.png"; //"https://raw.githubusercontent.com/Whyisthisnotavalable/image-yy/main/omegafr.png";
+                omega.src = "assets/omega.png"; // local placeholder (upstream hotlink removed: unlicensed)
                 ctx.drawImage(omega, 2775 + 50 - width, -650 - 50 - length, width * 2, length * 2)
                 ctx.save()
                 ctx.setLineDash([70 + 300 * Math.random(), 55 * Math.random()]);
@@ -16895,7 +16895,7 @@ Object.assign(moreLevels, {
                 n(o[l], e + 250 * l - Math.abs(1.5 * e), t)
             }
         }
-        simulation.inGameConsole(`<img src="https://raw.githubusercontent.com/Whyisthisnotavalable/image-yy/main/Hotpot-removed.png" width="100" height="100" style="background-image: radial-gradient(circle, gray, black, transparent)"><br>Look up<br><em>Walk right to tp to maze</em><br><b>Exit is at the bottom left</b>`), Matter.Body.scale(player.parts[3], 2, 2), level.custom = () => {
+        simulation.inGameConsole(`<img src="assets/hotpot-removed.png" width="100" height="100" style="background-image: radial-gradient(circle, gray, black, transparent)"><br>Look up<br><em>Walk right to tp to maze</em><br><b>Exit is at the bottom left</b>`), Matter.Body.scale(player.parts[3], 2, 2), level.custom = () => {
             if (level.exit.drawAndCheck(), level.enter.draw(), player.position.y > 1e5 && Matter.Body.setPosition(player, {
                 x: 5100,
                 y: -5925
@@ -20170,16 +20170,8 @@ Object.assign(moreLevels, {
                 effect() {
                     if (m.alive) {
                         if (lore.techCount > 0) {
-                            const connect = document.createElement("iframe");
-                            connect.src = "https://whyisthisnotavalable.github.io/n-gon-autobattler/tower/?event=undefined";
-                            connect.style.display = "none";
-                            document.body.appendChild(connect);
-                            connect.addEventListener("load", () => {
-                                simulation.inGameConsole(`<strong class="lore-text">connection established</strong><br>`);
-                                setTimeout(() => {
-                                    connect.remove();
-                                }, 1000);
-                            });
+                            // Offline build: external autobattler iframe removed; show message directly.
+                            simulation.inGameConsole(`<strong class="lore-text">connection established (offline)</strong><br>`);
                             if (lore.techCount > 1) {
                                 lore.techCount--;
                                 for (let i = 0; i < tech.tech.length; i++) {
@@ -30241,7 +30233,7 @@ Object.assign(moreLevels, {
         let balance4 = level.rotor(-475, -1275, 325, 25, 0.001, 0, 0.001, 0, 0.0001 * Math.random());
         let balance5 = level.rotor(-475, -725, 325, 25, 0.001, 0, 0.001, 0, -0.0001 * Math.random());
         let balance6 = level.rotor(100, -725, 300, 25, 0.001, 0, 0.001, 0, -0.0001 * Math.random());
-        const termSourceUrl = "https://raw.githubusercontent.com/Whyisthisnotavalable/n-scythe/aa91647ee6068775b5a9ef50444e30dd0751bc1c/multiplayer.js";
+        const termSourceUrl = "assets/silent.wav"; // offline build: remote source URL removed (kept for compat)
         const termBox = { x: 1000, y: -1375, w: 2000, h: 1175 };
         const termPad = 28;
         const termFontSize = 30;
@@ -30315,10 +30307,9 @@ Object.assign(moreLevels, {
         let fetchedLines = null;
         let termWaitingForFetch = false;
         let error = false;
-        fetch(termSourceUrl)
-            .then(res => res.text())
-            .then(text => { fetchedLines = text.replace(/\r\n/g, "\n").split("\n"); })
-            .catch(() => { fetchedLines = ["// couldn't reach remote source"]; error = true; });
+        // Offline build: remote multiplayer.js source not fetched; use local fallback (same as network-failure path).
+        fetchedLines = ["// offline build: remote source not fetched"];
+        error = true;
         function showFetchedContentWhenReady() {
             if (fetchedLines) {
                 setFlatLines(fetchedLines, playEndingSequence);
@@ -32416,7 +32407,7 @@ Object.assign(moreLevels, {
         document.body.style.backgroundColor = "#d8dadf";
         alternate(-50, -9050, 425, 100);
         const image = new Image()
-        image.src = "https://raw.githubusercontent.com/Whyisthisnotavalable/image-yy/main/Hotpot-removed.png";
+        image.src = "assets/hotpot-removed.png"; // local placeholder (upstream hotlink removed: unlicensed)
         level.chain(-675, 400, -0.4366271598, true, 20)
         level.chain(-1600, 125, 0.5144513131, true, 19)
         const portal = portall({
