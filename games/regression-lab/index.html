@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Regression Lab</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <header>
+    <div>
+      <h1>Regression Lab</h1>
+      <p>Click to add points, and the least-squares line follows. Slope = Σ(x−x̄)(y−ȳ)/Σ(x−x̄)² — the line that minimises the squared residuals. R² says how much of the scatter the line explains.</p>
+    </div>
+    <div class="hud">
+      <span id="slope-hud">slope —</span>
+      <span id="r2-hud">R² —</span>
+      <span id="rmse-hud">RMSE —</span>
+    </div>
+  </header>
+
+  <main>
+    <section class="stage">
+      <canvas id="scene" width="880" height="660"></canvas>
+      <p class="caption">Teal dots are your points, the green line is the least-squares fit, and the faint verticals are the residuals — the errors the line makes. The dashed line is the true line the points were generated from.</p>
+      <div class="legend">
+        <span><i class="sw-points"></i>points</span>
+        <span><i class="sw-fit"></i>least-squares fit</span>
+        <span><i class="sw-true"></i>true line</span>
+        <span><i class="sw-resid"></i>residuals</span>
+      </div>
+    </section>
+
+    <aside class="panel">
+      <label>
+        <span>True slope <b id="slopeT-out">1.50</b></span>
+        <input id="slopeT" type="range" min="-3" max="3" step="0.1" value="1.5" />
+      </label>
+      <label>
+        <span>True intercept <b id="intT-out">0.50</b></span>
+        <input id="intT" type="range" min="-3" max="3" step="0.1" value="0.5" />
+      </label>
+      <label>
+        <span>Noise σ <b id="noise-out">0.50</b></span>
+        <input id="noise" type="range" min="0" max="2" step="0.05" value="0.5" />
+      </label>
+      <label>
+        <span>Points <b id="n-out">20</b></span>
+        <input id="n" type="range" min="5" max="60" step="1" value="20" />
+      </label>
+
+      <div class="row">
+        <button id="preset-clean">Clean</button>
+        <button id="preset-noisy">Noisy</button>
+        <button id="preset-outlier">Outlier</button>
+        <button id="preset-flat">Flat</button>
+      </div>
+      <div class="row">
+        <button id="btn-regen" class="primary">Regenerate</button>
+        <button id="btn-clear">Clear</button>
+        <button id="toggle-resid" class="active">Residuals</button>
+      </div>
+
+      <div class="readouts">
+        <div><span>Slope</span><b id="slope-read">—</b></div>
+        <div><span>Intercept</span><b id="int-read">—</b></div>
+        <div><span>R²</span><b id="r2-read">—</b></div>
+        <div><span>RMSE</span><b id="rmse-read">—</b></div>
+        <div><span>Correlation r</span><b id="r-read">—</b></div>
+        <div><span>Points</span><b id="n-read">—</b></div>
+      </div>
+
+      <p id="status" class="status">With clean data the fit recovers the true line almost exactly. Noise scatters the points, but the least-squares line still lands near the truth — that is the whole point of the method.</p>
+      <p class="hint">Click the canvas to add a point. Keys 1–4 load presets, R regenerates, C clears. Try the outlier preset: one bad point drags the line, and R² drops.</p>
+    </aside>
+  </main>
+
+  <script src="app.js"></script>
+</body>
+</html>

@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Projectile Lab</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <header>
+    <div>
+      <h1>Projectile Lab</h1>
+      <p>Launch speed, angle and air drag set the flight. With no drag the range is v₀²·sin(2θ)/g — drag always steals distance, and the best angle drops below 45°.</p>
+    </div>
+    <div class="hud">
+      <span id="range-hud">range —</span>
+      <span id="apex-hud">apex —</span>
+      <span id="time-hud">flight —</span>
+    </div>
+  </header>
+
+  <main>
+    <section class="stage">
+      <canvas id="scene" width="880" height="660"></canvas>
+      <p class="caption">The cannon fires from the left. The dashed arc is the no-drag prediction; the solid trace is the real flight with drag. The flag marks where the shot lands.</p>
+      <div class="legend">
+        <span><i class="sw-flight"></i>flight</span>
+        <span><i class="sw-predict"></i>no-drag prediction</span>
+        <span><i class="sw-cannon"></i>cannon</span>
+        <span><i class="sw-flag"></i>landing flag</span>
+      </div>
+    </section>
+
+    <aside class="panel">
+      <label>
+        <span>Launch speed <b id="v0-out">35 m/s</b></span>
+        <input id="v0" type="range" min="10" max="60" step="1" value="35" />
+      </label>
+      <label>
+        <span>Launch angle <b id="angle-out">45°</b></span>
+        <input id="angle" type="range" min="5" max="85" step="1" value="45" />
+      </label>
+      <label>
+        <span>Drag coefficient <b id="drag-out">0.000</b></span>
+        <input id="drag" type="range" min="0" max="0.05" step="0.001" value="0" />
+      </label>
+
+      <div class="row">
+        <button id="preset-earth" class="active">Earth</button>
+        <button id="preset-mars">Mars</button>
+        <button id="preset-moon">Moon</button>
+        <button id="preset-jupiter">Jupiter</button>
+      </div>
+      <div class="row">
+        <button id="btn-launch" class="primary">Launch</button>
+        <button id="btn-reset">Reset</button>
+        <button id="toggle-trail" class="active">Trail</button>
+      </div>
+
+      <div class="readouts">
+        <div><span>Range</span><b id="range-read">—</b></div>
+        <div><span>Max height</span><b id="apex-read">—</b></div>
+        <div><span>Flight time</span><b id="time-read">—</b></div>
+        <div><span>Impact speed</span><b id="impact-read">—</b></div>
+        <div><span>No-drag range</span><b id="nodrag-read">—</b></div>
+        <div><span>Drag loss</span><b id="loss-read">—</b></div>
+      </div>
+
+      <p id="status" class="status">At 45° with no drag you get the longest range for a given speed. Add drag and the optimum angle slides lower — the shell spends more time in thin air near the top.</p>
+      <p class="hint">Drag on the canvas to aim, then Launch. Keys 1–4 switch planets, Space launches, R resets. Try Mars: same cannon, nearly triple the range.</p>
+    </aside>
+  </main>
+
+  <script src="app.js"></script>
+</body>
+</html>

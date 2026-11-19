@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>CLT Lab</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <header>
+    <div>
+      <h1>CLT Lab</h1>
+      <p>Roll n dice and add them up. One die is flat, two dice make a triangle, and by ten dice the histogram is already a bell curve — the central limit theorem in action.</p>
+    </div>
+    <div class="hud">
+      <span id="mean-hud">mean —</span>
+      <span id="sd-hud">sd —</span>
+      <span id="n-hud">dice —</span>
+    </div>
+  </header>
+
+  <main>
+    <section class="stage">
+      <canvas id="scene" width="880" height="660"></canvas>
+      <p class="caption">The histogram is the sum of n dice, rolled many times. The smooth curve is the normal distribution with the theoretical mean and standard deviation — watch the bars converge onto it as n grows.</p>
+      <div class="legend">
+        <span><i class="sw-hist"></i>histogram</span>
+        <span><i class="sw-normal"></i>normal curve</span>
+        <span><i class="sw-mean"></i>sample mean</span>
+      </div>
+    </section>
+
+    <aside class="panel">
+      <label>
+        <span>Dice per roll <b id="n-out">5</b></span>
+        <input id="n" type="range" min="1" max="20" step="1" value="5" />
+      </label>
+      <label>
+        <span>Samples <b id="samples-out">2000</b></span>
+        <input id="samples" type="range" min="200" max="5000" step="100" value="2000" />
+      </label>
+
+      <div class="row">
+        <button id="preset-d6" class="active">d6</button>
+        <button id="preset-d4">d4</button>
+        <button id="preset-d20">d20</button>
+      </div>
+      <div class="row">
+        <button id="btn-roll" class="primary">Roll</button>
+        <button id="toggle-normal" class="active">Normal</button>
+      </div>
+
+      <div class="readouts">
+        <div><span>Sample mean</span><b id="mean-read">—</b></div>
+        <div><span>Theory mean</span><b id="tmean-read">—</b></div>
+        <div><span>Sample sd</span><b id="sd-read">—</b></div>
+        <div><span>Theory sd</span><b id="tsd-read">—</b></div>
+        <div><span>Skewness</span><b id="skew-read">—</b></div>
+        <div><span>Samples</span><b id="samples-read">—</b></div>
+      </div>
+
+      <p id="status" class="status">One die is uniform. Two dice make a triangle. By five the bell is already visible — the sum of independent dice always tends to normal, whatever the die looks like.</p>
+      <p class="hint">Keys 1–3 switch dice (d6/d4/d20), Space rolls a fresh batch. Try d20 with 1 die: flat. Then 10 dice: a bell.</p>
+    </aside>
+  </main>
+
+  <script src="app.js"></script>
+</body>
+</html>
