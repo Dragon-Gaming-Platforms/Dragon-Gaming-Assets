@@ -1,0 +1,14 @@
+{
+  "name": "Signal Defender",
+  "desc": "A PCB-themed bullet-hell shooter with six modes, procedurally drawn art, synthesized audio, daily challenges, and local two-player Versus. English/Chinese language toggle and local saves; no external runtime dependencies.",
+  "controls": "Menus: mouse or tap. Move: WASD, arrow keys, or mouse drag; Shift dash; B EMP bomb; Space/P pause. Mobile: drag to move, second finger or bottom-left button to dash, bottom-right button to bomb. Versus: P1 WASD/Q/E, P2 arrows/Shift/Enter.",
+  "shelf": "Arcade & Action",
+  "tags": [
+    "arcade",
+    "bullet-hell",
+    "shooter",
+    "local-multiplayer",
+    "bilingual"
+  ],
+  "creator": "Jiacheng Wang"
+}
