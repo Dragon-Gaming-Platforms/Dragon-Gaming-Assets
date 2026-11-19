@@ -1,0 +1,15 @@
+{
+  "name": "Clawparty",
+  "desc": "A local party-game gauntlet for one human contestant against three CPU rivals. Compete across six quick rounds: carry pearls to your tidepool, score in Goal Rush, trace shapes, steal bones while the dog naps, count beach critters, and remember which tiles are safe. Shuffle the CPU lineup, practice any minigame, chase crowns, and resume an interrupted party from your browser. Canvas 2D, original bundled sprites, no build step, runtime libraries, accounts, or network requests.",
+  "controls": "WASD or arrow keys to move; Space or Enter to act (touch: on-screen joystick and action button)",
+  "shelf": "Arcade & Action",
+  "badge": "New",
+  "creator": "mmdmcy",
+  "tags": [
+    "arcade",
+    "party",
+    "minigames",
+    "cpu-opponents",
+    "canvas"
+  ]
+}
