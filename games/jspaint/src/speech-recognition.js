@@ -2047,9 +2047,7 @@ if (speech_recognition_available) {
 			// detect gradients / spread out histogram at least, and reject based on that
 			let image_url = results[~~(Math.random() * results.length)].image_url;
 			console.log("Using source image:", image_url);
-			if (!image_url.match(/^data:/)) {
-				image_url = `https://jspaint-cors-proxy.herokuapp.com/${image_url}`;
-			}
+			// Offline build: CORS proxy (jspaint-cors-proxy.herokuapp.com) removed; direct URL only.
 			const img = new Image();
 			img.crossOrigin = "Anonymous";
 			img.onerror = () => {
@@ -2085,8 +2083,15 @@ if (speech_recognition_available) {
 	}
 
 	function find_clipart(query) {
+		// Offline build: Bing clipart search removed (was via jspaint-cors-proxy.herokuapp.com).
+		// Reject with the same "no-results" shape so the caller shows "No clipart found".
+		return Promise.reject(Object.assign(
+			new Error(`failed to get clipart: offline build (no-results) for query '${query}'`),
+			{ code: "no-results" }
+		));
+		// Original implementation fetched https://www.bing.com/images/search via the CORS proxy (removed).
 		const bing_url = new URL(`https://www.bing.com/images/search?q=${encodeURIComponent(query)}&qft=+filterui:photo-clipart&FORM=IRFLTR`);
-		return fetch(`https://jspaint-cors-proxy.herokuapp.com/${bing_url}`)
+		return fetch(bing_url)
 			.then((response) => response.text())
 			.then((html) => {
 				// handle relative data-src

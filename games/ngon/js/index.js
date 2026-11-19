@@ -2176,29 +2176,9 @@ document.getElementById("updates").addEventListener("toggle", function () {
     let text = `<pre><strong>n-gon</strong>: <a href="https://github.com/landgreen/n-gon/blob/master/todo.txt">todo list</a>, complete <a href="https://github.com/landgreen/n-gon/commits/master">change-log</a>, commit <a href="https://www.cornbread2100.com/n-gon-loader">loader</a><hr>`
     document.getElementById("updates-div").innerHTML = text
 
-    ///  https://api.github.com/repos/landgreen/n-gon/stats/commit_activity
-    loadJSON('https://api.github.com/repos/landgreen/n-gon/commits',
-        function (data) {
-            // console.log(data[0].sha, lastShortHash)
-            // if (data[0].sha.substr(0, 7) === lastShortHash) {
-            //     text += "<br><em>https://github.com/landgreen/n-gon/</em>: hash matches latest version<hr>"
-            // } else {
-            //     text += "<br><em>https://github.com/landgreen/n-gon/</em>: hash does <strong>not</strong> match latest version<br><hr>"
-            // }
-            for (let i = 0, len = 20; i < len; i++) {
-                if (data[i].commit.message !== "quick bug fix") {
-                    text += "<strong>" + data[i].commit.author.date.substr(0, 10) + "</strong> - "; //+ "<br>"
-                    text += data[i].commit.message
-                    if (i < len - 1) text += "<hr>"
-                }
-            }
-            text += `</pre><hr><em>complete <a href="https://github.com/landgreen/n-gon/commits/master">change-log</a></em>`
-            document.getElementById("updates-div").innerHTML = text.replace(/\n/g, "<br />")
-        },
-        function (xhr) {
-            console.error(xhr);
-        }
-    );
+    // Offline build: GitHub API changelog fetch removed; show static note instead.
+    text += `</pre><hr><em>Offline build: changelog not fetched. See <a href="https://github.com/landgreen/n-gon/commits/master">change-log</a>.</em>`
+    document.getElementById("updates-div").innerHTML = text.replace(/\n/g, "<br />");
 })
 const sound = {
     tone(frequency, end = 1000, gain = 0.05) {

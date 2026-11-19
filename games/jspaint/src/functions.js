@@ -834,11 +834,10 @@ async function load_image_from_uri(uri) {
 		throw error;
 	}
 
+	// Offline build: CORS proxies removed (cors.bridged.cc, jspaint-cors-proxy.herokuapp.com).
+	// Direct URL + web.archive.org fallback only; downloads from CORS-blocked hosts will fail gracefully.
 	const uris_to_try = (is_download && !is_localhost) ? [
 		uri,
-		// work around CORS headers not sent by whatever server
-		`https://cors.bridged.cc/${uri}`,
-		`https://jspaint-cors-proxy.herokuapp.com/${uri}`,
 		// if the image isn't available on the live web, see if it's archived
 		`https://web.archive.org/${uri}`,
 	] : [uri];

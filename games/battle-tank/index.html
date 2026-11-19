@@ -6,7 +6,7 @@
 <meta charset="UTF-8" />
 <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<link href="https://fonts.googleapis.com/css2?family=Press+Start+2P&display=swap" rel="stylesheet">
+<!-- Press Start 2P vendored locally (OFL); see fonts/press-start-2p.woff2 -->
 <script src="js/jquery.min.js"></script>
 <script src="js/Helper.js"></script>
 <script src="js/keyboard.js"></script>
@@ -24,6 +24,13 @@
 <script src="js/main.js"></script>
 
 <style>
+  @font-face {
+    font-family: 'Press Start 2P';
+    font-style: normal;
+    font-display: swap;
+    font-weight: 400;
+    src: url('fonts/press-start-2p.woff2') format('woff2');
+  }
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
   body {

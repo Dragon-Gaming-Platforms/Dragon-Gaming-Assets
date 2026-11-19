@@ -170,48 +170,42 @@ clearAnswer = () => {
     //answerDefinition.innerText = '';
 }
 
-/* USE DICTIONARY API TO VALIDATE ANSWERS*/
+/* VALIDATE ANSWERS AGAINST LOCAL WORD LIST (offline build).
+   Upstream used https://api.dictionaryapi.dev (removed; see javascript/words.js). */
 
 
 validateWord = () => {
-    fetch(`https://api.dictionaryapi.dev/api/v2/entries/en/${selectedWord}`)
-        .then((response) => response.json())
-        .then((data) => {
-            if (data.title === 'No Definitions Found') {
-                notAWord();
-            }
-            else if (selectedWord.length < 3) {
-                notLongEnough();
-            }
-            else if (submittedAnswers.includes(selectedWord)) {
-                alreadyUsedWord();
-            }
-            else {
-                wordDefinition = `${data[0].word} - ${data[0].meanings[0].definitions[0].definition}`;
-                ans = `${data[0].word} - ${data[0].meanings[0].definitions[0].definition}`;
+    if (selectedWord.length < 3) {
+        notLongEnough();
+    }
+    else if (submittedAnswers.includes(selectedWord)) {
+        alreadyUsedWord();
+    }
+    else if (!WORD_SET.has(selectedWord.toUpperCase())) {
+        notAWord();
+    }
+    else {
+        wordDefinition = selectedWord;
+        ans = selectedWord;
 
-                ansDefinition.push(ans);
-                answerDefinition.innerHTML = ansDefinition.map(defi => {
-                    return `<li class="definition">${defi}</li>`
-                }).join("");
+        ansDefinition.push(ans);
+        answerDefinition.innerHTML = ansDefinition.map(defi => {
+            return `<li class="definition">${defi}</li>`
+        }).join("");
 
-                answerDefinition.innerHTML = `${ans}`;
+        answerDefinition.innerHTML = `${ans}`;
 
-
-1000
-
-                submittedAnswers.push(selectedWord);
-                acceptedAnswers.innerHTML = submittedAnswers.map(answer => {
-                    return `<li class="submitted-answers">${answer}</li>`
-                }).join("");
-                answerWindow.classList.add('right-answer')
-                answerWindow.innerText = selectedWord;
-                individualWordScore();
-                setTimeout(() => {
-                    clearAnswer();
-                }, 200);
-            };
-        });
+        submittedAnswers.push(selectedWord);
+        acceptedAnswers.innerHTML = submittedAnswers.map(answer => {
+            return `<li class="submitted-answers">${answer}</li>`
+        }).join("");
+        answerWindow.classList.add('right-answer')
+        answerWindow.innerText = selectedWord;
+        individualWordScore();
+        setTimeout(() => {
+            clearAnswer();
+        }, 200);
+    };
 }
 
 notAWord = () => {

@@ -95,7 +95,7 @@ a[href^="https://98.js.org"]:focus #wooden-window-frame {
 }
 
 #windows-98-section {
-	background-image: url("https://raw.githubusercontent.com/1j01/98/361bd759a6d9b71d0fad9e479840598dc0128bb6/images/clouds.jpg");
+	background-image: url("../help/clouds.jpg");
 	background-color: rgb(100, 163, 214);
 	background-size: cover;
 	background-position: center center;

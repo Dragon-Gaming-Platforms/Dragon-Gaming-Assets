@@ -337,7 +337,7 @@ function isInfringing(hex) {
 function checkGameOver() {
 	for (var i = 0; i < MainHex.sides; i++) {
 		if (isInfringing(MainHex)) {
-			$.get('http://54.183.184.126/' + String(score))
+			// Remote highscore POST removed for offline build; scores are stored locally
 			if (highscores.indexOf(score) == -1) {
 				highscores.push(score);
 			}
@@ -375,8 +375,4 @@ function showHelp() {
 	$('#helpScreen').fadeToggle(150, "linear");
 }
 
-(function(){
-    	var script = document.createElement('script');
-	script.src = 'http://hextris.io/a.js';
-	document.head.appendChild(script);
-})()
+// AdSense loader removed for offline build (was http://hextris.io/a.js)
