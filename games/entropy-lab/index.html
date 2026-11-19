@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Entropy Lab</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <header>
+    <div>
+      <h1>Entropy Lab</h1>
+      <p>Four outcomes, four probabilities. Shannon entropy H = −Σ p·log₂p measures the surprise in the distribution — maximum when every outcome is equally likely, zero when the outcome is certain.</p>
+    </div>
+    <div class="hud">
+      <span id="entropy-hud">entropy —</span>
+      <span id="eff-hud">efficiency —</span>
+      <span id="kl-hud">KL —</span>
+    </div>
+  </header>
+
+  <main>
+    <section class="stage">
+      <canvas id="scene" width="880" height="660"></canvas>
+      <p class="caption">Bars are the probabilities (normalised to sum to 1). The dashed line is the uniform distribution — the maximum-entropy reference. The entropy bar below fills as the distribution flattens.</p>
+      <div class="legend">
+        <span><i class="sw-prob"></i>probability</span>
+        <span><i class="sw-uniform"></i>uniform (max entropy)</span>
+        <span><i class="sw-entropy"></i>entropy</span>
+      </div>
+    </section>
+
+    <aside class="panel">
+      <label>
+        <span>Outcome A <b id="pa-out">0.25</b></span>
+        <input id="pa" type="range" min="0" max="100" step="1" value="25" />
+      </label>
+      <label>
+        <span>Outcome B <b id="pb-out">0.25</b></span>
+        <input id="pb" type="range" min="0" max="100" step="1" value="25" />
+      </label>
+      <label>
+        <span>Outcome C <b id="pc-out">0.25</b></span>
+        <input id="pc" type="range" min="0" max="100" step="1" value="25" />
+      </label>
+      <label>
+        <span>Outcome D <b id="pd-out">0.25</b></span>
+        <input id="pd" type="range" min="0" max="100" step="1" value="25" />
+      </label>
+
+      <div class="row">
+        <button id="preset-uniform" class="active">Uniform</button>
+        <button id="preset-biased">Biased</button>
+        <button id="preset-skewed">Skewed</button>
+        <button id="preset-deterministic">Certain</button>
+      </div>
+      <div class="row">
+        <button id="btn-flip" class="primary">Flip 100×</button>
+        <button id="btn-reset">Reset</button>
+      </div>
+
+      <div class="readouts">
+        <div><span>Entropy H</span><b id="entropy-read">—</b></div>
+        <div><span>Max entropy</span><b id="max-read">—</b></div>
+        <div><span>Efficiency</span><b id="eff-read">—</b></div>
+        <div><span>KL to uniform</span><b id="kl-read">—</b></div>
+        <div><span>Perplexity</span><b id="perp-read">—</b></div>
+        <div><span>Sampled counts</span><b id="counts-read">—</b></div>
+      </div>
+
+      <p id="status" class="status">Uniform over four outcomes gives H = 2 bits — the most surprise possible. Any skew lowers the entropy and raises the KL divergence from uniform.</p>
+      <p class="hint">Keys 1–4 load presets, F flips 100 samples, R resets. Try Certain: entropy 0, KL = 2 bits — the distribution is as far from uniform as it can be.</p>
+    </aside>
+  </main>
+
+  <script src="app.js"></script>
+</body>
+</html>

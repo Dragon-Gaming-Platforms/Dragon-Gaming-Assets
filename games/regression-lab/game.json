@@ -1,0 +1,15 @@
+{
+  "name": "Regression Lab",
+  "desc": "A least-squares regression lab: true-slope, intercept, noise and point-count sliders drive the data, with the fitted line, R², RMSE and residuals shown live.",
+  "controls": "True-slope, intercept, noise and point-count sliders, four presets (clean/noisy/outlier/flat), regenerate/clear buttons, residuals toggle, click-to-add-points; keys 1–4 load presets, R regenerates, C clears",
+  "shelf": "Interactive Stories & Experiments",
+  "tags": [
+    "games",
+    "html5",
+    "statistics",
+    "regression",
+    "mathematics"
+  ],
+  "badge": "New",
+  "creator": "Original build (Dragon Gaming Assets)"
+}

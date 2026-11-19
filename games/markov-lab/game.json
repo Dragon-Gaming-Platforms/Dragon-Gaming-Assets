@@ -1,0 +1,15 @@
+{
+  "name": "Markov Lab",
+  "desc": "A word-level Markov chain lab: chain order, temperature and length sliders drive text generation from a built-in corpus, with the transition matrix shown as a heatmap.",
+  "controls": "Chain-order, temperature and length sliders, three order presets, generate/retrain buttons, heatmap toggle; keys 1–3 set the order, G generates, R retrains",
+  "shelf": "Interactive Stories & Experiments",
+  "tags": [
+    "games",
+    "html5",
+    "language",
+    "probability",
+    "mathematics"
+  ],
+  "badge": "New",
+  "creator": "Original build (Dragon Gaming Assets)"
+}
