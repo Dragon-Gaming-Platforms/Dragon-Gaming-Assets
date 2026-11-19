@@ -1,0 +1,15 @@
+{
+  "name": "Fifteen Puzzle",
+  "desc": "Slide numbered tiles into order around a blank space. Eight 3×3 and sixteen 4×4 shuffled starts, each reachable from the solved board.",
+  "controls": "Mouse / touch to slide a tile beside the blank; arrow keys move the blank",
+  "shelf": "Puzzle & Logic",
+  "tags": [
+    "games",
+    "html5",
+    "puzzle",
+    "sliding",
+    "original"
+  ],
+  "badge": "New",
+  "creator": "Dragon Gaming Platforms"
+}

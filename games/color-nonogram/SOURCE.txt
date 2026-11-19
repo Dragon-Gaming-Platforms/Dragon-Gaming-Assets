@@ -1,0 +1,9 @@
+Colour Nonogram — original independent implementation and 24-puzzle pack
+Created: 2026-10-17
+License: MIT; see LICENSE.
+Source: https://github.com/Dragon-Gaming-Platforms/Dragon-Gaming-Assets/tree/main/games/color-nonogram
+
+Original rules, controller, renderer and generated puzzle data. No code, art, fonts,
+puzzle data or assets were copied from any third party, and no runtime dependencies or
+network services are used. Puzzle-type names are descriptive; no publisher affiliation.
+Pack and checks are described in the game's How to play dialog.

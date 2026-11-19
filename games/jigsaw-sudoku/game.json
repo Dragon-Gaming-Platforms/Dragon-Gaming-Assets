@@ -1,0 +1,16 @@
+{
+  "name": "Jigsaw Sudoku",
+  "desc": "Fill each row, column and irregular region with 1–9 once. 24 original puzzles in three clue tiers, each verified to have one solution.",
+  "controls": "Mouse / touch with keypad; keys 1–9 enter, 0 or Delete erases, arrows move",
+  "shelf": "Puzzle & Logic",
+  "tags": [
+    "games",
+    "html5",
+    "puzzle",
+    "logic",
+    "sudoku",
+    "original"
+  ],
+  "badge": "New",
+  "creator": "Dragon Gaming Platforms"
+}

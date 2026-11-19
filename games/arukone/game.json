@@ -1,0 +1,16 @@
+{
+  "name": "Arukone",
+  "desc": "Draw one path for each coloured pair so the paths cover the whole grid without crossing. 24 original puzzles at 5×5 and 6×6.",
+  "controls": "Mouse / touch: drag from a coloured dot to its partner dot",
+  "shelf": "Puzzle & Logic",
+  "tags": [
+    "games",
+    "html5",
+    "puzzle",
+    "logic",
+    "paths",
+    "original"
+  ],
+  "badge": "New",
+  "creator": "Dragon Gaming Platforms"
+}
