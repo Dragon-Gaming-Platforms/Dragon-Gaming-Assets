@@ -1,0 +1,15 @@
+{
+  "name": "Spring Lab",
+  "desc": "A driven mass-spring-damper: mass, stiffness, damping and drive sliders drive the natural frequency, damping ratio and resonance amplitude.",
+  "controls": "Mass, stiffness, damping, drive-frequency and drive-amplitude sliders, five damping/resonance presets, play/pause, kick and reset; keys 1–5 load presets, Space pauses, K kicks, R resets",
+  "shelf": "Interactive Stories & Experiments",
+  "tags": [
+    "games",
+    "html5",
+    "physics",
+    "oscillation",
+    "mathematics"
+  ],
+  "badge": "New",
+  "creator": "Original build (Dragon Gaming Assets)"
+}

@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Sat Lab</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <header>
+    <div>
+      <h1>Sat Lab</h1>
+      <p>Keplerian orbits around Earth: change the semi-major axis, eccentricity and inclination and watch the period, the apoapsis/periapsis velocities and the ground track respond.</p>
+    </div>
+    <div class="hud">
+      <span id="period-hud">period —</span>
+      <span id="alt-hud">altitude —</span>
+      <span id="vel-hud">velocity —</span>
+    </div>
+  </header>
+
+  <main>
+    <section class="stage">
+      <canvas id="scene" width="880" height="660"></canvas>
+      <p class="caption">Top: the orbit as seen from above the ecliptic (Earth at the focus, not the centre). Bottom: the ground track — longitude vs latitude as the satellite passes over the rotating Earth.</p>
+      <div class="legend">
+        <span><i class="sw-orbit"></i>orbit</span>
+        <span><i class="sw-sat"></i>satellite</span>
+        <span><i class="sw-track"></i>ground track</span>
+        <span><i class="sw-earth"></i>Earth</span>
+      </div>
+    </section>
+
+    <aside class="panel">
+      <label>
+        <span>Semi-major axis a <b id="a-out">1.10 R⊕</b></span>
+        <input id="a" type="range" min="1.05" max="7" step="0.01" value="1.1" />
+      </label>
+      <label>
+        <span>Eccentricity e <b id="e-out">0.010</b></span>
+        <input id="e" type="range" min="0" max="0.9" step="0.005" value="0.01" />
+      </label>
+      <label>
+        <span>Inclination i <b id="i-out">51.6°</b></span>
+        <input id="i" type="range" min="0" max="90" step="0.5" value="51.6" />
+      </label>
+      <label>
+        <span>Time scale <b id="speed-out">60×</b></span>
+        <input id="speed" type="range" min="1" max="600" step="1" value="60" />
+      </label>
+
+      <div class="row">
+        <button id="preset-leo" class="active">LEO</button>
+        <button id="preset-iss">ISS</button>
+        <button id="preset-geo">GEO</button>
+        <button id="preset-molniya">Molniya</button>
+        <button id="preset-gto">GTO</button>
+      </div>
+      <div class="row">
+        <button id="toggle-play" class="active">Pause</button>
+        <button id="toggle-track" class="active">Ground track</button>
+      </div>
+
+      <div class="readouts">
+        <div><span>Period</span><b id="period-read">—</b></div>
+        <div><span>Apoapsis alt</span><b id="apo-read">—</b></div>
+        <div><span>Periapsis alt</span><b id="peri-read">—</b></div>
+        <div><span>v at periapsis</span><b id="vperi-read">—</b></div>
+        <div><span>v at apoapsis</span><b id="vapo-read">—</b></div>
+        <div><span>Altitude now</span><b id="alt-read">—</b></div>
+        <div><span>Velocity now</span><b id="vel-read">—</b></div>
+        <div><span>Latitude now</span><b id="lat-read">—</b></div>
+      </div>
+
+      <p id="status" class="status">Kepler's third law: the period grows as a^1.5 — doubling the semi-major axis multiplies the period by 2.83, and the apoapsis velocity falls as the orbit stretches.</p>
+      <p class="hint">Keys 1–5 load presets, Space pauses, T toggles the ground track. The satellite starts at periapsis.</p>
+    </aside>
+  </main>
+
+  <script src="app.js"></script>
+</body>
+</html>

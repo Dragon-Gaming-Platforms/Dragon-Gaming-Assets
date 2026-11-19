@@ -1,0 +1,15 @@
+{
+  "name": "K-Means Lab",
+  "desc": "A k-means clustering lab: k, point-count and blob-spread sliders drive Lloyd's algorithm over Gaussian blobs, with inertia tracked every iteration.",
+  "controls": "Cluster-count, point-count and blob-spread sliders, four presets (2/3/4 blobs, rings), step/run/reset buttons, draggable centres; keys 1–4 load presets, S steps, G runs, R resets",
+  "shelf": "Interactive Stories & Experiments",
+  "tags": [
+    "games",
+    "html5",
+    "machine-learning",
+    "clustering",
+    "mathematics"
+  ],
+  "badge": "New",
+  "creator": "Original build (Dragon Gaming Assets)"
+}
