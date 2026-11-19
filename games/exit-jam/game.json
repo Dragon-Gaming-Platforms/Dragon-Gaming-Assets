@@ -1,0 +1,16 @@
+{
+  "name": "Exit Jam",
+  "desc": "Slide cars and trucks so the red target car can leave through the right exit. 24 original boards with exact shortest-slide hints.",
+  "controls": "Mouse, touch or keyboard: drag a car, or select with Enter and slide with arrow keys",
+  "shelf": "Puzzle & Logic",
+  "tags": [
+    "games",
+    "html5",
+    "puzzle",
+    "logic",
+    "sliding",
+    "original"
+  ],
+  "badge": "New",
+  "creator": "Dragon Gaming Platforms"
+}
