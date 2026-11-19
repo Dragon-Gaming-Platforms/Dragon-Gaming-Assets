@@ -1,0 +1,13 @@
+{
+  "name": "Defender",
+  "desc": "An unaffiliated arcade homage: fly through a wraparound world, shoot invading aliens, and rescue the humanoids they abduct. Original code-drawn graphics and synthesized sound; no external assets or runtime dependencies.",
+  "controls": "Enter start; Left/Right arrows steer; Z thrust; X reverse/flip; Q/A or Up/Down climb/dive; Space or Ctrl fire; S or Shift smart bomb; H hyperspace; P pause; M mute. Touch controls on phones (landscape recommended).",
+  "shelf": "Arcade & Action",
+  "tags": [
+    "arcade",
+    "shooter",
+    "rescue",
+    "canvas"
+  ],
+  "creator": "GarethDaviesLondon"
+}
