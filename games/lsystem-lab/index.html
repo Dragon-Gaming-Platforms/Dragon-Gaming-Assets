@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>L-System Lab</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <header>
+    <div>
+      <h1>L-System Lab</h1>
+      <p>An axiom and a few rewrite rules, applied again and again, grow into fractals. A turtle reads the string — F draws, + and − turn — and the curve appears.</p>
+    </div>
+    <div class="hud">
+      <span id="len-hud">string —</span>
+      <span id="seg-hud">segments —</span>
+      <span id="dim-hud">dimension —</span>
+    </div>
+  </header>
+
+  <main>
+    <section class="stage">
+      <canvas id="scene" width="880" height="660"></canvas>
+      <p class="caption">Each Grow step replaces every symbol by its rule. The turtle then walks the string: F steps forward, +/− turn by the angle, [ pushes and ] pops the stack (for branches).</p>
+      <div class="legend">
+        <span><i class="sw-curve"></i>curve</span>
+        <span><i class="sw-axiom"></i>axiom</span>
+      </div>
+    </section>
+
+    <aside class="panel">
+      <label>
+        <span>Iterations <b id="iter-out">4</b></span>
+        <input id="iter" type="range" min="1" max="12" step="1" value="4" />
+      </label>
+      <label>
+        <span>Turn angle <b id="angle-out">90°</b></span>
+        <input id="angle" type="range" min="10" max="180" step="1" value="90" />
+      </label>
+
+      <div class="row">
+        <button id="preset-koch" class="active">Koch</button>
+        <button id="preset-dragon">Dragon</button>
+        <button id="preset-plant">Plant</button>
+        <button id="preset-sierpinski">Sierpinski</button>
+      </div>
+      <div class="row">
+        <button id="btn-grow" class="primary">Grow</button>
+        <button id="btn-reset">Reset</button>
+      </div>
+
+      <div class="readouts">
+        <div><span>String length</span><b id="len-read">—</b></div>
+        <div><span>Segments</span><b id="seg-read">—</b></div>
+        <div><span>Total length</span><b id="tot-read">—</b></div>
+        <div><span>Dimension est.</span><b id="dim-read">—</b></div>
+        <div><span>Iterations</span><b id="iter-read">—</b></div>
+        <div><span>Rule</span><b id="rule-read">—</b></div>
+      </div>
+
+      <p id="status" class="status">Koch: each segment becomes four segments at one-third the length, so the dimension is log(4)/log(3) ≈ 1.26 — between a line and a plane.</p>
+      <p class="hint">Keys 1–4 load presets, Space grows one iteration, R resets. Try the Plant at 6 iterations: the brackets branch the turtle, and a fern appears.</p>
+    </aside>
+  </main>
+
+  <script src="app.js"></script>
+</body>
+</html>

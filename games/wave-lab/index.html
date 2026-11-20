@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Wave Lab</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <header>
+    <div>
+      <h1>Wave Lab</h1>
+      <p>A string fixed at both ends, plucked and released. It vibrates as a sum of standing-wave modes — the fundamental plus harmonics at fₙ = n·c/(2L) — and the pluck position decides which harmonics sound.</p>
+    </div>
+    <div class="hud">
+      <span id="f1-hud">f₁ —</span>
+      <span id="c-hud">speed —</span>
+      <span id="modes-hud">modes —</span>
+    </div>
+  </header>
+
+  <main>
+    <section class="stage">
+      <canvas id="scene" width="880" height="660"></canvas>
+      <p class="caption">The string is the sum of its modes. Faint lines show the first three mode shapes — pluck at the centre and only odd harmonics survive, because the even modes have a node there.</p>
+      <div class="legend">
+        <span><i class="sw-string"></i>string</span>
+        <span><i class="sw-mode"></i>mode shapes</span>
+        <span><i class="sw-pluck"></i>pluck point</span>
+      </div>
+    </section>
+
+    <aside class="panel">
+      <label>
+        <span>Tension <b id="tension-out">100 N</b></span>
+        <input id="tension" type="range" min="20" max="400" step="5" value="100" />
+      </label>
+      <label>
+        <span>Linear density <b id="mu-out">0.010 kg/m</b></span>
+        <input id="mu" type="range" min="0.002" max="0.05" step="0.001" value="0.01" />
+      </label>
+      <label>
+        <span>Pluck position <b id="pluck-out">0.50 L</b></span>
+        <input id="pluck" type="range" min="0.1" max="0.9" step="0.01" value="0.5" />
+      </label>
+      <label>
+        <span>Damping <b id="damp-out">0.10 /s</b></span>
+        <input id="damp" type="range" min="0" max="1" step="0.02" value="0.1" />
+      </label>
+
+      <div class="row">
+        <button id="preset-guitar" class="active">Guitar</button>
+        <button id="preset-violin">Violin</button>
+        <button id="preset-bass">Bass</button>
+        <button id="preset-harp">Harp</button>
+      </div>
+      <div class="row">
+        <button id="btn-pluck" class="primary">Pluck</button>
+        <button id="toggle-modes" class="active">Modes</button>
+      </div>
+
+      <div class="readouts">
+        <div><span>Wave speed c</span><b id="c-read">—</b></div>
+        <div><span>Fundamental f₁</span><b id="f1-read">—</b></div>
+        <div><span>2nd harmonic</span><b id="f2-read">—</b></div>
+        <div><span>3rd harmonic</span><b id="f3-read">—</b></div>
+        <div><span>Period T₁</span><b id="t1-read">—</b></div>
+        <div><span>Strongest mode</span><b id="strong-read">—</b></div>
+      </div>
+
+      <p id="status" class="status">Pluck at the centre and the even harmonics vanish — their nodes sit exactly where your finger is. Move the pluck and a different set of harmonics sounds.</p>
+      <p class="hint">Drag on the string to set the pluck point. Keys 1–4 load presets, Space plucks. Try plucking at 0.33 L: every third harmonic disappears.</p>
+    </aside>
+  </main>
+
+  <script src="app.js"></script>
+</body>
+</html>

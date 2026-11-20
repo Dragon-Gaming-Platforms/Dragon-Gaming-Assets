@@ -1,0 +1,15 @@
+{
+  "name": "Wave Lab",
+  "desc": "A vibrating-string lab: tension, density, pluck position and damping drive the standing-wave modes, with harmonic frequencies and the pluck-point node rule shown live.",
+  "controls": "Tension, density, pluck-position and damping sliders, four presets (guitar/violin/bass/harp), pluck button, modes toggle, click-to-set-pluck; keys 1–4 load presets, Space plucks",
+  "shelf": "Interactive Stories & Experiments",
+  "tags": [
+    "games",
+    "html5",
+    "physics",
+    "waves",
+    "mathematics"
+  ],
+  "badge": "New",
+  "creator": "Original build (Dragon Gaming Assets)"
+}

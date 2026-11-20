@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Mandelbrot Lab</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <header>
+    <div>
+      <h1>Mandelbrot Lab</h1>
+      <p>For each pixel, iterate z → z² + c and see whether it escapes. The points that never escape form the Mandelbrot set — infinite detail at every scale.</p>
+    </div>
+    <div class="hud">
+      <span id="c-hud">c —</span>
+      <span id="iter-hud">iters —</span>
+      <span id="zoom-hud">zoom —</span>
+    </div>
+  </header>
+
+  <main>
+    <section class="stage">
+      <canvas id="scene" width="880" height="660"></canvas>
+      <p class="caption">Black is the set (never escapes). Colours show how fast the orbit escapes — the bands are level curves of the escape time. Drag to pan, scroll or use +/− to zoom.</p>
+      <div class="legend">
+        <span><i class="sw-set"></i>in the set</span>
+        <span><i class="sw-escape"></i>escapes</span>
+        <span><i class="sw-cursor"></i>cursor c</span>
+      </div>
+    </section>
+
+    <aside class="panel">
+      <label>
+        <span>Max iterations <b id="maxiter-out">80</b></span>
+        <input id="maxiter" type="range" min="20" max="300" step="10" value="80" />
+      </label>
+      <label>
+        <span>Zoom <b id="zoom-out">1.0×</b></span>
+        <input id="zoom" type="range" min="1" max="50" step="0.5" value="1" />
+      </label>
+
+      <div class="row">
+        <button id="preset-full" class="active">Full set</button>
+        <button id="preset-seahorse">Seahorse</button>
+        <button id="preset-elephant">Elephant</button>
+        <button id="preset-spiral">Spiral</button>
+      </div>
+      <div class="row">
+        <button id="btn-zoomin" class="primary">Zoom in</button>
+        <button id="btn-zoomout">Zoom out</button>
+        <button id="btn-reset">Reset</button>
+      </div>
+
+      <div class="readouts">
+        <div><span>Cursor c</span><b id="c-read">—</b></div>
+        <div><span>Escape iters</span><b id="iter-read">—</b></div>
+        <div><span>In set?</span><b id="set-read">—</b></div>
+        <div><span>Zoom</span><b id="zoom-read">—</b></div>
+        <div><span>Center</span><b id="center-read">—</b></div>
+        <div><span>Width</span><b id="width-read">—</b></div>
+      </div>
+
+      <p id="status" class="status">The main cardioid is the set of c where the orbit stays bounded. Zoom into the boundary and new copies of the whole set appear — the set is fractal.</p>
+      <p class="hint">Drag to pan, scroll to zoom, +/− keys zoom. Keys 1–4 load presets, R resets. Try Seahorse valley: the spiral is a miniature of the whole set.</p>
+    </aside>
+  </main>
+
+  <script src="app.js"></script>
+</body>
+</html>
