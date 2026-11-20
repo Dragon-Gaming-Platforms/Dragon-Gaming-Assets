@@ -1,0 +1,14 @@
+{
+  "name": "Tabletop Turbo",
+  "desc": "An unaffiliated top-down racer across four miniature circuits: choose one of four balanced cars and race three AI rivals through desk, breakfast, garden, and pool courses. Drift, use chevron boosts, and dodge spills; the 3D scenery and sound are generated at runtime.",
+  "controls": "↑/W accelerate; ↓/S brake or reverse; ←/→ or A/D steer; Space handbrake/drift; P/Esc pause; R restart; M mute; Enter confirm/next.",
+  "shelf": "Arcade & Action",
+  "tags": [
+    "racing",
+    "arcade",
+    "top-down",
+    "3d",
+    "ai-opponents"
+  ],
+  "creator": "Jovan Veljanoski"
+}
