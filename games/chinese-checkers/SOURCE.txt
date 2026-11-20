@@ -1,0 +1,9 @@
+Chinese Checkers — original independent implementation
+Created: 2026-10-17
+License: MIT; see LICENSE.
+Source: https://github.com/Dragon-Gaming-Platforms/Dragon-Gaming-Assets/tree/main/games/chinese-checkers
+
+Original rules, move generator, computer opponent, renderer and styles. The star-board
+layout and hop rules are the public-domain general rules of the game; no code, art,
+artwork or assets were copied from any third party, and no runtime dependencies or
+network services are used. The game name is descriptive; no publisher affiliation.

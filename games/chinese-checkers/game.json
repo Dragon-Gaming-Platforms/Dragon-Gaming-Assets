@@ -1,0 +1,9 @@
+{
+  "name": "Chinese Checkers",
+  "desc": "Race ten marbles across the six-pointed star to the opposite point. Play a friend or a computer opponent with three levels. Original implementation, MIT.",
+  "controls": "Mouse / touch: select a marble, then a highlighted hole; keyboard: Tab and Enter",
+  "shelf": "Strategy & Idle",
+  "tags": ["games", "html5", "board", "strategy", "original"],
+  "badge": "New",
+  "creator": "Dragon Gaming Platforms"
+}
