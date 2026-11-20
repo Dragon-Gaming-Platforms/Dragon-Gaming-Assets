@@ -1,0 +1,15 @@
+{
+  "name": "Recursion Lab",
+  "desc": "A recursion lab: Tower of Hanoi, Fibonacci call tree and factorial chain, with call counts, depth and optimal-move readouts.",
+  "controls": "Disk-count and Fibonacci-n sliders, three presets (Hanoi/Fibonacci/Factorial), step/run/reset buttons; keys 1–3 switch demos, Space steps, G runs, R resets",
+  "shelf": "Interactive Stories & Experiments",
+  "tags": [
+    "games",
+    "html5",
+    "recursion",
+    "algorithms",
+    "mathematics"
+  ],
+  "badge": "New",
+  "creator": "Original build (Dragon Gaming Assets)"
+}

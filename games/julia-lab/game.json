@@ -1,0 +1,15 @@
+{
+  "name": "Julia Lab",
+  "desc": "A Julia-set explorer: fix c and vary the starting point z0, rendering the filled Julia set with escape-time coloring and connectedness readouts.",
+  "controls": "c-real, c-imag and max-iterations sliders, four presets (rabbit/siegel/spiral/dendrite), reset button, move cursor to probe z0; keys 1–4 load presets, R resets",
+  "shelf": "Interactive Stories & Experiments",
+  "tags": [
+    "games",
+    "html5",
+    "fractals",
+    "complex-numbers",
+    "mathematics"
+  ],
+  "badge": "New",
+  "creator": "Original build (Dragon Gaming Assets)"
+}

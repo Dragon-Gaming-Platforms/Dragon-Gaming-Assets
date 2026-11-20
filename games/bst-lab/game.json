@@ -1,0 +1,15 @@
+{
+  "name": "BST Lab",
+  "desc": "An AVL-tree lab: a self-balancing binary search tree with rotations after every insert and delete, showing height, balance factors and the AVL height bound live.",
+  "controls": "Insert-count and value-range sliders, three presets (random/sorted/reverse), insert/delete/search/clear buttons, balance-factor toggle; keys 1–3 load presets, I inserts, D deletes, S searches, C clears",
+  "shelf": "Interactive Stories & Experiments",
+  "tags": [
+    "games",
+    "html5",
+    "data-structures",
+    "trees",
+    "mathematics"
+  ],
+  "badge": "New",
+  "creator": "Original build (Dragon Gaming Assets)"
+}

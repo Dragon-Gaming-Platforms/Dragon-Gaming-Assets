@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Logistic Lab</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <header>
+    <div>
+      <h1>Logistic Lab</h1>
+      <p>One line of maths — x → r·x(1−x) — and a slider. Turn r up and the population settles, then oscillates with period 2, 4, 8… then dissolves into chaos.</p>
+    </div>
+    <div class="hud">
+      <span id="r-hud">r —</span>
+      <span id="period-hud">period —</span>
+      <span id="lyap-hud">Lyapunov —</span>
+    </div>
+  </header>
+
+  <main>
+    <section class="stage">
+      <canvas id="scene" width="880" height="660"></canvas>
+      <p class="caption">The bifurcation diagram: for each r, the long-run values of x. One line is a fixed point, two lines a period-2 cycle, a cloud is chaos. The dashed line is the fixed point x* = 1 − 1/r.</p>
+      <div class="legend">
+        <span><i class="sw-attractor"></i>attractor</span>
+        <span><i class="sw-fixed"></i>fixed point</span>
+        <span><i class="sw-series"></i>time series</span>
+      </div>
+    </section>
+
+    <aside class="panel">
+      <label>
+        <span>Parameter r <b id="r-out">3.90</b></span>
+        <input id="r" type="range" min="2.5" max="4" step="0.005" value="3.9" />
+      </label>
+      <label>
+        <span>Start x₀ <b id="x0-out">0.50</b></span>
+        <input id="x0" type="range" min="0.05" max="0.95" step="0.01" value="0.5" />
+      </label>
+
+      <div class="row">
+        <button id="preset-fixed" class="active">Fixed</button>
+        <button id="preset-period2">Period-2</button>
+        <button id="preset-period4">Period-4</button>
+        <button id="preset-chaos">Chaos</button>
+      </div>
+      <div class="row">
+        <button id="toggle-series" class="active">Time series</button>
+        <button id="btn-reset">Reset</button>
+      </div>
+
+      <div class="readouts">
+        <div><span>Fixed point x*</span><b id="fixed-read">—</b></div>
+        <div><span>Period</span><b id="period-read">—</b></div>
+        <div><span>Lyapunov λ</span><b id="lyap-read">—</b></div>
+        <div><span>Attractor pts</span><b id="pts-read">—</b></div>
+        <div><span>Current x</span><b id="x-read">—</b></div>
+        <div><span>Iterations</span><b id="iter-read">—</b></div>
+      </div>
+
+      <p id="status" class="status">At r = 3.9 the map is chaotic: nearby starts diverge exponentially (Lyapunov exponent positive), so long-term prediction is impossible even though the rule is deterministic.</p>
+      <p class="hint">Keys 1–4 load presets, R resets. Sweep r slowly from 2.8 to 4.0 and watch the single line split into two, then four, then a cloud — the period-doubling route to chaos.</p>
+    </aside>
+  </main>
+
+  <script src="app.js"></script>
+</body>
+</html>
