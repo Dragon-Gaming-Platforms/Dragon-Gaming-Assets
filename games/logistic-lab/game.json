@@ -1,0 +1,15 @@
+{
+  "name": "Logistic Lab",
+  "desc": "A logistic-map lab: the r slider sweeps the bifurcation diagram from fixed point through period-doubling to chaos, with period and Lyapunov exponent shown live.",
+  "controls": "Parameter-r and start-x0 sliders, four presets (fixed/period-2/period-4/chaos), time-series toggle, reset; keys 1–4 load presets, R resets",
+  "shelf": "Interactive Stories & Experiments",
+  "tags": [
+    "games",
+    "html5",
+    "chaos",
+    "dynamics",
+    "mathematics"
+  ],
+  "badge": "New",
+  "creator": "Original build (Dragon Gaming Assets)"
+}

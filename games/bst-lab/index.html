@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>BST Lab</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <header>
+    <div>
+      <h1>BST Lab</h1>
+      <p>An AVL tree: a binary search tree that rebalances itself with rotations after every insert and delete, so the height stays logarithmic no matter what order you feed it.</p>
+    </div>
+    <div class="hud">
+      <span id="height-hud">height —</span>
+      <span id="nodes-hud">nodes —</span>
+      <span id="bf-hud">root BF —</span>
+    </div>
+  </header>
+
+  <main>
+    <section class="stage">
+      <canvas id="scene" width="880" height="660"></canvas>
+      <p class="caption">Each node shows its key and balance factor (left height − right height). Green means balanced (|BF| ≤ 1); the tree rebalances with rotations whenever a node would go out of range.</p>
+      <div class="legend">
+        <span><i class="sw-node"></i>node</span>
+        <span><i class="sw-balanced"></i>balanced</span>
+        <span><i class="sw-search"></i>search path</span>
+      </div>
+    </section>
+
+    <aside class="panel">
+      <label>
+        <span>Random inserts <b id="n-out">10</b></span>
+        <input id="n" type="range" min="1" max="30" step="1" value="10" />
+      </label>
+      <label>
+        <span>Value range <b id="range-out">100</b></span>
+        <input id="range" type="range" min="20" max="500" step="10" value="100" />
+      </label>
+
+      <div class="row">
+        <button id="preset-random" class="active">Random</button>
+        <button id="preset-sorted">Sorted</button>
+        <button id="preset-reverse">Reverse</button>
+      </div>
+      <div class="row">
+        <button id="btn-insert" class="primary">Insert</button>
+        <button id="btn-delete">Delete</button>
+        <button id="btn-clear">Clear</button>
+      </div>
+      <div class="row">
+        <button id="btn-search">Search</button>
+        <button id="toggle-bf" class="active">Balance</button>
+      </div>
+
+      <div class="readouts">
+        <div><span>Height</span><b id="height-read">—</b></div>
+        <div><span>Nodes</span><b id="nodes-read">—</b></div>
+        <div><span>Root BF</span><b id="bf-read">—</b></div>
+        <div><span>Rotations</span><b id="rot-read">—</b></div>
+        <div><span>Search cost</span><b id="search-read">—</b></div>
+        <div><span>Inorder</span><b id="inorder-read">—</b></div>
+      </div>
+
+      <p id="status" class="status">Insert in sorted order and a plain BST degenerates into a linked list — height n, search O(n). The AVL tree rotates to stay balanced: height stays under 1.44·log₂(n).</p>
+      <p class="hint">Keys 1–3 load presets, I inserts, D deletes, S searches, C clears. Try Sorted: watch the rotations keep the height at 4 while a plain BST would hit 30.</p>
+    </aside>
+  </main>
+
+  <script src="app.js"></script>
+</body>
+</html>

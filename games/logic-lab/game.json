@@ -1,0 +1,15 @@
+{
+  "name": "Logic Lab",
+  "desc": "A boolean-logic lab: seven gates plus half and full adders, with live signal levels, truth tables and carry readouts.",
+  "controls": "A/B/C input toggles, eight presets (AND/OR/XOR/NAND/NOR/XNOR/half adder/full adder); keys A, B, C toggle inputs, keys 1–8 load presets",
+  "shelf": "Interactive Stories & Experiments",
+  "tags": [
+    "games",
+    "html5",
+    "logic",
+    "digital-circuits",
+    "mathematics"
+  ],
+  "badge": "New",
+  "creator": "Original build (Dragon Gaming Assets)"
+}
