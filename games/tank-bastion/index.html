@@ -1,0 +1,176 @@
+<!-- Modified for Dragon Gaming Assets: rebranded as Tank Bastion, removed the external font and fullscreen requirement, and corrected audio filenames. Upstream source by dev sAgar; Apache-2.0. -->
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="description" content="An arcade tank-defense game: break through brick walls, outmaneuver enemy tanks, and protect your base." />
+  <title>Tank Bastion</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <!-- Welcome screen; original game credit retained. -->
+  <div id="thankYouScreen" class="overlay">
+    <div class="thank-you-content">
+      <h1>Tank Bastion</h1>
+      <p>Hold the line. Protect the core.</p>
+      <p>An independent tank-defense game by dev sAgar.</p>
+      <button id="continueBtn">Continue</button>
+    </div>
+  </div>
+  <!-- Start Screen -->
+  <div id="startScreen" class="overlay">
+    <h1>Tank Bastion</h1>
+<div class="title-particle-rain">
+  <div class="particle"></div>
+  <div class="particle"></div>
+  <div class="particle"></div>
+  <div class="particle"></div>
+  <div class="particle"></div>
+  <div class="particle"></div>
+  <div class="particle"></div>
+  <div class="particle"></div>
+  <div class="particle"></div>
+  <div class="particle"></div>
+</div>
+    <div class="title-particles">
+      <div class="particle"></div>
+      <div class="particle"></div>
+      <div class="particle"></div>
+      <div class="particle"></div>
+      <div class="particle"></div>
+      <div class="particle"></div>
+    </div>
+
+    <p>Destroy All Enemies💥</p>
+    <p>Protect Your Base At All Costs🛡️</p>
+    <p> <strong>Good Luck!</strong> </p>
+    <button id="startBtn">Start Game</button>
+  </div>
+
+  <!-- Game Container -->
+  <div id="gameWrapper">
+    <div id="gameContainer">
+      <div id="gameTitle">TANK BASTION</div>
+      <canvas id="gameCanvas" width="832" height="832"></canvas>
+      <div id="hud">
+        <span>Lives: <span id="lives">3</span></span>
+        <span>Enemies: <span id="enemyCount">0</span></span>
+        <span>Base: <span id="baseHealth">5</span></span>
+        <span>Score: <span id="score">0</span></span>
+        <span>Level: <span id="level">1</span></span>
+        <span id="pauseIndicator" class="hidden">PAUSED</span>
+      </div>
+      <div id="controlsIndicator">
+        <div class="section-title">CONTROLS:</div>
+        <div><span>Arrows:</span><span>Move</span></div>
+        <div><span>Space:</span><span>Fire</span></div>
+        <div><span>Hold Space:</span><span>Rapid Fire</span></div>
+        <div><span><small>P:</small></span><span><small>Pause/Resume Game</small></span></div>
+      </div>
+      <button id="resetBtn" class="game-button">Reset Game</button>
+
+      <div id="powerUpInfo">
+        <div class="section-title">POWER-UPS:</div>
+        <div><span class="power-green"><big>💚</big>:</span><span><small>+1 Life</small></span></div><br>
+        <div><span class="power-yellow"><big>🛡️</big>:</span><span><small>Player Shield (10s)</small></span></div><br>
+        <div><span class="power-blue"><big>🌀</big>:</span><span><small>Base Shield (10s)</small></span></div><br>
+        <div><span class="power-purple"><big>🔫</big>:</span><span><small>Magic Bullets (10s)</small></span></div>
+
+        <div class="section-title" style="margin-top: 20px;">ACTIVE EFFECTS:</div>
+        <div id="activeEffects">
+          <!-- Power-up names will appear here dynamically -->
+        </div>
+      </div>
+      <div id="highScoreContainer">
+        <div class="section-title">HIGH SCORE</div>
+        <div id="highScoreDisplay">0</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Game Over Screen -->
+  <div id="gameOverScreen" class="overlay hidden">
+    <div id="gameOverTitle">
+      <h1>Game Over</h1>
+    </div>
+    <div class="skull-icon"></div>
+    <p id="gameOverReason"></p>
+    <p>Final Score: <span id="finalScore">0</span></p>
+    <p>Level Reached: <span id="finalLevel">1</span></p>
+    <button id="restartBtn">Play Again</button>
+  </div>
+
+  <script src="game.js"></script>
+
+  <!-- Audio Elements -->
+  <div id="audioElements" style="display:none;">
+    <audio id="shootSound" src="assets/audio/shoot.mp3" preload="auto"></audio>
+    <audio id="playerHitSound" src="assets/audio/player_hit.mp3" preload="auto"></audio>
+    <audio id="playerExplosionSound" src="assets/audio/player_explosion.mp3" preload="auto"></audio>
+    <audio id="baseHitSound" src="assets/audio/base_hit.mp3" preload="auto"></audio>
+    <audio id="baseExplosionSound" src="assets/audio/base_explosion.mp3" preload="auto"></audio>
+    <audio id="enemyExplosionSound" src="assets/audio/enemy_explosion.mp3" preload="auto"></audio>
+    <audio id="bulletImpactSound" src="assets/audio/bullet_impact.mp3" preload="auto"></audio>
+    <audio id="powerupCollectSound" src="assets/audio/powerup_collect.mp3" preload="auto"></audio>
+    <audio id="levelStartSound" src="assets/audio/level_start.mp3" preload="auto"></audio>
+    <audio id="gameOverSound" src="assets/audio/game_over.mp3" preload="auto"></audio>
+    <audio id="highScoreSound" src="assets/audio/high_score.mp3" preload="auto"></audio>
+    <audio id="buttonClickSound" src="assets/audio/button_click.mp3" preload="auto"></audio>
+    <audio id="pauseToggleSound" src="assets/audio/pause_toggle.mp3" preload="auto"></audio>
+    <audio id="bgMusicSound" src="assets/audio/bg_music.mp3" preload="auto" loop></audio>
+    <audio id="titleMusicSound" src="assets/audio/title_music.mp3" preload="auto" loop></audio>
+  </div>
+
+  <!-- Modified: starts directly inside embedded frames; fullscreen is optional. -->
+  <script>
+    window.addEventListener('DOMContentLoaded', () => {
+      const startButton = document.getElementById('startBtn');
+      const restartButton = document.getElementById('restartBtn');
+      const resetButton = document.getElementById('resetBtn');
+      const gameWrapper = document.getElementById('gameWrapper');
+
+      function playButtonClick() {
+        if (typeof window.playSound === 'function') window.playSound('button_click');
+      }
+
+      function startGame() {
+        playButtonClick();
+        if (typeof window.startGame === 'function') window.startGame();
+      }
+
+      startButton.addEventListener('click', startGame);
+      restartButton.addEventListener('click', startGame);
+      resetButton.addEventListener('click', () => {
+        playButtonClick();
+        if (typeof window.initGame === 'function') window.initGame();
+      });
+
+      function resizeGame() {
+        const portrait = window.innerWidth < window.innerHeight;
+        const baseWidth = portrait ? 850 : 1350;
+        const baseHeight = portrait ? 1300 : 900;
+        document.body.classList.toggle('mobile-layout', portrait);
+
+        const scale = Math.min(
+          window.innerWidth / baseWidth,
+          window.innerHeight / baseHeight
+        ) * 0.98;
+        gameWrapper.style.transform = `scale(${scale})`;
+        gameWrapper.style.transformOrigin = 'top center';
+        gameWrapper.style.marginTop = `${Math.max(0, (window.innerHeight - baseHeight * scale) / 2)}px`;
+        document.body.style.alignItems = 'flex-start';
+        document.body.style.overflow = 'hidden';
+      }
+
+      window.addEventListener('resize', resizeGame);
+      window.addEventListener('keydown', (event) => {
+        if (['Space', 'ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].includes(event.code)) {
+          event.preventDefault();
+        }
+      });
+      resizeGame();
+    });
+  </script>
+</body>
+</html>
