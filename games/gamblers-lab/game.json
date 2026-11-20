@@ -1,0 +1,15 @@
+{
+  "name": "Gamblers Lab",
+  "desc": "A gambler's-ruin lab: start, goal and win-probability sliders drive the ruin probability (q/p)^i, expected duration and a 50-walk simulation.",
+  "controls": "Start, goal and win-probability sliders, four presets (fair/unfair/favorable/long shot), simulate and reset buttons; keys 1–4 load presets, Space simulates, R resets",
+  "shelf": "Interactive Stories & Experiments",
+  "tags": [
+    "games",
+    "html5",
+    "probability",
+    "random-walk",
+    "mathematics"
+  ],
+  "badge": "New",
+  "creator": "Original build (Dragon Gaming Assets)"
+}

@@ -1,0 +1,15 @@
+{
+  "name": "Rocket Lab",
+  "desc": "A rocket-equation lab: exhaust velocity, mass ratio and payload sliders drive the Tsiolkovsky delta-v, with LEO/Mars/escape milestones shown live.",
+  "controls": "Exhaust-velocity, mass-ratio and payload sliders, four presets (chemical/nuclear/ion/staged), launch and reset buttons; keys 1–4 load presets, Space launches, R resets",
+  "shelf": "Interactive Stories & Experiments",
+  "tags": [
+    "games",
+    "html5",
+    "rockets",
+    "physics",
+    "mathematics"
+  ],
+  "badge": "New",
+  "creator": "Original build (Dragon Gaming Assets)"
+}

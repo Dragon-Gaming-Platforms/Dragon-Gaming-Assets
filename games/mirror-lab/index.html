@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Mirror Lab</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <header>
+    <div>
+      <h1>Mirror Lab</h1>
+      <p>A spherical mirror focuses light at its focal point. The mirror equation 1/f = 1/dₒ + 1/dᵢ predicts where the image forms — real and inverted, or virtual and upright.</p>
+    </div>
+    <div class="hud">
+      <span id="di-hud">dᵢ —</span>
+      <span id="mag-hud">m —</span>
+      <span id="type-hud">type —</span>
+    </div>
+  </header>
+
+  <main>
+    <section class="stage">
+      <canvas id="scene" width="880" height="660"></canvas>
+      <p class="caption">Blue is the object, teal the image. The three principal rays — parallel-then-focal, through-the-centre, focal-then-parallel — meet at the image tip. Dashed extensions mark a virtual image behind the mirror.</p>
+      <div class="legend">
+        <span><i class="sw-object"></i>object</span>
+        <span><i class="sw-image"></i>image</span>
+        <span><i class="sw-ray"></i>principal rays</span>
+      </div>
+    </section>
+
+    <aside class="panel">
+      <label>
+        <span>Focal length <b id="f-out">100 mm</b></span>
+        <input id="f" type="range" min="-200" max="200" step="5" value="100" />
+      </label>
+      <label>
+        <span>Object distance <b id="do-out">250 mm</b></span>
+        <input id="do" type="range" min="20" max="500" step="5" value="250" />
+      </label>
+      <label>
+        <span>Object height <b id="ho-out">60 mm</b></span>
+        <input id="ho" type="range" min="10" max="120" step="5" value="60" />
+      </label>
+
+      <div class="row">
+        <button id="preset-concave" class="active">Concave</button>
+        <button id="preset-convex">Convex</button>
+        <button id="preset-plane">Plane</button>
+      </div>
+      <div class="row">
+        <button id="toggle-rays" class="active">Rays</button>
+      </div>
+
+      <div class="readouts">
+        <div><span>Image dist dᵢ</span><b id="di-read">—</b></div>
+        <div><span>Magnification</span><b id="mag-read">—</b></div>
+        <div><span>Image height</span><b id="hi-read">—</b></div>
+        <div><span>Type</span><b id="type-read">—</b></div>
+        <div><span>Orientation</span><b id="orient-read">—</b></div>
+        <div><span>Check 1/f</span><b id="check-read">—</b></div>
+      </div>
+
+      <p id="status" class="status">Concave with the object beyond f: a real, inverted image in front of the mirror. Bring the object inside f and the image flips to virtual, upright and magnified — behind the mirror.</p>
+      <p class="hint">Drag the object tip to move it. Keys 1–3 load presets. Try Concave with dₒ = 50 mm (inside f = 100): the virtual image is twice as tall and upright.</p>
+    </aside>
+  </main>
+
+  <script src="app.js"></script>
+</body>
+</html>

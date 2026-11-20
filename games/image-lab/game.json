@@ -1,0 +1,15 @@
+{
+  "name": "Image Lab",
+  "desc": "An image-convolution lab: kernel size and strength sliders drive blur, sharpen, edge-detect and emboss filters over a generated test pattern, with edge-energy readouts.",
+  "controls": "Kernel-size and strength sliders, four presets (blur/sharpen/edge/emboss), original and kernel-grid toggles; keys 1–4 load presets, O toggles original, K toggles kernel",
+  "shelf": "Interactive Stories & Experiments",
+  "tags": [
+    "games",
+    "html5",
+    "image-processing",
+    "convolution",
+    "mathematics"
+  ],
+  "badge": "New",
+  "creator": "Original build (Dragon Gaming Assets)"
+}

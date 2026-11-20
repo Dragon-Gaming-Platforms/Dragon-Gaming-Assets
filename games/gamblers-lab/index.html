@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Gamblers Lab</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <header>
+    <div>
+      <h1>Gamblers Lab</h1>
+      <p>Start with i coins, win or lose 1 coin per round, stop at 0 (ruin) or N (the goal). Even a fair game is a slow bleed — the house only needs time.</p>
+    </div>
+    <div class="hud">
+      <span id="ruin-hud">ruin —</span>
+      <span id="dur-hud">duration —</span>
+      <span id="sim-hud">simulated —</span>
+    </div>
+  </header>
+
+  <main>
+    <section class="stage">
+      <canvas id="scene" width="880" height="660"></canvas>
+      <p class="caption">Each faint line is one gambler's walk from i to ruin (bottom) or the goal (top). The green band is the theory: ruin probability (q/p)ⁱ for an unfair game, i/N for a fair one.</p>
+      <div class="legend">
+        <span><i class="sw-walk"></i>walks</span>
+        <span><i class="sw-ruin"></i>ruin</span>
+        <span><i class="sw-goal"></i>goal</span>
+      </div>
+    </section>
+
+    <aside class="panel">
+      <label>
+        <span>Start i <b id="i-out">50</b></span>
+        <input id="i" type="range" min="5" max="95" step="5" value="50" />
+      </label>
+      <label>
+        <span>Goal N <b id="n-out">100</b></span>
+        <input id="n" type="range" min="20" max="200" step="10" value="100" />
+      </label>
+      <label>
+        <span>Win prob p <b id="p-out">0.50</b></span>
+        <input id="p" type="range" min="0.3" max="0.7" step="0.01" value="0.5" />
+      </label>
+
+      <div class="row">
+        <button id="preset-fair" class="active">Fair</button>
+        <button id="preset-unfair">Unfair</button>
+        <button id="preset-favorable">Favorable</button>
+        <button id="preset-longshot">Long shot</button>
+      </div>
+      <div class="row">
+        <button id="btn-sim" class="primary">Simulate</button>
+        <button id="btn-reset">Reset</button>
+      </div>
+
+      <div class="readouts">
+        <div><span>Ruin prob (theory)</span><b id="ruin-read">—</b></div>
+        <div><span>Ruin rate (sim)</span><b id="sim-read">—</b></div>
+        <div><span>Expected duration</span><b id="dur-read">—</b></div>
+        <div><span>Sim duration</span><b id="simdur-read">—</b></div>
+        <div><span>Walks</span><b id="walks-read">—</b></div>
+        <div><span>Goal hits</span><b id="goals-read">—</b></div>
+      </div>
+
+      <p id="status" class="status">Fair game, start at 50 of 100: ruin probability is exactly 50%. The walk is a martingale — on average you neither gain nor lose, but the absorbing walls make ruin certain eventually.</p>
+      <p class="hint">Keys 1–4 load presets, Space simulates, R resets. Try Unfair (p=0.4): ruin probability jumps to 98% — a 10% edge is a death sentence over time.</p>
+    </aside>
+  </main>
+
+  <script src="app.js"></script>
+</body>
+</html>
