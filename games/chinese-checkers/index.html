@@ -1,0 +1,22 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="description" content="Chinese Checkers on the six-pointed star: race your ten marbles to the opposite point. Play against the computer or a friend. Original implementation, MIT."><title>Chinese Checkers · Board games</title><link rel="stylesheet" href="style.css"><script defer src="app.js"></script></head><body>
+<header><div><p class="eyebrow">Dragon Gaming · Original board games</p><h1>Chinese Checkers</h1><p class="subtitle">Race ten marbles across the star. First to fill the far point wins.</p></div><nav><button id="rules-open" type="button">How to play</button></nav></header>
+<main>
+<section class="card play" aria-label="Game">
+<div class="toolbar"><span id="turn" class="turn"></span><span class="grow"></span><label>Opponent <select id="mode" aria-label="Opponent"><option value="computer">Computer</option><option value="two">Two players</option></select></label><label>Level <select id="level" aria-label="Computer level"><option value="easy">Easy</option><option value="medium" selected>Medium</option><option value="hard">Hard</option></select></label></div>
+<div class="toolbar"><button id="clear" type="button">Clear selection</button><button id="undo" type="button">Undo</button><button id="new" type="button" class="primary">New game</button></div>
+<div class="board-wrap"><svg id="svg" viewBox="-180 -190 360 380" role="group" aria-label="Chinese Checkers star board, 121 holes"></svg></div>
+<p id="score" class="score"></p>
+<p id="message" role="status" aria-live="polite"></p>
+</section>
+<aside class="card"><p class="eyebrow">Rules</p><h2>Reach the far point</h2><ol>
+<li>Red moves first, then Blue. Each side starts with ten marbles filling one point of the star.</li>
+<li>On your turn, move one marble to an adjacent empty hole, or hop over an adjacent marble into the empty hole beyond it. Hops can be chained within one turn, and you may stop after any hop.</li>
+<li>The first side to move all ten marbles into the opposite point wins.</li>
+<li>300 moves without a winner is a draw.</li>
+</ol>
+<p class="tip">Click a marble to select it. Highlighted holes are reachable. Keyboard: Tab to a hole, then Enter.</p></aside>
+</main>
+<footer><span>Original implementation · <a href="LICENSE">MIT license</a> · <a href="SOURCE.txt">Source record</a></span></footer>
+<dialog id="rules"><h2>Chinese Checkers rules</h2><ol><li>Move a marble to an adjacent empty hole, or hop over an adjacent marble to the empty hole beyond.</li><li>Chain hops in one turn; you may stop after any hop.</li><li>Fill the opposite point with all ten marbles to win.</li></ol><form method="dialog"><button id="rules-close" type="button">Back to game</button></form></dialog>
+<script>document.getElementById('rules-open').onclick=()=>document.getElementById('rules').showModal();document.getElementById('rules-close').onclick=()=>document.getElementById('rules').close();</script>
+</body></html>
