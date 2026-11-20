@@ -1,0 +1,33 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Skyward Strike — airplane shooter</title>
+<meta name="description" content="Skyward Strike: a vertical-scrolling airplane shooter that runs in the browser. Arrow keys to fly, space to fire.">
+<meta name="theme-color" content="#05060f">
+<meta property="og:title" content="Skyward Strike">
+<meta property="og:description" content="A vertical-scrolling airplane shooter that runs in the browser.">
+<meta property="og:type" content="website">
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'><rect width='32' height='32' rx='7' fill='%23070b18'/><path d='M16 4 L20 18 L16 16 L12 18 Z' fill='%23f4f8ff'/><path d='M16 13 L29 22 L21 22 L16 20 L11 22 L3 22 Z' fill='%236fd8ff'/></svg>">
+<link rel="stylesheet" href="styles.css">
+</head>
+<body data-state="title">
+  <div class="frame">
+    <div class="stagewrap">
+      <div class="stage" id="stage">
+        <canvas id="game" aria-label="Skyward Strike game field" role="img"></canvas>
+        <div class="overlay" id="overlay" hidden>
+          <div class="panel" id="panel"></div>
+        </div>
+      </div>
+    </div>
+    <footer class="bar">
+      <span class="brand">Skyward&nbsp;Strike</span>
+      <span class="hint">Arrows / WASD to fly · Space to fire · X to bomb · P to pause</span>
+      <button id="mute" class="ghost" type="button" aria-pressed="false">Sound on</button>
+    </footer>
+  </div>
+  <script type="module" src="src/main.js"></script>
+</body>
+</html>
