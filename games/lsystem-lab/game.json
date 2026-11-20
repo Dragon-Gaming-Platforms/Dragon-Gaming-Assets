@@ -1,0 +1,15 @@
+{
+  "name": "L-System Lab",
+  "desc": "An L-system lab: rewrite rules and a turtle draw Koch, dragon, plant and Sierpinski fractals, with string length, segment count and fractal dimension shown live.",
+  "controls": "Iteration and turn-angle sliders, four presets (Koch/dragon/plant/Sierpinski), grow/reset buttons; keys 1–4 load presets, Space grows, R resets",
+  "shelf": "Interactive Stories & Experiments",
+  "tags": [
+    "games",
+    "html5",
+    "fractals",
+    "graphics",
+    "mathematics"
+  ],
+  "badge": "New",
+  "creator": "Original build (Dragon Gaming Assets)"
+}

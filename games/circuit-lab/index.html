@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Circuit Lab</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <header>
+    <div>
+      <h1>Circuit Lab</h1>
+      <p>A battery, a resistor and a capacitor in a loop. The capacitor charges exponentially: V_c(t) = V₀(1 − e^(−t/RC)). The time constant τ = RC sets the pace — after 5τ the capacitor is 99% full.</p>
+    </div>
+    <div class="hud">
+      <span id="tau-hud">τ —</span>
+      <span id="vc-hud">V_c —</span>
+      <span id="ic-hud">I_c —</span>
+    </div>
+  </header>
+
+  <main>
+    <section class="stage">
+      <canvas id="scene" width="880" height="660"></canvas>
+      <p class="caption">Top: the circuit loop — battery, resistor and capacitor. Bottom: capacitor voltage (green) and current (blue) over time. The dashed line is the supply voltage; the curves meet it asymptotically.</p>
+      <div class="legend">
+        <span><i class="sw-vc"></i>capacitor voltage</span>
+        <span><i class="sw-ic"></i>current</span>
+        <span><i class="sw-supply"></i>supply</span>
+      </div>
+    </section>
+
+    <aside class="panel">
+      <label>
+        <span>Resistance <b id="r-out">1000 Ω</b></span>
+        <input id="r" type="range" min="100" max="10000" step="100" value="1000" />
+      </label>
+      <label>
+        <span>Capacitance <b id="c-out">1000 µF</b></span>
+        <input id="c" type="range" min="100" max="10000" step="100" value="1000" />
+      </label>
+      <label>
+        <span>Supply voltage <b id="v0-out">9.0 V</b></span>
+        <input id="v0" type="range" min="1" max="24" step="0.5" value="9" />
+      </label>
+
+      <div class="row">
+        <button id="preset-fast" class="active">Fast</button>
+        <button id="preset-medium">Medium</button>
+        <button id="preset-slow">Slow</button>
+        <button id="preset-huge">Huge</button>
+      </div>
+      <div class="row">
+        <button id="btn-charge" class="primary">Charge</button>
+        <button id="btn-discharge">Discharge</button>
+        <button id="toggle-curves" class="active">Curves</button>
+      </div>
+
+      <div class="readouts">
+        <div><span>Time constant τ</span><b id="tau-read">—</b></div>
+        <div><span>V_c now</span><b id="vc-read">—</b></div>
+        <div><span>I_c now</span><b id="ic-read">—</b></div>
+        <div><span>Charge Q</span><b id="q-read">—</b></div>
+        <div><span>Energy ½CV²</span><b id="e-read">—</b></div>
+        <div><span>Elapsed</span><b id="t-read">—</b></div>
+      </div>
+
+      <p id="status" class="status">At t = τ the capacitor is 63% charged; at 5τ it is 99%. The current starts at V₀/R and decays to zero — the capacitor blocks DC once full.</p>
+      <p class="hint">Keys 1–4 load presets, Space charges, D discharges. Try Huge: τ = 100 s, so the curves crawl. Then Fast: τ = 0.01 s, done before you blink.</p>
+    </aside>
+  </main>
+
+  <script src="app.js"></script>
+</body>
+</html>

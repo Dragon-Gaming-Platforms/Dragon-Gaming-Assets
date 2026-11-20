@@ -1,0 +1,15 @@
+{
+  "name": "Mandelbrot Lab",
+  "desc": "A Mandelbrot-set explorer: escape-time rendering of z → z² + c with pan, zoom, four named regions and live escape-iteration readouts.",
+  "controls": "Max-iterations and zoom sliders, four presets (full set/seahorse/elephant/spiral), zoom in/out and reset buttons, drag to pan, scroll to zoom; keys 1–4 load presets, +/− zoom, R resets",
+  "shelf": "Interactive Stories & Experiments",
+  "tags": [
+    "games",
+    "html5",
+    "fractals",
+    "complex-numbers",
+    "mathematics"
+  ],
+  "badge": "New",
+  "creator": "Original build (Dragon Gaming Assets)"
+}

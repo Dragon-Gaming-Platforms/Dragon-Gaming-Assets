@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>FFT Lab</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <header>
+    <div>
+      <h1>FFT Lab</h1>
+      <p>A signal built from a few sine waves, and its discrete Fourier transform. The DFT asks: how much of each frequency is in the signal? The answer is the spectrum below.</p>
+    </div>
+    <div class="hud">
+      <span id="peak-hud">peak —</span>
+      <span id="bins-hud">bins —</span>
+      <span id="parseval-hud">Parseval —</span>
+    </div>
+  </header>
+
+  <main>
+    <section class="stage">
+      <canvas id="scene" width="880" height="660"></canvas>
+      <p class="caption">Top: the time signal (one period shown, repeated). Bottom: the magnitude spectrum — each bar is one DFT bin. A pure sine is a single bar; a square wave is odd harmonics only.</p>
+      <div class="legend">
+        <span><i class="sw-signal"></i>signal</span>
+        <span><i class="sw-spectrum"></i>spectrum</span>
+      </div>
+    </section>
+
+    <aside class="panel">
+      <label>
+        <span>Harmonic 1 amp <b id="a1-out">1.00</b></span>
+        <input id="a1" type="range" min="0" max="2" step="0.05" value="1" />
+      </label>
+      <label>
+        <span>Harmonic 2 amp <b id="a2-out">0.00</b></span>
+        <input id="a2" type="range" min="0" max="2" step="0.05" value="0" />
+      </label>
+      <label>
+        <span>Harmonic 3 amp <b id="a3-out">0.00</b></span>
+        <input id="a3" type="range" min="0" max="2" step="0.05" value="0" />
+      </label>
+      <label>
+        <span>Harmonic 4 amp <b id="a4-out">0.00</b></span>
+        <input id="a4" type="range" min="0" max="2" step="0.05" value="0" />
+      </label>
+
+      <div class="row">
+        <button id="preset-sine" class="active">Sine</button>
+        <button id="preset-square">Square</button>
+        <button id="preset-saw">Saw</button>
+        <button id="preset-chord">Chord</button>
+      </div>
+      <div class="row">
+        <button id="toggle-log">Log scale</button>
+        <button id="toggle-phase">Phase</button>
+      </div>
+
+      <div class="readouts">
+        <div><span>Dominant bin</span><b id="peak-read">—</b></div>
+        <div><span>Peak magnitude</span><b id="peakmag-read">—</b></div>
+        <div><span>Energy Σx²</span><b id="energy-read">—</b></div>
+        <div><span>Parseval check</span><b id="parseval-read">—</b></div>
+        <div><span>Sample rate</span><b id="fs-read">—</b></div>
+        <div><span>Bins</span><b id="bins-read">—</b></div>
+      </div>
+
+      <p id="status" class="status">A pure sine is one bar in the spectrum. Add harmonics and the bars multiply — a square wave needs odd harmonics 1, 3, 5… with amplitudes 1, ⅓, ⅕…</p>
+      <p class="hint">Keys 1–4 load presets, L toggles log scale, P toggles phase. Try Square: the even bins stay empty, exactly as Fourier predicted in 1807.</p>
+    </aside>
+  </main>
+
+  <script src="app.js"></script>
+</body>
+</html>

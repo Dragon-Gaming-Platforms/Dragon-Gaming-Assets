@@ -1,0 +1,15 @@
+{
+  "name": "FFT Lab",
+  "desc": "A discrete-Fourier-transform lab: four harmonic-amplitude sliders drive the signal, with the magnitude spectrum, dominant bin and Parseval check shown live.",
+  "controls": "Four harmonic-amplitude sliders, four presets (sine/square/saw/chord), log-scale and phase toggles; keys 1–4 load presets, L toggles log scale, P toggles phase",
+  "shelf": "Interactive Stories & Experiments",
+  "tags": [
+    "games",
+    "html5",
+    "signal-processing",
+    "fourier",
+    "mathematics"
+  ],
+  "badge": "New",
+  "creator": "Original build (Dragon Gaming Assets)"
+}

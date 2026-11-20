@@ -1,0 +1,15 @@
+{
+  "name": "Circuit Lab",
+  "desc": "An RC charging-circuit lab: resistance, capacitance and supply sliders drive the exponential charge curve, with time constant, charge and stored energy shown live.",
+  "controls": "Resistance, capacitance and supply-voltage sliders, four presets (fast/medium/slow/huge), charge/discharge buttons, curves toggle; keys 1–4 load presets, Space charges, D discharges",
+  "shelf": "Interactive Stories & Experiments",
+  "tags": [
+    "games",
+    "html5",
+    "electronics",
+    "circuits",
+    "mathematics"
+  ],
+  "badge": "New",
+  "creator": "Original build (Dragon Gaming Assets)"
+}
