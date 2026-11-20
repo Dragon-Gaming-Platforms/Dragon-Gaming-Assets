@@ -1,0 +1,13 @@
+{
+  "name": "Skyward Strike",
+  "desc": "A vertical-scrolling airplane shooter with escalating waves, five enemy types, a boss every fifth wave, combo scoring, power-ups, and synthesized audio. Original Canvas-drawn sprites; no asset files, build step, or runtime dependencies.",
+  "controls": "Fly: arrows or WASD; fire: hold Space or Z; bomb: X or B; pause: P or Esc; mute: M. Touch/mouse: drag on the field to fly and auto-fire.",
+  "shelf": "Arcade & Action",
+  "tags": [
+    "arcade",
+    "shooter",
+    "air-combat",
+    "vertical-scrolling"
+  ],
+  "creator": "CTBot000"
+}

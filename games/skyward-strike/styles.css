@@ -1,0 +1,241 @@
+:root {
+  --ink: #e8eefc;
+  --dim: #8fa2c8;
+  --accent: #6fd8ff;
+  --hot: #ff6b81;
+  --gold: #ffd166;
+  --panel: rgba(8, 12, 26, 0.86);
+  --chrome: 76px; /* footer + stage padding, reserved from the viewport height */
+  color-scheme: dark;
+}
+
+* { box-sizing: border-box; }
+
+html, body {
+  height: 100%;
+  margin: 0;
+}
+
+body {
+  background:
+    radial-gradient(1200px 700px at 50% -10%, #17224d 0%, #080b18 55%, #04050c 100%);
+  color: var(--ink);
+  font-family: system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  overflow: hidden;
+  -webkit-text-size-adjust: 100%;
+}
+
+.frame {
+  position: fixed;
+  inset: 0;
+  display: grid;
+  grid-template-rows: 1fr auto;
+  padding-bottom: env(safe-area-inset-bottom);
+}
+
+.stagewrap {
+  display: grid;
+  place-items: center;
+  min-height: 0;
+  padding: 10px;
+}
+
+/*
+ * The stage keeps a fixed 2:3 field. Width is the definite axis and the height
+ * comes from aspect-ratio, so the ratio actually applies — a stretched item
+ * (flex-grow, or align stretch) has two definite axes and ignores it.
+ */
+.stage {
+  position: relative;
+  width: min(100%, calc((100vh - var(--chrome)) * 2 / 3));
+  width: min(100%, calc((100dvh - var(--chrome)) * 2 / 3));
+  aspect-ratio: 2 / 3;
+  container-type: size;
+  border-radius: 14px;
+  overflow: hidden;
+  background: #05060f;
+  box-shadow:
+    0 0 0 1px rgba(255, 255, 255, 0.07),
+    0 30px 80px rgba(0, 0, 0, 0.6),
+    0 0 70px rgba(64, 128, 255, 0.12);
+}
+
+canvas#game {
+  display: block;
+  width: 100%;
+  height: 100%;
+  touch-action: none;
+  cursor: crosshair;
+}
+
+/* [hidden] is only a UA rule, so state it explicitly next to the display rule. */
+.overlay {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  padding: 4cqw;
+  background: rgba(4, 6, 16, 0.6);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+}
+.overlay[hidden] { display: none; }
+
+/*
+ * Overlay chrome is sized in container units so it tracks the letterboxed
+ * stage rather than the viewport, which can be a very different shape.
+ */
+.panel {
+  width: min(86cqw, 420px);
+  padding: clamp(18px, 6cqh, 34px) clamp(16px, 6cqw, 30px);
+  text-align: center;
+  background: var(--panel);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 16px;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.55);
+  animation: rise 0.22s ease-out;
+}
+
+@keyframes rise {
+  from { opacity: 0; transform: translateY(10px) scale(0.98); }
+  to { opacity: 1; transform: none; }
+}
+
+.panel h1 {
+  margin: 0 0 6px;
+  font-size: clamp(24px, 8.6cqw, 44px);
+  letter-spacing: 0.04em;
+  background: linear-gradient(180deg, #ffffff, var(--accent));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.panel h2 {
+  margin: 0 0 8px;
+  font-size: clamp(20px, 6.6cqw, 32px);
+  letter-spacing: 0.06em;
+  color: var(--hot);
+}
+
+.panel h2.calm { color: var(--accent); }
+
+/* Only worth saying where there is no keyboard. */
+.touch { display: none; }
+@media (pointer: coarse) {
+  .touch {
+    display: block;
+    margin: 0 0 clamp(12px, 2.6cqh, 18px);
+    color: var(--accent);
+    font-size: clamp(11px, 3.2cqw, 14px);
+  }
+}
+
+.tag {
+  margin: 0 0 clamp(10px, 2.4cqh, 18px);
+  color: var(--dim);
+  font-size: clamp(12px, 3.4cqw, 15px);
+}
+
+.score {
+  margin: 2px 0 10px;
+  font-family: ui-monospace, Menlo, Consolas, monospace;
+  font-size: clamp(30px, 11cqw, 52px);
+  font-weight: 700;
+  color: var(--gold);
+}
+
+.keys {
+  display: grid;
+  grid-template-columns: auto auto;
+  gap: 4px 14px;
+  justify-content: center;
+  margin: 0 0 clamp(14px, 3cqh, 22px);
+  font-size: clamp(11px, 3.2cqw, 14px);
+}
+.keys dt { color: var(--dim); text-align: right; }
+.keys dd { margin: 0; text-align: left; font-weight: 600; }
+
+.cta {
+  appearance: none;
+  border: 0;
+  border-radius: 999px;
+  padding: clamp(10px, 2.6cqh, 15px) clamp(22px, 8cqw, 40px);
+  font: inherit;
+  font-weight: 700;
+  font-size: clamp(14px, 4cqw, 18px);
+  letter-spacing: 0.03em;
+  color: #04121c;
+  background: linear-gradient(180deg, #a8ecff, var(--accent));
+  cursor: pointer;
+  box-shadow: 0 10px 26px rgba(111, 216, 255, 0.28);
+  transition: transform 0.12s ease, box-shadow 0.12s ease;
+}
+.cta:hover { transform: translateY(-1px); }
+.cta:active { transform: translateY(1px); box-shadow: 0 4px 14px rgba(111, 216, 255, 0.24); }
+.cta:focus-visible { outline: 3px solid #fff; outline-offset: 3px; }
+
+.best {
+  margin: clamp(10px, 2.4cqh, 16px) 0 0;
+  color: var(--dim);
+  font-size: clamp(11px, 3.2cqw, 14px);
+  letter-spacing: 0.04em;
+}
+
+.record {
+  margin: clamp(10px, 2.4cqh, 16px) 0 0;
+  color: var(--gold);
+  font-weight: 700;
+  font-size: clamp(12px, 3.6cqw, 15px);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+.bar {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 0 16px 10px;
+  height: 44px;
+  font-size: 12px;
+  color: var(--dim);
+}
+
+.brand {
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ink);
+}
+
+.hint {
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.ghost {
+  appearance: none;
+  border: 1px solid rgba(255, 255, 255, 0.16);
+  background: rgba(255, 255, 255, 0.04);
+  color: var(--ink);
+  border-radius: 999px;
+  padding: 6px 14px;
+  font: inherit;
+  font-size: 12px;
+  cursor: pointer;
+  white-space: nowrap;
+}
+.ghost:hover { background: rgba(255, 255, 255, 0.1); }
+.ghost:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+@media (max-width: 560px) {
+  .hint { display: none; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .panel { animation: none; }
+  .cta { transition: none; }
+}
