@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Rocket Lab</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <header>
+    <div>
+      <h1>Rocket Lab</h1>
+      <p>The Tsiolkovsky rocket equation: Δv = vₑ·ln(m₀/m_f). Your speed change depends only on the exhaust velocity and the mass ratio — not on how fast you burn.</p>
+    </div>
+    <div class="hud">
+      <span id="dv-hud">Δv —</span>
+      <span id="ratio-hud">ratio —</span>
+      <span id="prop-hud">propellant —</span>
+    </div>
+  </header>
+
+  <main>
+    <section class="stage">
+      <canvas id="scene" width="880" height="660"></canvas>
+      <p class="caption">The rocket burns its propellant and accelerates. The bar below is your Δv budget against the milestones: LEO (9.4 km/s), Mars transfer (12 km/s), escape (16 km/s).</p>
+      <div class="legend">
+        <span><i class="sw-rocket"></i>rocket</span>
+        <span><i class="sw-budget"></i>Δv budget</span>
+        <span><i class="sw-milestone"></i>milestones</span>
+      </div>
+    </section>
+
+    <aside class="panel">
+      <label>
+        <span>Exhaust velocity <b id="ve-out">3.0 km/s</b></span>
+        <input id="ve" type="range" min="1" max="40" step="0.1" value="3" />
+      </label>
+      <label>
+        <span>Mass ratio <b id="ratio-out">10.0</b></span>
+        <input id="ratio" type="range" min="1.5" max="30" step="0.1" value="10" />
+      </label>
+      <label>
+        <span>Payload <b id="payload-out">10 t</b></span>
+        <input id="payload" type="range" min="1" max="100" step="1" value="10" />
+      </label>
+
+      <div class="row">
+        <button id="preset-chemical" class="active">Chemical</button>
+        <button id="preset-nuclear">Nuclear</button>
+        <button id="preset-ion">Ion</button>
+        <button id="preset-staged">Staged</button>
+      </div>
+      <div class="row">
+        <button id="btn-launch" class="primary">Launch</button>
+        <button id="btn-reset">Reset</button>
+      </div>
+
+      <div class="readouts">
+        <div><span>Δv</span><b id="dv-read">—</b></div>
+        <div><span>Mass ratio</span><b id="ratio-read">—</b></div>
+        <div><span>Propellant</span><b id="prop-read">—</b></div>
+        <div><span>Final mass</span><b id="final-read">—</b></div>
+        <div><span>LEO (9.4)</span><b id="leo-read">—</b></div>
+        <div><span>Escape (16)</span><b id="esc-read">—</b></div>
+      </div>
+
+      <p id="status" class="status">Chemical rocket, mass ratio 10: Δv = 3.0·ln(10) = 6.9 km/s — not enough for LEO. You need a mass ratio of e^(9.4/3) ≈ 23, which is why real rockets stage.</p>
+      <p class="hint">Keys 1–4 load presets, Space launches, R resets. Try Ion: vₑ = 30 km/s needs a mass ratio of only 1.37 for LEO — but the thrust is a whisper.</p>
+    </aside>
+  </main>
+
+  <script src="app.js"></script>
+</body>
+</html>

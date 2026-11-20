@@ -1,0 +1,15 @@
+{
+  "name": "Mirror Lab",
+  "desc": "A spherical-mirror lab: focal length, object distance and height sliders drive the mirror equation, with principal rays, image type and magnification shown live.",
+  "controls": "Focal-length, object-distance and object-height sliders, three presets (concave/convex/plane), rays toggle, draggable object tip; keys 1–3 load presets",
+  "shelf": "Interactive Stories & Experiments",
+  "tags": [
+    "games",
+    "html5",
+    "optics",
+    "mirrors",
+    "mathematics"
+  ],
+  "badge": "New",
+  "creator": "Original build (Dragon Gaming Assets)"
+}
