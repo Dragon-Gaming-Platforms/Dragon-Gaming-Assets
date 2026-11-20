@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Image Lab</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <header>
+    <div>
+      <h1>Image Lab</h1>
+      <p>Every pixel becomes a weighted average of its neighbours. The weights are the kernel — blur, sharpen, edge-detect and emboss are all just different 3×3 grids of numbers.</p>
+    </div>
+    <div class="hud">
+      <span id="mean-hud">mean —</span>
+      <span id="edge-hud">edge energy —</span>
+      <span id="ksum-hud">kernel Σ —</span>
+    </div>
+  </header>
+
+  <main>
+    <section class="stage">
+      <canvas id="scene" width="880" height="660"></canvas>
+      <p class="caption">Left: the test pattern (gradient, shapes, noise). Right: the filtered result. The kernel grid below shows the weights — a kernel that sums to 1 preserves brightness; one that sums to 0 keeps only edges.</p>
+      <div class="legend">
+        <span><i class="sw-orig"></i>original</span>
+        <span><i class="sw-filtered"></i>filtered</span>
+        <span><i class="sw-kernel"></i>kernel</span>
+      </div>
+    </section>
+
+    <aside class="panel">
+      <label>
+        <span>Kernel size <b id="ksize-out">3×3</b></span>
+        <input id="ksize" type="range" min="3" max="5" step="2" value="3" />
+      </label>
+      <label>
+        <span>Strength <b id="strength-out">1.00</b></span>
+        <input id="strength" type="range" min="0.2" max="3" step="0.1" value="1" />
+      </label>
+
+      <div class="row">
+        <button id="preset-blur" class="active">Blur</button>
+        <button id="preset-sharpen">Sharpen</button>
+        <button id="preset-edge">Edge</button>
+        <button id="preset-emboss">Emboss</button>
+      </div>
+      <div class="row">
+        <button id="toggle-orig" class="active">Original</button>
+        <button id="toggle-kernel" class="active">Kernel</button>
+      </div>
+
+      <div class="readouts">
+        <div><span>Mean brightness</span><b id="mean-read">—</b></div>
+        <div><span>Edge energy</span><b id="edge-read">—</b></div>
+        <div><span>Kernel sum</span><b id="ksum-read">—</b></div>
+        <div><span>Variance</span><b id="var-read">—</b></div>
+        <div><span>Kernel</span><b id="kernel-read">—</b></div>
+        <div><span>Size</span><b id="size-read">—</b></div>
+      </div>
+
+      <p id="status" class="status">Blur averages each pixel with its neighbours, so variance falls. Edge detection subtracts the neighbourhood average — flat areas go black, boundaries light up.</p>
+      <p class="hint">Keys 1–4 load presets, O toggles the original, K toggles the kernel grid. Try Edge: the gradient and shapes become outlines, the noise becomes static.</p>
+    </aside>
+  </main>
+
+  <script src="app.js"></script>
+</body>
+</html>

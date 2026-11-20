@@ -1,0 +1,15 @@
+{
+  "name": "Thermo Lab",
+  "desc": "A heat-equation lab: thermal diffusivity and boundary-condition sliders drive the 1D diffusion of temperature, with energy conservation and steady-state readouts.",
+  "controls": "Diffusivity and boundary-condition sliders, four initial-condition presets (hot spot/gradient/sine/step), run/pause and reset buttons; keys 1–4 load presets, Space runs/pauses, R resets",
+  "shelf": "Interactive Stories & Experiments",
+  "tags": [
+    "games",
+    "html5",
+    "physics",
+    "heat",
+    "mathematics"
+  ],
+  "badge": "New",
+  "creator": "Original build (Dragon Gaming Assets)"
+}

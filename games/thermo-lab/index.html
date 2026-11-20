@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Thermo Lab</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+  <header>
+    <div>
+      <h1>Thermo Lab</h1>
+      <p>The heat equation ∂T/∂t = α·∂²T/∂x²: heat flows from hot to cold until everything evens out. The diffusivity α sets the pace; the boundary conditions decide the ending.</p>
+    </div>
+    <div class="hud">
+      <span id="tmax-hud">max —</span>
+      <span id="tmin-hud">min —</span>
+      <span id="energy-hud">energy —</span>
+    </div>
+  </header>
+
+  <main>
+    <section class="stage">
+      <canvas id="scene" width="880" height="660"></canvas>
+      <p class="caption">The rod's temperature profile, coloured from cold (blue) to hot (red). With insulated ends the total heat is conserved — the profile flattens to the mean. With fixed ends it drains to the boundary temperature.</p>
+      <div class="legend">
+        <span><i class="sw-temp"></i>temperature</span>
+        <span><i class="sw-mean"></i>mean</span>
+      </div>
+    </section>
+
+    <aside class="panel">
+      <label>
+        <span>Diffusivity α <b id="alpha-out">0.50</b></span>
+        <input id="alpha" type="range" min="0.05" max="1" step="0.05" value="0.5" />
+      </label>
+      <label>
+        <span>Boundary <b id="bc-out">Insulated</b></span>
+        <input id="bc" type="range" min="0" max="2" step="1" value="0" />
+      </label>
+
+      <div class="row">
+        <button id="preset-spot" class="active">Hot spot</button>
+        <button id="preset-gradient">Gradient</button>
+        <button id="preset-sine">Sine</button>
+        <button id="preset-step">Step</button>
+      </div>
+      <div class="row">
+        <button id="btn-run" class="primary">Pause</button>
+        <button id="btn-reset">Reset</button>
+      </div>
+
+      <div class="readouts">
+        <div><span>Max T</span><b id="tmax-read">—</b></div>
+        <div><span>Min T</span><b id="tmin-read">—</b></div>
+        <div><span>Mean T</span><b id="tmean-read">—</b></div>
+        <div><span>Total energy</span><b id="energy-read">—</b></div>
+        <div><span>Steady?</span><b id="steady-read">—</b></div>
+        <div><span>Steps</span><b id="steps-read">—</b></div>
+      </div>
+
+      <p id="status" class="status">Insulated ends conserve total heat: the hot spot spreads and the rod settles at the mean temperature. Fixed ends drain heat to the boundaries instead.</p>
+      <p class="hint">Keys 1–4 load initial conditions, Space runs/pauses, R resets. Try the Step preset with fixed ends: the discontinuity smooths into a gradient, then drains away.</p>
+    </aside>
+  </main>
+
+  <script src="app.js"></script>
+</body>
+</html>
