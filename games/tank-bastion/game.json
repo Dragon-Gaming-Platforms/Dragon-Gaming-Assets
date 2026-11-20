@@ -1,0 +1,9 @@
+{
+  "name": "Tank Bastion",
+  "desc": "An arcade tank-defense game: blast through breakable walls, outmaneuver enemy tanks, collect power-ups, and protect your base through successive waves.",
+  "controls": "Arrow keys: move; Space: fire (hold to rapid-fire); P: pause or resume",
+  "shelf": "Arcade & Action",
+  "tags": ["games", "arcade", "tank", "action", "html5"],
+  "badge": "New",
+  "creator": "dev sAgar"
+}

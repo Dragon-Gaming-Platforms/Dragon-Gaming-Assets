@@ -55,6 +55,26 @@ sneakers/runners, moonlander, lunar-lander, skifree, enduro, road-racing family.
 11. **Wave shooter with original theme** — clear mechanics difference from
     `pimenta` and `vampire-survivors` required.
 12. **Twin-stick arena shooter (original, code-drawn)** — nothing in catalog.
+13. **Berzerk / Frenzy-style maze shooter** — `berzerk+maze+shooter+javascript`,
+    `robot+maze+game+html5`; require original grid, enemy and sound assets.
+14. **Q*bert-style isometric hopper** — `isometric+hopper+game+javascript`,
+    `cube+jump+arcade+html5`; original characters and visuals only.
+15. **Elevator Action-style stealth platformer** — `elevator+action+browser+game`,
+    `stealth+platformer+javascript`; original levels/art, no arcade ROM content.
+16. **Bomb Jack-style platform collectathon** — `bomb+jack+game+canvas`,
+    `platform+collectathon+javascript`; require original sprites and level design.
+17. **Marble Madness-style isometric rolling game** — `marble+madness+style+html5`,
+    `isometric+marble+game+javascript`; original tracks and scenery.
+18. **Pengo-style ice-block maze action** — `pengo+style+game+javascript`,
+    `ice+maze+arcade+html5`; original characters/art, no Sega assets.
+19. **Gyruss-style circular shooter** — `gyruss+style+shooter+canvas`,
+    `circular+arcade+shmup+javascript`; original ship, enemies and bullet art.
+20. **Thexder-style transforming-mech run-and-gun** — `thexder+style+game+javascript`,
+    `transforming+mech+shooter+html5`; original art and mechanics implementation.
+21. **Mappy-style platform chase** — `mappy+style+platform+game+javascript`,
+    `maze+platformer+html5`; original characters, levels and audio.
+22. **Paperboy-style delivery-dodger** — `paperboy+style+game+javascript`,
+    `bike+delivery+arcade+html5`; original maps, art and sound, no copied branding.
 
 ### Classics searched 2026-10-16 — every repo unlicensed (retry later)
 
